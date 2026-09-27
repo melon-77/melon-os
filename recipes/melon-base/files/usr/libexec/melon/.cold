@@ -35,15 +35,19 @@ SYSIMG=${MELON_SYSIMG:-/media/melon/melon/rootfs.sqfs}
 
 # theme music, at 30% volume, for as long as this runs
 ICE_PID=
-if [ -f /usr/share/melon/.ice ] && command -v mpg123 >/dev/null && [ -e /dev/snd/controlC0 ]; then
-  if amixer sget Master >/dev/null 2>&1; then
-    amixer -q -M sset Master 30% unmute 2>/dev/null || true
-    for c in PCM Speaker Headphone Front; do amixer -q -M sset "$c" 100% unmute 2>/dev/null || true; done
-  else
-    amixer -q -M sset PCM 30% unmute 2>/dev/null || true
+if [ -f /usr/share/melon/.ice ] && command -v mpg123 >/dev/null; then
+  # play on the card that has the speakers, not the GPU's HDMI audio (card 0 on many laptops)
+  ICE_CARD=$(melon-sound-default 2>/dev/null) ICE_PCM=$(melon-sound-default --pcm 2>/dev/null)
+  if [ -n "$ICE_CARD" ]; then
+    if amixer -c "$ICE_CARD" sget Master >/dev/null 2>&1; then
+      amixer -c "$ICE_CARD" -q -M sset Master 30% unmute 2>/dev/null || true
+      for c in PCM Speaker Headphone Front; do amixer -c "$ICE_CARD" -q -M sset "$c" 100% unmute 2>/dev/null || true; done
+    else
+      amixer -c "$ICE_CARD" -q -M sset PCM 30% unmute 2>/dev/null || true
+    fi
+    mpg123 -q --loop -1 -a "$ICE_PCM" /usr/share/melon/.ice >/dev/null 2>&1 &
+    ICE_PID=$!
   fi
-  mpg123 -q --loop -1 /usr/share/melon/.ice >/dev/null 2>&1 &
-  ICE_PID=$!
 fi
 stop_ice(){ [ -n "$ICE_PID" ] && kill "$ICE_PID" 2>/dev/null; ICE_PID=; }
 trap stop_ice EXIT

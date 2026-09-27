@@ -1,38 +1,80 @@
 #!/bin/sh
-# intro animation: an iced-out glove catching the light
-C=$(printf '\033[1;38;5;51m') W=$(printf '\033[1;97m') D=$(printf '\033[38;5;39m') B=$(printf '\033[1;38;5;195m') R=$(printf '\033[0m')
-glove='
-                  .--.--.--.
-               .--|<>|<>|<>|
-               |<>|<>|<>|<>|
-               |<>|<>|<>|<>|   .-.
-               |<>|<>|<>|<>|  /<>/
-               |<><><><><><>|/<>/
-               |<><><><><><><><>/
-                \<><><><><><><>/
-                 |<><><><><><>|
-                 |============|
-                 |<><><><><><>|
-                 `------------`
-'
-frame(){ # shimmer: a random handful of stones flash white
-  printf '\033[H'
-  printf '%s\n' "$glove" | awk -v s="$1" -v c="$C" -v w="$W" -v d="$D" -v r="$R" 'BEGIN{srand(s)}
-    { out=""; n=split($0,ch,""); i=1
-      while(i<=n){ if(ch[i]=="<" && ch[i+1]==">"){ x=rand(); out=out (x<0.12? w "**" r : (x<0.5? c "<>" r : d "<>" r)); i+=2 }
-                   else { out=out d ch[i] r; i++ } }
-      print out }'
-}
-printf '\033[2J\033[?25l'
-i=0; while [ $i -lt 14 ]; do frame $((i*7919+$$)); sleep 0.12; i=$((i+1)); done
-cat <<EOF
-${B}     ___   ____  _____   __  __     _     _   _
-    |_ _| / ___|| ____| |  \/  |   / \   | \ | |
-     | | | |    |  _|   | |\/| |  / _ \  |  \| |
-     | | | |___ | |___  | |  | | / ___ \ | |\  |
-    |___| \____||_____| |_|  |_|/_/   \_\|_| \_|${R}
-
-    ${D}the melon console installer. cold, quick, no questions you don't need.${R}
-
-EOF
-printf '\033[?25h'
+# intro: a diamond-encrusted glove, pixel art in true colour, stones sparkling, then the title.
+[ -t 1 ] || exit 0
+E=$(printf '\033')
+cols=$(stty size 2>/dev/null | cut -d' ' -f2); [ -n "$cols" ] || cols=80
+printf '%s[2J%s[?25l' "$E" "$E"
+awk -v E="$E" -v COLS="$cols" '
+function clamp(v){ return v<0?0:(v>1?1:v) }
+function seg(px,py,ax,ay,bx,by,  dx,dy,t,qx,qy){ dx=bx-ax; dy=by-ay; t=((px-ax)*dx+(py-ay)*dy)/(dx*dx+dy*dy); t=t<0?0:(t>1?1:t); qx=ax+t*dx-px; qy=ay+t*dy-py; return sqrt(qx*qx+qy*qy) }
+function inglove(x,y){
+  if(seg(x,y,12,8,12,26)<=3.6) return 1          # index finger
+  if(seg(x,y,19.5,4,19.5,26)<=3.6) return 1      # middle
+  if(seg(x,y,27,7,27,26)<=3.6) return 1          # ring
+  if(seg(x,y,33.5,13,33.5,27)<=3.1) return 1     # little finger
+  if(seg(x,y,9.5,33,3.5,21)<=3.6) return 1       # thumb
+  if(x>=8.5 && x<=36.5 && y>=23 && y<=39){ if((x<11 || x>34) && y>36) return ((x-11)^2+(y-36)^2<=9 || (x-34)^2+(y-36)^2<=9); return 1 }
+  if(x>=10 && x<=35 && y>=39 && y<=46) return 2  # cuff
+  return 0 }
+function h(a,b,c){ return (a*73856093 + b*19349663 + c*83492791) % 1000 }
+function rgb(r,g,b){ return int(r) ";" int(g) ";" int(b) }
+function pix(x,y,f,   m,sx,sy,gx,gy,k,c,shade){
+  m=inglove(x+0.5,y+0.5)
+  if(!m){                                   # glints around the glove
+    for(k=0;k<5;k++){ sx=gx_[k]; sy=gy_[k]
+      if(((f+k*3)%7)<3){ if((x==sx && (y-sy)^2<=4) || (y==sy && (x-sx)^2<=4)) return (x==sx && y==sy)?"255;255;255":"150;220;255" } }
+    return "" }
+  # outline: platinum edge
+  if(!inglove(x-0.5,y+0.5) || !inglove(x+1.5,y+0.5) || !inglove(x+0.5,y-0.5) || !inglove(x+0.5,y+1.5)) return (m==2)?"235;235;245":"205;215;230"
+  if(m==2){                                 # cuff: bigger stones set in platinum
+    gx=(x-10)%4; gy=(y-39)%4; if(gx==3 || gy==3) return "150;155;170"
+    k=h(int((x-10)/4),int((y-39)/4),0); if(h(int((x-10)/4),int((y-39)/4),f)%9==0) return "255;255;255"
+    c=(k%3==0)?"185;235;255":(k%3==1)?"140;205;250":"215;245;255"
+    return (gx==0 && gy==0)?"255;255;255":c }
+  gx=x%3; gy=y%3; if(gx==2 || gy==2) return "28;40;70"    # dark setting between stones
+  k=h(int(x/3),int(y/3),0)
+  if(h(int(x/3),int(y/3),f)%13==0) return "255;255;255"  # this stone catches the light
+  shade=clamp(0.95 - y/70 + (x<20?0.08:0))
+  if(k%4==0) c=rgb(120*shade+40,195*shade+30,250); else if(k%4==1) c=rgb(170*shade+40,225*shade+25,255); else if(k%4==2) c=rgb(80*shade+30,150*shade+40,235); else c=rgb(205*shade+45,240*shade+15,255)
+  if(gx==0 && gy==0) c="245;252;255"
+  return c }
+function frame(f,   row,x,t,b,line,out){
+  out=E "[H"
+  for(row=0;row<24;row++){
+    line=pad
+    for(x=0;x<40;x++){ t=pix(x,2*row,f); b=pix(x,2*row+1,f)
+      if(t=="" && b=="") line=line E "[0m "
+      else if(t=="") line=line E "[0;38;2;" b "m\342\226\204"
+      else if(b=="") line=line E "[0;38;2;" t "m\342\226\200"
+      else line=line E "[0;38;2;" t ";48;2;" b "m\342\226\200" }
+    line=line E "[0m"
+    if(row>=7 && row<=10) line=line "    " title[row-7]
+    if(row==12) line=line "    " E "[38;2;150;200;235mthe melon console installer" E "[0m"
+    if(row==13) line=line "    " E "[38;2;90;120;160mcold, quick, no questions you do not need" E "[0m"
+    out=out line E "[K\n" }
+  printf "%s", out; fflush() }
+BEGIN{
+  pad=""; if(COLS>100) for(i=0;i<int((COLS-86)/2);i++) pad=pad " "
+  split("38 30 3 36 5", gx_, " "); split("3 2 10 9 45", gy_, " ")
+  gx_[0]=1; gy_[0]=15; gx_[4]=39; gy_[4]=34; gx_[1]=38; gy_[1]=3; gx_[2]=30; gy_[2]=1; gx_[3]=4; gy_[3]=9
+  # 5x7 pixel font, drawn with half blocks in an ice gradient (glyphs in display order)
+  G[1]="11111 00100 00100 00100 00100 00100 11111"
+  G[2]="01111 10000 10000 10000 10000 10000 01111"
+  G[3]="11111 10000 10000 11110 10000 10000 11111"
+  G[4]="10001 11011 10101 10101 10001 10001 10001"
+  G[5]="01110 10001 10001 11111 10001 10001 10001"
+  G[6]="10001 11001 10101 10011 10001 10001 10001"
+  for(r=0;r<8;r++) for(c=0;c<42;c++) P[r,c]=0
+  for(gi=1;gi<=6;gi++){ split(G[gi],rows," "); for(r=1;r<=7;r++) for(c=1;c<=5;c++) if(substr(rows[r],c,1)=="1"){ P[r-1,(gi-1)*7+c-1]=1 } }
+  for(tr=0;tr<4;tr++){ s=""
+    for(c=0;c<42;c++){ a=P[2*tr,c]; b=(2*tr+1<7)?P[2*tr+1,c]:0
+      ca=rgb(170+12*(2*tr),225+4*(2*tr),255); cb=rgb(170+12*(2*tr+1),225+4*(2*tr+1),255)
+      if(a && b) s=s E "[0;38;2;" ca ";48;2;" cb "m\342\226\200"
+      else if(a) s=s E "[0;38;2;" ca "m\342\226\200"
+      else if(b) s=s E "[0;38;2;" cb "m\342\226\204"
+      else s=s E "[0m " }
+    title[tr]=s E "[0m" }
+  for(f=0;f<16;f++){ frame(f); system("sleep 0.09") }
+  frame(99)
+}'
+printf '%s[?25h\n' "$E"

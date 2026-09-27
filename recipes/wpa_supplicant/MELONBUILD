@@ -1,5 +1,6 @@
 pkgname=wpa_supplicant
 pkgver=2.11
+pkgrel=1
 pkgdesc="WPA/WPA2/WPA3 client for wireless networks"
 license=BSD-3-Clause
 url=https://w1.fi/wpa_supplicant/
@@ -37,6 +38,8 @@ CONFIG_BGSCAN_SIMPLE=y
 CONFIG_ELOOP=eloop
 CONFIG_L2_PACKET=linux
 CONFIG_OS=unix
+CONFIG_DEBUG_SYSLOG=y
+CONFIG_DEBUG_FILE=y
 CFG
   export CFLAGS="$CFLAGS -I$SYSROOT/usr/include/libnl3" PKG_CONFIG=pkg-config
   make -j$JOBS BINDIR=/usr/bin LIBDIR=/usr/lib >/dev/null

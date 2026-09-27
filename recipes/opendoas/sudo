@@ -1,0 +1,36 @@
+#!/bin/sh
+# melon's sudo: understands the everyday sudo options and runs them through doas.
+#   sudo CMD...    sudo -u USER CMD...    sudo -i    sudo -s    sudo -e FILE    sudo -k    sudo -v    sudo -n
+user= login= shell= nonint= edit=
+while [ $# -gt 0 ]; do
+  case $1 in
+    -u) user=$2; shift 2 ;;
+    -u*) user=${1#-u}; shift ;;
+    --user=*) user=${1#--user=}; shift ;;
+    -i|--login) login=1; shift ;;
+    -s|--shell) shell=1; shift ;;
+    -n|--non-interactive) nonint=-n; shift ;;
+    -e|--edit) edit=1; shift ;;
+    -E|-H|--preserve-env|--preserve-env=*|-S|-b) shift ;;   # accepted, doas handles the environment itself
+    -k|-K|--reset-timestamp|--remove-timestamp) exec doas -L ;;
+    -v|--validate) exec doas $nonint true ;;
+    -l|--list) cat /etc/doas.conf 2>/dev/null || echo "sudo: run as root to see the rules in /etc/doas.conf"; exit 0 ;;
+    -V|--version) echo "melon sudo (doas $(doas -h 2>&1 | head -1 | tr -d '\n'))"; exit 0 ;;
+    -h|--help) sed -n '2,3p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    --) shift; break ;;
+    -*) echo "sudo: option $1 isn't supported here (melon's sudo runs doas; try: doas $*)" >&2; exit 1 ;;
+    *) break ;;
+  esac
+done
+target=${user:-root}
+tshell=$(awk -F: -v u="$target" '$1==u{print $7}' /etc/passwd); tshell=${tshell:-/bin/sh}
+set_u=; [ -n "$user" ] && set_u="-u $user"
+if [ -n "$edit" ]; then exec doas $nonint $set_u ${EDITOR:-vi} "$@"; fi
+if [ -n "$login" ]; then
+  if [ $# -eq 0 ]; then exec doas $nonint $set_u "$tshell" -l; else exec doas $nonint $set_u "$tshell" -l -c "$*"; fi
+fi
+if [ -n "$shell" ]; then
+  if [ $# -eq 0 ]; then exec doas $nonint $set_u "${SHELL:-$tshell}"; else exec doas $nonint $set_u "${SHELL:-$tshell}" -c "$*"; fi
+fi
+[ $# -gt 0 ] || { echo "usage: sudo [-u user] [-i|-s] command" >&2; exit 1; }
+exec doas $nonint $set_u "$@"

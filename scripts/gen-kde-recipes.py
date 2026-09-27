@@ -7,10 +7,10 @@ All of them are CMake projects cross-compiled the same way:
 Order matters: build-all builds them in ORDER and each package lands in the sysroot for the next.
 """
 import json, os
-M = '/home/claude/melon'
-SRCIDX = json.load(open(f'{M}/work/kde-sources.json'))
+M = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SRCIDX = json.load(open(f'{M}/scripts/kde-sources.json'))  # Debian source tarball for each recipe
 
-QT = f'-DQT_HOST_PATH={M}/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR={M}/hosttools/qt6/lib/cmake'
+QT = '-DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake'  # $M expands when the recipe runs
 QTDIRS = ('-DINSTALL_BINDIR=lib/qt6/bin -DINSTALL_PUBLICBINDIR=usr/bin -DINSTALL_LIBEXECDIR=lib/qt6/libexec '
           '-DINSTALL_ARCHDATADIR=lib/qt6 -DINSTALL_DATADIR=share/qt6 -DINSTALL_INCLUDEDIR=include/qt6 '
           '-DINSTALL_MKSPECSDIR=lib/qt6/mkspecs -DINSTALL_DOCDIR=share/doc/qt6 -DINSTALL_EXAMPLESDIR=share/doc/qt6/examples')

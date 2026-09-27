@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build the melon cross toolchain for $MELON_ARCH (x86_64-melon-linux-musl or i686-melon-linux-musl).
 set -euo pipefail
-. /home/claude/melon/scripts/env.sh
+. "$(dirname "$(readlink -f "$0")")/env.sh"
 B=$WORK/toolchain; mkdir -p $B $SYSROOT/usr; cd $B
 # melon uses a merged /usr: /lib -> usr/lib, /bin -> usr/bin
 ln -sfn usr/lib $SYSROOT/lib; ln -sfn usr/bin $SYSROOT/bin; ln -sfn usr/bin $SYSROOT/sbin; ln -sfn bin $SYSROOT/usr/sbin

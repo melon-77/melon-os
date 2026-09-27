@@ -1,6 +1,6 @@
 # melon build environment
 #   MELON_ARCH=x86_64 (default) or MELON_ARCH=x86 (32-bit, i686)
-export M=/home/claude/melon
+export M=${M:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}
 export MELON_ARCH=${MELON_ARCH:-x86_64}
 case $MELON_ARCH in
   x86_64) export TARGET=x86_64-melon-linux-musl APK_ARCH=x86_64 ARCH_SUFFIX= MUSL_ARCH=x86_64 KARCH=x86_64 \

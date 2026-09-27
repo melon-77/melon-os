@@ -1,6 +1,6 @@
 #!/bin/bash
 # run long builds back to back so the 2 cores never sit idle
-. /home/claude/melon/scripts/env.sh
+. "$(dirname "$(readlink -f "$0")")/env.sh"
 until grep -q '^EXIT' $M/logs/build-llvm.log; do sleep 60; done
 grep -q '^EXIT 0' $M/logs/build-llvm.log || { echo "llvm failed; stopping queue"; exit 1; }
 $M/scripts/build-all.sh mesa libepoxy xwayland > $M/logs/build-mesa.log 2>&1; echo "EXIT $?" >> $M/logs/build-mesa.log
@@ -9,7 +9,7 @@ echo QUEUE-1-DESKTOP-PART-DONE
 
 # ---- 32-bit (i686) console edition ----
 export MELON_ARCH=x86
-. /home/claude/melon/scripts/env.sh
+. "$(dirname "$(readlink -f "$0")")/env.sh"
 ln -sf $SYSROOT/usr/lib/libc.so /lib/ld-musl-i386.so.1
 echo $SYSROOT/usr/lib > /etc/ld-musl-i386.path
 $M/scripts/toolchain.sh > $M/logs/toolchain-x86.log 2>&1; echo "EXIT $?" >> $M/logs/toolchain-x86.log

@@ -10,7 +10,7 @@ depends=(squashfs-tools kpmcore cryptsetup python3)
 subpackages=(calamares-dev)
 # Python job modules through the bundled pybind11; Python is the melon one (cross), found by hand.
 # Modules melon doesn't use are skipped; melon's own steps run as shellprocess jobs (calamares-melon).
-build(){ cmake_setup -B build -DQT_HOST_PATH=/home/claude/melon/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=/home/claude/melon/hosttools/qt6/lib/cmake -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_QTPLUGINDIR=lib/qt6/plugins -DKDE_INSTALL_QMLDIR=lib/qt6/qml -DKDE_INSTALL_LIBEXECDIR=libexec -DKF_IGNORE_PLATFORM_CHECK=ON -DBUILD_WITH_QT6=ON -DQT_MAJOR_VERSION=6 -DWITH_QT6=ON -DWITH_PYTHON=ON -DWITH_PYBIND11=ON -DBUILD_TESTING=OFF \
+build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_QTPLUGINDIR=lib/qt6/plugins -DKDE_INSTALL_QMLDIR=lib/qt6/qml -DKDE_INSTALL_LIBEXECDIR=libexec -DKF_IGNORE_PLATFORM_CHECK=ON -DBUILD_WITH_QT6=ON -DQT_MAJOR_VERSION=6 -DWITH_QT6=ON -DWITH_PYTHON=ON -DWITH_PYBIND11=ON -DBUILD_TESTING=OFF \
     -DINSTALL_CONFIG=OFF -DINSTALL_POLKIT=ON -DWITH_APPSTREAM=OFF -DWITH_KF5DBus=OFF -DBUILD_APPDATA=OFF \
     -DCMAKE_DISABLE_FIND_PACKAGE_LIBPWQUALITY=ON -DCMAKE_DISABLE_FIND_PACKAGE_PythonQt=ON \
     -DPython_EXECUTABLE=$M/hosttools/python/bin/python3.14 -DPython_INCLUDE_DIR=$SYSROOT/usr/include/python3.14 \

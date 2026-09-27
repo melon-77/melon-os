@@ -1,7 +1,7 @@
 #!/bin/bash
 # build a list of recipes in order; stop at the first failure
 # (MELON_KEEP_GOING=1: note the failure and carry on with the rest; the list of failures is printed at the end)
-. /home/claude/melon/scripts/env.sh
+. "$(dirname "$(readlink -f "$0")")/env.sh"
 failed=()
 # MELON_SKIP_BUILT=1: skip recipes whose current version-release is already in the repo (to resume a queue)
 built(){ ( pkgrel=0; . $M/recipes/$1/MELONBUILD >/dev/null 2>&1; [ -f $REPO/$APK_ARCH/$pkgname-$pkgver-r$pkgrel.apk ] ); }

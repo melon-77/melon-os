@@ -5,7 +5,7 @@ Each row: recipe name, version, tarball in sources/deb, top directory, build sys
 extra configure/meson/cmake options, and flags. Recipes that need special handling are written by hand.
 """
 import os, sys
-M = '/home/claude/melon'
+M = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROWS = [
  # name, ver, orig tarball, topdir, system, makedepends, options, extra
  ('libpciaccess','0.18.1','libpciaccess_0.18.1.orig.tar.gz','libpciaccess-0.18.1','meson','zlib-dev',"-Dzlib=enabled",''),

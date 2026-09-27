@@ -172,6 +172,13 @@ The build container can be reclaimed while idle, which kills background builds. 
 restarts the host Qt build and the Qt/KF6/Plasma queue (`scripts/queue-4.sh`); finished host Qt modules
 and packages already in the repo (`MELON_SKIP_BUILT=1`) are skipped.
 
+After an unclean shutdown (WSL restart, power loss), files written in the last minutes can be empty or
+truncated. Before resuming: look for empty packages (`find repo -name '*.apk' -size 0`; the builder skips
+nothing that is empty, but a truncated `.apk` still blocks reindexing), delete `work/pkg/<name>/.prepared`
+of the package that was compiling so it unpacks fresh, and check `git fsck` (empty objects in `.git/objects`
+can be restored with `git fetch` once they are moved aside). `apk verify` needs an absolute `--keys-dir`:
+a relative one is resolved against `/` and reports every package as UNTRUSTED.
+
 ## Testing (required before you commit a change that affects boot or install)
 
 ```sh

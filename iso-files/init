@@ -19,9 +19,19 @@ done
 [ -n "$found" ] || { echo "melon: boot medium not found. Dropping to a shell."; exec sh; }
 echo "   found on $found"
 toram=; for a in $(cat /proc/cmdline); do [ "$a" = toram ] && toram=1; done
+if [ -n "$toram" ]; then
+  # copy everything the live session and the installer need (system image, live layer, package repo)
+  # into RAM, then release the boot medium so it can be unplugged
+  size=$(du -sm /mnt/media/melon | cut -f1)
+  printf '   copying %s MiB to RAM ... ' "$size"
+  mkdir -p /mnt/ram; mount -t tmpfs -o mode=755,size=$((size + 64))m tmpfs /mnt/ram
+  cp -a /mnt/media/melon /mnt/ram/ || { echo "failed (not enough RAM?)"; exec sh; }
+  umount /mnt/media
+  echo "done - you can remove the boot medium now"
+  mount --move /mnt/ram /mnt/media
+fi
 mount -t tmpfs -o mode=755,size=80% tmpfs /mnt/rw
 sq=/mnt/media/melon/rootfs.sqfs lv=/mnt/media/melon/live.sqfs
-if [ -n "$toram" ]; then echo "   copying system to RAM"; cp $sq $lv /mnt/rw/; sq=/mnt/rw/rootfs.sqfs lv=/mnt/rw/live.sqfs; fi
 mkdir -p /mnt/live
 mount -t squashfs -o loop,ro $sq /mnt/ro || { echo "melon: cannot mount root image"; exec sh; }
 mount -t squashfs -o loop,ro $lv /mnt/live || { echo "melon: cannot mount live layer"; exec sh; }

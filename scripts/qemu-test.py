@@ -3,6 +3,7 @@
 
   qemu-test.py live  <iso> <disk.img> [--uefi]   boot the ISO, run the quick installer onto disk.img
   qemu-test.py disk  <disk.img> [--uefi]         boot the installed disk and check the system
+  qemu-test.py toram <iso> <disk.img>            boot with "copy to RAM", eject the CD, then use and install
 """
 import sys, time, pexpect, os
 
@@ -14,10 +15,11 @@ log = open(f'/home/claude/melon/logs/qemu-{mode}{"-uefi" if uefi else ""}.log', 
 cmd = ['qemu-system-x86_64', '-m', '3072', '-smp', '2', '-nographic', '-no-reboot',
        '-audiodev', 'wav,id=snd0,path=/home/claude/melon/logs/audio-capture.wav',
        '-device', 'intel-hda', '-device', 'hda-duplex,audiodev=snd0',
-       '-netdev', 'user,id=n0', '-device', 'virtio-net-pci,netdev=n0']
+       '-netdev', 'user,id=n0', '-device', 'virtio-net-pci,netdev=n0',
+       '-monitor', 'unix:/tmp/melon-qmon.sock,server,nowait']
 if uefi:
     cmd += ['-bios', '/usr/share/ovmf/OVMF.fd']
-if mode == 'live':
+if mode in ('live', 'toram'):
     iso, disk = args
     cmd += ['-cdrom', iso, '-drive', f'file={disk},if=virtio,format=raw', '-boot', 'd']
 else:
@@ -60,6 +62,34 @@ if mode == 'live':
     print(sh('ls /usr/bin | wc -l'))
     p.sendline('poweroff')
     p.expect(pexpect.EOF, timeout=300)
+    sys.exit(0 if ok else 1)
+elif mode == 'toram':
+    step('waiting for GRUB')
+    p.expect('melon live', timeout=300); time.sleep(1)
+    p.send('c'); p.expect('grub>', timeout=60)
+    for line in ['linux /boot/vmlinuz toram console=tty0 console=ttyS0,115200', 'initrd /boot/initramfs.img', 'boot']:
+        for ch in line: p.send(ch); time.sleep(0.08)   # GRUB drops keys that arrive too fast
+        p.send('\r'); time.sleep(1)
+    p.expect('copying .* MiB to RAM', timeout=600); step('copying to RAM')
+    p.expect('you can remove the boot medium now', timeout=900); step('copy finished')
+    p.expect(PROMPT, timeout=900); step('logged in')
+    # pull the "USB stick": eject the CD through the QEMU monitor
+    import socket
+    m = socket.socket(socket.AF_UNIX); m.connect('/tmp/melon-qmon.sock'); time.sleep(0.5)
+    m.sendall(b'eject -f ide1-cd0\n'); time.sleep(1); m.sendall(b'info block\n'); time.sleep(1)
+    print(m.recv(65536).decode(errors='replace')); m.close()
+    step('boot medium ejected')
+    sh('stty cols 160 rows 50; export TERM=vt100')
+    for c in ['grep -E "media|sr0" /proc/mounts', 'ls -la /media/melon/melon', 'dd if=/dev/sr0 of=/dev/null bs=2048 count=1', 'free -m',
+              'melonfetch | tail -3', 'mpg123 --version | head -1']:
+        print(f'$ {c}'); print(sh(c))
+    sh('export MELON_DISK=vda MELON_HOSTNAME=ramtest MELON_ROOTPW=melonroot MELON_USER=jcole '
+       'MELON_USERPW=melonuser MELON_PROFILE=base MELON_YES=1 MELON_SERIAL=1')
+    out = sh('/usr/libexec/melon/.cold', timeout=3600)
+    ok = 'melon is installed' in out
+    step(f'install with the medium removed: {"OK" if ok else "FAILED"}')
+    if not ok: print(out[-3000:])
+    p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)
     sys.exit(0 if ok else 1)
 else:
     step('waiting for GRUB on the installed disk')

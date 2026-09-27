@@ -7,7 +7,7 @@
 # The initramfs stacks them with a RAM overlay. The installers copy rootfs.sqfs to disk (fast, and no
 # second copy of every package on the ISO) and use the repo on the ISO only for extra packages.
 set -euo pipefail
-. /home/claude/melon/scripts/env.sh
+. "$(dirname "$(readlink -f "$0")")/env.sh"
 APK=$M/hosttools/bin/apk
 ROOT=$WORK/liveroot LIVE=$WORK/livelayer ISO=$WORK/iso INITRD=$WORK/initrd
 DATE=$(date +%Y%m%d)

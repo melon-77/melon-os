@@ -1,7 +1,7 @@
 #!/bin/bash
 # second half of the toolchain: musl with the stage-1 compiler, then the full GCC
 set -euo pipefail
-. /home/claude/melon/scripts/env.sh
+. "$(dirname "$(readlink -f "$0")")/env.sh"
 cd $WORK/toolchain
 echo "=== $(date +%T) musl"
 cd musl-1.2.5

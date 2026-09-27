@@ -1,7 +1,7 @@
 #!/bin/bash
 # Qt 6 -> KF6 -> Plasma and apps (order from gen-kde-recipes.py), then the Qt-dependent installer and
 # Flatpak pieces. Waits for the host Qt tools first.
-. /home/claude/melon/scripts/env.sh
+. "$(dirname "$(readlink -f "$0")")/env.sh"
 until grep -q '^EXIT' $M/logs/host-qt.log 2>/dev/null; do sleep 60; done
 grep -q '^EXIT 0' $M/logs/host-qt.log || { echo "host Qt failed"; exit 1; }
 python3 $M/scripts/gen-kde-recipes.py > $M/work/kde-order.txt

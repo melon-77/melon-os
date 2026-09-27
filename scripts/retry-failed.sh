@@ -1,7 +1,7 @@
 #!/bin/bash
 # retry-failed.sh <log> <newlog> [extra recipes...]: wait for a build-all run (its log) to finish,
 # then build the recipes that failed in it again (in the same order), plus any extras first.
-. /home/claude/melon/scripts/env.sh
+. "$(dirname "$(readlink -f "$0")")/env.sh"
 log=$1 new=$2; shift 2
 until grep -q '^EXIT' "$log" 2>/dev/null; do sleep 30; done
 failed=$(grep '^##### FAILED: ' "$log" | sed 's/^##### FAILED: //')

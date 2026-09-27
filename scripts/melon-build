@@ -2,7 +2,7 @@
 # melon-build: build a MELONBUILD recipe into signed apk v3 packages.
 # usage: melon-build <recipe-name> [--no-install]
 set -euo pipefail
-. /home/claude/melon/scripts/env.sh
+. "$(dirname "$(readlink -f "$0")")/env.sh"
 APK=$M/hosttools/bin/apk
 KEY=$M/keys/melon-signing.rsa
 ARCH=$APK_ARCH

@@ -3,7 +3,7 @@
 # for the build machine. Cross-compiling Qt and KDE for melon requires host tools of the exact same
 # Qt version (QT_HOST_PATH). Installed to hosttools/qt6; nothing from here ships in melon.
 set -euo pipefail
-M=/home/claude/melon
+M=$(cd "$(dirname "$(readlink -f "$0")")/.." \&\& pwd)
 QV=6.10.2
 H=$M/hosttools/qt6
 W=$M/work/host-qt

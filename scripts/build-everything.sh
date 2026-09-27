@@ -1,0 +1,50 @@
+#!/bin/bash
+# build-everything.sh: build melon from nothing on a prepared host (scripts/host-setup.sh first).
+#   toolchain -> base system -> plumbing -> libraries and services -> Qt/KDE/Plasma -> installers -> ISOs
+# Resumable: run it again after an interruption; finished packages are skipped and a package that was
+# interrupted mid-build continues where it stopped. Needs keys/melon-signing.rsa (see BUILDING.md).
+#   JOBS=16 scripts/build-everything.sh
+set -uo pipefail
+. "$(dirname "$(readlink -f "$0")")/env.sh"
+LOG=$M/logs; mkdir -p $LOG $REPO/$APK_ARCH
+step(){ printf '\033[1;35m== %s  %s\033[0m\n' "$(date +%H:%M)" "$*"; }
+[ -f $M/keys/melon-signing.rsa ] || { echo "keys/melon-signing.rsa is missing (see BUILDING.md)" >&2; exit 1; }
+
+if [ ! -x $TOOLS/bin/$TARGET-gcc ] || ! grep -q '^EXIT 0' $LOG/toolchain.log 2>/dev/null; then
+  step "cross toolchain ($TARGET)"
+  $M/scripts/toolchain.sh > $LOG/toolchain.log 2>&1; echo "EXIT $?" >> $LOG/toolchain.log
+  grep -q '^EXIT 0' $LOG/toolchain.log || { echo "toolchain failed, see logs/toolchain.log"; exit 1; }
+fi
+[ -d $SYSROOT/lib/apk/db ] || $M/hosttools/bin/apk --root $SYSROOT --arch $APK_ARCH --initdb --keys-dir $M/keys/trusted \
+  --repositories-file /dev/null add >/dev/null 2>&1 || true
+
+BASE="melon-layout linux-headers musl gcc-runtime zlib zstd openssl apk-tools busybox ncurses bash runit util-linux
+  userspace-rcu inih bsd-compat-headers xfsprogs grub libnl3 expat dbus wpa_supplicant alsa-lib alsa-utils mpg123 kmod
+  opendoas ca-certificates linux-firmware melon-base melon-sounds linux-melon"
+PLUMBING="libffi pcre2 glib libcap duktape linux-pam eudev elogind polkit argp-standalone musl-fts musl-obstack elfutils
+  sqlite json-c popt device-mapper cryptsetup dosfstools squashfs-tools python3"
+SIMPLE=$(python3 $M/scripts/gen-simple-recipes.py)
+DESKTOP_LIBS="mesa libepoxy xwayland lua5.4 vulkan-loader appstream flatpak xdg-desktop-portal gamemode melon-fonts
+  qemu-guest-agent open-vm-tools hvtools melon-vm-guest"
+KDE=$(python3 $M/scripts/gen-kde-recipes.py)
+INSTALLERS="kpmcore calamares calamares-melon melon-desktop"
+ALL=$(printf '%s\n' $BASE $PLUMBING $SIMPLE $DESKTOP_LIBS $KDE $INSTALLERS | awk '!seen[$0]++')
+# recipes nobody listed yet go at the end (llvm is left out: Mesa is built without it for now)
+EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL) | grep -vx llvm)
+ALL="$ALL $EXTRA"
+
+# a few passes: a package that failed because something it needs came later in the list gets another go
+for pass in 1 2 3; do
+  step "packages, pass $pass"
+  MELON_AUTO_RESUME=1 MELON_SKIP_BUILT=1 MELON_KEEP_GOING=1 $M/scripts/build-all.sh $ALL > $LOG/everything-$pass.log 2>&1
+  failed=$(grep '^##### FAILED: ' $LOG/everything-$pass.log | sed 's/^##### FAILED: //')
+  echo "   failed: ${failed:-none}"
+  [ -z "$failed" ] && break
+  [ $pass -gt 1 ] && [ "$failed" = "$prev" ] && break     # no progress: needs a fix, not another pass
+  prev=$failed
+done
+
+step "ISOs"
+$M/scripts/mkiso.sh > $LOG/mkiso.log 2>&1 && echo "   console ISO: $(ls $M/out/melon-2*.iso)"
+MELON_EDITION=desktop $M/scripts/mkiso.sh > $LOG/mkiso-desktop.log 2>&1 && echo "   desktop ISO: $(ls $M/out/melon-desktop-*.iso)"
+[ -z "${failed:-}" ] || { echo "packages that still fail: $failed (logs/pkg-<name>.log)"; exit 1; }

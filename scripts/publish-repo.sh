@@ -10,7 +10,7 @@
 #
 # GitHub refuses files over 100 MB; split big packages (see linux-firmware) before publishing.
 set -euo pipefail
-. /home/claude/melon/scripts/env.sh
+. "$(dirname "$(readlink -f "$0")")/env.sh"
 W=$M/work/publish
 URL=$(git -C $M remote get-url origin)
 rm -rf $W; mkdir -p $W; cd $W

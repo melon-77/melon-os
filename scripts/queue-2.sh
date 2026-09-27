@@ -1,11 +1,11 @@
 #!/bin/bash
 # Mesa (without LLVM), Xwayland, host Qt tools, then the whole 32-bit console edition
-. /home/claude/melon/scripts/env.sh
+. "$(dirname "$(readlink -f "$0")")/env.sh"
 $M/scripts/build-all.sh mesa libepoxy xwayland > $M/logs/build-mesa.log 2>&1; echo "EXIT $?" >> $M/logs/build-mesa.log
 $M/scripts/host-qt.sh > $M/logs/host-qt.log 2>&1; echo "EXIT $?" >> $M/logs/host-qt.log
 echo DESKTOP-PART-DONE
 export MELON_ARCH=x86
-. /home/claude/melon/scripts/env.sh
+. "$(dirname "$(readlink -f "$0")")/env.sh"
 ln -sf $SYSROOT/usr/lib/libc.so /lib/ld-musl-i386.so.1
 echo $SYSROOT/usr/lib > /etc/ld-musl-i386.path
 $M/scripts/toolchain.sh > $M/logs/toolchain-x86.log 2>&1; echo "EXIT $?" >> $M/logs/toolchain-x86.log

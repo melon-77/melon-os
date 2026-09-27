@@ -1,7 +1,7 @@
 #!/bin/bash
 # low-priority side queue (x86_64): host Python, then the libraries and services that don't need Qt,
 # and the installer's non-Qt dependencies. Runs niced next to the Qt build.
-. /home/claude/melon/scripts/env.sh
+. "$(dirname "$(readlink -f "$0")")/env.sh"
 $M/scripts/host-python.sh > $M/logs/host-python.log 2>&1; echo "EXIT $?" >> $M/logs/host-python.log
 MELON_KEEP_GOING=1 $M/scripts/build-all.sh \
   sqlite libyaml libfyaml json-c popt yaml-cpp dosfstools squashfs-tools device-mapper cryptsetup python3 \

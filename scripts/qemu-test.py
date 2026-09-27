@@ -128,7 +128,7 @@ else:
               'lspci 2>/dev/null | head; cat /sys/bus/pci/devices/*/modalias | head -20',
               'modprobe -v snd_hda_intel; ls /dev/snd; dmesg | tail -5',
               'melon-detect-virt; lsmod | grep -E "vmw|vmxnet|pvscsi|virtio|hv_|vbox" ; ls /var/service',
-              'sleep 3; sv status qemu-ga vmtoolsd hv_kvp_daemon 2>&1']:
+              'sleep 3; sv status /var/service/qemu-ga /var/service/vmtoolsd /var/service/hv_kvp_daemon 2>&1']:
         print(f'$ {c}'); print(sh(c))
     # sudo as the normal user: asks for the password once, then remembers it
     p.sendline('su - jcole'); p.expect(r'@melon[\w-]*.*\$ ', timeout=60)

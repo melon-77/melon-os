@@ -1,6 +1,6 @@
 pkgname=hvtools
 pkgver=7.0
-pkgrel=0
+pkgrel=1
 pkgdesc="Hyper-V guest daemons from the Linux sources (key-value exchange, backup snapshots, file copy)"
 license=GPL-2.0-only
 url=https://www.kernel.org
@@ -23,7 +23,7 @@ package(){
 #!/bin/sh
 exec 2>&1
 # only in Hyper-V guests; elsewhere the service switches itself off
-[ -d /sys/bus/vmbus ] || { sv down $n >/dev/null 2>&1; exit 0; }
+[ -d /sys/bus/vmbus ] || { sv down "\$PWD" >/dev/null 2>&1; exit 0; }
 modprobe -q hv_utils 2>/dev/null
 if [ $n = hv_fcopy_uio_daemon ]; then   # the file-copy channel is a UIO device (Hyper-V "Guest services")
   modprobe -q uio_hv_generic 2>/dev/null

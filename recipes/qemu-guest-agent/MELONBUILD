@@ -1,6 +1,6 @@
 pkgname=qemu-guest-agent
 pkgver=10.2.1
-pkgrel=0
+pkgrel=1
 pkgdesc="QEMU guest agent: lets KVM/QEMU hosts (virt-manager, Proxmox, GNOME Boxes) shut down, freeze and query the VM"
 license=GPL-2.0-or-later
 url=https://www.qemu.org
@@ -18,9 +18,16 @@ package(){ install -Dm755 build/qga/qemu-ga $pkgdir/usr/bin/qemu-ga
   cat > $pkgdir/etc/sv/qemu-ga/run <<'RUN'
 #!/bin/sh
 exec 2>&1
-# only in KVM/QEMU guests that have the agent channel; elsewhere the service switches itself off
+# only in KVM/QEMU guests that have the agent channel; elsewhere the service switches itself off.
+# mdev doesn't make udev's /dev/virtio-ports/<name> links, so find the port by its name in sysfs
 dev=/dev/virtio-ports/org.qemu.guest_agent.0
-[ -e $dev ] || { sv down qemu-ga >/dev/null 2>&1; exit 0; }
+if [ ! -e $dev ]; then
+  dev=
+  for n in /sys/class/virtio-ports/*/name; do
+    [ "$(cat $n 2>/dev/null)" = org.qemu.guest_agent.0 ] && dev=/dev/$(basename $(dirname $n))
+  done
+fi
+[ -n "$dev" ] && [ -e "$dev" ] || { sv down "$PWD" >/dev/null 2>&1; exit 0; }
 exec qemu-ga -m virtio-serial -p $dev -l /var/log/qemu-ga.log
 RUN
   chmod 755 $pkgdir/etc/sv/qemu-ga/run; }

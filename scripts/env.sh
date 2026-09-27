@@ -15,4 +15,4 @@ export SRC=$M/sources
 export WORK=$M/work$ARCH_SUFFIX
 export REPO=$M/repo
 export PATH=$TOOLS/bin:$PATH
-export JOBS=$(nproc)
+export JOBS=${JOBS:-$(nproc)}   # JOBS=10 scripts/... to use fewer (RAM: about 1 GB per job for Qt/KDE)

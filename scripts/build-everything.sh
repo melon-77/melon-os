@@ -22,9 +22,10 @@ BASE="melon-layout linux-headers musl gcc-runtime zlib zstd xz openssl apk-tools
   userspace-rcu inih bsd-compat-headers xfsprogs grub libnl3 expat dbus wpa_supplicant alsa-lib alsa-utils mpg123 kmod
   opendoas ca-certificates linux-firmware melon-base melon-sounds linux-melon"
 PLUMBING="libffi pcre2 glib libcap duktape linux-pam eudev elogind polkit argp-standalone musl-fts musl-obstack elfutils
-  sqlite json-c popt device-mapper cryptsetup dosfstools squashfs-tools e2fsprogs bzip2 hunspell python3"
+  sqlite json-c popt device-mapper cryptsetup dosfstools squashfs-tools e2fsprogs bzip2 hunspell attr lm-sensors libogg libvorbis
+  libtool sound-theme-freedesktop libcanberra icu boost-headers python3"
 SIMPLE=$(python3 $M/scripts/gen-simple-recipes.py)
-DESKTOP_LIBS="mesa libepoxy xwayland lua5.4 vulkan-loader appstream flatpak xdg-desktop-portal gamemode melon-fonts
+DESKTOP_LIBS="libsndfile pulseaudio cups modemmanager qrencode mesa libepoxy xwayland lua5.4 vulkan-loader ffmpeg appstream flatpak xdg-desktop-portal gamemode melon-fonts
   qemu-guest-agent open-vm-tools hvtools melon-vm-guest"
 KDE=$(python3 $M/scripts/gen-kde-recipes.py)
 INSTALLERS="kpmcore calamares calamares-melon melon-desktop"

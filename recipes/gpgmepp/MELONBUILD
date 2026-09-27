@@ -1,0 +1,11 @@
+pkgname=gpgmepp
+pkgver=2.0.0
+pkgrel=0
+pkgdesc="gpgmepp (graphics stack)"
+license=custom
+source=(gpgmepp-2.0.0.tar.xz)
+builddir=$srcdir/gpgmepp-2.0.0
+makedepends=(gpgme-dev libgpg-error-dev)
+subpackages=(gpgmepp-dev)
+build(){ cmake_setup -B build -DBUILD_TESTING=OFF; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

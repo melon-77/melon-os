@@ -1,0 +1,16 @@
+pkgname=cups
+pkgver=2.4.16
+pkgrel=0
+pkgdesc="CUPS printing: the client library (libcups) for Qt's print dialogs; the print server comes later"
+license=Apache-2.0
+url=https://openprinting.github.io/cups/
+source=(cups-2.4.16.tar.gz)
+makedepends=(openssl-dev zlib-dev)
+subpackages=(cups-dev libcups)
+depends=(libcups)
+pkgdesc_libcups="CUPS client library"
+build(){ ./configure $conf_flags --with-components=libcups --with-tls=openssl --disable-static --disable-gssapi \
+  --disable-pam --disable-dbus --disable-avahi --disable-systemd --without-rcdir --with-docdir=/usr/share/doc/cups
+  make -j$JOBS; }
+package(){ make BUILDROOT=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,man,locale}; }
+pkg_libcups(){ amove 'usr/lib/libcups*.so.*'; }

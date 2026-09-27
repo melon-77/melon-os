@@ -1,0 +1,19 @@
+pkgname=ffmpeg
+pkgver=8.0.1
+pkgrel=0
+pkgdesc="FFmpeg audio/video libraries and tools (LGPL build; KPipeWire uses it for screen sharing and recording)"
+license=LGPL-2.1-or-later
+url=https://ffmpeg.org
+source=(ffmpeg-8.0.1.tar.xz)
+makedepends=(libdrm-dev libva-dev libvorbis-dev libogg-dev zlib-dev bzip2-dev xz-dev)
+subpackages=(ffmpeg-dev ffmpeg-libs)
+depends=(ffmpeg-libs)
+pkgdesc_ffmpeg_libs="FFmpeg libraries (libavcodec, libavformat, libavutil, ...)"
+# nothing is autodetected (the build host's libraries must never leak in); hardware video through VA-API.
+# x86 assembly needs nasm on the build host.
+build(){ ./configure --prefix=/usr --enable-cross-compile --cross-prefix=$TARGET- --arch=x86_64 --target-os=linux \
+  --sysroot=$SYSROOT --pkg-config=pkg-config --enable-shared --disable-static --enable-pic --disable-doc --disable-debug \
+  --disable-autodetect --enable-zlib --enable-bzlib --enable-lzma --enable-iconv --enable-vaapi --enable-libdrm \
+  --enable-libvorbis --extra-cflags="$CFLAGS" --extra-ldflags="$LDFLAGS"; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,man}; }
+pkg_libs(){ amove 'usr/lib/lib*.so.*'; }

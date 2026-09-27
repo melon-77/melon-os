@@ -1,0 +1,17 @@
+pkgname=modemmanager
+pkgver=1.25.95
+pkgrel=0
+pkgdesc="ModemManager: mobile broadband modems (plasma-nm needs its D-Bus API)"
+license="GPL-2.0-or-later AND LGPL-2.1-or-later"
+url=https://modemmanager.org
+source=(modemmanager-1.25.95.tar.xz)
+makedepends=(glib-dev libgudev-dev dbus-dev polkit-dev)
+subpackages=(modemmanager-dev libmm-glib)
+depends=(libmm-glib)
+pkgdesc_libmm_glib="ModemManager GLib client library"
+# no QMI/MBIM/QRTR protocol libraries: generic AT-command modems only
+build(){ meson_setup -Dudev=true -Dsystemdsystemunitdir=no -Dsystemd_suspend_resume=false -Dsystemd_journal=false \
+  -Dpolkit=permissive -Dmbim=false -Dqmi=false -Dqrtr=false -Dintrospection=false -Dvapi=false -Dman=false \
+  -Dbash_completion=false -Dtests=false -Dexamples=false build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/{man,locale}; }
+pkg_libmm_glib(){ amove 'usr/lib/libmm-glib.so.*'; }

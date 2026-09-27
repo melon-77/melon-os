@@ -1,0 +1,15 @@
+pkgname=sound-theme-freedesktop
+pkgver=0.8
+pkgrel=0
+pkgdesc="freedesktop.org default sound theme (event sounds)"
+license="GPL-2.0-or-later AND CC-BY-3.0 AND CC-BY-SA-2.0"
+url=https://www.freedesktop.org/wiki/Specifications/sound-theme-spec/
+source=(sound-theme-freedesktop-0.8.tar.bz2)
+# data only; index.theme is written here instead of by intltool
+build(){ :; }
+package(){
+  install -d $pkgdir/usr/share/sounds/freedesktop/stereo
+  install -m644 stereo/*.oga $pkgdir/usr/share/sounds/freedesktop/stereo/
+  printf '[Sound Theme]\nName=Default\nComment=Default sound theme\nDirectories=stereo\n\n[stereo]\nOutputProfile=stereo\n' \
+    > $pkgdir/usr/share/sounds/freedesktop/index.theme
+}

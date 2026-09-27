@@ -1,0 +1,13 @@
+pkgname=libtool
+pkgver=2.5.4
+pkgrel=0
+pkgdesc="GNU libtool (libltdl, the portable dlopen wrapper)"
+license="GPL-2.0-or-later AND LGPL-2.1-or-later"
+url=https://www.gnu.org/software/libtool/
+source=(libtool-2.5.4.tar.xz)
+subpackages=(libtool-dev libltdl)
+depends=(libltdl)
+pkgdesc_libltdl="libltdl dynamic module loader"
+build(){ ./configure $conf_flags --disable-static --enable-ltdl-install; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,man,info}; }
+pkg_libltdl(){ amove 'usr/lib/libltdl.so.*'; }

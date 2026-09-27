@@ -1,5 +1,6 @@
 pkgname=extra-cmake-modules
 pkgver=6.24.0
+pkgrel=0
 pkgdesc="extra-cmake-modules"
 license="LGPL-2.1-or-later OR GPL-2.0-or-later (see sources)"
 source=(extra-cmake-modules-6.24.0.tar.xz)

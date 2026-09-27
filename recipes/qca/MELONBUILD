@@ -1,0 +1,10 @@
+pkgname=qca
+pkgver=2.3.10
+pkgrel=2
+pkgdesc="qca"
+license="LGPL-2.1-or-later OR GPL-2.0-or-later (see sources)"
+source=(qca-2.3.10.tar.xz)
+builddir=$srcdir/qca-2.3.10
+subpackages=(qca-dev)
+build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_QTPLUGINDIR=lib/qt6/plugins -DKDE_INSTALL_QMLDIR=lib/qt6/qml -DKDE_INSTALL_LIBEXECDIR=libexec -DKF_IGNORE_PLATFORM_CHECK=ON -DBUILD_WITH_QT6=ON -DQT_MAJOR_VERSION=6 -DBUILD_DOC=OFF -DQT6=ON -DBUILD_TESTS=OFF -DBUILD_TOOLS=OFF -DWITH_botan_PLUGIN=no -DWITH_pkcs11_PLUGIN=no -DWITH_cyrus-sasl_PLUGIN=no; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; sed -i 's|"/usr/|"${_IMPORT_PREFIX}/|g' $pkgdir/usr/lib/cmake/Qca-qt6/Qca-qt6Targets*.cmake; sed -i 's|^set(_IMPORT_PREFIX "/usr")$|get_filename_component(_IMPORT_PREFIX "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)|' $pkgdir/usr/lib/cmake/Qca-qt6/Qca-qt6Targets.cmake; }

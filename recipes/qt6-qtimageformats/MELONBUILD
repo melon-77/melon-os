@@ -1,5 +1,6 @@
 pkgname=qt6-qtimageformats
 pkgver=6.10.2
+pkgrel=0
 pkgdesc="qt6-qtimageformats"
 license="LGPL-2.1-or-later OR GPL-2.0-or-later (see sources)"
 source=(qt6-qtimageformats-6.10.2.tar.xz)

@@ -1,0 +1,11 @@
+pkgname=gst-plugins-base
+pkgver=1.28.2
+pkgrel=0
+pkgdesc="gst-plugins-base (graphics stack)"
+license=custom
+source=(gst-plugins-base-1.28.2.tar.xz)
+builddir=$srcdir/gst-plugins-base-1.28.2
+makedepends=(gstreamer-dev libogg-dev libvorbis-dev alsa-lib-dev)
+subpackages=(gst-plugins-base-dev)
+build(){ meson_setup -Dauto_features=disabled -Dogg=enabled -Dvorbis=enabled -Dalsa=enabled -Dapp=enabled -Daudioconvert=enabled -Daudioresample=enabled -Dtypefind=enabled -Dplayback=enabled -Dvolume=enabled -Dexamples=disabled -Dtests=disabled -Ddoc=disabled -Dintrospection=disabled -Dnls=disabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

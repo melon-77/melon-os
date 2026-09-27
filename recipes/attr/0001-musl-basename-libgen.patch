@@ -1,0 +1,10 @@
+--- a/tools/attr.c	2026-09-27 15:53:00.625391432 -0700
++++ b/tools/attr.c	2026-09-27 15:53:00.639330270 -0700
+@@ -27,6 +27,7 @@
+ #include <unistd.h>
+ #include <errno.h>
+ #include <string.h>
++#include <libgen.h>
+ #include <locale.h>
+ 
+ #include <attr/attributes.h>

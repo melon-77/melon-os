@@ -1,0 +1,11 @@
+pkgname=gstreamer
+pkgver=1.28.2
+pkgrel=0
+pkgdesc="gstreamer (graphics stack)"
+license=custom
+source=(gstreamer-1.28.2.tar.xz)
+builddir=$srcdir/gstreamer-1.28.2
+makedepends=(glib-dev)
+subpackages=(gstreamer-dev)
+build(){ meson_setup -Dauto_features=disabled -Dtools=enabled -Dexamples=disabled -Dtests=disabled -Dbenchmarks=disabled -Ddoc=disabled -Dintrospection=disabled -Dnls=disabled -Dptp-helper=disabled -Dbash-completion=disabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

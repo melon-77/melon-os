@@ -1,0 +1,16 @@
+pkgname=libcanberra
+pkgver=0.30
+pkgrel=0
+pkgdesc="Event sound library (XDG sound theme spec), used by KWin and KNotifications"
+license=LGPL-2.1-or-later
+url=https://0pointer.de/lennart/projects/libcanberra/
+source=(libcanberra-0.30.tar.xz)
+makedepends=(libvorbis-dev libogg-dev libtool-dev alsa-lib-dev eudev-dev)
+subpackages=(libcanberra-dev)
+depends=(sound-theme-freedesktop)
+# ALSA plays the sounds (PipeWire provides the ALSA device); no GTK, PulseAudio or GStreamer backends
+# its 2012 config.sub predates musl targets: use the build host's current one
+build(){ cp /usr/share/misc/config.sub /usr/share/misc/config.guess build-aux/
+  ./configure $conf_flags --disable-static --enable-alsa --disable-oss --disable-pulse --disable-gstreamer \
+  --disable-gtk --disable-gtk3 --disable-tdb --disable-lynx --with-builtin=dso; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,gtk-doc,vala}; }

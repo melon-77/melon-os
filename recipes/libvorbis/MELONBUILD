@@ -1,0 +1,11 @@
+pkgname=libvorbis
+pkgver=1.3.7
+pkgrel=0
+pkgdesc="Ogg Vorbis audio codec library"
+license=BSD-3-Clause
+url=https://xiph.org/vorbis/
+source=(libvorbis-1.3.7.tar.gz)
+makedepends=(libogg-dev)
+subpackages=(libvorbis-dev)
+build(){ ./configure $conf_flags --disable-static --disable-docs --disable-examples; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc; }

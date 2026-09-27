@@ -1,0 +1,12 @@
+--- a/data/meson.build	2026-09-27 15:40:23.240925732 -0700
++++ b/data/meson.build	2026-09-27 15:40:23.244374874 -0700
+@@ -9,7 +9,8 @@
+ 
+ # Do not rely on an exe wrapper for rel-info, use the system one in that case
+ if meson.is_cross_build()
+-    dependency('appstream', version: '>=' + as_version, native: true,
++    # melon: the build host's appstreamcli only folds NEWS into the metainfo, an older one does that fine
++    dependency('appstream', native: true,
+                not_found_message: 'Native appstream required for cross-building')
+     ascli_exe = find_program('appstreamcli', native: true)
+ endif

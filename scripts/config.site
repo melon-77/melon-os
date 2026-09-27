@@ -1,0 +1,5 @@
+# autoconf answers for cross builds against musl (CONFIG_SITE, set by melon-build).
+# Cross-compiling, AC_FUNC_MALLOC can't run its test and assumes a broken malloc, which leaves
+# undefined rpl_malloc/rpl_realloc references. musl's malloc(0) and realloc(p, 0) are fine.
+ac_cv_func_malloc_0_nonnull=yes
+ac_cv_func_realloc_0_nonnull=yes

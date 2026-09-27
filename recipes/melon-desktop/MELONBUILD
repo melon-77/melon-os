@@ -1,15 +1,15 @@
 pkgname=melon-desktop
 pkgver=0.1
-pkgrel=1
-pkgdesc="melon desktop: Plasma defaults, melon dark theme, wallpapers, splash, SDDM config and desktop services"
+pkgrel=2
+pkgdesc="melon desktop: Plasma defaults, melon dark theme, wallpapers, splash, SDDM and GRUB look, desktop services, first-login app offer"
 license=MIT
-# The desktop package list itself lives in the ISO profile (scripts/mkiso.sh DESKTOP_PKGS), so this
+# The desktop package list itself lives in scripts/desktop-packages.txt (the ISO profile), so this
 # package only carries melon's own files and can be built before the whole desktop stack exists.
 depends=(melon-base)
 builddir=$srcdir
 options=(keepdirs)
 package(){
   cp -a $startdir/files/. $pkgdir/
-  chmod 755 $pkgdir/etc/sv/*/run $pkgdir/etc/sv/*/log/run
+  chmod 755 $pkgdir/etc/sv/*/run $pkgdir/etc/sv/*/log/run $pkgdir/usr/bin/*
   for s in NetworkManager bluetoothd power-profiles-daemon; do mkdir -p $pkgdir/var/log/$s; done
 }

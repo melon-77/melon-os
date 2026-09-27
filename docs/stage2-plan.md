@@ -47,5 +47,17 @@ Built from the owner's answers in `docs/desktop-config.txt`. Decisions made with
    session is tested with llvmpipe/virgl).
 9. Later: Rust for melon, then native Firefox, Alacritty and NVK.
 
+## Status
+
+- Layers 1 and 2 are built (Mesa 26 without LLVM for now: radeonsi via ACO, RADV, iris/ANV, nouveau,
+  virgl, softpipe).
+- Layer 5/6 libraries and services are built except where noted in the build logs; NetworkManager is
+  built without `nmcli` until readline is packaged (Plasma's network applet uses libnm).
+- Qt 6, KF6 and Plasma: recipes generated (`scripts/gen-kde-recipes.py`), building after the host Qt tools.
+- Installers: Calamares configuration, the gauntlet module and the finishing jobs are written
+  (`recipes/calamares-melon`); both installers can encrypt the root (LUKS2) and make a swap file.
+- Desktop ISO: `MELON_EDITION=desktop scripts/mkiso.sh` (package list in `scripts/desktop-packages.txt`).
+- First login offers Firefox, VLC, Steam and Prism Launcher from Flathub (`melon-first-boot`).
+
 Expected compile time on the 2-core build container: 2–4 days in total. The build scripts delete each
 build tree after a successful package to stay inside the disk budget.

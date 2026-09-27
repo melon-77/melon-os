@@ -1,0 +1,106 @@
+#!/bin/sh
+# Calamares job "finish": everything the console installer does after copying the system, for the
+# partitions Calamares made. Runs on the live system; the new system is mounted at $1, the new user is $2.
+set -eu
+ROOT=$1 NEWUSER=${2:-}
+PATH=/usr/bin
+REPO=/media/melon/melon/repo
+ARCH=$(apk --print-arch)
+say(){ echo "melon: $*"; }
+devof(){ awk -v m="$1" '$2==m{d=$1} END{print d}' /proc/mounts; }
+uuidof(){ blkid -s UUID -o value "$1"; }
+
+rootdev=$(devof "$ROOT"); bootdev=$(devof "$ROOT/boot"); efidev=$(devof "$ROOT/boot/efi")
+[ -n "$rootdev" ] || { echo "cal-finish: nothing mounted at $ROOT" >&2; exit 1; }
+[ -n "$bootdev" ] || bootdev=$rootdev
+
+# the shims from cal-prepare were only for the users job
+rm -f "$ROOT/usr/local/bin/useradd" "$ROOT/usr/local/bin/usermod" "$ROOT/usr/local/bin/groupadd"
+
+say "fstab"
+rootfs=$(blkid -s TYPE -o value "$rootdev")
+{
+  echo "# <device>                                  <mountpoint> <type> <options>              <dump> <pass>"
+  echo "UUID=$(uuidof "$rootdev")  /            $rootfs    defaults,noatime       0      1"
+  [ "$bootdev" != "$rootdev" ] && echo "UUID=$(uuidof "$bootdev")                              /boot        vfat   defaults,umask=0077    0      2"
+  [ -n "$efidev" ] && echo "UUID=$(uuidof "$efidev")                              /boot/efi    vfat   defaults,umask=0077    0      2"
+  echo "tmpfs                                       /tmp         tmpfs  nosuid,nodev,mode=1777 0      0"
+} > "$ROOT/etc/fstab"
+
+say "swap file"   # zram (the zram service) comes first; the swap file catches the rest
+memk=$(awk '/MemTotal/{print $2}' /proc/meminfo)
+freek=$(df -k "$ROOT" | awk 'NR==2{print $4}')
+swapm=$(( memk / 1024 )); [ $swapm -gt 8192 ] && swapm=8192
+[ $(( freek / 1024 )) -lt $(( swapm * 4 )) ] && swapm=$(( freek / 1024 / 8 ))
+if [ "$swapm" -ge 256 ]; then
+  fallocate -l ${swapm}M "$ROOT/swapfile" 2>/dev/null || dd if=/dev/zero of="$ROOT/swapfile" bs=1M count=$swapm status=none
+  chmod 600 "$ROOT/swapfile"; mkswap "$ROOT/swapfile" >/dev/null
+  echo "/swapfile                                   none         swap   defaults,pri=10        0      0" >> "$ROOT/etc/fstab"
+fi
+
+say "packages from the ISO"
+mkdir -p "$ROOT/var/lib/melon"
+cp -a "$REPO" "$ROOT/var/lib/melon/repo"
+echo "/var/lib/melon/repo/$ARCH/Packages.adb" > "$ROOT/etc/apk/repositories"
+
+luksdev=
+case $rootdev in
+  /dev/mapper/*|/dev/dm-*) luksdev=$(cryptsetup status "$rootdev" | awk '$1=="device:"{print $2}') ;;
+esac
+if [ -n "$luksdev" ]; then
+  say "encrypted root on $luksdev: unlock initramfs"
+  mkdir -p "$ROOT/etc/melon"; : > "$ROOT/etc/melon/encrypted-root"
+  apk --root "$ROOT" --arch "$ARCH" --repositories-file /dev/null --repository "$REPO/$ARCH/Packages.adb" --no-cache add cryptsetup
+  chroot "$ROOT" melon-mkinitramfs
+  rm -f "$ROOT/etc/crypttab"   # the initramfs opens root; nothing else is encrypted
+fi
+
+say "services"
+svcs="getty-tty1 getty-tty2 getty-tty3 mdevd syslogd klogd crond ntpd dhcp"
+prof=/usr/share/melon/profiles/desktop.services
+[ -f $prof ] || prof=/usr/share/melon/profiles/base.services
+if [ -f $prof ]; then
+  for s in $(grep -v '^#' $prof); do
+    case $s in -*) svcs=$(printf '%s\n' $svcs | grep -vxF -- "${s#-}" | xargs) ;; *) svcs="$svcs $s" ;; esac
+  done
+fi
+mkdir -p "$ROOT/var/service"
+for s in $svcs; do if [ -d "$ROOT/etc/sv/$s" ]; then ln -sfn /etc/sv/$s "$ROOT/var/service/$s"; fi; done
+chroot "$ROOT" dbus-uuidgen --ensure 2>/dev/null || true
+
+say "bootloader"
+# the whole disk that holds /boot
+bootpart=${bootdev##*/}
+disk=/dev/$(basename "$(readlink -f /sys/class/block/$bootpart/..)")
+if [ -d /sys/firmware/efi ] || [ -n "$efidev" ]; then
+  efidir=/boot; [ -n "$efidev" ] && efidir=/boot/efi
+  EFI_TARGET=x86_64-efi; [ "$ARCH" = x86 ] && EFI_TARGET=i386-efi
+  chroot "$ROOT" grub-install --target=$EFI_TARGET --efi-directory=$efidir --boot-directory=/boot --bootloader-id=melon 2>&1 | grep -v '^Installing for' || true
+  # also the removable-media path, for firmware that forgets boot entries
+  chroot "$ROOT" grub-install --target=$EFI_TARGET --efi-directory=$efidir --boot-directory=/boot --removable --no-nvram 2>&1 | grep -v '^Installing for' || true
+fi
+# BIOS boot code as well when the disk has room for it (MBR disks, or GPT with a BIOS boot partition)
+chroot "$ROOT" grub-install --target=i386-pc --boot-directory=/boot "$disk" 2>&1 | grep -v '^Installing for' || true
+[ -f "$ROOT/boot/grub/grub.cfg" ] || mkdir -p "$ROOT/boot/grub"
+MELON_ROOT_DEV="$rootdev" MELON_BOOT_DEV="$bootdev" chroot "$ROOT" melon-update-grub
+
+say "gauntlet rewards"
+mkdir -p "$ROOT/etc/melon" "$ROOT/usr/share/wallpapers"
+cp -a /usr/share/melon/rewards/melon-survivor "$ROOT/usr/share/wallpapers/"
+date +%Y-%m-%d > "$ROOT/etc/melon/gauntlet-survivor"
+if [ -n "$NEWUSER" ] && [ -d "$ROOT/home/$NEWUSER" ]; then
+  uid=$(awk -F: -v u="$NEWUSER" '$1==u{print $3":"$4}' "$ROOT/etc/passwd")
+  mkdir -p "$ROOT/home/$NEWUSER/Pictures" "$ROOT/home/$NEWUSER/.config/autostart"
+  /usr/libexec/melon/cal-certificate "$NEWUSER" > "$ROOT/home/$NEWUSER/Pictures/melon-gauntlet-certificate.svg"
+  # first Plasma login: put the survivor wallpaper up once, then forget about it
+  cat > "$ROOT/home/$NEWUSER/.config/autostart/melon-survivor.desktop" <<DESK
+[Desktop Entry]
+Type=Application
+Name=melon survivor wallpaper
+Exec=sh -c 'plasma-apply-wallpaperimage /usr/share/wallpapers/melon-survivor && rm -f ~/.config/autostart/melon-survivor.desktop'
+X-KDE-autostart-phase=2
+NoDisplay=true
+DESK
+  chown -R "$uid" "$ROOT/home/$NEWUSER/Pictures" "$ROOT/home/$NEWUSER/.config"
+fi
+say "done"

@@ -92,7 +92,8 @@ has_opt(){ local o; for o in "${options[@]:-}"; do [ "$o" = "$1" ] && return 0; 
 # ---------- install makedepends into the sysroot ----------
 sysroot_add(){
   [ $# -eq 0 ] && return 0
-  $APK --root $SYSROOT --arch $ARCH --keys-dir $M/keys/trusted --repositories-file /dev/null \
+  # the lock lets two builds for the same arch run side by side (sysroot database and repo index)
+  flock $OUT/.lock $APK --root $SYSROOT --arch $ARCH --keys-dir $M/keys/trusted --repositories-file /dev/null \
        --repository $OUT/Packages.adb --no-scripts --no-cache --quiet add --upgrade "$@"
 }
 if [ ${#makedepends[@]} -gt 0 ]; then msg "sysroot: ${makedepends[*]}"; sysroot_add "${makedepends[@]}"; fi
@@ -169,7 +170,9 @@ make_apk(){ local sub=$1 dir=$2 desc=$3; shift 3; local deps=("$@")
   for st in pre-install post-install pre-upgrade post-upgrade pre-deinstall post-deinstall; do
     [ -f "$startdir/$sub.$st" ] && scr+=(-s "$st:$startdir/$sub.$st"); done
   rm -f "$OUT/$sub"-[0-9]*.apk
-  $APK --sign-key $KEY mkpkg -F "$dir" "${info[@]}" "${scr[@]}" -o "$OUT/$sub-$pkgver-r$pkgrel.apk"
+  # written under a temporary name so a parallel reindex never reads a half-written package
+  $APK --sign-key $KEY mkpkg -F "$dir" "${info[@]}" "${scr[@]}" -o "$OUT/.$sub.apk.tmp"
+  mv "$OUT/.$sub.apk.tmp" "$OUT/$sub-$pkgver-r$pkgrel.apk"
   msg "created $sub-$pkgver-r$pkgrel.apk ($(du -h "$OUT/$sub-$pkgver-r$pkgrel.apk" | cut -f1))"
 }
 
@@ -192,7 +195,7 @@ make_apk "$pkgname" "$pkgdir" "$pkgdesc" "${depends[@]}"
 
 # ---------- reindex ----------
 msg "reindex"
-( cd $OUT && $APK --keys-dir $M/keys/trusted --sign-key $KEY mkndx -d "melon $(date +%Y%m%d)" -o Packages.adb.new *.apk && mv Packages.adb.new Packages.adb )
+( cd $OUT && flock .lock bash -c "$APK --keys-dir $M/keys/trusted --sign-key $KEY mkndx -d 'melon $(date +%Y%m%d)' -o Packages.adb.new *.apk && mv Packages.adb.new Packages.adb" )
 
 # ---------- install into sysroot so later builds can use it ----------
 if [ $INSTALL = 1 ]; then

@@ -1,0 +1,17 @@
+pkgname=device-mapper
+pkgver=2.03.31
+pkgdesc="Linux device-mapper library and dmsetup (from LVM2; needed by cryptsetup for LUKS)"
+license="GPL-2.0-only AND LGPL-2.1-only"
+url=https://sourceware.org/lvm2/
+source=(lvm2-2.03.31.tar.xz)
+builddir=$srcdir/LVM2.2.03.31
+makedepends=(eudev-dev util-linux-dev linux-headers)
+subpackages=(device-mapper-dev)
+# only the device-mapper part of LVM2: libdevmapper + dmsetup, with udev sync so /dev/mapper nodes appear
+build(){ ./configure $conf_flags --enable-pkgconfig --enable-udev_sync --enable-udev_rules --with-udev-prefix=/usr \
+    --disable-selinux --disable-nls --disable-readline --disable-systemd-journal --disable-app-machineid \
+    --with-thin=none --with-cache=none --with-vdo=none --with-writecache=none --with-integrity=none --disable-blkid_wiping \
+    --with-default-run-dir=/run/lvm --with-default-locking-dir=/run/lock/lvm ac_cv_func_malloc_0_nonnull=yes ac_cv_func_realloc_0_nonnull=yes
+  make -j$JOBS device-mapper; }
+package(){ make DESTDIR=$pkgdir install_device-mapper; rm -rf $pkgdir/usr/share/man
+  chmod u+w $pkgdir/usr/lib/libdevmapper.so* 2>/dev/null || true; }

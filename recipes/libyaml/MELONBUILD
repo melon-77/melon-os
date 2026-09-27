@@ -3,7 +3,7 @@ pkgver=0.2.5
 pkgdesc="libyaml (graphics stack)"
 license=custom
 source=(libyaml-0.2.5.tar.gz)
-builddir=$srcdir/yaml-0.2.5
+builddir=$srcdir/libyaml-0.2.5
 subpackages=(libyaml-dev)
 build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
 package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

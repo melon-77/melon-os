@@ -1,0 +1,9 @@
+pkgname=json-c
+pkgver=0.18
+pkgdesc="json-c (graphics stack)"
+license=custom
+source=(json-c-0.18.tar.xz)
+builddir=$srcdir/json-c-json-c-0.18-20240915
+subpackages=(json-c-dev)
+build(){ cmake_setup -B build -DBUILD_STATIC_LIBS=OFF -DBUILD_TESTING=OFF -DDISABLE_WERROR=ON -DBUILD_APPS=OFF; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

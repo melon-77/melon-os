@@ -1,0 +1,9 @@
+pkgname=dosfstools
+pkgver=4.2
+pkgdesc="dosfstools (graphics stack)"
+license=custom
+source=(dosfstools-4.2.tar.gz)
+builddir=$srcdir/dosfstools-4.2
+subpackages=(dosfstools-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --enable-compat-symlinks --without-udev; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

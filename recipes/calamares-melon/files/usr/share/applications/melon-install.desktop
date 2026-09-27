@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Install melon
+GenericName=System installer
+Comment=Install melon to this computer (the gauntlet)
+Icon=melon
+Exec=melon-install-gui
+Terminal=false
+Categories=System;
+Keywords=installer;calamares;install;

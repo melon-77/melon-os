@@ -1,0 +1,9 @@
+pkgname=popt
+pkgver=1.19
+pkgdesc="popt (graphics stack)"
+license=custom
+source=(popt-1.19.tar.xz)
+builddir=$srcdir/popt-1.19
+subpackages=(popt-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-nls; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

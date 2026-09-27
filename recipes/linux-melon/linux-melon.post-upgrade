@@ -1,4 +1,6 @@
 #!/bin/sh
 for d in /usr/lib/modules/*; do [ -d "$d" ] && depmod -a "${d##*/}"; done
+# encrypted installs boot through a small initramfs; rebuild it for the new kernel
+[ -f /etc/melon/encrypted-root ] && [ -x /usr/bin/melon-mkinitramfs ] && /usr/bin/melon-mkinitramfs
 [ -x /usr/bin/melon-update-grub ] && [ -f /boot/grub/grub.cfg ] && /usr/bin/melon-update-grub
 exit 0

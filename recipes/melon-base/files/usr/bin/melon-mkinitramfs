@@ -1,0 +1,73 @@
+#!/bin/sh
+# melon-mkinitramfs: build the small initramfs that encrypted (LUKS) installs boot with.
+#
+#   melon-mkinitramfs [kernel-version]      writes /boot/initramfs-<flavour>.img
+#
+# melon normally boots without an initramfs (the storage drivers and XFS are built into the kernel).
+# Only an encrypted root needs one: it loads dm-crypt, asks for the passphrase, opens the LUKS
+# container and switches to the real root. /etc/crypttab-style settings come from the kernel command
+# line that melon-update-grub writes: cryptroot=UUID=<luks uuid> root=/dev/mapper/melonroot
+set -eu
+PATH=/usr/bin
+[ -f /etc/melon/encrypted-root ] || [ "${MELON_FORCE_INITRAMFS:-0}" = 1 ] || { echo "melon-mkinitramfs: root isn't encrypted, nothing to do"; exit 0; }
+command -v cryptsetup >/dev/null || { echo "melon-mkinitramfs: cryptsetup is not installed" >&2; exit 1; }
+
+build_one(){ kver=$1
+  kdir=/usr/lib/modules/$kver; [ -d "$kdir" ] || { echo "no modules for $kver" >&2; return 1; }
+  # which /boot/vmlinuz-<flavour> belongs to this kernel version
+  flav=${kver#*-}      # 7.0.0-melon -> melon (matches /boot/vmlinuz-melon)
+  out=/boot/initramfs-$flav.img
+  W=$(mktemp -d); trap 'rm -rf "$W"' EXIT
+  mkdir -p $W/usr/bin $W/usr/lib $W/dev $W/proc $W/sys $W/run $W/newroot $W/etc
+  ln -s usr/bin $W/bin; ln -s usr/bin $W/sbin; ln -s usr/lib $W/lib
+  cp /usr/bin/busybox $W/usr/bin/; for a in sh mount umount switch_root mkdir sleep cat echo mdev ls stty findfs seq; do ln -s busybox $W/usr/bin/$a; done
+  # dynamic binaries and the libraries they need
+  for b in /usr/bin/cryptsetup /usr/bin/kmod; do
+    cp $b $W/usr/bin/
+    ldd $b 2>/dev/null | awk '/=>/{print $3} !/=>/{print $1}' | grep '^/' | while read -r l; do
+      cp -L "$l" $W/usr/lib/ 2>/dev/null || true; done
+  done
+  cp -L /usr/lib/ld-musl-*.so.1 $W/usr/lib/ 2>/dev/null || true
+  for m in modprobe insmod; do ln -s kmod $W/usr/bin/$m; done
+  # modules: device-mapper, dm-crypt and the ciphers LUKS2 defaults to, plus USB/HID input for the passphrase
+  mkdir -p $W$kdir
+  cp $kdir/modules.order $kdir/modules.builtin* $W$kdir/ 2>/dev/null || true
+  want="dm_mod dm_crypt xts aes_generic aesni_intel ghash_clmulni_intel sha256_generic sha512_generic af_alg algif_skcipher
+        crc32c_intel hid_generic usbhid xhci_pci ehci_pci ohci_pci uhci_hcd atkbd i8042 evdev"
+  for m in $want; do
+    kmod modprobe -S "$kver" --show-depends "$m" 2>/dev/null | awk '$1=="insmod"{print $2}'
+  done | sort -u | while read -r f; do mkdir -p "$W$(dirname "$f")"; cp "$f" "$W$f"; done
+  depmod -b $W "$kver" 2>/dev/null || kmod depmod -b $W "$kver"
+  cat > $W/init <<'INIT'
+#!/bin/sh
+export PATH=/usr/bin
+mount -t proc proc /proc; mount -t sysfs sys /sys; mount -t devtmpfs dev /dev; mount -t tmpfs run /run
+for m in dm_mod dm_crypt xts aesni_intel aes_generic sha256_generic sha512_generic algif_skcipher usbhid hid_generic xhci_pci ehci_pci atkbd; do
+  modprobe -q $m 2>/dev/null
+done
+croot= root= ; for a in $(cat /proc/cmdline); do case $a in cryptroot=*) croot=${a#cryptroot=} ;; root=*) root=${a#root=} ;; esac; done
+name=${root#/dev/mapper/}
+dev=
+for i in $(seq 1 20); do   # USB and NVMe disks can take a moment to appear
+  case $croot in
+    UUID=*) dev=$(findfs "$croot" 2>/dev/null) || dev=$(for p in /sys/class/block/*; do b=/dev/${p##*/}
+              [ "$(cryptsetup luksUUID "$b" 2>/dev/null)" = "${croot#UUID=}" ] && echo "$b" && break; done) ;;
+    *) dev=$croot ;;
+  esac
+  [ -n "$dev" ] && [ -b "$dev" ] && break; sleep 0.5
+done
+[ -b "$dev" ] || { echo "melon: encrypted root $croot not found"; exec sh; }
+echo; echo "  melon: unlocking the encrypted disk"
+until cryptsetup open "$dev" "$name"; do echo "  try again"; done
+mount -o rw -t xfs "$root" /newroot || { echo "melon: cannot mount $root"; exec sh; }
+mount --move /dev /newroot/dev 2>/dev/null || umount /dev
+umount /run; umount /sys; umount /proc
+exec switch_root /newroot /usr/bin/init
+INIT
+  chmod 755 $W/init
+  (cd $W && find . | cpio -o -H newc --quiet | zstd -q -10 > "$out.new") && mv "$out.new" "$out"
+  echo "melon-mkinitramfs: wrote $out"
+  rm -rf "$W"; trap - EXIT
+}
+
+if [ $# -gt 0 ]; then build_one "$1"; else for d in /usr/lib/modules/*; do [ -d "$d" ] && build_one "${d##*/}"; done; fi

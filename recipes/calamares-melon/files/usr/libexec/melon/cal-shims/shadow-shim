@@ -1,0 +1,34 @@
+#!/bin/sh
+# Calamares' users job calls the shadow tools (useradd, usermod, groupadd). melon has BusyBox's
+# adduser/addgroup instead, so during a Calamares install these small shims stand in for the calls
+# Calamares makes. They are copied into the target's /usr/local/bin before the users job and removed
+# again by the finishing job; they never stay on an installed system.
+PATH=/usr/bin
+me=${0##*/}
+die(){ echo "$me: $*" >&2; exit 1; }
+case $me in
+  useradd)   # useradd -m -U [-s SHELL] -c FULLNAME [-K UMASK=077] LOGIN
+    shell=/bin/bash gecos=
+    while [ $# -gt 1 ]; do
+      case $1 in -m|-U) ;; -s) shift; shell=$1 ;; -c) shift; gecos=$1 ;; -K) shift ;; *) die "unsupported option $1" ;; esac
+      shift
+    done
+    [ $# -eq 1 ] || die "no login name"
+    adduser -D -s "$shell" -g "$gecos" "$1" ;;
+  usermod)   # usermod -aG g1,g2 LOGIN  |  usermod -p HASH LOGIN
+    case $1 in
+      -aG) groups=$2 login=$3; old_ifs=$IFS; IFS=,
+           for g in $groups; do addgroup "$login" "$g" 2>/dev/null || { addgroup "$g" && addgroup "$login" "$g"; } || die "group $g"; done
+           IFS=$old_ifs ;;
+      -p)  hash=$2 login=$3
+           grep -q "^$login:" /etc/shadow || die "no such user $login"
+           # the hash may contain / and $, so edit with awk rather than sed
+           awk -F: -v OFS=: -v u="$login" -v h="$hash" '$1==u{$2=h} {print}' /etc/shadow > /etc/shadow.new &&
+             chmod 640 /etc/shadow.new && mv /etc/shadow.new /etc/shadow ;;
+      *) die "unsupported options $*" ;;
+    esac ;;
+  groupadd)  # groupadd [--system] NAME
+    sys=; [ "$1" = --system ] && { sys=-S; shift; }
+    grep -q "^$1:" /etc/group || addgroup $sys "$1" ;;
+  *) die "unknown shim" ;;
+esac

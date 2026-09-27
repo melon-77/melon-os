@@ -36,7 +36,7 @@ fi
 
 msg "Mounting filesystems"
 mount -o remount,rw / 2>/dev/null
-mount -a -t nosysfs,nonfs,noproc,notmpfs 2>/dev/null
+mount -a -t nosysfs,nonfs,noproc 2>/dev/null   # includes the /tmp tmpfs from fstab
 swapon -a 2>/dev/null
 
 hostname -F /etc/hostname 2>/dev/null

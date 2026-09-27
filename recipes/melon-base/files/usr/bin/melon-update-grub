@@ -5,11 +5,19 @@ set -e
 devof(){ awk -v m="$1" '$2==m{d=$1} END{print d}' /proc/mounts; }
 rootdev=${MELON_ROOT_DEV:-$(devof /)}
 bootdev=${MELON_BOOT_DEV:-$(devof /boot)}; [ -n "$bootdev" ] || bootdev=$rootdev
-partuuid=$(blkid -s PARTUUID -o value "$rootdev")
 bootuuid=$(blkid -s UUID -o value "$bootdev")
-[ -n "$partuuid" ] && [ -n "$bootuuid" ] || { echo "melon-update-grub: cannot identify root ($rootdev) or boot ($bootdev) device" >&2; exit 1; }
+# an encrypted root (LUKS, opened by the initramfs from melon-mkinitramfs) or a plain partition
+luksdev=
+case $rootdev in
+  /dev/mapper/*|/dev/dm-*)
+    luksdev=$(cryptsetup status "$rootdev" 2>/dev/null | awk '$1=="device:"{print $2}')
+    [ -n "$luksdev" ] || { echo "melon-update-grub: $rootdev is a device-mapper device but not a LUKS mapping" >&2; exit 1; }
+    rootspec="root=/dev/mapper/melonroot cryptroot=UUID=$(cryptsetup luksUUID "$luksdev")" ;;
+  *) partuuid=$(blkid -s PARTUUID -o value "$rootdev"); [ -n "$partuuid" ] && rootspec="root=PARTUUID=$partuuid" ;;
+esac
+[ -n "${rootspec:-}" ] && [ -n "$bootuuid" ] || { echo "melon-update-grub: cannot identify root ($rootdev) or boot ($bootdev) device" >&2; exit 1; }
 [ -r /etc/default/grub ] && . /etc/default/grub
-cmdline="root=PARTUUID=$partuuid rootfstype=xfs rw ${GRUB_CMDLINE_LINUX_DEFAULT:-quiet} ${GRUB_CMDLINE_LINUX}"
+cmdline="$rootspec rootfstype=xfs rw ${GRUB_CMDLINE_LINUX_DEFAULT:-quiet} ${GRUB_CMDLINE_LINUX}"
 # kernel path relative to the filesystem grub reads it from
 if [ "$bootdev" != "$rootdev" ]; then kpath=""; else kpath="/boot"; fi
 cat > /boot/grub/grub.cfg.new <<CFG
@@ -29,12 +37,15 @@ CFG
 for k in /boot/vmlinuz-*; do
   [ -f "$k" ] || continue; f=${k##*/}; flav=${f#vmlinuz-}
   name="melon Linux"; [ "$flav" = melon ] || name="melon Linux ($flav)"
+  initrd=; [ -f /boot/initramfs-$flav.img ] && initrd="  initrd $kpath/initramfs-$flav.img"
   cat >> /boot/grub/grub.cfg.new <<CFG
 menuentry '$name' {
   linux $kpath/$f $cmdline
+$initrd
 }
 menuentry '$name, safe graphics' {
   linux $kpath/$f $cmdline nomodeset
+$initrd
 }
 CFG
 done

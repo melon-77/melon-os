@@ -1,0 +1,28 @@
+pkgname=bzip2
+pkgver=1.0.8
+pkgrel=0
+pkgdesc="bzip2 compression tools"
+license=bzip2-1.0.6
+url=https://sourceware.org/bzip2/
+source=(bzip2-1.0.8.tar.gz)
+subpackages=(bzip2-dev libbz2)
+depends=(libbz2)
+pkgdesc_libbz2="bzip2 compression library"
+# plain Makefiles, no configure: the shared library and the binaries linked against it come from Makefile-libbz2_so
+build(){
+  make -f Makefile-libbz2_so CC="$CC" CFLAGS="$CFLAGS -fPIC -Wall -D_FILE_OFFSET_BITS=64"
+  make bzip2recover CC="$CC" CFLAGS="$CFLAGS -Wall -D_FILE_OFFSET_BITS=64"
+}
+package(){
+  install -Dm755 bzip2-shared $pkgdir/usr/bin/bzip2
+  install -m755 bzip2recover bzdiff bzgrep bzmore $pkgdir/usr/bin/
+  for l in bunzip2 bzcat; do ln -s bzip2 $pkgdir/usr/bin/$l; done
+  install -Dm755 libbz2.so.$pkgver $pkgdir/usr/lib/libbz2.so.$pkgver
+  ln -s libbz2.so.$pkgver $pkgdir/usr/lib/libbz2.so.1.0; ln -s libbz2.so.$pkgver $pkgdir/usr/lib/libbz2.so.1
+  ln -s libbz2.so.$pkgver $pkgdir/usr/lib/libbz2.so
+  install -Dm644 bzlib.h $pkgdir/usr/include/bzlib.h
+  # upstream ships no pkg-config file; many projects look for one
+  mkdir -p $pkgdir/usr/lib/pkgconfig
+  printf 'prefix=/usr\nlibdir=${prefix}/lib\nincludedir=${prefix}/include\n\nName: bzip2\nDescription: bzip2 compression library\nVersion: %s\nLibs: -L${libdir} -lbz2\nCflags: -I${includedir}\n' $pkgver > $pkgdir/usr/lib/pkgconfig/bzip2.pc
+}
+pkg_libbz2(){ amove 'usr/lib/libbz2.so.*'; }

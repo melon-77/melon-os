@@ -9,6 +9,7 @@ deb/bluez_5.85.orig.tar.gz	7516f167f6aaabff9a48eac1515638fd349ecb884d254b558481b
 deb/breeze_6.6.5.orig.tar.xz	06c4c3e466cd03a8c1e411a38b04756b6e145879a560534b2fc44666d41330f4	apt	breeze=4:6.6.5-0ubuntu0.1
 deb/bubblewrap_0.11.1.orig.tar.xz	c1b7455a1283b1295879a46d5f001dfd088c0bb0f238abb5e128b3583a246f71	apt	bubblewrap=0.11.1-1ubuntu0.3
 deb/busybox_1.37.0.orig.tar.bz2	3311dff32e746499f4df0d5df04d7eb396382d7e108bb9250e7b519b837043a4	apt	busybox=1:1.37.0-7ubuntu1
+deb/bzip2_1.0.8.orig.tar.gz	ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269	apt	bzip2=1.0.8-6ubuntu0.1
 deb/calamares_3.3.14.orig.tar.gz	5547f80db067dea923ae693ba6bb88eb2b2eeac1da3ebec42fce453e31c290c0	apt	calamares=3.3.14-0ubuntu25.26.04.1
 deb/cryptsetup_2.8.4.orig.tar.gz	d1c18663eb565a0c5511110b8559db71e4fa4c482740273d39fd0a9dff7fbd29	apt	cryptsetup=2:2.8.4-1ubuntu4
 deb/curl_8.18.0.orig.tar.gz	e9274a5f8ab5271c0e0e6762d2fce194d5f98acc568e4ce816845b2dcc0cf88f	apt	curl=8.18.0-1ubuntu2.7
@@ -274,6 +275,7 @@ deb/xwayland_24.1.10.orig.tar.xz	459762be8ea046c94386687d77a87add6073868bee14f02
 deb/xz-utils_5.8.3.orig.tar.xz	fff1ffcf2b0da84d308a14de513a1aa23d4e9aa3464d17e64b9714bfdd0bbfb6	apt	xz-utils=5.8.3-1
 deb/yaml-cpp_0.8.0+dfsg.orig.tar.xz	32c85a5f36633a9005b20261b35fccb0d8ec69e9ef16c67de7d5d007944e3709	apt	yaml-cpp=0.8.0+dfsg-9
 deb/zlib_1.3.dfsg+really1.3.1.orig.tar.gz	60dd315c07f616887caa029408308a018ace66e3d142726a97db164b3b8f69fb	apt	zlib=1:1.3.dfsg+really1.3.1-1ubuntu3.1
+bzip2-1.0.8.tar.gz	-	link	deb/bzip2_1.0.8.orig.tar.gz
 e2fsprogs-1.47.2.tar.gz	-	link	deb/e2fsprogs_1.47.2.orig.tar.gz
 firmware/linux-firmware-amd-graphics_20240318.git3b128b60-0ubuntu3.3_all.deb	7c6a6083e963fd9394d1f6471b6a94e787a76c6f98b262c2d9262b9a57308b53	pool	http://archive.ubuntu.com/ubuntu/pool/main/l/linux-firmware-amd-graphics/linux-firmware-amd-graphics_20240318.git3b128b60-0ubuntu3.3_all.deb
 firmware/linux-firmware-intel-graphics_20240318.git3b128b60-0ubuntu3.1_all.deb	ee2355785ed16466bab120effd242f77423847ec53bc01c5c334431427ea8254	pool	http://archive.ubuntu.com/ubuntu/pool/main/l/linux-firmware-intel-graphics/linux-firmware-intel-graphics_20240318.git3b128b60-0ubuntu3.1_all.deb

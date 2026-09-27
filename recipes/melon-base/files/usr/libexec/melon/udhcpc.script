@@ -1,0 +1,19 @@
+#!/bin/sh
+# udhcpc hook for melon: BusyBox's default script sets the address, routes and DNS server from the
+# network; then melon adds public fallback DNS servers.
+#
+# musl asks every nameserver at once and takes the first answer, so a fallback only speeds things up.
+# It matters on routers whose DNS drops parallel A/AAAA queries (musl then fails with "temporary
+# failure" / apk's "transient resolver error"). Turn it off with: touch /etc/melon/no-dns-fallback
+/usr/share/udhcpc/default.script "$@"
+case "$1" in
+  bound|renew)
+    [ -e /etc/melon/no-dns-fallback ] && exit 0
+    n=$(grep -c '^nameserver' /etc/resolv.conf 2>/dev/null || echo 0)
+    for ns in 1.1.1.1 9.9.9.9; do
+      [ "$n" -ge 3 ] && break           # musl reads at most three
+      grep -q "^nameserver $ns\$" /etc/resolv.conf 2>/dev/null && continue
+      echo "nameserver $ns" >> /etc/resolv.conf; n=$((n + 1))
+    done ;;
+esac
+exit 0

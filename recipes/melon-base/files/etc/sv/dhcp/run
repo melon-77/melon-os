@@ -5,4 +5,4 @@ IFACE=${IFACE:-$(for i in /sys/class/net/*; do n=${i##*/}; [ "$n" = lo ] && cont
 # the network driver may still be loading (e.g. e1000 in VirtualBox): look again in 2 seconds
 [ -n "$IFACE" ] || { sleep 2; exit 1; }
 ip link set "$IFACE" up
-exec udhcpc -f -S -i "$IFACE" -R -t 0 -A 5
+exec udhcpc -f -S -i "$IFACE" -R -t 0 -A 5 -s /usr/libexec/melon/udhcpc.script

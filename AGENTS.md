@@ -196,6 +196,12 @@ the serial port, so tests don't need a screen. The test also records the sound c
   mdev doesn't create `/dev/virtio-ports/*` links, so `qemu-ga` finds its port through sysfs.
 - **Installers** add `melon-vm-guest` when `melon-detect-virt` says they run in a VM. The console ISO carries
   it in its package repo; the desktop image includes it.
+- **vmwgfx is blacklisted except on real VMware** (`/etc/modprobe.d/melon-vm.conf`, loaded from `/etc/runit/1`
+  when `melon-detect-virt` says `vmware`). VirtualBox's default VMSVGA adapter and QEMU's vmware-svga look
+  like VMware's; vmwgfx switched off the boot console there and then failed, so the screen froze at
+  "Starting devices" (reported from VirtualBox). GRUB passes a framebuffer (`gfxpayload`) so simpledrm
+  keeps the console alive without any GPU driver. Check the screen, not just the serial log:
+  boot with `-vga vmware -serial none` and take a `screendump` from the QEMU monitor.
 - **Not included (yet):** VirtualBox's userspace (VBoxClient/VBoxService: clipboard, drag and drop) and
   VMware's X11 helper. Shared folders on VirtualBox work with `mount -t vboxsf`.
 - **Test:** `scripts/qemu-test.py live|disk ... --vmware` uses PVSCSI + VMXNET3 + VMware SVGA; every test

@@ -30,6 +30,8 @@ else
   mdev -s
 fi
 [ -s /etc/modules ] && grep -v '^#' /etc/modules | xargs -r modprobe -a -q
+# VMware's own display driver, only on real VMware (see /etc/modprobe.d/melon-vm.conf)
+[ "$(melon-detect-virt 2>/dev/null)" = vmware ] && modprobe -q vmwgfx
 
 # point ALSA at the speakers rather than HDMI audio (sound codecs finish probing a moment later)
 ( sleep 4; melon-sound-default --write >/dev/null 2>&1 ) &

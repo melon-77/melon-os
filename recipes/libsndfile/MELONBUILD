@@ -1,0 +1,14 @@
+pkgname=libsndfile
+pkgver=1.2.2
+pkgrel=0
+pkgdesc="Library for reading and writing sound files (WAV, FLAC, Ogg Vorbis, ...)"
+license=LGPL-2.1-or-later
+url=https://libsndfile.github.io/libsndfile/
+source=(libsndfile-1.2.2.tar.gz)
+subpackages=(libsndfile-dev)
+# built-in formats only (WAV, AIFF, AU, ...): its Ogg/Vorbis support comes only together with FLAC and Opus,
+# which melon doesn't have yet. Event sounds decode Ogg through libcanberra's own libvorbis path.
+build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DBUILD_PROGRAMS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF \
+  -DENABLE_EXTERNAL_LIBS=OFF -DENABLE_MPEG=OFF \
+  -DCMAKE_DISABLE_FIND_PACKAGE_ALSA=ON -DCMAKE_DISABLE_FIND_PACKAGE_Sqlite3=ON -DINSTALL_MANPAGES=OFF; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc; }

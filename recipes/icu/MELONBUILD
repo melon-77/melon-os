@@ -1,0 +1,25 @@
+pkgname=icu
+pkgver=78.2
+pkgrel=0
+pkgdesc="International Components for Unicode (text boundaries, collation, conversion); Konsole needs it"
+license=Unicode-3.0
+url=https://icu.unicode.org
+source=(icu-78.2.tar.gz)
+builddir=$srcdir/icu
+subpackages=(icu-dev icu-libs)
+depends=(icu-libs)
+pkgdesc_icu_libs="ICU libraries and data"
+# cross-compiling ICU needs the same ICU built for the build host first: its data tools run during the build.
+# The host build must not see the cross toolchain, the sysroot or config.site (rule 2). ICU's Makefiles have
+# their own TARGET variable, so melon's exported TARGET is hidden from make in both builds.
+build(){
+  mkdir -p host target
+  ( cd host && unset TARGET CC CXX AR AS LD NM RANLIB STRIP OBJCOPY CFLAGS CXXFLAGS CPPFLAGS LDFLAGS \
+      PKG_CONFIG_LIBDIR PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH CONFIG_SITE &&
+    ../source/configure --disable-tests --disable-samples --disable-extras >/dev/null && make -j$JOBS >/dev/null )
+  cd target
+  ../source/configure $conf_flags --with-cross-build=$srcdir/icu/host --disable-static --disable-tests --disable-samples
+  env -u TARGET make -j$JOBS
+}
+package(){ env -u TARGET make -C target DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man; }
+pkg_libs(){ amove 'usr/lib/libicu*.so.*'; }

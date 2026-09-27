@@ -1,5 +1,6 @@
 pkgname=qt6-qtshadertools
 pkgver=6.10.2
+pkgrel=0
 pkgdesc="qt6-qtshadertools"
 license="LGPL-2.1-or-later OR GPL-2.0-or-later (see sources)"
 source=(qt6-qtshadertools-6.10.2.tar.xz)

@@ -1,0 +1,17 @@
+pkgname=lm-sensors
+pkgver=3.6.2
+pkgrel=0
+pkgdesc="Hardware sensor tools and library (libsensors)"
+license="LGPL-2.1-or-later AND GPL-2.0-or-later"
+url=https://github.com/lm-sensors/lm-sensors
+source=(lm-sensors-3.6.2.tar.gz)
+builddir=$srcdir/lm-sensors-3-6-2
+subpackages=(lm-sensors-dev libsensors)
+depends=(libsensors)
+pkgdesc_libsensors="Hardware sensor library"
+# plain Makefile; bison and flex run on the build host
+_mk(){ make PREFIX=/usr ETCDIR=/etc MANDIR=/usr/share/man LIBDIR=/usr/lib SBINDIR=/usr/bin BUILD_STATIC_LIB=0 \
+  CC="$CC" AR="$AR" CFLAGS="$CFLAGS -Wall" "$@"; }
+build(){ _mk -j$JOBS; }
+package(){ _mk DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man; }
+pkg_libsensors(){ amove 'usr/lib/libsensors.so.*' etc/sensors3.conf; }

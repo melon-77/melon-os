@@ -1,9 +1,10 @@
 pkgname=kf6-breeze-icons
 pkgver=6.24.0
+pkgrel=0
 pkgdesc="kf6-breeze-icons"
 license="LGPL-2.1-or-later OR GPL-2.0-or-later (see sources)"
 source=(kf6-breeze-icons-6.24.0.tar.xz)
 builddir=$srcdir/breeze-icons-6.24.0
 subpackages=(kf6-breeze-icons-dev)
-build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_QTPLUGINDIR=lib/qt6/plugins -DKDE_INSTALL_QMLDIR=lib/qt6/qml -DKDE_INSTALL_LIBEXECDIR=libexec -DKF_IGNORE_PLATFORM_CHECK=ON -DBUILD_WITH_QT6=ON -DQT_MAJOR_VERSION=6 -DWITH_X11=OFF -DWITH_ICON_GENERATION=OFF -DBINARY_ICONS_RESOURCE=OFF; ninja -C build -j$JOBS; }
+build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_QTPLUGINDIR=lib/qt6/plugins -DKDE_INSTALL_QMLDIR=lib/qt6/qml -DKDE_INSTALL_LIBEXECDIR=libexec -DKF_IGNORE_PLATFORM_CHECK=ON -DBUILD_WITH_QT6=ON -DQT_MAJOR_VERSION=6 -DBUILD_DOC=OFF -DWITH_ICON_GENERATION=OFF -DBINARY_ICONS_RESOURCE=OFF; ninja -C build -j$JOBS; }
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

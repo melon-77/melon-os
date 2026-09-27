@@ -1,0 +1,10 @@
+pkgname=libogg
+pkgver=1.3.6
+pkgrel=0
+pkgdesc="Ogg bitstream library"
+license=BSD-3-Clause
+url=https://xiph.org/ogg/
+source=(libogg-1.3.6.tar.xz)
+subpackages=(libogg-dev)
+build(){ ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc; }

@@ -1,0 +1,14 @@
+pkgname=qrencode
+pkgver=4.1.1
+pkgrel=0
+pkgdesc="QR code encoding library (KDE Prison)"
+license=LGPL-2.1-or-later
+url=https://fukuchi.org/works/qrencode/
+source=(qrencode-4.1.1.tar.bz2)
+subpackages=(qrencode-dev libqrencode)
+depends=(libqrencode)
+pkgdesc_libqrencode="QR code encoding library"
+# the qrencode command-line tool needs libpng; only the library is built
+build(){ ./configure $conf_flags --disable-static --without-tools; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man; }
+pkg_libqrencode(){ amove 'usr/lib/libqrencode.so.*'; }

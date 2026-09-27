@@ -10,9 +10,9 @@
 "top": "bluedevil-6.6.4"
 },
 "breeze": {
-"file": "breeze_6.6.5.orig.tar.xz",
-"ver": "6.6.5",
-"top": "breeze-6.6.5"
+"file": "breeze_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "breeze-6.6.4"
 },
 "dolphin": {
 "file": "dolphin_25.12.3.orig.tar.xz",
@@ -30,9 +30,9 @@
 "top": "hwdata-0.394"
 },
 "kactivitymanagerd": {
-"file": "kactivitymanagerd_6.6.6.orig.tar.xz",
-"ver": "6.6.6",
-"top": "kactivitymanagerd-6.6.6"
+"file": "kactivitymanagerd_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "kactivitymanagerd-6.6.4"
 },
 "kde-cli-tools": {
 "file": "kde-cli-tools_6.6.4.orig.tar.xz",
@@ -40,9 +40,9 @@
 "top": "kde-cli-tools-6.6.4"
 },
 "kde-spectacle": {
-"file": "kde-spectacle_6.6.6.orig.tar.xz",
-"ver": "6.6.6",
-"top": "spectacle-6.6.6"
+"file": "kde-spectacle_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "spectacle-6.6.4"
 },
 "kdecoration": {
 "file": "kdecoration_6.6.4.orig.tar.xz",
@@ -163,6 +163,11 @@
 "file": "kf6-kguiaddons_6.24.0.orig.tar.xz",
 "ver": "6.24.0",
 "top": "kguiaddons-6.24.0"
+},
+"kf6-kholidays": {
+"file": "kf6-kholidays_6.24.0.orig.tar.xz",
+"ver": "6.24.0",
+"top": "kholidays-6.24.0"
 },
 "kf6-ki18n": {
 "file": "kf6-ki18n_6.24.0.orig.tar.xz",
@@ -304,6 +309,11 @@
 "ver": "6.24.0",
 "top": "networkmanager-qt-6.24.0"
 },
+"kf6-prison": {
+"file": "kf6-prison_6.24.0.orig.tar.xz",
+"ver": "6.24.0",
+"top": "prison-6.24.0"
+},
 "kf6-qqc2-desktop-style": {
 "file": "kf6-qqc2-desktop-style_6.24.0.orig.tar.xz",
 "ver": "6.24.0",
@@ -325,19 +335,24 @@
 "top": "threadweaver-6.24.0"
 },
 "kglobalacceld": {
-"file": "kglobalacceld_6.6.5.orig.tar.xz",
-"ver": "6.6.5",
-"top": "kglobalacceld-6.6.5"
+"file": "kglobalacceld_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "kglobalacceld-6.6.4"
 },
 "kinfocenter": {
-"file": "kinfocenter_6.6.6.orig.tar.xz",
-"ver": "6.6.6",
-"top": "kinfocenter-6.6.6"
+"file": "kinfocenter_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "kinfocenter-6.6.4"
 },
 "kirigami-addons": {
 "file": "kirigami-addons_1.11.0.orig.tar.xz",
 "ver": "1.11.0",
 "top": "kirigami-addons-1.11.0"
+},
+"knighttime": {
+"file": "knighttime_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "knighttime-6.6.4"
 },
 "konsole": {
 "file": "konsole_25.12.3.orig.tar.xz",
@@ -350,19 +365,19 @@
 "top": "kpipewire-6.6.4"
 },
 "kscreen": {
-"file": "kscreen_6.6.5.orig.tar.xz",
-"ver": "6.6.5",
-"top": "kscreen-6.6.5"
+"file": "kscreen_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "kscreen-6.6.4"
 },
 "kscreenlocker": {
-"file": "kscreenlocker_6.6.5.orig.tar.xz",
-"ver": "6.6.5",
-"top": "kscreenlocker-6.6.5"
+"file": "kscreenlocker_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "kscreenlocker-6.6.4"
 },
 "ksystemstats": {
-"file": "ksystemstats_6.6.6.orig.tar.xz",
-"ver": "6.6.6",
-"top": "ksystemstats-6.6.6"
+"file": "ksystemstats_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "ksystemstats-6.6.4"
 },
 "kwayland": {
 "file": "kwayland_6.6.4.orig.tar.xz",
@@ -370,9 +385,9 @@
 "top": "kwayland-6.6.4"
 },
 "kwin": {
-"file": "kwin_6.6.6.orig.tar.xz",
-"ver": "6.6.6",
-"top": "kwin-6.6.6"
+"file": "kwin_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "kwin-6.6.4"
 },
 "layer-shell-qt": {
 "file": "layer-shell-qt_6.6.4.orig.tar.xz",
@@ -400,59 +415,59 @@
 "top": "libkscreen-6.6.4"
 },
 "libksysguard": {
-"file": "libksysguard_6.6.5.orig.tar.xz",
-"ver": "6.6.5",
-"top": "libksysguard-6.6.5"
+"file": "libksysguard_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "libksysguard-6.6.4"
 },
 "libplasma": {
-"file": "libplasma_6.6.6.orig.tar.xz",
-"ver": "6.6.6",
-"top": "libplasma-6.6.6"
+"file": "libplasma_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "libplasma-6.6.4"
 },
 "milou": {
 "file": "milou_6.6.4.orig.tar.xz",
 "ver": "6.6.4",
 "top": "milou-6.6.4"
 },
-"plasma-activities-stats": {
-"file": "plasma-activities-stats_6.6.4.orig.tar.xz",
-"ver": "6.6.4",
-"top": "plasma-activities-stats-6.6.4"
-},
 "plasma-activities": {
 "file": "plasma-activities_6.6.4.orig.tar.xz",
 "ver": "6.6.4",
 "top": "plasma-activities-6.6.4"
 },
+"plasma-activities-stats": {
+"file": "plasma-activities-stats_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "plasma-activities-stats-6.6.4"
+},
 "plasma-desktop": {
-"file": "plasma-desktop_6.6.6.orig.tar.xz",
-"ver": "6.6.6",
-"top": "plasma-desktop-6.6.6"
+"file": "plasma-desktop_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "plasma-desktop-6.6.4"
 },
 "plasma-discover": {
-"file": "plasma-discover_6.6.6.orig.tar.xz",
-"ver": "6.6.6",
-"top": "discover-6.6.6"
+"file": "plasma-discover_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "discover-6.6.4"
 },
 "plasma-integration": {
-"file": "plasma-integration_6.6.5.orig.tar.xz",
-"ver": "6.6.5",
-"top": "plasma-integration-6.6.5"
+"file": "plasma-integration_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "plasma-integration-6.6.4"
 },
 "plasma-nm": {
-"file": "plasma-nm_6.6.6.orig.tar.xz",
-"ver": "6.6.6",
-"top": "plasma-nm-6.6.6"
+"file": "plasma-nm_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "plasma-nm-6.6.4"
 },
 "plasma-pa": {
-"file": "plasma-pa_6.6.5.orig.tar.xz",
-"ver": "6.6.5",
-"top": "plasma-pa-6.6.5"
+"file": "plasma-pa_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "plasma-pa-6.6.4"
 },
 "plasma-systemmonitor": {
-"file": "plasma-systemmonitor_6.6.6.orig.tar.xz",
-"ver": "6.6.6",
-"top": "plasma-systemmonitor-6.6.6"
+"file": "plasma-systemmonitor_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "plasma-systemmonitor-6.6.4"
 },
 "plasma-wayland-protocols": {
 "file": "plasma-wayland-protocols_1.20.0.orig.tar.xz",
@@ -460,9 +475,9 @@
 "top": "plasma-wayland-protocols-1.20.0"
 },
 "plasma-workspace": {
-"file": "plasma-workspace_6.6.6.orig.tar.xz",
-"ver": "6.6.6",
-"top": "plasma-workspace-6.6.6"
+"file": "plasma-workspace_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "plasma-workspace-6.6.4"
 },
 "plasma5support": {
 "file": "plasma5support_6.6.4.orig.tar.xz",
@@ -480,9 +495,19 @@
 "top": "polkit-qt-1-0.200.0"
 },
 "powerdevil": {
-"file": "powerdevil_6.6.6.orig.tar.xz",
-"ver": "6.6.6",
-"top": "powerdevil-6.6.6"
+"file": "powerdevil_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "powerdevil-6.6.4"
+},
+"pulseaudio-qt": {
+"file": "pulseaudio-qt_1.7.0.orig.tar.xz",
+"ver": "1.7.0",
+"top": "pulseaudio-qt-1.7.0"
+},
+"qca2": {
+"file": "qca2_2.3.10.orig.tar.xz",
+"ver": "2.3.10",
+"top": "qca-2.3.10"
 },
 "qcoro": {
 "file": "qcoro_0.13.0.orig.tar.gz",
@@ -508,6 +533,11 @@
 "file": "qt6-imageformats_6.10.2.orig.tar.xz",
 "ver": "6.10.2",
 "top": "qtimageformats-everywhere-src-6.10.2"
+},
+"qt6-location": {
+"file": "qt6-location_6.10.2.orig.tar.xz",
+"ver": "6.10.2",
+"top": "qtlocation-everywhere-src-6.10.2"
 },
 "qt6-multimedia": {
 "file": "qt6-multimedia_6.10.2.orig.tar.xz",
@@ -544,15 +574,20 @@
 "ver": "6.10.2",
 "top": "qtwayland-everywhere-src-6.10.2"
 },
-"sddm-kcm": {
-"file": "sddm-kcm_6.6.4.orig.tar.xz",
-"ver": "6.6.4",
-"top": "sddm-kcm-6.6.4"
+"qt6-webview": {
+"file": "qt6-webview_6.10.2.orig.tar.xz",
+"ver": "6.10.2",
+"top": "qtwebview-everywhere-src-6.10.2"
 },
 "sddm": {
 "file": "sddm_0.21.0+git20250502.4fe234b.orig.tar.gz",
 "ver": "0.21.0+git20250502.4fe234b",
 "top": "sddm-0.21.0+git20250502.4fe234b"
+},
+"sddm-kcm": {
+"file": "sddm-kcm_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "sddm-kcm-6.6.4"
 },
 "shared-mime-info": {
 "file": "shared-mime-info_2.4.orig.tar.bz2",
@@ -560,9 +595,14 @@
 "top": "shared-mime-info-2.4"
 },
 "systemsettings": {
-"file": "systemsettings_6.6.5.orig.tar.xz",
-"ver": "6.6.5",
-"top": "systemsettings-6.6.5"
+"file": "systemsettings_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "systemsettings-6.6.4"
+},
+"xcb-util": {
+"file": "xcb-util_0.4.1.orig.tar.gz",
+"ver": "0.4.1",
+"top": "xcb-util-0.4.1"
 },
 "xcb-util-cursor": {
 "file": "xcb-util-cursor_0.1.6.orig.tar.gz",
@@ -589,14 +629,9 @@
 "ver": "0.4.2",
 "top": "xcb-util-wm-0.4.2"
 },
-"xcb-util": {
-"file": "xcb-util_0.4.1.orig.tar.gz",
-"ver": "0.4.1",
-"top": "xcb-util-0.4.1"
-},
 "xdg-desktop-portal-kde": {
-"file": "xdg-desktop-portal-kde_6.6.6.orig.tar.xz",
-"ver": "6.6.6",
-"top": "xdg-desktop-portal-kde-6.6.6"
+"file": "xdg-desktop-portal-kde_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "xdg-desktop-portal-kde-6.6.4"
 }
 }

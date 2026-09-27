@@ -1,0 +1,15 @@
+pkgname=boost-headers
+pkgver=1.90.0
+pkgrel=0
+pkgdesc="Boost C++ headers (header-only use; kactivitymanagerd needs them)"
+license=BSL-1.0
+url=https://www.boost.org
+source=(boost-1.90.0.tar.xz)
+builddir=$srcdir/boost_1.90
+options=('!strip')
+# nothing to compile: only the headers are installed, no Boost libraries are built
+build(){ :; }
+# the source is laid out per library (libs/<lib>/include/boost/...); merge them, as 'b2 headers' would
+package(){ install -d $pkgdir/usr/include
+  for d in libs/*/include libs/numeric/*/include; do [ -d $d/boost ] && cp -a $d/. $pkgdir/usr/include/; done
+  [ -f $pkgdir/usr/include/boost/version.hpp ]; }

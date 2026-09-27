@@ -61,7 +61,7 @@ echo 'GETTY_ARGS="-n -l /usr/bin/melon-autologin"' > $LIVE/etc/sv/getty-tty1/con
 echo 'GETTY_ARGS="-n -l /usr/bin/melon-autologin"' > $LIVE/etc/sv/getty-ttyS0/conf
 if [ "$EDITION" = desktop ]; then
   for s in getty-tty2 getty-tty3 getty-ttyS0 syslogd klogd udevd dbus elogind polkitd NetworkManager bluetoothd \
-           power-profiles-daemon zram sddm; do ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
+           power-profiles-daemon zram sddm qemu-ga vmtoolsd hv_kvp_daemon hv_vss_daemon hv_fcopy_uio_daemon; do ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
   # the live user: logs in automatically to Plasma, may use doas without a password, has the installer on the desktop
   awk -F: '$1!="live"' $ROOT/etc/passwd > $LIVE/etc/passwd; echo 'live:x:1000:1000:melon live:/home/live:/bin/bash' >> $LIVE/etc/passwd
   awk -F: '$1!="live"' $LIVE/etc/shadow > $LIVE/etc/shadow.t; echo 'live::20000:0:99999:7:::' >> $LIVE/etc/shadow.t
@@ -101,7 +101,10 @@ if [ -n "$DESKTOP_PKGS" ]; then
   apkx fetch --recursive --output $ISO/melon/repo/$APK_ARCH $DESKTOP_PKGS >/dev/null
 fi
 # always carry the small, commonly wanted extras so an offline install can still add them
-apkx fetch --recursive --output $ISO/melon/repo/$APK_ARCH melon-base bash busybox musl apk-tools >/dev/null
+extras="melon-base bash busybox musl apk-tools"
+# guest tools, which the installers add when they run inside a VM
+ls $M/repo/$APK_ARCH/melon-vm-guest-[0-9]*.apk >/dev/null 2>&1 && extras="$extras melon-vm-guest"
+apkx fetch --recursive --output $ISO/melon/repo/$APK_ARCH $extras >/dev/null
 ( cd $ISO/melon/repo/$APK_ARCH && $APK --keys-dir $M/keys/trusted --sign-key $M/keys/melon-signing.rsa mkndx -d "melon $DATE" -o Packages.adb *.apk )
 
 step "initramfs"

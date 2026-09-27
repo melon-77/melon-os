@@ -1,0 +1,11 @@
+pkgname=libtirpc
+pkgver=1.3.7
+pkgrel=0
+pkgdesc="libtirpc (graphics stack)"
+license=custom
+source=(libtirpc-1.3.7.tar.bz2)
+builddir=$srcdir/libtirpc-1.3.7
+makedepends=(bsd-compat-headers)
+subpackages=(libtirpc-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-gssapi; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

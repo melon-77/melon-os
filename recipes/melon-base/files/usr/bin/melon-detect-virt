@@ -1,0 +1,26 @@
+#!/bin/sh
+# melon-detect-virt: print which hypervisor melon runs under, or "none" on real hardware.
+#   kvm  qemu  vmware  virtualbox  hyperv  xen  parallels  bhyve  none
+# (exit status 0 in a VM, 1 on real hardware, like systemd-detect-virt)
+dmi(){ cat /sys/class/dmi/id/$1 2>/dev/null; }
+v="$(dmi sys_vendor) $(dmi product_name) $(dmi board_vendor) $(dmi bios_vendor)"
+r=none
+case $v in
+  *VMware*)                          r=vmware ;;
+  *innotek*|*VirtualBox*|*Oracle*)   r=virtualbox ;;
+  *Parallels*)                       r=parallels ;;
+  *BHYVE*)                           r=bhyve ;;
+  *Microsoft*Virtual*)               r=hyperv ;;
+  *Xen*)                             r=xen ;;
+  *QEMU*|*KVM*|*Bochs*|*SeaBIOS*)    r=qemu ;;
+esac
+if [ $r = none ] || [ $r = qemu ]; then
+  # the CPUID hypervisor leaf, as the kernel reports it
+  h=$(dmesg 2>/dev/null | sed -n 's/.*Hypervisor detected: //p' | head -1)
+  case $h in KVM) r=kvm ;; Microsoft*) r=hyperv ;; VMware) r=vmware ;; Xen*) r=xen ;; esac
+  [ $r = none ] && [ -d /sys/bus/vmbus ] && r=hyperv
+  [ $r = none ] && [ -d /proc/xen ] && r=xen
+  [ $r = none ] && grep -q '^flags.* hypervisor' /proc/cpuinfo 2>/dev/null && r=qemu
+fi
+echo $r
+[ $r != none ]

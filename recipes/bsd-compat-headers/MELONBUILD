@@ -1,8 +1,9 @@
 pkgname=bsd-compat-headers
 pkgver=0.7.2
-pkgrel=1
-pkgdesc="BSD/glibc compatibility headers (sys/cdefs.h) for musl"
+pkgrel=2
+pkgdesc="BSD/glibc compatibility headers (sys/cdefs.h, sys/queue.h) for musl"
 license=BSD-2-Clause
 depends=(musl-dev)
 builddir=$srcdir
-package(){ install -Dm644 $startdir/cdefs.h $pkgdir/usr/include/sys/cdefs.h; }
+# the same headers as Alpine's bsd-compat-headers (files from aports, checked against its sha512sums)
+package(){ for h in cdefs queue; do install -Dm644 $startdir/$h.h $pkgdir/usr/include/sys/$h.h; done; }

@@ -1,0 +1,35 @@
+pkgname=hvtools
+pkgver=7.0
+pkgrel=0
+pkgdesc="Hyper-V guest daemons from the Linux sources (key-value exchange, backup snapshots, file copy)"
+license=GPL-2.0-only
+url=https://www.kernel.org
+source=(linux-7.0.tar.gz)
+builddir=$srcdir/linux-7.0/tools/hv
+makedepends=(linux-headers)
+build(){
+  local f="$CFLAGS -D_GNU_SOURCE -D__always_inline=__attribute__((__always_inline__)) -DKVP_SCRIPTS_PATH=\"/usr/libexec/hypervkvpd/\""
+  $CC $f -o hv_kvp_daemon hv_kvp_daemon.c $LDFLAGS
+  $CC $f -o hv_vss_daemon hv_vss_daemon.c $LDFLAGS
+  $CC $f -o hv_fcopy_uio_daemon hv_fcopy_uio_daemon.c vmbus_bufring.c $LDFLAGS; }
+package(){
+  for d in hv_kvp_daemon hv_vss_daemon hv_fcopy_uio_daemon; do install -Dm755 $d $pkgdir/usr/bin/$d; done
+  install -Dm755 hv_get_dhcp_info.sh $pkgdir/usr/libexec/hypervkvpd/hv_get_dhcp_info
+  install -Dm755 hv_get_dns_info.sh $pkgdir/usr/libexec/hypervkvpd/hv_get_dns_info
+  mkdir -p $pkgdir/var/lib/hyperv
+  for d in hv_kvp_daemon:vmbus/hv_kvp hv_vss_daemon:vmbus/hv_vss hv_fcopy_uio_daemon:uio/hv_fcopy; do
+    n=${d%%:*} dev=${d#*:}; mkdir -p $pkgdir/etc/sv/$n
+    cat > $pkgdir/etc/sv/$n/run <<RUN
+#!/bin/sh
+exec 2>&1
+# only in Hyper-V guests; elsewhere the service switches itself off
+[ -d /sys/bus/vmbus ] || { sv down $n >/dev/null 2>&1; exit 0; }
+modprobe -q hv_utils 2>/dev/null
+if [ $n = hv_fcopy_uio_daemon ]; then   # the file-copy channel is a UIO device (Hyper-V "Guest services")
+  modprobe -q uio_hv_generic 2>/dev/null
+  echo 34d14be3-dee4-41c8-9ae7-6b174977c192 > /sys/bus/vmbus/drivers/uio_hv_generic/new_id 2>/dev/null
+fi
+exec $n -n
+RUN
+    chmod 755 $pkgdir/etc/sv/$n/run
+  done; }

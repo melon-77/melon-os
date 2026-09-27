@@ -60,6 +60,13 @@ if [ -n "$luksdev" ]; then
   rm -f "$ROOT/etc/crypttab"   # the initramfs opens root; nothing else is encrypted
 fi
 
+vmsvcs=
+if virt=$(melon-detect-virt); then
+  say "running in a $virt VM: guest tools"
+  apk --root "$ROOT" --arch "$ARCH" --repositories-file /dev/null --repository "$REPO/$ARCH/Packages.adb" --no-cache add melon-vm-guest >/dev/null 2>&1 \
+    && vmsvcs=$(cat "$ROOT/usr/share/melon/vm-guest.services" 2>/dev/null)
+fi
+
 say "services"
 svcs="getty-tty1 getty-tty2 getty-tty3 mdevd syslogd klogd crond ntpd dhcp"
 prof=/usr/share/melon/profiles/desktop.services
@@ -70,7 +77,7 @@ if [ -f $prof ]; then
   done
 fi
 mkdir -p "$ROOT/var/service"
-for s in $svcs; do if [ -d "$ROOT/etc/sv/$s" ]; then ln -sfn /etc/sv/$s "$ROOT/var/service/$s"; fi; done
+for s in $svcs $vmsvcs; do if [ -d "$ROOT/etc/sv/$s" ]; then ln -sfn /etc/sv/$s "$ROOT/var/service/$s"; fi; done
 chroot "$ROOT" dbus-uuidgen --ensure 2>/dev/null || true
 
 say "bootloader"

@@ -1,0 +1,17 @@
+pkgname=kmod
+pkgver=34.2
+pkgdesc="Linux kernel module tools (modprobe, depmod, lsmod) and libkmod"
+license="GPL-2.0-or-later AND LGPL-2.1-or-later"
+url=https://git.kernel.org/pub/scm/utils/kernel/kmod/kmod.git
+source=(kmod-34.2.tar.xz)
+makedepends=(zlib-dev zstd-dev openssl-dev)
+subpackages=(kmod-dev kmod-libs)
+depends=(kmod-libs)
+pkgdesc_kmod_libs="libkmod library"
+build(){ meson_setup -Dmanpages=false -Ddocs=false -Dxz=disabled -Dzstd=enabled -Dzlib=enabled -Dopenssl=enabled \
+    -Dbashcompletiondir=no -Dfishcompletiondir=no -Dzshcompletiondir=no -Dmoduledir=/usr/lib/modules build >/dev/null
+  ninja -C build >/dev/null; }
+package(){ DESTDIR=$pkgdir ninja -C build install >/dev/null
+  for t in depmod insmod lsmod modinfo modprobe rmmod; do ln -sf kmod $pkgdir/usr/bin/$t; done
+  mkdir -p $pkgdir/etc/modprobe.d $pkgdir/etc/depmod.d; }
+pkg_libs(){ amove 'usr/lib/libkmod.so.*'; }

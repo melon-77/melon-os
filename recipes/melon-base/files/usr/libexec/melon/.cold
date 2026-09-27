@@ -139,7 +139,7 @@ chroot $TARGET grub-install --target=i386-pc --boot-directory=/boot "$DISK" 2>&1
 chroot $TARGET grub-install --target=x86_64-efi --efi-directory=/boot --boot-directory=/boot --removable --no-nvram 2>&1 | grep -v '^Installing for' || true
 [ -f $TARGET/boot/EFI/BOOT/BOOTX64.EFI ] || die "UEFI GRUB was not installed"
 [ -f $TARGET/boot/grub/i386-pc/core.img ] || die "BIOS GRUB was not installed"
-chroot $TARGET melon-update-grub
+MELON_ROOT_DEV="${PP}3" MELON_BOOT_DEV="${PP}2" chroot $TARGET melon-update-grub
 
 say "Finishing"
 sync

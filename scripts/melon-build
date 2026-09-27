@@ -76,6 +76,11 @@ sysroot_add(){
 if [ ${#makedepends[@]} -gt 0 ]; then msg "sysroot: ${makedepends[*]}"; sysroot_add "${makedepends[@]}"; fi
 
 # ---------- fetch / unpack ----------
+# MELON_KEEP_SRC=1 resumes a failed build in the existing tree (no unpack, no patches, no prepare)
+if [ "${MELON_KEEP_SRC:-0}" = 1 ] && [ -d "$srcdir" ]; then
+  msg "reusing existing source tree"; rm -rf "$pkgbase"; mkdir -p "$pkgdir"; KEEP=1
+else
+KEEP=0
 rm -rf "$WORK/pkg/$name"; mkdir -p "$srcdir" "$pkgdir"
 for s in "${source[@]:-}"; do
   [ -z "$s" ] && continue
@@ -87,6 +92,7 @@ cd "$srcdir"; [ -d "$builddir" ] && cd "$builddir"
 # apply patches shipped with the recipe
 for p in "$startdir"/*.patch; do [ -f "$p" ] || continue; msg "patch $(basename $p)"; patch -p1 -s < "$p"; done
 msg prepare; prepare
+fi
 cd "$builddir" 2>/dev/null || cd "$srcdir"
 msg build; build
 cd "$builddir" 2>/dev/null || cd "$srcdir"

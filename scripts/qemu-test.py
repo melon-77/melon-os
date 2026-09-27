@@ -75,7 +75,9 @@ else:
               'apk list --installed | wc -l', 'apk update && apk search -q | wc -l',
               'ls /sys/firmware/efi >/dev/null 2>&1 && echo booted-UEFI || echo booted-BIOS',
               'id jcole', 'ip -4 addr show dev eth0 | grep inet; ping -c1 -W3 10.0.2.2 >/dev/null && echo net-ok',
-              'ls /usr/libexec/melon']:
+              'ls /usr/libexec/melon', 'free -m; df -h / /boot', 'wc -l < /proc/modules; ls /usr/lib/modules',
+              'lspci 2>/dev/null | head; cat /sys/bus/pci/devices/*/modalias | head -20',
+              'modprobe -v snd_hda_intel; ls /dev/snd; dmesg | tail -5']:
         print(f'$ {c}'); print(sh(c))
     p.sendline('poweroff')
     p.expect(pexpect.EOF, timeout=300)

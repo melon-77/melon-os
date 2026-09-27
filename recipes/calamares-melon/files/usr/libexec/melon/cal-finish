@@ -46,7 +46,7 @@ fi
 say "packages from the ISO"
 mkdir -p "$ROOT/var/lib/melon"
 cp -a "$REPO" "$ROOT/var/lib/melon/repo"
-echo "/var/lib/melon/repo/$ARCH/Packages.adb" > "$ROOT/etc/apk/repositories"
+{ echo "$(cat /usr/share/melon/repo-url)/$ARCH/Packages.adb"; echo "/var/lib/melon/repo/$ARCH/Packages.adb"; } > "$ROOT/etc/apk/repositories"
 
 luksdev=
 case $rootdev in

@@ -77,7 +77,7 @@ if [ "$EDITION" = desktop ]; then
 else
   for s in getty-tty1 getty-tty2 getty-tty3 getty-ttyS0 mdevd syslogd klogd dhcp; do ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
 fi
-echo "/media/melon/melon/repo/$APK_ARCH/Packages.adb" > $LIVE/etc/apk/repositories
+{ echo "$(cat $ROOT/usr/share/melon/repo-url)/$APK_ARCH/Packages.adb"; echo "/media/melon/melon/repo/$APK_ARCH/Packages.adb"; } > $LIVE/etc/apk/repositories
 install -m644 $M/recipes/melon-sounds/ice.mp3 $LIVE/usr/share/melon/.ice
 cat > $LIVE/etc/motd <<'MOTD'
 

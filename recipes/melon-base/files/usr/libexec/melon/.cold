@@ -158,7 +158,8 @@ fi
 say "Configuring the system"
 mkdir -p $TARGET/var/lib/melon
 cp -a "$REPO" $TARGET/var/lib/melon/repo
-echo "/var/lib/melon/repo/$ARCH/Packages.adb" > $TARGET/etc/apk/repositories
+# the online melon repo (GitHub) first, the copy from the ISO for offline use
+{ echo "$(cat /usr/share/melon/repo-url)/$ARCH/Packages.adb"; echo "/var/lib/melon/repo/$ARCH/Packages.adb"; } > $TARGET/etc/apk/repositories
 echo "$MELON_HOSTNAME" > $TARGET/etc/hostname
 sed -i "s/^127.0.1.1.*/127.0.1.1\t$MELON_HOSTNAME/" $TARGET/etc/hosts
 ROOT_UUID=$(blkid -s UUID -o value "$ROOTDEV"); BOOT_UUID=$(blkid -s UUID -o value "$BOOTP")

@@ -256,6 +256,28 @@ offline copy from the ISO, and the live ISO uses it too. Everything is signed wi
 host doesn't need to be trusted. GitHub rejects files over 100 MB: split big packages (Intel Bluetooth
 firmware is its own package for that reason). Publish after building packages people should get.
 
+## Signing keys and rotation
+
+Installed systems trust two keys, both shipped in `/etc/apk/keys` by `apk-tools` (and in `keys/trusted/`):
+
+- `melon-signing.rsa`: the everyday key. Everything is signed with it. Keep it on **one** build machine.
+- `melon-backup.rsa`: the offline backup key. Its private half lives off every build machine (a USB stick
+  in a drawer) and is used only for a rotation. Never leave it in `keys/`.
+
+If `melon-signing.rsa` leaks or is lost:
+
+1. Make a new everyday key: `openssl genrsa -out keys/melon-signing.rsa 4096`, then
+   `openssl rsa -in keys/melon-signing.rsa -pubout -out keys/melon-signing.rsa.pub`, and copy the `.pub`
+   into `keys/trusted/` (replacing the old one).
+2. Bump `pkgrel` of `apk-tools` (it now ships the new public key and the backup key, not the old key) and
+   build it signed with the backup key: `MELON_SIGN_KEY=/path/to/melon-backup.rsa scripts/melon-build apk-tools`.
+   Installed systems accept it because they already trust the backup key.
+3. Publish that transition repo (its index is signed with the backup key too) and let systems upgrade.
+4. Rebuild and re-sign everything with the new key (`build-everything.sh` with an empty `repo/`), publish.
+   Systems that upgraded in step 3 trust only the new key and the backup key from then on.
+5. Make a new backup key the same way, ship its public half in `apk-tools` (bump `pkgrel`), put the private
+   half offline.
+
 ## Sources
 
 The original build container can't reach kernel.org, gnu.org or most upstream sites. It can reach the

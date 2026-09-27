@@ -4,7 +4,7 @@
 set -euo pipefail
 . "$(dirname "$(readlink -f "$0")")/env.sh"
 APK=$M/hosttools/bin/apk
-KEY=$M/keys/melon-signing.rsa
+KEY=${MELON_SIGN_KEY:-$M/keys/melon-signing.rsa}   # MELON_SIGN_KEY: only for a key rotation (AGENTS.md)
 ARCH=$APK_ARCH
 OUT=$REPO/$ARCH
 mkdir -p "$OUT"

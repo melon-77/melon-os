@@ -268,8 +268,6 @@ the tarballs are identical.
 ## Roadmap
 
 - **Stage 1 (base):** toolchain, base packages, live ISO, installers. In progress. See the task list in the PR/issue.
-- **Tuned ProBook kernel:** boot the live ISO on the HP ProBook 445 G8 (Ryzen 7 5800U), run
-  `melon-hwprofile`, then build a `linux-melon-probook` flavour from that module list.
 - **Stage 2 (desktop):** udev replacement (eudev or libudev-zero), dbus, elogind or seatd, Mesa with LLVM
   (radeonsi for the Ryzen iGPU), Qt 6, KDE Frameworks 6, Plasma, KWin (Wayland), SDDM, PipeWire,
   NetworkManager, Calamares with melon branding and the gauntlet, and the desktop profile for both installers.

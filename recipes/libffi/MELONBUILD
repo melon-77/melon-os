@@ -1,0 +1,10 @@
+pkgname=libffi
+pkgver=3.5.2
+pkgdesc="Portable foreign function interface library"
+license=MIT
+url=https://sourceware.org/libffi
+source=(libffi-3.5.2.tar.gz)
+subpackages=(libffi-dev)
+prepare(){ ./autogen.sh; }
+build(){ ./configure $conf_flags --disable-static --disable-docs --disable-multi-os-directory; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{man,info}; }

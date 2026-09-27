@@ -1,0 +1,10 @@
+pkgname=expat
+pkgver=2.7.4
+pkgdesc="XML parser library"
+license=MIT
+url=https://libexpat.github.io
+source=(expat-2.7.4.tar.gz)
+builddir=$srcdir/libexpat-R_2_7_4/expat
+subpackages=(expat-dev)
+build(){ cmake_setup -B build -DEXPAT_BUILD_TESTS=OFF -DEXPAT_BUILD_EXAMPLES=OFF -DEXPAT_BUILD_DOCS=OFF -DEXPAT_BUILD_TOOLS=ON; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc; }

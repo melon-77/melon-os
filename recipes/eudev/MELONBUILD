@@ -1,0 +1,18 @@
+pkgname=eudev
+pkgver=3.2.14
+pkgdesc="Device manager (udev without systemd)"
+license=GPL-2.0-only
+url=https://github.com/eudev-project/eudev
+source=(eudev-3.2.14.tar.gz)
+makedepends=(kmod-dev util-linux-dev)
+subpackages=(eudev-dev eudev-libs)
+depends=(eudev-libs)
+pkgdesc_eudev_libs="libudev"
+prepare(){ autoreconf -fi; }
+build(){ ./configure $conf_flags --disable-manpages --enable-kmod --enable-hwdb --disable-selinux \
+   --with-rootprefix=/usr --with-rootlibdir=/usr/lib; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir sharepkgconfigdir=/usr/lib/pkgconfig install
+  rm -rf $pkgdir/usr/share/man
+  mkdir -p $pkgdir/etc/sv/udevd
+  printf '#!/bin/sh\nexec 2>&1\nexec udevd\n' > $pkgdir/etc/sv/udevd/run; chmod 755 $pkgdir/etc/sv/udevd/run; }
+pkg_libs(){ amove 'usr/lib/libudev.so.*'; }

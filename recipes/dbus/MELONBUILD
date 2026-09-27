@@ -1,0 +1,20 @@
+pkgname=dbus
+pkgver=1.16.2
+pkgdesc="Message bus system (system and session bus)"
+license="AFL-2.1 OR GPL-2.0-or-later"
+url=https://www.freedesktop.org/wiki/Software/dbus
+source=(dbus-1.16.2.tar.xz)
+makedepends=(expat-dev)
+subpackages=(dbus-dev dbus-libs)
+depends=(dbus-libs)
+pkgdesc_dbus_libs="D-Bus client library"
+options=(keepdirs)
+build(){ meson_setup -Dsystemd=disabled -Dx11_autolaunch=disabled -Ddoxygen_docs=disabled -Dxml_docs=disabled \
+   -Dmodular_tests=disabled -Dmessage_bus=true -Dselinux=disabled -Dapparmor=disabled -Dlibaudit=disabled \
+   -Dsession_socket_dir=/tmp -Druntime_dir=/run -Ddbus_user=messagebus -Dsystem_pid_file=/run/dbus/dbus.pid \
+   -Dsystem_socket=/run/dbus/system_bus_socket -Depoll=enabled -Dinotify=enabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/run $pkgdir/var/run
+  mkdir -p $pkgdir/etc/sv/dbus $pkgdir/var/lib/dbus
+  printf '#!/bin/sh\nexec 2>&1\nmkdir -p /run/dbus\ndbus-uuidgen --ensure=/etc/machine-id\ndbus-uuidgen --ensure\nexec dbus-daemon --system --nofork --nopidfile\n' > $pkgdir/etc/sv/dbus/run
+  chmod 755 $pkgdir/etc/sv/dbus/run; }
+pkg_libs(){ amove 'usr/lib/libdbus-1.so.*'; }

@@ -1,0 +1,14 @@
+pkgname=linux-pam
+pkgver=1.7.0
+pkgdesc="Pluggable Authentication Modules (needed by SDDM, the screen locker and elogind)"
+license="BSD-3-Clause OR GPL-2.0-or-later"
+url=https://github.com/linux-pam/linux-pam
+source=(Linux-PAM-1.7.0.tar.xz)
+builddir=$srcdir/Linux-PAM-1.7.0
+subpackages=(linux-pam-dev)
+build(){ meson_setup -Dexamples=false -Ddocs=disabled -Dselinux=disabled -Daudit=disabled -Deconf=disabled -Dnis=disabled \
+    -Dlogind=disabled -Dxtests=false -Di18n=enabled -Dpam_userdb=disabled -Dpam_lastlog=disabled -Dsecuredir=/usr/lib/security build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install
+  rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man
+  mkdir -p $pkgdir/etc/pam.d; cp $startdir/pam.d/* $pkgdir/etc/pam.d/
+  chmod 4755 $pkgdir/usr/bin/unix_chkpwd 2>/dev/null || true; }

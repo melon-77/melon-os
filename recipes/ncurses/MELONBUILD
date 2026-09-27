@@ -17,11 +17,11 @@ build(){
   ./configure $conf_flags --with-shared --without-debug --without-ada --without-cxx-binding --enable-widec \
     --without-normal --enable-pc-files --with-pkg-config-libdir=/usr/lib/pkgconfig --disable-stripping \
     --with-build-cc=gcc --with-tic-path=/usr/bin/tic --with-infocmp-path=/usr/bin/infocmp \
-    --disable-root-access --with-default-terminfo-dir=/usr/share/terminfo >/dev/null
-  make -j$JOBS >/dev/null
+    --disable-root-access --with-default-terminfo-dir=/usr/share/terminfo
+  make -j$JOBS
 }
 package(){
-  make DESTDIR=$pkgdir TIC_PATH=/usr/bin/tic install >/dev/null
+  make DESTDIR=$pkgdir TIC_PATH=/usr/bin/tic install
   # non-wide compatibility names
   for l in ncurses form panel menu; do
     ln -sf lib${l}w.so $pkgdir/usr/lib/lib$l.so

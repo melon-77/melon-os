@@ -10,9 +10,9 @@ depends=(linux-firmware-amdgpu kmod)
 options=('!strip')
 _kmake(){ env -u PKG_CONFIG_SYSROOT_DIR -u PKG_CONFIG_LIBDIR -u CFLAGS -u CXXFLAGS -u LDFLAGS -u CC -u CXX -u LD -u AR -u NM -u STRIP -u OBJCOPY -u READELF -u OBJDUMP -u AS -u RANLIB make ARCH=x86_64 CROSS_COMPILE=$TARGET- HOSTCC=gcc KBUILD_BUILD_USER=melon KBUILD_BUILD_HOST=melon "$@"; }
 build(){
-  _kmake x86_64_defconfig >/dev/null
-  scripts/kconfig/merge_config.sh -m .config $startdir/config-melon >/dev/null
-  _kmake olddefconfig >/dev/null
+  _kmake x86_64_defconfig
+  scripts/kconfig/merge_config.sh -m .config $startdir/config-melon
+  _kmake olddefconfig
   _kmake -j$JOBS bzImage modules 2>&1 | grep -E 'error|Error' | head -20 || true
   [ -f arch/x86/boot/bzImage ]
 }
@@ -21,7 +21,7 @@ package(){
   install -Dm644 arch/x86/boot/bzImage $pkgdir/boot/vmlinuz-melon
   install -Dm644 .config $pkgdir/boot/config-melon
   install -Dm644 System.map $pkgdir/boot/System.map-melon
-  _kmake INSTALL_MOD_PATH=$pkgdir INSTALL_MOD_STRIP=1 DEPMOD=/bin/true modules_install >/dev/null
+  _kmake INSTALL_MOD_PATH=$pkgdir INSTALL_MOD_STRIP=1 DEPMOD=/bin/true modules_install
   mkdir -p $pkgdir/usr/lib; mv $pkgdir/lib/modules $pkgdir/usr/lib/modules; rm -rf $pkgdir/lib
   rm -f $pkgdir/usr/lib/modules/$kver/build
   echo $kver > $pkgdir/usr/lib/modules/$kver/melon-kver

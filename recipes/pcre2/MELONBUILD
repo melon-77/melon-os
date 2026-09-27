@@ -1,0 +1,9 @@
+pkgname=pcre2
+pkgver=10.46
+pkgdesc="Perl-compatible regular expression library (8, 16 and 32 bit)"
+license=BSD-3-Clause
+url=https://pcre2project.github.io/pcre2/
+source=(pcre2-10.46.tar.gz)
+subpackages=(pcre2-dev)
+build(){ ./configure $conf_flags --disable-static --enable-pcre2-16 --enable-pcre2-32 --enable-jit; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{man,doc}; }

@@ -7,6 +7,6 @@ source=(zstd-1.5.7.tar.xz)
 subpackages=(zstd-dev zstd-libs)
 depends=(zstd-libs)
 pkgdesc_zstd_libs="Zstandard shared library"
-build(){ make -j$JOBS PREFIX=/usr lib-release >/dev/null; make -j$JOBS -C programs PREFIX=/usr zstd-release >/dev/null; }
-package(){ make PREFIX=/usr DESTDIR=$pkgdir -C lib install-shared install-static install-includes install-pc >/dev/null; make -C programs PREFIX=/usr DESTDIR=$pkgdir install >/dev/null; rm -rf $pkgdir/usr/share/man; }
+build(){ make -j$JOBS PREFIX=/usr lib-release; make -j$JOBS -C programs PREFIX=/usr zstd-release; }
+package(){ make PREFIX=/usr DESTDIR=$pkgdir -C lib install-shared install-static install-includes install-pc; make -C programs PREFIX=/usr DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man; }
 pkg_libs(){ amove 'usr/lib/libzstd.so.*'; }

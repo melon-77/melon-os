@@ -7,8 +7,8 @@ source=(opendoas-6.8.2.tar.xz)
 makedepends=(bsd-compat-headers)
 options=('!strip')
 build(){
-  ./configure --prefix=/usr --sysconfdir=/etc --without-pam --with-shadow --with-timestamp >/dev/null
-  make -j$JOBS CC="$CC" >/dev/null
+  ./configure --prefix=/usr --sysconfdir=/etc --without-pam --with-shadow --with-timestamp
+  make -j$JOBS CC="$CC"
   $STRIP doas
 }
 package(){

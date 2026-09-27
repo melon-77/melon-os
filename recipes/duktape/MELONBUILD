@@ -1,0 +1,23 @@
+pkgname=duktape
+pkgver=2.7.0
+pkgdesc="Embeddable JavaScript engine (used by polkit)"
+license=MIT
+url=https://duktape.org
+source=(duktape-2.7.0.tar.xz)
+builddir=$srcdir/duktape-2.7.0+tests
+subpackages=(duktape-dev)
+build(){ make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr CC=$CC CFLAGS="$CFLAGS -fPIC" LIBDIR=/lib; }
+package(){ make -f Makefile.sharedlibrary INSTALL_PREFIX=$pkgdir/usr LIBDIR=/lib install
+  mkdir -p $pkgdir/usr/lib/pkgconfig
+  cat > $pkgdir/usr/lib/pkgconfig/duktape.pc <<'PC'
+prefix=/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+Name: duktape
+Description: Embeddable Javascript engine
+Version: 2.7.0
+Libs: -L${libdir} -lduktape
+Libs.private: -lm
+Cflags: -I${includedir}
+PC
+}

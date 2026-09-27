@@ -1,0 +1,12 @@
+pkgname=glib
+pkgver=2.88.0
+pkgdesc="Low level core library (GLib, GObject, GIO)"
+license=LGPL-2.1-or-later
+url=https://gitlab.gnome.org/GNOME/glib
+source=(glib-2.88.0.tar.xz)
+makedepends=(libffi-dev pcre2-dev zlib-dev util-linux-dev)
+subpackages=(glib-dev)
+build(){ meson_setup -Dintrospection=disabled -Dtests=false -Dman-pages=disabled -Dselinux=disabled -Dlibmount=enabled \
+   -Dsysprof=disabled -Ddocumentation=false -Dnls=disabled -Dglib_debug=disabled -Dxattr=true build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }
+pkg_dev(){ default_dev; amove usr/bin/gdbus-codegen usr/bin/glib-genmarshal usr/bin/glib-mkenums usr/bin/gtester* usr/share/glib-2.0/codegen usr/share/glib-2.0/gdb usr/share/gdb usr/share/gettext usr/share/bash-completion; }

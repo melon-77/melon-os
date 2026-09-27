@@ -1,6 +1,6 @@
 pkgname=open-vm-tools
 pkgver=13.0.10
-pkgrel=0
+pkgrel=1
 pkgdesc="VMware guest tools: screen auto-resize (resolutionKMS), time sync, clean shutdown, shared folders (vmhgfs-fuse)"
 license=LGPL-2.1-or-later
 url=https://github.com/vmware/open-vm-tools
@@ -34,7 +34,7 @@ package(){
 #!/bin/sh
 exec 2>&1
 # only in VMware guests; elsewhere the service switches itself off
-vmware-checkvm >/dev/null 2>&1 || { sv down vmtoolsd >/dev/null 2>&1; exit 0; }
+vmware-checkvm >/dev/null 2>&1 || { sv down "$PWD" >/dev/null 2>&1; exit 0; }
 modprobe -q vmw_vmci 2>/dev/null; modprobe -q vmw_vsock_vmci_transport 2>/dev/null
 exec vmtoolsd
 RUN

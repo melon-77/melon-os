@@ -186,6 +186,21 @@ emulation and everything is slow. Use generous timeouts. The ISO's GRUB and the 
 the serial port, so tests don't need a screen. The test also records the sound card output to
 `logs/audio-capture.wav`, which lets you check that the installer music really plays.
 
+## Running melon in a VM
+
+- **Kernel:** the virtual disk controllers are built in (virtio, VMware PVSCSI and LSI, Hyper-V storvsc,
+  Xen blkfront, AHCI), because installed systems boot without an initramfs. Network, video, balloon,
+  vsock and VirtualBox drivers are modules (`recipes/linux-melon/config-melon`, "virtual machine guest").
+- **Guest tools:** `melon-vm-guest` pulls in `qemu-guest-agent`, `open-vm-tools` and `hvtools`. Their runit
+  services are always enabled but switch themselves off (`sv down "$PWD"`) outside their hypervisor.
+  mdev doesn't create `/dev/virtio-ports/*` links, so `qemu-ga` finds its port through sysfs.
+- **Installers** add `melon-vm-guest` when `melon-detect-virt` says they run in a VM. The console ISO carries
+  it in its package repo; the desktop image includes it.
+- **Not included (yet):** VirtualBox's userspace (VBoxClient/VBoxService: clipboard, drag and drop) and
+  VMware's X11 helper. Shared folders on VirtualBox work with `mount -t vboxsf`.
+- **Test:** `scripts/qemu-test.py live|disk ... --vmware` uses PVSCSI + VMXNET3 + VMware SVGA; every test
+  also checks the QEMU guest agent and ends with a shutdown requested by the host through it.
+
 ## Installers: do not break these product decisions
 
 - **Graphical installer (desktop ISO): Calamares with the gauntlet.** About 200 very easy questions, one

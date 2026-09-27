@@ -4,12 +4,14 @@
   qemu-test.py live  <iso> <disk.img> [--uefi]   boot the ISO, run the quick installer onto disk.img
   qemu-test.py disk  <disk.img> [--uefi]         boot the installed disk and check the system
   qemu-test.py toram <iso> <disk.img>            boot with "copy to RAM", eject the CD, then use and install
+  --luks   install with an encrypted root (and type the passphrase when the installed disk boots)
 """
 import sys, time, pexpect, os
 
 mode = sys.argv[1]
 uefi = '--uefi' in sys.argv
 i686 = '--i686' in sys.argv          # 32-bit ISO / disk: run in qemu-system-i386
+luks = '--luks' in sys.argv
 args = [a for a in sys.argv[2:] if not a.startswith('--')]
 log = open(f'/home/claude/melon/logs/qemu-{mode}{"-uefi" if uefi else ""}{"-i686" if "--i686" in sys.argv else ""}.log', 'w')
 
@@ -55,7 +57,8 @@ if mode == 'live':
     print(sh('cat /proc/asound/cards; ls /dev/snd'))
     step('running the hidden installer')
     sh('export MELON_DISK=vda MELON_HOSTNAME=melontest MELON_ROOTPW=melonroot MELON_USER=jcole '
-       'MELON_USERPW=melonuser MELON_PROFILE=base MELON_YES=1 MELON_SERIAL=1')
+       'MELON_USERPW=melonuser MELON_PROFILE=base MELON_YES=1 MELON_SERIAL=1'
+       + (' MELON_ENCRYPT=y MELON_LUKSPW=melonluks' if luks else ' MELON_ENCRYPT=n'))
     out = sh('/usr/libexec/melon/.cold', timeout=3600)
     print(out[-3000:])
     ok = 'melon is installed' in out
@@ -96,6 +99,9 @@ else:
     step('waiting for GRUB on the installed disk')
     p.expect("melon Linux", timeout=300)
     step('kernel booting')
+    if luks:
+        p.expect('unlocking the encrypted disk', timeout=900); step('initramfs asks for the passphrase')
+        p.expect('assphrase', timeout=120); p.sendline('melonluks'); step('passphrase sent')
     p.expect('login:', timeout=900)
     step('login prompt')
     p.sendline('root'); p.expect('assword:'); p.sendline('melonroot')

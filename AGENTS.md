@@ -144,6 +144,18 @@ Rebuilding the kernel takes about an hour on 2 cores.
     and checked against the sha512sums in Alpine's `alpine-keys` APKBUILD.
 24. **musl ships `libc.musl-<arch>.so.1`** (a symlink to the loader), the library name Alpine binaries link
     against. That's what lets opt-in `@alpine` packages run on melon.
+25. **Cross autoconf answers live in `scripts/config.site`** (`CONFIG_SITE`). Without them `AC_FUNC_MALLOC`
+    assumes a broken malloc and the library ends up with undefined `rpl_malloc` (libndp).
+26. **`msgfmt` needs `GETTEXTDATADIRS`** pointing at the sysroot's `/usr/share/gettext` to find the ITS
+    rules (polkit policies, GSettings schemas) that earlier melon packages installed (upower).
+27. **Host packages the build needs** besides the toolchain: `tcl` (sqlite's amalgamation), `hwdata`
+    (libdisplay-info reads `pnp.ids` at build time), `publicsuffix` (libpsl's built-in list), `autopoint`
+    (cryptsetup's autoreconf), `libltdl-dev`.
+28. **Only encrypted installs have an initramfs.** `melon-mkinitramfs` builds it when
+    `/etc/melon/encrypted-root` exists; `melon-update-grub` then writes `cryptroot=UUID=<luks>
+    root=/dev/mapper/melonroot` and an `initrd` line. Everything else still boots straight from the kernel.
+29. **Two build queues may run at once** for the same arch: `melon-build` takes `flock repo/<arch>/.lock`
+    around sysroot installs and reindexing, and writes packages under a temporary name first.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
@@ -156,6 +168,9 @@ qemu-img create -f raw /tmp/disk.img 12G
 scripts/qemu-test.py live out/melon-*-x86_64.iso /tmp/disk.img            # BIOS: boot ISO + unattended install
 scripts/qemu-test.py disk /tmp/disk.img                                   # BIOS: boot the installed system
 scripts/qemu-test.py disk /tmp/disk.img --uefi                            # UEFI: same disk
+scripts/qemu-test.py live out/melon-*-x86_64.iso /tmp/disk.img --luks     # install with an encrypted root
+scripts/qemu-test.py disk /tmp/disk.img --luks                            # boot it, typing the passphrase
+MELON_EDITION=desktop scripts/mkiso.sh                                    # the Plasma live ISO (desktop edition)
 ```
 
 Logs go to `logs/qemu-*.log`. There's no KVM in the usual build container, so QEMU runs in software
@@ -167,8 +182,17 @@ the serial port, so tests don't need a screen. The test also records the sound c
 
 - **Graphical installer (desktop ISO): Calamares with the gauntlet.** About 200 very easy questions, one
   per screen. The Next button waits a few seconds. A wrong answer sends you back 10 questions, never out
-  of the installer. Questions are in `recipes/calamares-melon/gauntlet/questions.js`. It's deliberately
-  slow, to put off people who are only there for status. Keep it that way.
+  of the installer. Questions are in `recipes/calamares-melon/modules/gauntlet/questions.js`; the page is
+  a small Calamares view module (`GauntletViewStep`, `gauntlet.qml`) that keeps Calamares' Next button
+  locked until the last question. It's deliberately slow, to put off people who are only there for
+  status. Keep it that way. Survivors get the `melon-survivor` wallpaper (only installed by Calamares),
+  an SVG certificate in `~/Pictures` and a melonfetch badge (`/etc/melon/gauntlet-survivor`).
+- **Calamares runs melon's own jobs** (`cal-prepare`, `cal-finish` in `calamares-melon`): Calamares'
+  users job calls shadow's `useradd`/`usermod`/`groupadd`, which melon doesn't have, so `cal-prepare`
+  puts BusyBox-backed shims into the target's `/usr/local/bin` and `cal-finish` removes them.
+- **Live-only packages** (`/usr/share/melon/profiles/live-only`, e.g. `calamares-melon`) are in the
+  desktop ISO's system image and both installers remove them from the new system. Both installers make
+  the new system's `/etc/apk/world` match the chosen profile.
 - **Console installer: quick and deliberately hidden.** It lives at `/usr/libexec/melon/.cold`. It is started
   by typing its name in bash, which a `command_not_found_handle` in `/etc/profile.d/zz-melon.sh`
   recognises **by hash**. The owner decided the name must not be discoverable. Therefore:
@@ -179,7 +203,8 @@ the serial port, so tests don't need a screen. The test also records the sound c
   It asks base or desktop and installs exactly what the desktop ISO installs. It plays
   `/usr/share/melon/.ice` (from the `melon-sounds` package, live ISO only) at 30% volume while it runs.
 - Unattended install variables: `MELON_DISK MELON_HOSTNAME MELON_ROOTPW MELON_USER MELON_USERPW
-  MELON_PROFILE MELON_YES=1 MELON_SERIAL=1 MELON_WIFI_SSID MELON_WIFI_PSK MELON_ALPINE=y`.
+  MELON_PROFILE MELON_YES=1 MELON_SERIAL=1 MELON_WIFI_SSID MELON_WIFI_PSK MELON_ALPINE=y
+  MELON_ENCRYPT=y MELON_LUKSPW`. With `MELON_YES=1`, questions that have a default take it.
 - **Profiles** live in `/usr/share/melon/profiles/` on the live system: `<name>` is the package list,
   `<name>.services` the runit services (`name` enables one, `-name` drops a base service). `mkiso.sh`
   writes them. The desktop profile swaps `mdevd`/`dhcp` for `udevd` and NetworkManager, and the
@@ -205,6 +230,11 @@ the tarballs are identical.
 - **Stage 2 (desktop):** udev replacement (eudev or libudev-zero), dbus, elogind or seatd, Mesa with LLVM
   (radeonsi for the Ryzen iGPU), Qt 6, KDE Frameworks 6, Plasma, KWin (Wayland), SDDM, PipeWire,
   NetworkManager, Calamares with melon branding and the gauntlet, and the desktop profile for both installers.
+- **32-bit (i686) console edition: paused by the owner** (resume later). Everything is arch-aware
+  (`MELON_ARCH=x86`), but the i686 toolchain doesn't finish yet: GCC's final build fails in libatomic's
+  configure because `--enable-default-ssp` on i386 needs `__stack_chk_fail_local`, which comes from a
+  `libssp_nonshared.a` (Alpine builds one in its musl package). Add that to the musl build (or drop
+  default SSP for i686), then run `scripts/queue-2.sh`'s 32-bit part.
 - **Stage 3 (gaming):** Flatpak and dependencies, Flathub remote, Steam through Flatpak, gamepad udev rules.
 
 ## Git conventions

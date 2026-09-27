@@ -8,10 +8,13 @@ QV=6.10.2
 H=$M/hosttools/qt6
 W=$M/work/host-qt
 unset CC CXX CFLAGS CXXFLAGS LDFLAGS PKG_CONFIG_LIBDIR PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH
-rm -rf $W; mkdir -p $W $H; cd $W
+mkdir -p $W $H; cd $W
 common="-G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$H -DQT_BUILD_EXAMPLES=OFF -DQT_BUILD_TESTS=OFF -DBUILD_TESTING=OFF"
 mod(){ # mod <debian-name> <dir-prefix> [cmake args...]
   local deb=$1 dir=$2; shift 2
+  # finished modules leave a marker, so a restarted run (e.g. after the container was reclaimed) resumes
+  [ -f $H/.done-$deb ] && { echo "=== $deb already built"; return 0; }
+  rm -rf ${dir}*${QV}* b-$deb
   tar xf $M/sources/deb/${deb}_${QV}*.orig.tar.xz
   local src=$(ls -d ${dir}*${QV}* | head -1)
   echo "=== $(date +%T) $src"
@@ -19,6 +22,7 @@ mod(){ # mod <debian-name> <dir-prefix> [cmake args...]
   ninja -C b-$deb -j$(nproc) >/dev/null
   ninja -C b-$deb install >/dev/null
   rm -rf $src b-$deb
+  touch $H/.done-$deb
 }
 mod qt6-base qtbase -DFEATURE_opengl=ON -DINPUT_opengl=desktop -DFEATURE_xcb=OFF -DFEATURE_glib=OFF -DFEATURE_icu=OFF \
     -DFEATURE_sql=OFF -DFEATURE_printsupport=OFF -DFEATURE_network=ON -DFEATURE_widgets=ON -DFEATURE_dbus=ON \

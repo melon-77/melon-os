@@ -59,7 +59,8 @@ done
 [ -b "$dev" ] || { echo "melon: encrypted root $croot not found"; exec sh; }
 echo; echo "  melon: unlocking the encrypted disk"
 until cryptsetup open "$dev" "$name"; do echo "  try again"; done
-mount -o rw -t xfs "$root" /newroot || { echo "melon: cannot mount $root"; exec sh; }
+fstype=xfs; for a in $(cat /proc/cmdline); do case $a in rootfstype=*) fstype=${a#rootfstype=} ;; esac; done
+mount -o rw -t "$fstype" "$root" /newroot || { echo "melon: cannot mount $root"; exec sh; }
 mount --move /dev /newroot/dev 2>/dev/null || umount /dev
 umount /run; umount /sys; umount /proc
 exec switch_root /newroot /usr/bin/init

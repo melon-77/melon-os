@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Welcome to melon
+Comment=Offer Firefox, VLC, Steam and Prism Launcher from Flathub on the first login
+Exec=melon-first-boot
+Icon=melon
+NoDisplay=true
+X-KDE-autostart-phase=2
+OnlyShowIn=KDE;

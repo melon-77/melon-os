@@ -32,6 +32,9 @@ export LDFLAGS="-Wl,--as-needed,-O1,--sort-common,-z,relro,-z,now"
 export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
 export PKG_CONFIG_LIBDIR=$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/share/pkgconfig
 export PKG_CONFIG_PATH=
+# msgfmt finds ITS rules (polkit, gschema, ...) installed by earlier melon packages
+export GETTEXTDATADIRS=$SYSROOT/usr/share/gettext:/usr/share/gettext
+export CONFIG_SITE=$M/scripts/config.site
 CHOST=$TARGET CBUILD=$(gcc -dumpmachine)
 export CHOST CBUILD
 conf_flags="--host=$CHOST --build=$CBUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --mandir=/usr/share/man --infodir=/usr/share/info --libdir=/usr/lib --bindir=/usr/bin --sbindir=/usr/bin --libexecdir=/usr/libexec"

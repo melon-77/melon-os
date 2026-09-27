@@ -1,0 +1,9 @@
+pkgname=libseccomp
+pkgver=2.6.0
+pkgdesc="libseccomp (graphics stack)"
+license=custom
+source=(libseccomp-2.6.0.tar.gz)
+builddir=$srcdir/libseccomp-2.6.0
+subpackages=(libseccomp-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-python; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

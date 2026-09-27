@@ -1,0 +1,10 @@
+pkgname=libassuan
+pkgver=3.0.2
+pkgdesc="libassuan (graphics stack)"
+license=custom
+source=(libassuan-3.0.2.tar.bz2)
+builddir=$srcdir/libassuan-3.0.2
+makedepends=(libgpg-error-dev)
+subpackages=(libassuan-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-doc --with-libgpg-error-prefix=$SYSROOT/usr; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

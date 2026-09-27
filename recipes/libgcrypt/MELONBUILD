@@ -1,0 +1,10 @@
+pkgname=libgcrypt
+pkgver=1.12.0
+pkgdesc="libgcrypt (graphics stack)"
+license=custom
+source=(libgcrypt-1.12.0.tar.bz2)
+builddir=$srcdir/libgcrypt-1.12.0
+makedepends=(libgpg-error-dev)
+subpackages=(libgcrypt-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-doc --with-libgpg-error-prefix=$SYSROOT/usr --disable-asm; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

@@ -1,0 +1,10 @@
+pkgname=xcb-util-keysyms
+pkgver=0.4.1
+pkgdesc="xcb-util-keysyms (graphics stack)"
+license=custom
+source=(xcb-util-keysyms-0.4.1.tar.xz)
+builddir=$srcdir/xcb-util-keysyms-0.4.1
+makedepends=(libxcb-dev)
+subpackages=(xcb-util-keysyms-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

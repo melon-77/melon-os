@@ -1,0 +1,9 @@
+pkgname=libgpg-error
+pkgver=1.58
+pkgdesc="libgpg-error (graphics stack)"
+license=custom
+source=(libgpg-error-1.58.tar.bz2)
+builddir=$srcdir/libgpg-error-1.58
+subpackages=(libgpg-error-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-doc --disable-tests --disable-nls --enable-install-gpg-error-config; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

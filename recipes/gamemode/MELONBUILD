@@ -1,0 +1,11 @@
+pkgname=gamemode
+pkgver=1.8.2
+pkgdesc="Feral GameMode: boosts CPU and GPU performance while a game is running"
+license=BSD-3-Clause
+url=https://github.com/FeralInteractive/gamemode
+source=(gamemode-1.8.2.tar.gz)
+makedepends=(inih-dev elogind-dev dbus-dev polkit-dev)
+subpackages=(gamemode-dev)
+build(){ meson_setup -Dwith-systemd-user-unit=false -Dwith-systemd-group=false -Dwith-pam-limits=false -Dwith-sd-bus-provider=elogind \
+   -Dwith-examples=false -Dwith-util=true build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/lib/systemd $pkgdir/usr/lib/sysusers.d; }

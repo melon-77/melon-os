@@ -1,0 +1,10 @@
+pkgname=xcb-util
+pkgver=0.4.1
+pkgdesc="xcb-util (graphics stack)"
+license=custom
+source=(xcb-util-0.4.1.tar.gz)
+builddir=$srcdir/xcb-util-0.4.1
+makedepends=(libxcb-dev)
+subpackages=(xcb-util-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

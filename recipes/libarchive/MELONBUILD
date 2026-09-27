@@ -1,0 +1,10 @@
+pkgname=libarchive
+pkgver=3.8.5
+pkgdesc="libarchive (graphics stack)"
+license=custom
+source=(libarchive-3.8.5.tar.xz)
+builddir=$srcdir/libarchive-3.8.5
+makedepends=(zlib-dev zstd-dev openssl-dev)
+subpackages=(libarchive-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --without-xml2 --without-expat --without-lzma --without-bz2lib --without-lz4 --without-libb2 --without-iconv --disable-acl --disable-xattr; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

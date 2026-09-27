@@ -1,0 +1,14 @@
+pkgname=ca-certificates
+pkgver=20260601
+pkgdesc="Mozilla's trusted root certificates (for HTTPS)"
+license="MPL-2.0"
+source=(ca-certificates_20260601~24.04.1_all.deb)
+builddir=$srcdir
+options=('!strip')
+package(){
+  mkdir -p x; dpkg-deb -x $srcdir/ca-certificates_*.deb x
+  install -d $pkgdir/usr/share/ca-certificates $pkgdir/etc/ssl/certs
+  cp -r x/usr/share/ca-certificates/mozilla $pkgdir/usr/share/ca-certificates/
+  cat x/usr/share/ca-certificates/mozilla/*.crt > $pkgdir/etc/ssl/certs/ca-certificates.crt
+  ln -s certs/ca-certificates.crt $pkgdir/etc/ssl/cert.pem
+}

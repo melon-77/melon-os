@@ -1,0 +1,10 @@
+pkgname=libksba
+pkgver=1.6.7
+pkgdesc="libksba (graphics stack)"
+license=custom
+source=(libksba-1.6.7.tar.bz2)
+builddir=$srcdir/libksba-1.6.7
+makedepends=(libgpg-error-dev)
+subpackages=(libksba-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-doc --with-libgpg-error-prefix=$SYSROOT/usr; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

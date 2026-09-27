@@ -1,0 +1,10 @@
+pkgname=pipewire
+pkgver=1.6.2
+pkgdesc="pipewire (graphics stack)"
+license=custom
+source=(pipewire-1.6.2.tar.gz)
+builddir=$srcdir/pipewire-1.6.2-95da54a482b68475958bbc3fa572a9c20df0df74
+makedepends=(dbus-dev alsa-lib-dev eudev-dev glib-dev sbc-dev linux-headers)
+subpackages=(pipewire-dev)
+build(){ meson_setup -Dsystemd=disabled -Dsystemd-system-service=disabled -Dsystemd-user-service=disabled -Dsession-managers=[] -Dalsa=enabled -Dpipewire-alsa=enabled -Djack=disabled -Dpipewire-jack=disabled -Dbluez5=enabled -Dbluez5-codec-aptx=disabled -Dbluez5-codec-ldac=disabled -Dbluez5-codec-lc3=disabled -Dbluez5-codec-lc3plus=disabled -Dbluez5-codec-opus=disabled -Dbluez5-codec-aac=disabled -Dlibcamera=disabled -Dvulkan=disabled -Dgstreamer=disabled -Dexamples=disabled -Dtests=disabled -Dman=disabled -Ddocs=disabled -Davahi=disabled -Decho-cancel-webrtc=disabled -Droc=disabled -Dlibpulse=disabled -Dudev=enabled -Dselinux=disabled -Dsnap=disabled -Dlibffado=disabled -Draop=disabled -Dopus=disabled -Dlv2=disabled -Dsdl2=disabled -Dsndfile=disabled -Dlibusb=disabled -Dreadline=disabled -Dflatpak=enabled -Dlibmysofa=disabled -Dlibcanberra=disabled -Dlegacy-rtkit=false -Dx11=disabled -Dx11-xfixes=disabled -Dpipewire-v4l2=disabled -Dv4l2=disabled -Dbluez5-backend-native=enabled -Dbluez5-backend-ofono=disabled -Dbluez5-backend-hsphfpd=disabled -Dcompress-offload=disabled -Debur128=disabled -Dfftw=disabled -Donnxruntime=disabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

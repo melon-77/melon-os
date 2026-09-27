@@ -1,0 +1,20 @@
+pkgname=flatpak
+pkgver=1.16.6
+pkgdesc="Application sandboxing and distribution (runs Steam, Firefox and other glibc apps on melon)"
+license=LGPL-2.1-or-later
+url=https://flatpak.org
+source=(flatpak-1.16.6.tar.xz)
+makedepends=(glib-dev ostree-dev libarchive-dev appstream-dev json-glib-dev gpgme-dev libxml2-dev libseccomp-dev polkit-dev
+  curl-dev fuse3-dev zstd-dev libcap-dev gdk-pixbuf-dev wayland-dev wayland-protocols bubblewrap xdg-dbus-proxy)
+subpackages=(flatpak-dev)
+depends=(bubblewrap xdg-dbus-proxy ca-certificates gnupg)
+build(){ meson_setup -Dsystem_bubblewrap=bwrap -Dsystem_dbus_proxy=xdg-dbus-proxy -Dsystemd=disabled -Dselinux_module=disabled \
+   -Dmalcontent=disabled -Dgir=disabled -Dgtkdoc=disabled -Ddocbook_docs=disabled -Dman=disabled -Dtests=false \
+   -Dinstalled_tests=false -Dsandboxed_triggers=true -Dxauth=disabled -Dgdm_env_file=false -Dsystem_helper=enabled \
+   -Dhttp_backend=curl -Dauto_sideloading=false -Ddconf=disabled -Dlibzstd=enabled -Dseccomp=enabled \
+   -Dwayland_security_context=enabled -Dsystem_install_dir=/var/lib/flatpak build
+  ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/lib/systemd $pkgdir/usr/lib/sysusers.d
+  # Flathub is added on first use from its official repo file (which carries its signing key), see melon-flathub
+  install -Dm755 $startdir/melon-flathub $pkgdir/usr/bin/melon-flathub
+}

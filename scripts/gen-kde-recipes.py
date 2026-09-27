@@ -63,9 +63,10 @@ PLASMA = [
  ('kirigami-addons',''), ('kpipewire',''), ('libksysguard',' -DBUILD_WITH_QTWEBENGINE=OFF'), ('ksystemstats',''),
  ('kscreenlocker',''), ('breeze',' -DBUILD_QT5=OFF'), ('kwin',' -DKWIN_BUILD_ACTIVITIES=ON -DKWIN_BUILD_X11=OFF'),
  ('plasma-workspace',' -DPLASMA_WAYLAND_DEFAULT_SESSION=ON'), ('plasma-integration',' -DBUILD_QT5=OFF'),
- ('plasma-desktop',''), ('systemsettings',''), ('kscreen',''), ('powerdevil',''), ('plasma-nm',' -DDISABLE_MODEMMANAGER_SUPPORT=OFF'),
+ ('plasma-desktop',''), ('systemsettings',''), ('kscreen',''), ('powerdevil',''), ('plasma-nm',' -DDISABLE_MODEMMANAGER_SUPPORT=ON'),
  ('plasma-pa',''), ('bluedevil',''), ('polkit-kde-agent-1',''), ('xdg-desktop-portal-kde',''), ('milou',''),
  ('kde-cli-tools',''), ('plasma-systemmonitor',''), ('kinfocenter',''), ('sddm-kcm',''),
+ ('sddm',' -DENABLE_PAM=ON -DNO_SYSTEMD=ON -DUSE_ELOGIND=ON -DBUILD_MAN_PAGES=OFF -DRUNTIME_DIR=/run/sddm -DUID_MIN=1000 -DDBUS_CONFIG_DIR=/usr/share/dbus-1/system.d'),
  ('dolphin',''), ('konsole',''), ('kde-spectacle',''), ('plasma-discover',' -DBUILD_PackageKitBackend=OFF -DBUILD_SnapBackend=OFF -DBUILD_FwupdBackend=OFF'),
 ]
 for n, extra in PLASMA:

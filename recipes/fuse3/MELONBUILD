@@ -1,0 +1,9 @@
+pkgname=fuse3
+pkgver=3.18.2
+pkgdesc="fuse3 (graphics stack)"
+license=custom
+source=(fuse3-3.18.2.tar.gz)
+builddir=$srcdir/fuse-3.18.2
+subpackages=(fuse3-dev)
+build(){ meson_setup -Dexamples=false -Dutils=true -Dtests=false -Duseroot=false -Dinitscriptdir= -Dudevrulesdir=/usr/lib/udev/rules.d build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

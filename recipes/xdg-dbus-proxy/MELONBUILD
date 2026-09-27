@@ -1,0 +1,10 @@
+pkgname=xdg-dbus-proxy
+pkgver=0.1.7
+pkgdesc="xdg-dbus-proxy (graphics stack)"
+license=custom
+source=(xdg-dbus-proxy-0.1.7.tar.xz)
+builddir=$srcdir/xdg-dbus-proxy-0.1.7
+makedepends=(glib-dev)
+subpackages=(xdg-dbus-proxy-dev)
+build(){ meson_setup -Dman=disabled -Dtests=false build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

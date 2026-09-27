@@ -1,0 +1,10 @@
+pkgname=vulkan-loader
+pkgver=1.4.341.0
+pkgdesc="vulkan-loader (graphics stack)"
+license=custom
+source=(vulkan-loader-1.4.341.0.tar.xz)
+builddir=$srcdir/vulkan-loader-1.4.341.0
+makedepends=(vulkan-headers wayland-dev libx11-dev libxrandr-dev)
+subpackages=(vulkan-loader-dev)
+build(){ cmake_setup -B build -DBUILD_WSI_XCB_SUPPORT=ON -DBUILD_WSI_XLIB_SUPPORT=ON -DBUILD_WSI_WAYLAND_SUPPORT=ON -DBUILD_TESTS=OFF -DVULKAN_HEADERS_INSTALL_DIR=$SYSROOT/usr; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

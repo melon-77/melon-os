@@ -1,5 +1,6 @@
 pkgname=libxtst
 pkgver=1.2.5
+pkgrel=0
 pkgdesc="libxtst (graphics stack)"
 license=custom
 source=(libxtst-1.2.5.tar.gz)

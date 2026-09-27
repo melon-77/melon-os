@@ -1,5 +1,6 @@
 pkgname=libxcvt
 pkgver=0.1.3
+pkgrel=0
 pkgdesc="libxcvt (graphics stack)"
 license=custom
 source=(libxcvt-0.1.3.tar.xz)

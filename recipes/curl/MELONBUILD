@@ -1,5 +1,6 @@
 pkgname=curl
 pkgver=8.18.0
+pkgrel=0
 pkgdesc="curl (graphics stack)"
 license=custom
 source=(curl-8.18.0.tar.gz)

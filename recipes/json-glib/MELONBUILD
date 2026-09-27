@@ -1,5 +1,6 @@
 pkgname=json-glib
 pkgver=1.10.8
+pkgrel=0
 pkgdesc="json-glib (graphics stack)"
 license=custom
 source=(json-glib-1.10.8.tar.xz)

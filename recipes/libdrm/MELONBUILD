@@ -1,5 +1,6 @@
 pkgname=libdrm
 pkgver=2.4.131
+pkgrel=0
 pkgdesc="libdrm (graphics stack)"
 license=custom
 source=(libdrm-2.4.131.tar.xz)

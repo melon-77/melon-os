@@ -1,5 +1,6 @@
 pkgname=libxml2
 pkgver=2.15.2
+pkgrel=0
 pkgdesc="libxml2 (graphics stack)"
 license=custom
 source=(libxml2-2.15.2.tar.xz)

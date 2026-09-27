@@ -1,5 +1,6 @@
 pkgname=libpciaccess
 pkgver=0.18.1
+pkgrel=0
 pkgdesc="libpciaccess (graphics stack)"
 license=custom
 source=(libpciaccess-0.18.1.tar.gz)

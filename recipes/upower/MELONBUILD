@@ -1,5 +1,6 @@
 pkgname=upower
 pkgver=1.91.1
+pkgrel=0
 pkgdesc="upower (graphics stack)"
 license=custom
 source=(upower-1.91.1.tar.bz2)

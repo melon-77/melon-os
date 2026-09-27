@@ -1,5 +1,6 @@
 pkgname=libxmlb
 pkgver=0.3.24
+pkgrel=0
 pkgdesc="libxmlb (graphics stack)"
 license=custom
 source=(libxmlb-0.3.24.tar.gz)

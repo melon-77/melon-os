@@ -1,5 +1,6 @@
 pkgname=xcb-util-cursor
 pkgver=0.1.6
+pkgrel=0
 pkgdesc="xcb-util-cursor (graphics stack)"
 license=custom
 source=(xcb-util-cursor-0.1.6.tar.gz)

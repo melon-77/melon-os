@@ -1,5 +1,6 @@
 pkgname=libxcursor
 pkgver=1.2.3
+pkgrel=0
 pkgdesc="libxcursor (graphics stack)"
 license=custom
 source=(libxcursor-1.2.3.tar.gz)

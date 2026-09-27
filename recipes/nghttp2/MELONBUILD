@@ -1,5 +1,6 @@
 pkgname=nghttp2
 pkgver=1.68.0
+pkgrel=0
 pkgdesc="nghttp2 (graphics stack)"
 license=custom
 source=(nghttp2-1.68.0.tar.gz)

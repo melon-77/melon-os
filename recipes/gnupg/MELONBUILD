@@ -1,10 +1,11 @@
 pkgname=gnupg
 pkgver=2.4.8
+pkgrel=0
 pkgdesc="gnupg (graphics stack)"
 license=custom
 source=(gnupg-2.4.8.tar.bz2)
 builddir=$srcdir/gnupg-2.4.8
 makedepends=(libgcrypt-dev libassuan-dev libksba-dev npth-dev zlib-dev sqlite-dev)
 subpackages=(gnupg-dev)
-build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-doc --disable-ldap --disable-gnutls --disable-card-support --disable-ccid-driver --disable-tofu --disable-sqlite --disable-bzip2 --without-readline --disable-nls --disable-wks-tools --with-libgpg-error-prefix=$SYSROOT/usr --with-libgcrypt-prefix=$SYSROOT/usr --with-libassuan-prefix=$SYSROOT/usr --with-ksba-prefix=$SYSROOT/usr; make -j$JOBS; }
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-doc --disable-ldap --disable-gnutls --disable-card-support --disable-ccid-driver --disable-tofu --disable-sqlite --disable-bzip2 --without-readline --disable-nls --disable-wks-tools --with-libgpg-error-prefix=$SYSROOT/usr --with-libgcrypt-prefix=$SYSROOT/usr --with-libassuan-prefix=$SYSROOT/usr --with-ksba-prefix=$SYSROOT/usr --with-npth-prefix=$SYSROOT/usr; make -j$JOBS; }
 package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

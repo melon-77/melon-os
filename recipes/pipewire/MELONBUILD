@@ -1,5 +1,6 @@
 pkgname=pipewire
 pkgver=1.6.2
+pkgrel=0
 pkgdesc="pipewire (graphics stack)"
 license=custom
 source=(pipewire-1.6.2.tar.gz)

@@ -1,5 +1,6 @@
 pkgname=libepoxy
 pkgver=1.5.10
+pkgrel=0
 pkgdesc="libepoxy (graphics stack)"
 license=custom
 source=(libepoxy-1.5.10.tar.gz)

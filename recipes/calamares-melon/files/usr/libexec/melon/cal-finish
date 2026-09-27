@@ -29,7 +29,7 @@ rootfs=$(blkid -s TYPE -o value "$rootdev")
 
 say "swap file"   # zram (the zram service) comes first; the swap file catches the rest
 memk=$(awk '/MemTotal/{print $2}' /proc/meminfo)
-freek=$(df -k "$ROOT" | awk 'NR==2{print $4}')
+freek=$(df -Pk "$ROOT" | awk 'NR==2{print $4}')
 swapm=$(( memk / 1024 )); [ $swapm -gt 8192 ] && swapm=8192
 [ $(( freek / 1024 )) -lt $(( swapm * 4 )) ] && swapm=$(( freek / 1024 / 8 ))
 if [ "$swapm" -ge 256 ]; then

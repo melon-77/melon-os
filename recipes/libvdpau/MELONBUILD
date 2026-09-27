@@ -1,5 +1,6 @@
 pkgname=libvdpau
 pkgver=1.5
+pkgrel=0
 pkgdesc="libvdpau (graphics stack)"
 license=custom
 source=(libvdpau-1.5.tar.bz2)

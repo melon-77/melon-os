@@ -1,5 +1,6 @@
 pkgname=libxrender
 pkgver=0.9.12
+pkgrel=0
 pkgdesc="libxrender (graphics stack)"
 license=custom
 source=(libxrender-0.9.12.tar.gz)

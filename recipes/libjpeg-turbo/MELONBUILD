@@ -1,5 +1,6 @@
 pkgname=libjpeg-turbo
 pkgver=2.1.5
+pkgrel=0
 pkgdesc="libjpeg-turbo (graphics stack)"
 license=custom
 source=(libjpeg-turbo-2.1.5.tar.gz)

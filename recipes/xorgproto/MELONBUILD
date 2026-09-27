@@ -1,5 +1,6 @@
 pkgname=xorgproto
 pkgver=2025.1
+pkgrel=0
 pkgdesc="xorgproto (graphics stack)"
 license=custom
 source=(xorgproto-2025.1.tar.gz)

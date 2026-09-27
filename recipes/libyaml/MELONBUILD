@@ -1,5 +1,6 @@
 pkgname=libyaml
 pkgver=0.2.5
+pkgrel=0
 pkgdesc="libyaml (graphics stack)"
 license=custom
 source=(libyaml-0.2.5.tar.gz)

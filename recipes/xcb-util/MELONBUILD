@@ -1,5 +1,6 @@
 pkgname=xcb-util
 pkgver=0.4.1
+pkgrel=0
 pkgdesc="xcb-util (graphics stack)"
 license=custom
 source=(xcb-util-0.4.1.tar.gz)

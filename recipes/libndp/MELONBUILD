@@ -1,5 +1,6 @@
 pkgname=libndp
 pkgver=1.9
+pkgrel=0
 pkgdesc="libndp (graphics stack)"
 license=custom
 source=(libndp-1.9.tar.gz)

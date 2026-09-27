@@ -1,5 +1,6 @@
 pkgname=libxcomposite
 pkgver=0.4.6
+pkgrel=0
 pkgdesc="libxcomposite (graphics stack)"
 license=custom
 source=(libxcomposite-0.4.6.tar.gz)

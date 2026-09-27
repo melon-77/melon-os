@@ -1,5 +1,6 @@
 pkgname=xcb-util-wm
 pkgver=0.4.2
+pkgrel=0
 pkgdesc="xcb-util-wm (graphics stack)"
 license=custom
 source=(xcb-util-wm-0.4.2.tar.xz)

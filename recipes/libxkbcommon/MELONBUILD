@@ -1,5 +1,6 @@
 pkgname=libxkbcommon
 pkgver=1.13.1
+pkgrel=0
 pkgdesc="libxkbcommon (graphics stack)"
 license=custom
 source=(libxkbcommon-1.13.1.tar.gz)

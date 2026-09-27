@@ -35,12 +35,13 @@ build_one(){ kver=$1
   want="dm_mod dm_crypt xts aes_generic aesni_intel ghash_clmulni_intel sha256_generic sha512_generic af_alg algif_skcipher
         crc32c_intel hid_generic usbhid xhci_pci ehci_pci ohci_pci uhci_hcd atkbd i8042 evdev"
   for m in $want; do
-    kmod modprobe -S "$kver" --show-depends "$m" 2>/dev/null | awk '$1=="insmod"{print $2}'
+    modprobe -S "$kver" --show-depends "$m" 2>/dev/null | awk '$1=="insmod"{print $2}'
   done | sort -u | while read -r f; do mkdir -p "$W$(dirname "$f")"; cp "$f" "$W$f"; done
-  depmod -b $W "$kver" 2>/dev/null || kmod depmod -b $W "$kver"
+  depmod -b $W "$kver"
   cat > $W/init <<'INIT'
 #!/bin/sh
 export PATH=/usr/bin
+export DM_DISABLE_UDEV=1        # no udev in here: libdevmapper makes the /dev/mapper node itself
 mount -t proc proc /proc; mount -t sysfs sys /sys; mount -t devtmpfs dev /dev; mount -t tmpfs run /run
 for m in dm_mod dm_crypt xts aesni_intel aes_generic sha256_generic sha512_generic algif_skcipher usbhid hid_generic xhci_pci ehci_pci atkbd; do
   modprobe -q $m 2>/dev/null

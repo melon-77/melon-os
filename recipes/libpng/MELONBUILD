@@ -1,5 +1,6 @@
 pkgname=libpng
 pkgver=1.6.57
+pkgrel=0
 pkgdesc="libpng (graphics stack)"
 license=custom
 source=(libpng-1.6.57.tar.gz)

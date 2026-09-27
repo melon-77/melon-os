@@ -1,5 +1,6 @@
 pkgname=mtdev
 pkgver=1.1.7
+pkgrel=0
 pkgdesc="mtdev (graphics stack)"
 license=custom
 source=(mtdev-1.1.7.tar.gz)

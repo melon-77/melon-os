@@ -1,5 +1,6 @@
 pkgname=dosfstools
 pkgver=4.2
+pkgrel=0
 pkgdesc="dosfstools (graphics stack)"
 license=custom
 source=(dosfstools-4.2.tar.gz)

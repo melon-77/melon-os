@@ -1,5 +1,6 @@
 pkgname=spirv-tools
 pkgver=2026.1
+pkgrel=0
 pkgdesc="spirv-tools (graphics stack)"
 license=custom
 source=(spirv-tools-2026.1.tar.gz)

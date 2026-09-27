@@ -1,5 +1,6 @@
 pkgname=sbc
 pkgver=2.1
+pkgrel=0
 pkgdesc="sbc (graphics stack)"
 license=custom
 source=(sbc-2.1.tar.gz)

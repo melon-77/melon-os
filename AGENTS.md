@@ -154,6 +154,10 @@ Rebuilding the kernel takes about an hour on 2 cores.
 28. **Only encrypted installs have an initramfs.** `melon-mkinitramfs` builds it when
     `/etc/melon/encrypted-root` exists; `melon-update-grub` then writes `cryptroot=UUID=<luks>
     root=/dev/mapper/melonroot` and an `initrd` line. Everything else still boots straight from the kernel.
+30. **musl 1.2.4+ hides the `*64` LFS types** (`off64_t`, `ino64_t`) unless `_LARGEFILE64_SOURCE` is
+    defined. Add `-D_LARGEFILE64_SOURCE` to the recipe's CFLAGS (gpgme), as Alpine does.
+31. **The builder's `apk add --upgrade` only reinstalls a package whose version-release changed.** Generated
+    recipes take their `pkgrel` from the `PKGREL` table in `scripts/gen-simple-recipes.py`.
 29. **Two build queues may run at once** for the same arch: `melon-build` takes `flock repo/<arch>/.lock`
     around sysroot installs and reindexing, and writes packages under a temporary name first.
 

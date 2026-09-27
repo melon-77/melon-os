@@ -1,5 +1,6 @@
 pkgname=harfbuzz
 pkgver=12.3.2
+pkgrel=0
 pkgdesc="harfbuzz (graphics stack)"
 license=custom
 source=(harfbuzz-12.3.2.tar.xz)

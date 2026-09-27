@@ -1,5 +1,6 @@
 pkgname=hwdata
 pkgver=0.394
+pkgrel=0
 pkgdesc="hwdata (graphics stack)"
 license=custom
 source=(hwdata-0.394.tar.gz)

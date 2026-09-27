@@ -1,5 +1,6 @@
 pkgname=lcms2
 pkgver=2.17
+pkgrel=0
 pkgdesc="lcms2 (graphics stack)"
 license=custom
 source=(lcms2-2.17.tar.gz)

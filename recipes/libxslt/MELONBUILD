@@ -1,5 +1,6 @@
 pkgname=libxslt
 pkgver=1.1.45
+pkgrel=0
 pkgdesc="libxslt (graphics stack)"
 license=custom
 source=(libxslt-1.1.45.tar.xz)

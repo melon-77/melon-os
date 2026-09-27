@@ -1,5 +1,6 @@
 pkgname=libfyaml
 pkgver=0.9.4
+pkgrel=0
 pkgdesc="libfyaml (graphics stack)"
 license=custom
 source=(libfyaml-0.9.4.tar.gz)

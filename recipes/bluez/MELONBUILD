@@ -1,5 +1,6 @@
 pkgname=bluez
 pkgver=5.85
+pkgrel=0
 pkgdesc="bluez (graphics stack)"
 license=custom
 source=(bluez-5.85.tar.gz)

@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt	2026-09-27 15:24:29.431327334 -0700
++++ b/CMakeLists.txt	2026-09-27 15:24:29.432442647 -0700
+@@ -78,7 +78,7 @@
+ 
+ if (NOT APPLE AND NOT ANDROID AND NOT WIN32 AND NOT HAIKU OR (WIN32 AND NOT WITH_SNORETOAST))
+     find_package(Qt6 ${REQUIRED_QT_VERSION} CONFIG REQUIRED DBus)
+-    find_package(Canberra REQUIRED)
++    find_package(Canberra)   # optional: the code checks TARGET Canberra::Canberra
+     set_package_properties(Canberra PROPERTIES
+         PURPOSE "Needed to build audio notification support")
+     if (TARGET Canberra::Canberra)

@@ -42,6 +42,7 @@ deb/gpgme1.0_2.0.1.orig.tar.bz2	821ab0695c842eab51752a81980c92b0410c7eadd04103f7
 deb/grub2_2.14.orig.tar.xz	bc8d3c73535b8838d8c8e2654d73edc4e6ae8c8acdb45d5df5dc9a1547446d43	apt	grub2=2.14-2ubuntu2.1
 deb/harfbuzz_12.3.2.orig.tar.xz	6f6db164359a2da5a84ef826615b448b33e6306067ad829d85d5b0bf936f1bb8	apt	harfbuzz=12.3.2-2
 deb/hicolor-icon-theme_0.18.orig.tar.xz	db0e50a80aa3bf64bb45cbca5cf9f75efd9348cf2ac690b907435238c3cf81d7	apt	hicolor-icon-theme=0.18-2build1
+deb/hunspell_1.7.2+really1.7.2.orig.tar.gz	11ddfa39afe28c28539fe65fc4f1592d410c1e9b6dd7d8a91ca25d85e9ec65b8	apt	hunspell=1.7.2+really1.7.2-11
 deb/hwdata_0.394.orig.tar.gz	b7c3fd7214a3b7c49d2661db127a712dc11cffd1799f793947aa1cb20aaf3298	apt	hwdata=0.394-1build1
 deb/json-c_0.18+ds.orig.tar.xz	f6439962c9622c1f9f4746d5b3daf5e0800c335281b048fab00159f2a29d7daa	apt	json-c=0.18+ds-3
 deb/json-glib_1.10.8+ds.orig.tar.xz	ecf9ee6822d6a5e4f63e7adbd39745a4875f19bd9975b0afa5e20c98d43f4b32	apt	json-glib=1.10.8+ds-2
@@ -334,6 +335,7 @@ grub-2.14.tar.xz	-	link	deb/grub2_2.14.orig.tar.xz
 hack-3.003.tar.gz	-	link	deb/fonts-hack_3.003.orig.tar.gz
 harfbuzz-12.3.2.tar.xz	-	link	deb/harfbuzz_12.3.2.orig.tar.xz
 hicolor-icon-theme-0.18.tar.xz	-	link	deb/hicolor-icon-theme_0.18.orig.tar.xz
+hunspell-1.7.2.tar.gz	-	link	deb/hunspell_1.7.2+really1.7.2.orig.tar.gz
 hwdata-0.394.tar.gz	-	link	deb/hwdata_0.394.orig.tar.gz
 inih-61.tar.gz	-	link	deb/libinih_61.orig.tar.gz
 json-c-0.18.tar.xz	-	link	deb/json-c_0.18+ds.orig.tar.xz

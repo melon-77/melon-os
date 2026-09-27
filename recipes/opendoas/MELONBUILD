@@ -1,0 +1,27 @@
+pkgname=opendoas
+pkgver=6.8.2
+pkgdesc="Run commands as another user (doas), plus a sudo command that uses it"
+license=ISC
+url=https://github.com/Duncaen/OpenDoas
+source=(opendoas-6.8.2.tar.xz)
+makedepends=(bsd-compat-headers)
+options=('!strip')
+build(){
+  ./configure --prefix=/usr --sysconfdir=/etc --without-pam --with-shadow --with-timestamp >/dev/null
+  make -j$JOBS CC="$CC" >/dev/null
+  $STRIP doas
+}
+package(){
+  install -Dm4755 doas $pkgdir/usr/bin/doas
+  install -Dm755 $startdir/sudo $pkgdir/usr/bin/sudo
+  install -Dm644 doas.1 $pkgdir/usr/share/man/man1/doas.1
+  install -Dm644 doas.conf.5 $pkgdir/usr/share/man/man5/doas.conf.5
+  install -dm755 $pkgdir/etc
+  cat > $pkgdir/etc/doas.conf <<'CONF'
+# who may run commands as root (see doas.conf(5))
+# members of the wheel group, remembering the password for 5 minutes like sudo
+permit persist setenv { PATH } :wheel
+permit nopass root
+CONF
+  chmod 0400 $pkgdir/etc/doas.conf
+}

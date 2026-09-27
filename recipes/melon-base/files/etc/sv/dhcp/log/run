@@ -1,0 +1,5 @@
+#!/bin/sh
+# keep service output off the console: it goes to /var/log/<service>/current
+name=$(basename "$(dirname "$(pwd -P)")")
+mkdir -p /var/log/$name
+exec svlogd -tt /var/log/$name

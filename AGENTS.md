@@ -14,6 +14,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | toolchain | GCC 15.2, binutils 2.46 | target triple `x86_64-melon-linux-musl` |
 | userland | BusyBox 1.37 | applet symlinks created by its post-install script |
 | shell | bash 5.3 (login shell), BusyBox ash is `/bin/sh` | |
+| privileges | doas (OpenDoas 6.8.2) with a `sudo` command on top | members of `wheel` |
 | init | runit 2.3 | stages in `/etc/runit/{1,2,3}`, services in `/etc/sv`, enabled = symlink in `/var/service` |
 | devices | BusyBox mdev (`mdev -d` service) | no udev yet, stage 2 will need one |
 | packages | apk-tools 3.0.8 | repo index `Packages.adb`, signed with `keys/melon-signing.rsa` |
@@ -113,6 +114,16 @@ Rebuilding the kernel takes about an hour on 2 cores.
     is listed too. `melon-update-grub` handles this when `GRUB_SERIAL=1` is set in `/etc/default/grub`.
 13. **`melon-update-grub` is given the root and boot devices explicitly** by the installer
     (`MELON_ROOT_DEV`, `MELON_BOOT_DEV`). Guessing them from inside a chroot picked the wrong filesystem UUID.
+
+14. **Services never write to the console.** Every `/etc/sv/<svc>/run` starts with `exec 2>&1`, and
+    anything chatty has a `log/run` that pipes it to `svlogd` in `/var/log/<svc>/`. A crash-looping
+    service that prints to the console floods the screen (this happened with wpa_supplicant).
+15. **Only pass options the binary was built with.** wpa_supplicant's `-s` needs `CONFIG_DEBUG_SYSLOG=y`.
+    Without it, every start printed the help text.
+16. **Shutdown unmounts `/boot` explicitly** (see `/etc/runit/3`). BusyBox's `umount -a -t no...` left the
+    FAT `/boot` dirty.
+17. **`sudo` is a small front end for doas** (`recipes/opendoas/sudo`). Rules live in `/etc/doas.conf`
+    (`permit persist :wheel`). New users get their shell setup from `/etc/skel`.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.

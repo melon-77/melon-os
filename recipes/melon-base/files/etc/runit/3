@@ -13,6 +13,9 @@ killall5 -15; sleep 1; killall5 -9
 msg "Unmounting filesystems"
 swapoff -a 2>/dev/null
 sync
-umount -a -r -t notmpfs,nosysfs,noproc,nodevtmpfs 2>/dev/null
+# unmount real filesystems deepest first (e.g. /boot before /); if one is busy, make it read-only
+for m in $(awk '$2!="/" && $3!~/^(proc|sysfs|devtmpfs|devpts|tmpfs|cgroup2?|efivarfs|securityfs|debugfs|mqueue|overlay|squashfs)$/{print $2}' /proc/mounts | sort -r); do
+  umount "$m" 2>/dev/null || mount -o remount,ro "$m" 2>/dev/null
+done
 mount -o remount,ro / 2>/dev/null
 sync

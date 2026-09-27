@@ -5,7 +5,7 @@ export CHARSET=UTF-8 LANG=C.UTF-8 LC_COLLATE=C
 umask 022
 for f in /etc/profile.d/*.sh; do [ -r "$f" ] && . "$f"; done; unset f
 if [ -n "$BASH_VERSION" ]; then
-  [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
+  if [ -f "$HOME/.bashrc" ]; then . "$HOME/.bashrc"; elif [ -r /etc/bash/bashrc ]; then . /etc/bash/bashrc; fi
 else
   PS1='\u@\h:\w\$ '
 fi

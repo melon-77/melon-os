@@ -109,6 +109,15 @@ else:
               'lspci 2>/dev/null | head; cat /sys/bus/pci/devices/*/modalias | head -20',
               'modprobe -v snd_hda_intel; ls /dev/snd; dmesg | tail -5']:
         print(f'$ {c}'); print(sh(c))
+    # sudo as the normal user: asks for the password once, then remembers it
+    p.sendline('su - jcole'); p.expect(r'@melon[\w-]*.*\$ ', timeout=60)
+    p.sendline('sudo id -u'); p.expect('assword', timeout=60); p.sendline('melonuser')
+    p.expect(r'\n\r*0\r*\n', timeout=60); step('sudo as jcole: OK (got uid 0)')
+    p.sendline('sudo -i whoami'); i = p.expect([r'[\r\n]root\r', 'assword'], timeout=60)
+    step('sudo -i without asking again: ' + ('OK' if i == 0 else 'asked again'))
+    if i == 1: p.sendline('melonuser'); p.expect('root', timeout=60)
+    p.sendline('exit'); p.expect(PROMPT, timeout=60)
+    print(sh('melon-svc status; ls /var/log'))
     p.sendline('poweroff')
     p.expect(pexpect.EOF, timeout=300)
     step('powered off')

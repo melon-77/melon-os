@@ -1,24 +1,121 @@
 #!/bin/sh
-# melonfetch: system summary with the melon logo
+# melonfetch: system summary next to a shaded, netted cantaloupe with a slice cut out.
+#   melonfetch            logo + info
+#   melonfetch --art      logo only
 . /etc/os-release 2>/dev/null
-P=$(printf '\033[1;38;5;212m') G=$(printf '\033[1;38;5;114m') B=$(printf '\033[1m') R=$(printf '\033[0m')
-up=$(awk '{s=int($1); d=int(s/86400); h=int(s%86400/3600); m=int(s%3600/60); if(d) printf "%dd ",d; printf "%dh %dm", h, m}' /proc/uptime)
-mem=$(awk '/MemTotal/{t=$2} /MemAvailable/{a=$2} END{printf "%d MiB / %d MiB", (t-a)/1024, t/1024}' /proc/meminfo)
-cpu=$(sed -n 's/^model name[[:space:]]*: //p' /proc/cpuinfo | head -1)
-host=$(cat /sys/class/dmi/id/product_name 2>/dev/null)
-pkgs=$(apk list --installed 2>/dev/null | wc -l)
-init=runit; [ -d /run/runit ] || init="runit"
-shell=$(basename "${SHELL:-sh}")
-cat <<EOF
-${P}       .-~~~~~~~~-.       ${R}  ${B}$(id -un)@$(hostname)${R}
-${P}     .'  .   .   . '.     ${R}  ${P}os${R}      ${PRETTY_NAME:-melon} ($(uname -m))
-${P}    /  .   .   .   . \\    ${R}  ${P}host${R}    ${host:-unknown}
-${P}   ;  .  .   .   .  . ;   ${R}  ${P}kernel${R}  $(uname -r)
-${G}   |~~~~~~~~~~~~~~~~~~|   ${R}  ${P}init${R}    $init
-${G}    \\________________/    ${R}  ${P}libc${R}    musl
-${R}                            ${P}pkgs${R}    $pkgs (apk)
-${R}                            ${P}shell${R}   $shell
-${R}                            ${P}cpu${R}     ${cpu:-unknown}
-${R}                            ${P}memory${R}  $mem
-${R}                            ${P}uptime${R}  $up
-EOF
+E=$(printf '\033')
+R="${E}[0m" B="${E}[1m" D="${E}[2m"
+P="${E}[1;38;5;212m"      # melon pink (labels)
+G="${E}[38;5;114m"        # leaf green
+O="${E}[38;5;215m"        # cantaloupe orange
+T="${E}[38;5;187m"        # rind net tan
+
+# ---------------------------------------------------------------- the melon
+art=$(awk -v E="$E" '
+function clamp(v){ return v<0?0:(v>1?1:v) }
+function mix(c1,c2,t,   a,b){ split(c1,a,";"); split(c2,b,";"); t=clamp(t)
+  return int(a[1]+(b[1]-a[1])*t) ";" int(a[2]+(b[2]-a[2])*t) ";" int(a[3]+(b[3]-a[3])*t) }
+function hash(x,y){ return (x*73856093 + y*19349663) % 97 }
+BEGIN{
+  W=38; PH=40                         # pixels: 38 wide, 40 tall (two per text row via half blocks)
+  cx=19; cy=21.5; R=17.3; pi=3.14159265
+  for(py=0;py<PH;py++) for(px=0;px<W;px++){
+    c=""
+    dx=(px+0.5-cx)/R; dy=(py+0.5-cy)/R; d=dx*dx+dy*dy
+    # stalk and leaf
+    if(px>=18 && px<=19 && py>=1 && py<=5) c=mix("110;70;35","150;100;55",(px-18))
+    lx=(px+0.5-24)/4.2; ly=(py+0.5-3)/1.9
+    if(lx*lx+ly*ly<=1) c=mix("70;140;50","130;190;80",clamp(0.6-ly*0.5))
+    if(d<=1){
+      ang=atan2(-dy,dx)*180/pi; r=sqrt(d)
+      if(ang>-42 && ang<30){                                       # the cut-out slice
+        if(r>0.93) c="60;105;45"
+        else if(r>0.86) c="196;222;150"
+        else if(r>0.52){ c=mix("255;184;110","240;118;40",(r-0.52)/0.34)
+                         if(ang<-34) c=mix(c,"140;60;15",0.55)      # lower cut face in shadow
+                         if(ang>23)  c=mix(c,"255;235;200",0.35) }   # upper cut face catches light
+        else { c=mix("250;226;178","250;196;130",r/0.52)
+               if((px+2*py)%4==0 && hash(px,py)<60) c="110;70;32"; else if((px+2*py)%4==1 && hash(px,py)<30) c="214;170;110" }
+      } else {                                                      # netted rind
+        light=clamp(0.52 - 0.42*dx - 0.5*dy + 0.45*sqrt(1-d))
+        c=mix("28;70;30","150;205;95",light)
+        if((px+py)%7==0 || (px-py+210)%7==0) c=mix("120;130;80","222;218;160",light)
+        hx=dx+0.42; hy=dy+0.45; if(hx*hx+hy*hy<0.035) c=mix(c,"255;255;240",0.55)
+        if(d>0.86) c=mix(c,"10;30;12",0.45)
+      }
+    }
+    col[py,px]=c
+  }
+  for(row=0;row<PH/2;row++){
+    line=""
+    for(px=0;px<W;px++){
+      t=col[2*row,px]; b=col[2*row+1,px]
+      if(t=="" && b=="")      line=line E "[0m "
+      else if(t=="")          line=line E "[0;38;2;" b "m\342\226\204"
+      else if(b=="")          line=line E "[0;38;2;" t "m\342\226\200"
+      else                    line=line E "[0;38;2;" t ";48;2;" b "m\342\226\200"
+    }
+    print line E "[0m"
+  }
+}')
+
+if [ "$1" = --art ]; then printf '%s\n' "$art"; exit 0; fi
+
+# ---------------------------------------------------------------- facts
+bar(){ # bar USED TOTAL -> 14-cell meter coloured by fill level
+  awk -v u="$1" -v t="$2" -v E="$E" 'BEGIN{ if(t<=0){print ""; exit} p=u/t; n=int(p*14+0.5)
+    c=(p<0.6)?"114":(p<0.85)?"215":"203"; s=E "[38;5;" c "m"; for(i=0;i<14;i++) s=s (i<n?"━":E "[38;5;238m━"); printf "%s%s %d%%", s, E "[0m", p*100 }'; }
+up=$(awk '{s=int($1); d=int(s/86400); h=int(s%86400/3600); m=int(s%3600/60); if(d) printf "%dd ",d; if(h||d) printf "%dh ",h; printf "%dm", m}' /proc/uptime)
+eval "$(awk '/MemTotal/{t=$2} /MemAvailable/{a=$2} END{printf "mt=%d mu=%d", t/1024, (t-a)/1024}' /proc/meminfo)"
+eval "$(df -P / 2>/dev/null | awk 'NR==2{printf "dt=%d du=%d", $2/1024, $3/1024}')"
+cpu=$(sed -n 's/^model name[[:space:]]*: //p' /proc/cpuinfo | head -1 | sed 's/ with .*//; s/(R)//g; s/(TM)//g; s/  */ /g')
+cores=$(grep -c ^processor /proc/cpuinfo)
+host=$(cat /sys/class/dmi/id/product_name 2>/dev/null); vendor=$(cat /sys/class/dmi/id/sys_vendor 2>/dev/null)
+case $host in ""|"To be filled"*|"System Product Name") host=$vendor ;; esac
+gpu=; for c in /sys/class/drm/card[0-9]; do [ -r $c/device/vendor ] || continue
+  drv=$(basename "$(readlink $c/device/driver 2>/dev/null)")
+  case $(cat $c/device/vendor) in 0x1002) v=AMD;; 0x8086) v=Intel;; 0x10de) v=NVIDIA;; 0x1af4) v=virtio;; 0x1234) v=QEMU;; *) v=GPU;; esac
+  gpu="${gpu:+$gpu, }$v${drv:+ ($drv)}"; done
+pkgs=$(apk info 2>/dev/null | wc -l)
+svcs=$(ls /var/service 2>/dev/null | wc -l)
+running=$(for s in /var/service/*; do sv status "$s" 2>/dev/null; done | grep -c '^run:')
+musl=$(/usr/lib/libc.so 2>&1 | sed -n 's/^Version //p')
+sh_name=$(basename "${SHELL:-/bin/sh}"); [ "$sh_name" = bash ] && sh_name="bash ${BASH_VERSION%%(*}"
+bat=; for b in /sys/class/power_supply/BAT*; do [ -r $b/capacity ] && bat="$(cat $b/capacity)% ($(cat $b/status 2>/dev/null | tr 'A-Z' 'a-z'))"; done
+wifi=; for w in /sys/class/net/*/wireless; do [ -d "$w" ] && wifi=$(basename "$(dirname "$w")"); done
+ip=$(ip -4 -o addr 2>/dev/null | awk '$2!="lo"{split($4,a,"/"); print a[1] " (" $2 ")"; exit}')
+user=$(id -un) hn=$(cat /proc/sys/kernel/hostname)
+
+title="${P}${user}${R}${B}@${R}${P}${hn}${R}   ${B}${O}m e l o n${R}"
+rule="${D}$(printf '%*s' $(( ${#user} + ${#hn} + 13 )) '' | sed 's/ /─/g')${R}"
+L(){ printf '%s%-8s%s %s' "$P" "$1" "$R" "$2"; }
+info="$title
+$rule
+$(L os "${PRETTY_NAME:-melon} ${D}$(uname -m)${R}")
+$(L host "${host:-unknown}")
+$(L kernel "$(uname -r)")
+$(L uptime "$up")
+$(L init "runit  ${D}${running}/${svcs} services up${R}")
+$(L libc "musl ${musl}")
+$(L pkgs "$pkgs ${D}(apk)${R}")
+$(L shell "$sh_name")
+$(L cpu "${cpu:-unknown} ${D}× ${cores}${R}")
+${gpu:+$(L gpu "$gpu")
+}$(L memory "$(bar $mu $mt) ${D}${mu}/${mt} MiB${R}")
+$(L disk "$(bar $du $dt) ${D}$(awk -v u=$du -v t=$dt 'BEGIN{printf "%.1f/%.1f", u/1024, t/1024}') GiB${R}")
+${bat:+$(L battery "$bat")
+}${ip:+$(L network "$ip${wifi:+ ${D}wifi: $wifi${R}}")
+}
+$(i=0; s=""; while [ $i -lt 8 ]; do s="$s${E}[4${i}m   "; i=$((i+1)); done; printf '%s%s' "$s" "$R")
+$(i=0; s=""; while [ $i -lt 8 ]; do s="$s${E}[10${i}m   "; i=$((i+1)); done; printf '%s%s' "$s" "$R")"
+
+# ---------------------------------------------------------------- side by side
+printf '%s\n' "$art" > /tmp/.mf-art.$$; printf '%s\n' "$info" > /tmp/.mf-info.$$
+echo
+awk -v A=/tmp/.mf-art.$$ -v I=/tmp/.mf-info.$$ 'BEGIN{
+  while((getline l < A)>0) a[++na]=l; while((getline l < I)>0) b[++nb]=l
+  off=int((na-nb)/2); if(off<0) off=0; n=(na>nb+off)?na:nb+off
+  for(k=1;k<=n;k++){ left=(k<=na)?a[k]:sprintf("%38s",""); right=(k-off>=1 && k-off<=nb)?b[k-off]:""; print "  " left "   " right }
+}'
+echo
+rm -f /tmp/.mf-art.$$ /tmp/.mf-info.$$

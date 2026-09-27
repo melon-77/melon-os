@@ -1,0 +1,44 @@
+#!/bin/sh
+# melon-sound-default: find the sound card that drives the speakers/headphones and make it ALSA's default.
+#
+# On many laptops (Ryzen ones especially) card 0 is the GPU's HDMI/DisplayPort audio, so programs that
+# play to "the default card" end up silent. This picks, in order:
+#   1. a card with an analog playback device (e.g. "ALC236 Analog")
+#   2. a card with any playback device whose name isn't HDMI/DisplayPort
+#   3. the first card with any playback device
+#
+#   melon-sound-default          print the chosen card number
+#   melon-sound-default --pcm    print an ALSA device for it, e.g. plughw:1,0
+#   melon-sound-default --write  also write /etc/asound.conf so every ALSA program uses it
+ASOUND=${MELON_ASOUND_ROOT:-/proc/asound}
+
+pick(){
+  local c n info d
+  for pass in analog nonhdmi any; do
+    for c in "$ASOUND"/card[0-9]*; do
+      [ -d "$c" ] || continue
+      n=${c##*card}
+      for info in "$c"/pcm*p/info; do
+        [ -f "$info" ] || continue
+        name=$(sed -n 's/^name: //p' "$info")
+        d=${info%p/info}; d=${d##*pcm}
+        case $pass in
+          analog)  case $name in *[Aa]nalog*) echo "$n $d"; return 0 ;; esac ;;
+          nonhdmi) case $name in *HDMI*|*hdmi*|*DP*|*DisplayPort*) ;; *) echo "$n $d"; return 0 ;; esac ;;
+          any)     echo "$n $d"; return 0 ;;
+        esac
+      done
+    done
+  done
+  return 1
+}
+
+set -- "$1" $(pick) || exit 1
+[ -n "$2" ] || exit 1
+mode=$1 card=$2 dev=$3
+if [ "$mode" = --pcm ]; then echo "plughw:$card,$dev"; else echo "$card"; fi
+if [ "$mode" = --write ]; then
+  if [ ! -f /etc/asound.conf ] || grep -q '^# written by melon-sound-default' /etc/asound.conf; then
+    printf '# written by melon-sound-default (delete this file to stop it being managed)\ndefaults.pcm.card %s\ndefaults.ctl.card %s\n' "$card" "$card" > /etc/asound.conf
+  fi
+fi

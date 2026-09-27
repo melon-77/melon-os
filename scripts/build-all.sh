@@ -3,7 +3,10 @@
 # (MELON_KEEP_GOING=1: note the failure and carry on with the rest; the list of failures is printed at the end)
 . /home/claude/melon/scripts/env.sh
 failed=()
+# MELON_SKIP_BUILT=1: skip recipes whose current version-release is already in the repo (to resume a queue)
+built(){ ( pkgrel=0; . $M/recipes/$1/MELONBUILD >/dev/null 2>&1; [ -f $REPO/$APK_ARCH/$pkgname-$pkgver-r$pkgrel.apk ] ); }
 for p in "$@"; do
+  if [ "${MELON_SKIP_BUILT:-0}" = 1 ] && built $p; then echo "##### $p already built"; continue; fi
   echo "##### $(date +%T) $p"
   if ! $M/scripts/melon-build $p > $M/logs/pkg-$p.log 2>&1; then
     echo "##### FAILED $p"; tail -25 $M/logs/pkg-$p.log

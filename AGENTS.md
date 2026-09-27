@@ -164,6 +164,10 @@ Rebuilding the kernel takes about an hour on 2 cores.
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
 
+The build container can be reclaimed while idle, which kills background builds. `scripts/resume.sh`
+restarts the host Qt build and the Qt/KF6/Plasma queue (`scripts/queue-4.sh`); finished host Qt modules
+and packages already in the repo (`MELON_SKIP_BUILT=1`) are skipped.
+
 ## Testing (required before you commit a change that affects boot or install)
 
 ```sh

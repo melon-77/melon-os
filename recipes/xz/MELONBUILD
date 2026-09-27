@@ -1,0 +1,13 @@
+pkgname=xz
+pkgver=5.8.3
+pkgrel=0
+pkgdesc="XZ Utils - LZMA/xz compression tools"
+license="0BSD AND GPL-2.0-or-later"
+url=https://tukaani.org/xz
+source=(xz-5.8.3.tar.xz)
+subpackages=(xz-dev xz-libs)
+depends=(xz-libs)
+pkgdesc_xz_libs="liblzma shared library"
+build(){ ./configure $conf_flags --disable-static --disable-doc --disable-nls; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,man,locale}; }
+pkg_libs(){ amove 'usr/lib/liblzma.so.*'; }

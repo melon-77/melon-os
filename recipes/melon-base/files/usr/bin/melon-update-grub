@@ -41,6 +41,8 @@ $( [ "${GRUB_SERIAL:-0}" = 1 ] && printf 'serial --unit=0 --speed=115200\ntermin
 if loadfont unicode; then set gfxmode=auto; insmod all_video; insmod gfxterm; terminal_output gfxterm $( [ "${GRUB_SERIAL:-0}" = 1 ] && echo serial )$bgline; fi
 set menu_color_normal=light-gray/black
 set menu_color_highlight=black/light-magenta
+# keep a graphical framebuffer for the kernel (simpledrm), so the console shows even without a GPU driver
+set gfxpayload=keep
 CFG
 for k in /boot/vmlinuz-*; do
   [ -f "$k" ] || continue; f=${k##*/}; flav=${f#vmlinuz-}

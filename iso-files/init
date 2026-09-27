@@ -39,5 +39,7 @@ mkdir -p /mnt/rw/upper /mnt/rw/work
 mount -t overlay -o lowerdir=/mnt/live:/mnt/ro,upperdir=/mnt/rw/upper,workdir=/mnt/rw/work overlay /newroot
 mkdir -p /newroot/media/melon
 mount --move /mnt/media /newroot/media/melon
-umount /proc /sys; umount /dev 2>/dev/null
+# keep /dev (with /dev/console) for the real system instead of starting it with an empty /dev
+mount --move /dev /newroot/dev 2>/dev/null || umount /dev 2>/dev/null
+umount /proc /sys
 exec switch_root /newroot /usr/bin/runit-init

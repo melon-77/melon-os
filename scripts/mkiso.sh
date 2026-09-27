@@ -122,6 +122,9 @@ serial --unit=0 --speed=115200
 terminal_input console serial
 terminal_output console serial
 insmod all_video
+# hand the kernel a graphical framebuffer: the screen keeps working through simpledrm even in VMs
+# (VirtualBox, VMware, Hyper-V) whose display adapter has no working driver
+set gfxpayload=1024x768,auto
 set menu_color_normal=light-gray/black
 set menu_color_highlight=black/light-magenta
 menuentry 'melon live' {

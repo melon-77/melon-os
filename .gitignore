@@ -3,7 +3,8 @@
 /tools/
 /sysroot/
 /hosttools/
-/sources/
+/sources/*
+!/sources/MANIFEST.tsv
 /repo/
 /out/
 /logs/

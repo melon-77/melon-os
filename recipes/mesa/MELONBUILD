@@ -26,7 +26,7 @@ build(){
     -Dzstd=enabled -Dintel-rt=disabled -Dgallium-rusticl=false -Dmicrosoft-clc=disabled build
   PATH=$M/hosttools/bin:$PATH ninja -C build -j$JOBS
 }
-package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc; }
+package(){ PATH=$M/hosttools/bin:$PATH DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc; }
 pkg_dri(){ amove usr/lib/dri 'usr/lib/libgallium-*.so' usr/share/drirc.d; }
 pkg_vulkan(){ amove 'usr/lib/libvulkan_*.so' usr/share/vulkan 'usr/lib/libVkLayer_*.so'; }
 pkg_va(){ amove 'usr/lib/dri/*_drv_video.so'; }

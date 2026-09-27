@@ -1,0 +1,11 @@
+# melon /etc/profile
+export PATH=/usr/local/bin:/usr/bin
+export PAGER=less EDITOR=vi
+export CHARSET=UTF-8 LANG=C.UTF-8 LC_COLLATE=C
+umask 022
+for f in /etc/profile.d/*.sh; do [ -r "$f" ] && . "$f"; done; unset f
+if [ -n "$BASH_VERSION" ]; then
+  [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
+else
+  PS1='\u@\h:\w\$ '
+fi

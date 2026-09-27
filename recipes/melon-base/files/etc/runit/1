@@ -1,0 +1,40 @@
+#!/bin/sh
+# melon runit stage 1: one-time system initialisation
+PATH=/usr/bin
+. /etc/runit/functions
+msg "Welcome to melon"
+mountpoint -q /proc || mount -t proc proc /proc -o nosuid,noexec,nodev
+mountpoint -q /sys  || mount -t sysfs sys /sys -o nosuid,noexec,nodev
+mountpoint -q /run  || mount -t tmpfs run /run -o mode=0755,nosuid,nodev
+mountpoint -q /dev  || mount -t devtmpfs dev /dev -o mode=0755,nosuid
+mkdir -p /dev/pts /dev/shm /run/lock
+mountpoint -q /dev/pts || mount -t devpts devpts /dev/pts -o mode=0620,gid=5,nosuid,noexec
+mountpoint -q /dev/shm || mount -t tmpfs shm /dev/shm -o mode=1777,nosuid,nodev
+mountpoint -q /sys/fs/cgroup || mount -t cgroup2 -o nsdelegate cgroup2 /sys/fs/cgroup 2>/dev/null
+[ -d /sys/firmware/efi/efivars ] && { mountpoint -q /sys/firmware/efi/efivars || mount -t efivarfs efivarfs /sys/firmware/efi/efivars 2>/dev/null; }
+ln -sf /proc/self/fd /dev/fd; ln -sf fd/0 /dev/stdin; ln -sf fd/1 /dev/stdout; ln -sf fd/2 /dev/stderr
+
+msg "Starting devices"
+mdev -s
+# coldplug: load drivers for hardware that is already present
+find /sys/devices -name modalias -type f -exec cat {} + 2>/dev/null | sort -u | xargs -r modprobe -a -b -q 2>/dev/null
+[ -s /etc/modules ] && grep -v '^#' /etc/modules | xargs -r modprobe -a -q
+mdev -s
+
+msg "Mounting filesystems"
+mount -o remount,rw / 2>/dev/null
+mount -a -t nosysfs,nonfs,noproc,notmpfs 2>/dev/null
+swapon -a 2>/dev/null
+
+hostname -F /etc/hostname 2>/dev/null
+sysctl -q -p /etc/sysctl.conf 2>/dev/null
+for f in /etc/sysctl.d/*.conf; do [ -f "$f" ] && sysctl -q -p "$f"; done
+ip link set lo up
+[ -f /var/lib/random-seed ] && cat /var/lib/random-seed > /dev/urandom
+hwclock -s -u 2>/dev/null
+dmesg -n 3
+install -m 0664 -g utmp /dev/null /run/utmp
+: > /var/log/wtmp 2>/dev/null
+touch /etc/runit/stopit /etc/runit/reboot 2>/dev/null; chmod 0 /etc/runit/stopit /etc/runit/reboot 2>/dev/null
+msg "melon is up"
+exit 0

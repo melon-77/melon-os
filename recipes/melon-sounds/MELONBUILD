@@ -1,0 +1,8 @@
+pkgname=melon-sounds
+pkgver=1.0
+pkgdesc="melon sounds"
+license=custom
+depends=(mpg123 alsa-utils)
+builddir=$srcdir
+options=('!strip')
+package(){ install -Dm644 $startdir/ice.mp3 $pkgdir/usr/share/melon/.ice; }

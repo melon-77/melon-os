@@ -1,0 +1,25 @@
+# Runtime libraries taken from the melon cross compiler build.
+pkgname=libgcc
+pkgver=15.2.0
+pkgdesc="GNU C compiler runtime libraries"
+license="GPL-3.0-or-later WITH GCC-exception-3.1"
+url=https://gcc.gnu.org
+subpackages=(libstdc++ libstdc++-dev libatomic libgomp)
+depends_libstdc__="libgcc"
+depends_libstdc___dev="libstdc++"
+pkgdesc_libstdc__="GNU C++ standard library"
+pkgdesc_libstdc___dev="GNU C++ standard library headers"
+pkgdesc_libatomic="GCC atomic operations library"
+pkgdesc_libgomp="GCC OpenMP runtime"
+builddir=$srcdir
+package(){
+  L=$TOOLS/$TARGET/lib64; mkdir -p $pkgdir/usr/lib $pkgdir/usr/include
+  cp -a $L/libgcc_s.so* $L/libstdc++.so* $L/libatomic.so* $L/libgomp.so* $pkgdir/usr/lib/ 2>/dev/null || true
+  cp -a $L/libstdc++.a $L/libstdc++fs.a $L/libsupc++.a $pkgdir/usr/lib/ 2>/dev/null || true
+  cp -a $TOOLS/$TARGET/include/c++ $pkgdir/usr/include/
+  rm -f $pkgdir/usr/lib/*.py
+}
+pkg_libstdc__(){ amove 'usr/lib/libstdc++.so.*'; }
+pkg_libstdc___dev(){ amove usr/include/c++ 'usr/lib/libstdc++.so' 'usr/lib/*.a'; }
+pkg_libatomic(){ amove 'usr/lib/libatomic.so*'; }
+pkg_libgomp(){ amove 'usr/lib/libgomp.so*'; }

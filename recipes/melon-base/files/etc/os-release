@@ -1,0 +1,8 @@
+NAME="melon"
+PRETTY_NAME="melon Linux"
+ID=melon
+VERSION_ID=rolling
+BUILD_ID=@BUILD_ID@
+ANSI_COLOR="1;38;5;212"
+LOGO=melon
+HOME_URL="https://example.invalid/melon"

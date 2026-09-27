@@ -1,0 +1,3 @@
+#!/bin/sh
+# minimal shutdown: shutdown [-r|-h|-P] [now]
+case "$1" in -r) exec reboot ;; *) exec poweroff ;; esac

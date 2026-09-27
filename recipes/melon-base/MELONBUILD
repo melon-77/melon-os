@@ -1,0 +1,17 @@
+pkgname=melon-base
+pkgver=0.1
+pkgdesc="melon base system: init scripts, services, configuration and tools"
+license=MIT
+depends=(melon-layout musl busybox bash runit apk-tools ncurses-terminfo-base util-linux)
+builddir=$srcdir
+options=(keepdirs)
+package(){
+  cp -a $startdir/files/. $pkgdir/
+  sed -i "s/@BUILD_ID@/$(date +%Y%m%d)/" $pkgdir/etc/os-release
+  chmod 640 $pkgdir/etc/shadow; chmod 755 $pkgdir/usr/bin/* $pkgdir/etc/runit/[123] $pkgdir/etc/runit/ctrlaltdel
+  mkdir -p $pkgdir/var/service $pkgdir/var/lib $pkgdir/var/log $pkgdir/var/spool/cron/crontabs
+  ln -sf ../usr/lib/os-release $pkgdir/etc/os-release.lnk 2>/dev/null; rm -f $pkgdir/etc/os-release.lnk
+  mkdir -p $pkgdir/root; cat > $pkgdir/root/.bashrc <<'RC'
+[ -r /etc/bash/bashrc ] && . /etc/bash/bashrc
+RC
+}

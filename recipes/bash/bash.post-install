@@ -1,0 +1,5 @@
+#!/bin/sh
+[ -f /etc/shells ] || exit 0
+grep -qx /bin/bash /etc/shells || echo /bin/bash >> /etc/shells
+grep -qx /usr/bin/bash /etc/shells || echo /usr/bin/bash >> /etc/shells
+exit 0

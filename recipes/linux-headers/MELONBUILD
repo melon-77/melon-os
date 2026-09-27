@@ -1,0 +1,8 @@
+pkgname=linux-headers
+pkgver=7.0
+pkgdesc="Linux kernel userspace API headers"
+license=GPL-2.0-only
+url=https://kernel.org
+source=(linux-7.0.tar.gz)
+builddir=$srcdir/linux-7.0
+package(){ make ARCH=x86_64 INSTALL_HDR_PATH=$pkgdir/usr headers_install >/dev/null; }

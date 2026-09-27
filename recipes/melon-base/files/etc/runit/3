@@ -1,0 +1,18 @@
+#!/bin/sh
+# melon runit stage 3: shutdown
+PATH=/usr/bin
+. /etc/runit/functions
+msg "Stopping services"
+sv -w 10 force-stop /var/service/* >/dev/null 2>&1
+sv exit /var/service/* >/dev/null 2>&1
+msg "Saving random seed"
+dd if=/dev/urandom of=/var/lib/random-seed count=1 bs=512 2>/dev/null
+hwclock -w -u 2>/dev/null
+msg "Sending TERM to all processes"
+killall5 -15; sleep 1; killall5 -9
+msg "Unmounting filesystems"
+swapoff -a 2>/dev/null
+sync
+umount -a -r -t notmpfs,nosysfs,noproc,nodevtmpfs 2>/dev/null
+mount -o remount,ro / 2>/dev/null
+sync

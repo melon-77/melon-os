@@ -1,0 +1,31 @@
+#!/bin/sh
+# melon live initramfs: find the melon medium, mount the squashfs root with a RAM overlay, hand over to runit.
+export PATH=/bin
+/bin/busybox --install -s /bin
+mkdir -p /proc /sys /dev /mnt/media /mnt/ro /mnt/rw /newroot
+mount -t proc proc /proc; mount -t sysfs sys /sys; mount -t devtmpfs dev /dev
+echo 3 > /proc/sys/kernel/printk
+printf '\033[1;38;5;212m=>\033[0m \033[1mmelon live: looking for boot medium\033[0m\n'
+found=
+for try in $(seq 1 40); do
+  for d in /dev/sr* /dev/sd* /dev/nvme*n* /dev/vd* /dev/mmcblk*; do
+    [ -b "$d" ] || continue
+    mount -r "$d" /mnt/media 2>/dev/null || continue
+    if [ -f /mnt/media/melon/rootfs.sqfs ]; then found=$d; break 2; fi
+    umount /mnt/media
+  done
+  sleep 0.5
+done
+[ -n "$found" ] || { echo "melon: boot medium not found. Dropping to a shell."; exec sh; }
+echo "   found on $found"
+toram=; for a in $(cat /proc/cmdline); do [ "$a" = toram ] && toram=1; done
+mount -t tmpfs -o mode=755,size=80% tmpfs /mnt/rw
+sq=/mnt/media/melon/rootfs.sqfs
+if [ -n "$toram" ]; then echo "   copying system to RAM"; cp $sq /mnt/rw/rootfs.sqfs; sq=/mnt/rw/rootfs.sqfs; fi
+mount -t squashfs -o loop,ro $sq /mnt/ro || { echo "melon: cannot mount root image"; exec sh; }
+mkdir -p /mnt/rw/upper /mnt/rw/work
+mount -t overlay -o lowerdir=/mnt/ro,upperdir=/mnt/rw/upper,workdir=/mnt/rw/work overlay /newroot
+mkdir -p /newroot/media/melon
+mount --move /mnt/media /newroot/media/melon
+umount /proc /sys; umount /dev 2>/dev/null
+exec switch_root /newroot /usr/bin/runit-init

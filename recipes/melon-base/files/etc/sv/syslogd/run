@@ -1,0 +1,2 @@
+#!/bin/sh
+exec syslogd -n -O /var/log/messages -s 1024 -b 4

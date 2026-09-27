@@ -1,0 +1,14 @@
+pkgname=melon-layout
+pkgver=1.0
+pkgdesc="melon filesystem hierarchy (merged /usr)"
+license=MIT
+builddir=$srcdir
+package(){
+  cd $pkgdir
+  mkdir -p usr/bin usr/lib usr/share usr/include usr/local/bin usr/local/lib usr/local/share \
+    boot dev etc home media mnt opt proc root run srv sys tmp \
+    var/cache var/empty var/lib var/log var/mail var/opt var/spool var/tmp var/service etc/profile.d etc/apk/keys
+  ln -s usr/bin bin; ln -s usr/bin sbin; ln -s usr/lib lib; ln -s bin usr/sbin; ln -s ../run var/run; ln -s ../run/lock var/lock
+  chmod 1777 tmp var/tmp; chmod 700 root
+}
+options=(keepdirs)

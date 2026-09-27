@@ -1,0 +1,5 @@
+#!/bin/sh
+[ -r conf ] && . ./conf
+IFACE=${IFACE:-$(for i in /sys/class/net/*; do [ -d $i/wireless ] && { echo ${i##*/}; break; }; done)}
+[ -n "$IFACE" ] || { sleep 30; exit 1; }
+exec wpa_supplicant -s -c /etc/wpa_supplicant/wpa_supplicant.conf -i "$IFACE" -D nl80211,wext

@@ -1,0 +1,36 @@
+pkgname=linux-firmware
+pkgver=20240318
+pkgdesc="Firmware blobs for Linux drivers (meta package)"
+license="custom:redistributable"
+url=https://gitlab.com/kernel-firmware/linux-firmware
+_debs="amd-graphics:amdgpu realtek:realtek intel-wireless:intel-wifi intel-graphics:intel-gpu mediatek:mediatek qualcomm-wireless:atheros misc:other"
+source=(linux-firmware-amd-graphics_20240318.git3b128b60-0ubuntu3.3_all.deb
+        linux-firmware-realtek_20240318.git3b128b60-0ubuntu3.1_all.deb
+        linux-firmware-intel-wireless_20240318.git3b128b60-0ubuntu3.1_all.deb
+        linux-firmware-intel-graphics_20240318.git3b128b60-0ubuntu3.1_all.deb
+        linux-firmware-mediatek_20240318.git3b128b60-0ubuntu3.1_all.deb
+        linux-firmware-qualcomm-wireless_20240318.git3b128b60-0ubuntu3.1_all.deb
+        linux-firmware-misc_20240318.git3b128b60-0ubuntu3.1_all.deb
+        wireless-regdb-2026.05.30.tar.gz)
+subpackages=(linux-firmware-amdgpu linux-firmware-realtek linux-firmware-intel-wifi linux-firmware-intel-gpu linux-firmware-mediatek linux-firmware-atheros linux-firmware-other wireless-regdb)
+depends=(linux-firmware-amdgpu linux-firmware-realtek linux-firmware-intel-wifi linux-firmware-intel-gpu linux-firmware-mediatek linux-firmware-atheros linux-firmware-other wireless-regdb)
+builddir=$srcdir
+pkgdesc_wireless_regdb="Wireless regulatory database"
+package(){
+  for pair in $_debs; do deb=${pair%%:*}; sub=${pair##*:}
+    mkdir -p x-$sub; dpkg-deb -x $srcdir/linux-firmware-${deb}_*.deb x-$sub
+    mkdir -p $pkgbase/linux-firmware-$sub/usr/lib
+    mv x-$sub/lib/firmware $pkgbase/linux-firmware-$sub/usr/lib/firmware
+  done
+  install -Dm644 wireless-regdb-*/regulatory.db $pkgbase/wireless-regdb/usr/lib/firmware/regulatory.db
+  install -Dm644 wireless-regdb-*/regulatory.db.p7s $pkgbase/wireless-regdb/usr/lib/firmware/regulatory.db.p7s
+  mkdir -p $pkgdir/usr/share/licenses/linux-firmware; echo "See https://gitlab.com/kernel-firmware/linux-firmware WHENCE" > $pkgdir/usr/share/licenses/linux-firmware/README
+}
+options=('!strip')
+pkgdesc_linux_firmware_amdgpu="Firmware for amdgpu devices"
+pkgdesc_linux_firmware_realtek="Firmware for realtek devices"
+pkgdesc_linux_firmware_intel_wifi="Firmware for intel-wifi devices"
+pkgdesc_linux_firmware_intel_gpu="Firmware for intel-gpu devices"
+pkgdesc_linux_firmware_mediatek="Firmware for mediatek devices"
+pkgdesc_linux_firmware_atheros="Firmware for atheros devices"
+pkgdesc_linux_firmware_other="Firmware for other devices"

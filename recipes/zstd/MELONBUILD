@@ -1,0 +1,12 @@
+pkgname=zstd
+pkgver=1.5.7
+pkgdesc="Zstandard - fast real-time compression"
+license="BSD-3-Clause OR GPL-2.0-or-later"
+url=https://facebook.github.io/zstd
+source=(zstd-1.5.7.tar.xz)
+subpackages=(zstd-dev zstd-libs)
+depends=(zstd-libs)
+pkgdesc_zstd_libs="Zstandard shared library"
+build(){ make -j$JOBS PREFIX=/usr lib-release >/dev/null; make -j$JOBS -C programs PREFIX=/usr zstd-release >/dev/null; }
+package(){ make PREFIX=/usr DESTDIR=$pkgdir -C lib install-shared install-static install-includes install-pc >/dev/null; make -C programs PREFIX=/usr DESTDIR=$pkgdir install >/dev/null; rm -rf $pkgdir/usr/share/man; }
+pkg_libs(){ amove 'usr/lib/libzstd.so.*'; }

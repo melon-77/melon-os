@@ -1,0 +1,6 @@
+#!/bin/sh
+[ -r conf ] && . ./conf
+IFACE=${IFACE:-$(for i in /sys/class/net/*; do n=${i##*/}; [ "$n" = lo ] && continue; [ -d $i/wireless ] && continue; echo $n; break; done)}
+[ -n "$IFACE" ] || { sleep 30; exit 1; }
+ip link set "$IFACE" up
+exec udhcpc -f -S -i "$IFACE" -R -t 0 -A 5

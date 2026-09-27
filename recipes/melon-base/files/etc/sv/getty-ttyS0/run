@@ -1,0 +1,5 @@
+#!/bin/sh
+# only offer a login on the serial port when the kernel was told to use it as a console
+[ -r conf ] && . ./conf
+grep -q "console=ttyS0" /proc/cmdline || exec sleep 2147483647
+exec setsid getty ${GETTY_ARGS} 115200 ttyS0 vt100

@@ -1,30 +1,41 @@
 #!/bin/bash
 # mkiso.sh: assemble the melon live/installer ISO (BIOS + UEFI hybrid) from the melon package repo.
+#
+# The ISO carries two squashfs layers:
+#   melon/rootfs.sqfs  a pristine, apk-installed melon system (exactly what gets installed)
+#   melon/live.sqfs    the small live-session layer on top (autologin, hostname, live services, sounds)
+# The initramfs stacks them with a RAM overlay. The installers copy rootfs.sqfs to disk (fast, and no
+# second copy of every package on the ISO) and use the repo on the ISO only for extra packages.
 set -euo pipefail
 . /home/claude/melon/scripts/env.sh
 APK=$M/hosttools/bin/apk
-ROOT=$WORK/liveroot ISO=$WORK/iso INITRD=$WORK/initrd
+ROOT=$WORK/liveroot LIVE=$WORK/livelayer ISO=$WORK/iso INITRD=$WORK/initrd
 DATE=$(date +%Y%m%d)
 OUTISO=$M/out/melon-$DATE-x86_64.iso
-PKGS=${PKGS:-"melon-base linux-melon linux-firmware wpa_supplicant xfsprogs grub zstd openssl ncurses-terminfo musl-utils alsa-utils"}
-LIVE_EXTRA=${LIVE_EXTRA:-"melon-sounds"}
+PKGS=${PKGS:-"melon-base linux-melon linux-firmware wpa_supplicant xfsprogs grub zstd openssl ncurses-terminfo musl-utils alsa-utils mpg123 kmod"}
+DESKTOP_PKGS=${DESKTOP_PKGS:-}
 step(){ printf '\033[1;35m== %s\033[0m\n' "$*"; }
+apkx(){ $APK --arch x86_64 --keys-dir $M/keys/trusted --repositories-file /dev/null --repository $REPO/x86_64/Packages.adb --no-cache "$@"; }
 
-step "root filesystem"
-rm -rf $ROOT $ISO $INITRD; mkdir -p $ROOT $ISO/boot/grub $ISO/melon $INITRD
-$APK --root $ROOT --initdb --arch x86_64 --keys-dir $M/keys/trusted --repositories-file /dev/null \
-     --repository $REPO/x86_64/Packages.adb --no-cache add $PKGS $LIVE_EXTRA
-echo "$REPO" >/dev/null
+step "system layer (what gets installed)"
+rm -rf $ROOT $LIVE $ISO $INITRD; mkdir -p $ROOT $LIVE $ISO/boot/grub $ISO/melon $INITRD
+apkx --root $ROOT --initdb add $PKGS
+rm -rf $ROOT/var/cache/apk/*
+mkdir -p $ROOT/usr/share/melon/profiles
+printf '%s\n' $PKGS > $ROOT/usr/share/melon/profiles/base
+[ -n "$DESKTOP_PKGS" ] && printf '%s\n' $PKGS $DESKTOP_PKGS > $ROOT/usr/share/melon/profiles/desktop
+cp $ROOT/boot/vmlinuz-melon $ISO/boot/vmlinuz
 
-step "live tweaks"
-echo melon-live > $ROOT/etc/hostname
-sed -i 's/^root:[^:]*:/root::/' $ROOT/etc/shadow
-echo 'GETTY_ARGS="-n -l /usr/bin/melon-autologin"' > $ROOT/etc/sv/getty-tty1/conf
-echo 'GETTY_ARGS="-n -l /usr/bin/melon-autologin"' > $ROOT/etc/sv/getty-ttyS0/conf
-for s in getty-tty1 getty-tty2 getty-tty3 getty-ttyS0 mdevd syslogd klogd dhcp; do ln -sfn /etc/sv/$s $ROOT/var/service/$s; done
-mkdir -p $ROOT/usr/share/melon/profiles; printf "%s\n" $PKGS > $ROOT/usr/share/melon/profiles/base; [ -n "${DESKTOP_PKGS:-}" ] && printf "%s\n" $PKGS $DESKTOP_PKGS > $ROOT/usr/share/melon/profiles/desktop
-echo "/media/melon/melon/repo/x86_64/Packages.adb" > $ROOT/etc/apk/repositories
-cat > $ROOT/etc/motd <<'MOTD'
+step "live layer"
+mkdir -p $LIVE/etc/sv/getty-tty1 $LIVE/etc/sv/getty-ttyS0 $LIVE/var/service $LIVE/etc/apk $LIVE/usr/share/melon
+echo melon-live > $LIVE/etc/hostname
+sed 's/^root:[^:]*:/root::/' $ROOT/etc/shadow > $LIVE/etc/shadow; chmod 640 $LIVE/etc/shadow
+echo 'GETTY_ARGS="-n -l /usr/bin/melon-autologin"' > $LIVE/etc/sv/getty-tty1/conf
+echo 'GETTY_ARGS="-n -l /usr/bin/melon-autologin"' > $LIVE/etc/sv/getty-ttyS0/conf
+for s in getty-tty1 getty-tty2 getty-tty3 getty-ttyS0 mdevd syslogd klogd dhcp; do ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
+echo "/media/melon/melon/repo/x86_64/Packages.adb" > $LIVE/etc/apk/repositories
+install -m644 $M/recipes/melon-sounds/ice.mp3 $LIVE/usr/share/melon/.ice
+cat > $LIVE/etc/motd <<'MOTD'
 
   Welcome to the melon live system.
 
@@ -34,15 +45,18 @@ cat > $ROOT/etc/motd <<'MOTD'
     melon-svc enable wpa_supplicant dhcp-wifi      connect to Wi-Fi
 
 MOTD
-cp $ROOT/boot/vmlinuz-melon $ISO/boot/vmlinuz
-rm -rf $ROOT/var/cache/apk/*
 
 step "squashfs"
-mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet -e boot/vmlinuz-melon boot/System.map-melon
-step "package repository"
+mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet
+mksquashfs $LIVE $ISO/melon/live.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet -all-root
+
+step "package repository (extras only; the base system comes from rootfs.sqfs)"
 mkdir -p $ISO/melon/repo/x86_64
-$APK --arch x86_64 --keys-dir $M/keys/trusted --repositories-file /dev/null --repository $REPO/x86_64/Packages.adb \
-     --no-cache fetch --recursive --output $ISO/melon/repo/x86_64 $PKGS ${DESKTOP_PKGS:-} >/dev/null
+if [ -n "$DESKTOP_PKGS" ]; then
+  apkx fetch --recursive --output $ISO/melon/repo/x86_64 $DESKTOP_PKGS >/dev/null
+fi
+# always carry the small, commonly wanted extras so an offline install can still add them
+apkx fetch --recursive --output $ISO/melon/repo/x86_64 melon-base bash busybox musl apk-tools >/dev/null
 ( cd $ISO/melon/repo/x86_64 && $APK --keys-dir $M/keys/trusted --sign-key $M/keys/melon-signing.rsa mkndx -d "melon $DATE" -o Packages.adb *.apk )
 
 step "initramfs"
@@ -81,4 +95,5 @@ menuentry 'melon live (serial console)' {
 CFG
 mkdir -p $M/out; rm -f $M/out/melon-*-x86_64.iso
 $M/hosttools/grub/bin/grub-mkrescue -o $OUTISO $ISO -- -volid MELON 2>&1 | grep -v -E '^xorriso|^Drive|^Media|^libisofs|^Added|^ISO image|^Writing|^Written|^$' || true
+( cd $M/out && sha256sum $(basename $OUTISO) > SHA256SUMS )
 ls -la $OUTISO

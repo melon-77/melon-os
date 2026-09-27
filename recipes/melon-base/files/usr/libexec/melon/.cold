@@ -30,7 +30,8 @@ askpw(){ eval "cur=\${$1:-}"; [ -n "$cur" ] && return 0
     [ -n "$a" ] && [ "$a" = "$b" ] && break; echo "passwords did not match or were empty"; done; eval "$1=\$a"; }
 
 [ "$(id -u)" = 0 ] || die "needs root"
-[ -f "$REPO/x86_64/Packages.adb" ] || die "package repository not found at $REPO (are you on the live ISO?)"
+SYSIMG=${MELON_SYSIMG:-/media/melon/melon/rootfs.sqfs}
+[ -f "$SYSIMG" ] || die "melon system image not found at $SYSIMG (are you on the live ISO?)"
 
 # theme music, at 30% volume, for as long as this runs
 ICE_PID=
@@ -94,14 +95,19 @@ mkfs.xfs -q -f -L melon "${PP}3"
 say "Mounting"
 mkdir -p $TARGET; mount -t xfs "${PP}3" $TARGET
 mkdir -p $TARGET/boot; mount -t vfat -o umask=0077 "${PP}2" $TARGET/boot
-mkdir -p $TARGET/dev $TARGET/proc $TARGET/sys $TARGET/run $TARGET/etc/apk/keys
-cp /etc/apk/keys/* $TARGET/etc/apk/keys/
+say "Copying the melon system"
+mkdir -p /run/melon-src; mount -t squashfs -o loop,ro "$SYSIMG" /run/melon-src
+tar -C /run/melon-src --exclude=./boot -cf - . | tar -C $TARGET -xpf -
+for f in /run/melon-src/boot/*; do [ -f "$f" ] && cp "$f" $TARGET/boot/; done
+umount /run/melon-src
+mkdir -p $TARGET/dev $TARGET/proc $TARGET/sys $TARGET/run
 for d in dev proc sys; do mount --bind /$d $TARGET/$d; done
 
-say "Installing packages with apk"
-PKGS=$(grep -v '^#' /usr/share/melon/profiles/$MELON_PROFILE)
-apk --root $TARGET --initdb --arch x86_64 --keys-dir /etc/apk/keys --repositories-file /dev/null \
-    --repository "$REPO/x86_64/Packages.adb" --no-cache add $PKGS
+EXTRA=$(grep -v '^#' /usr/share/melon/profiles/$MELON_PROFILE | grep -vxF -f /usr/share/melon/profiles/base || true)
+if [ -n "$EXTRA" ]; then
+  say "Installing the $MELON_PROFILE profile with apk"
+  apk --root $TARGET --arch x86_64 --repositories-file /dev/null --repository "$REPO/x86_64/Packages.adb" --no-cache add $EXTRA
+fi
 
 say "Configuring the system"
 mkdir -p $TARGET/var/lib/melon

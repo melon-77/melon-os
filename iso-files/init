@@ -20,11 +20,13 @@ done
 echo "   found on $found"
 toram=; for a in $(cat /proc/cmdline); do [ "$a" = toram ] && toram=1; done
 mount -t tmpfs -o mode=755,size=80% tmpfs /mnt/rw
-sq=/mnt/media/melon/rootfs.sqfs
-if [ -n "$toram" ]; then echo "   copying system to RAM"; cp $sq /mnt/rw/rootfs.sqfs; sq=/mnt/rw/rootfs.sqfs; fi
+sq=/mnt/media/melon/rootfs.sqfs lv=/mnt/media/melon/live.sqfs
+if [ -n "$toram" ]; then echo "   copying system to RAM"; cp $sq $lv /mnt/rw/; sq=/mnt/rw/rootfs.sqfs lv=/mnt/rw/live.sqfs; fi
+mkdir -p /mnt/live
 mount -t squashfs -o loop,ro $sq /mnt/ro || { echo "melon: cannot mount root image"; exec sh; }
+mount -t squashfs -o loop,ro $lv /mnt/live || { echo "melon: cannot mount live layer"; exec sh; }
 mkdir -p /mnt/rw/upper /mnt/rw/work
-mount -t overlay -o lowerdir=/mnt/ro,upperdir=/mnt/rw/upper,workdir=/mnt/rw/work overlay /newroot
+mount -t overlay -o lowerdir=/mnt/live:/mnt/ro,upperdir=/mnt/rw/upper,workdir=/mnt/rw/work overlay /newroot
 mkdir -p /newroot/media/melon
 mount --move /mnt/media /newroot/media/melon
 umount /proc /sys; umount /dev 2>/dev/null

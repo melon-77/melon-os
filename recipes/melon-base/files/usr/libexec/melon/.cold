@@ -36,10 +36,10 @@ askpw(){ eval "cur=\${$1:-}"; [ -n "$cur" ] && return 0
 ICE_PID=
 if [ -f /usr/share/melon/.ice ] && command -v mpg123 >/dev/null && [ -e /dev/snd/controlC0 ]; then
   if amixer sget Master >/dev/null 2>&1; then
-    amixer -q -M sset Master 30% unmute 2>/dev/null
-    for c in PCM Speaker Headphone Front; do amixer -q -M sset "$c" 100% unmute 2>/dev/null; done
+    amixer -q -M sset Master 30% unmute 2>/dev/null || true
+    for c in PCM Speaker Headphone Front; do amixer -q -M sset "$c" 100% unmute 2>/dev/null || true; done
   else
-    amixer -q -M sset PCM 30% unmute 2>/dev/null
+    amixer -q -M sset PCM 30% unmute 2>/dev/null || true
   fi
   mpg123 -q --loop -1 /usr/share/melon/.ice >/dev/null 2>&1 &
   ICE_PID=$!

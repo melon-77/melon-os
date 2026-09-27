@@ -21,7 +21,7 @@ ROWS = [
  ('libinput','1.31.1','libinput_1.31.1.orig.tar.gz','libinput-1.31.1-1920686963fe224f7d2f4fe195cbed651e11d455','meson','eudev-dev libevdev-dev mtdev-dev libwacom-dev',"-Ddocumentation=false -Dtests=false -Ddebug-gui=false -Dlibwacom=true -Dudev-dir=/usr/lib/udev -Dlua-plugins=disabled",''),
  ('pixman','0.46.4','pixman_0.46.4.orig.tar.gz','pixman-0.46.4','meson','',"-Dtests=disabled -Ddemos=disabled -Dgtk=disabled -Dlibpng=disabled",''),
  ('libpng','1.6.57','libpng1.6_1.6.57.orig.tar.gz','libpng-1.6.57','auto','zlib-dev',"--disable-static",''),
- ('libjpeg-turbo','2.1.5','libjpeg-turbo_2.1.5.orig.tar.gz','libjpeg-turbo-2.1.5','cmake','',"-DENABLE_STATIC=OFF -DWITH_JPEG8=ON -DCMAKE_INSTALL_DEFAULT_LIBDIR=lib",''),
+ ('libjpeg-turbo','2.1.5','libjpeg-turbo_2.1.5.orig.tar.gz','libjpeg-turbo-2.1.5','cmake','',"-DENABLE_STATIC=OFF -DWITH_JPEG8=ON -DCMAKE_INSTALL_DEFAULT_LIBDIR=lib -DCMAKE_INSTALL_LIBDIR=/usr/lib",''),
  ('freetype','2.14.2','freetype_2.14.2+dfsg.orig.tar.xz','freetype-2.14.2','meson','zlib-dev libpng-dev',"-Dharfbuzz=disabled -Dbrotli=disabled -Dbzip2=disabled -Dpng=enabled -Dzlib=system",''),
  ('harfbuzz','12.3.2','harfbuzz_12.3.2.orig.tar.xz','harfbuzz-12.3.2','meson','freetype-dev glib-dev',"-Dtests=disabled -Ddocs=disabled -Dintrospection=disabled -Dcairo=disabled -Dicu=disabled -Dfreetype=enabled -Dglib=enabled -Dgobject=disabled -Dutilities=disabled",''),
  ('fontconfig','2.17.1','fontconfig_2.17.1.orig.tar.gz','fontconfig-2.17.1-6d0a98982ec351c165c9224c8b7dbdfca3010e47','meson','freetype-dev expat-dev',"-Ddoc=disabled -Dtests=disabled -Dtools=enabled -Dcache-build=disabled -Dnls=disabled",''),
@@ -110,7 +110,7 @@ ROWS = [
 ]
 
 # pkgrel for recipes whose build changed without a version change (rule 6 in AGENTS.md)
-PKGREL = {'npth': 1, 'networkmanager': 0, 'power-profiles-daemon': 0}
+PKGREL = {'npth': 1, 'libjpeg-turbo': 1, 'networkmanager': 0, 'power-profiles-daemon': 0}
 
 def recipe(r):
     name, ver, tb, top, system, mdeps, opts, extra = r

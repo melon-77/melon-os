@@ -1,0 +1,12 @@
+#!/bin/sh
+# melon-hwprofile: record this machine's hardware so a tuned kernel can be built for it.
+out=${1:-/root/melon-hwprofile-$(cat /etc/hostname 2>/dev/null || echo melon).txt}
+{
+  echo "# melon hardware profile $(date -u +%F)"
+  echo "## dmi"; for f in sys_vendor product_name product_version board_name bios_version; do printf '%s: ' $f; cat /sys/class/dmi/id/$f 2>/dev/null; done
+  echo "## cpu"; grep -m1 'model name' /proc/cpuinfo; grep -m1 flags /proc/cpuinfo
+  echo "## lsmod"; cat /proc/modules | cut -d' ' -f1 | sort
+  echo "## modaliases"; find /sys/devices -name modalias -exec cat {} + 2>/dev/null | sort -u
+  echo "## firmware requests"; dmesg | grep -i firmware
+} > "$out"
+echo "saved $out - send this file to whoever builds your tuned kernel"

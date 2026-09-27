@@ -1,0 +1,12 @@
+# build outputs and downloaded sources (reproducible from scripts)
+/work/
+/tools/
+/sysroot/
+/hosttools/
+/sources/
+/repo/
+/out/
+/logs/
+# never commit the private repository signing key
+/keys/*.rsa
+!/keys/*.rsa.pub

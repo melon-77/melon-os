@@ -1,0 +1,153 @@
+#!/bin/sh
+# the quick melon installer.
+#
+# Layout (GPT, boots on both BIOS and UEFI):
+#   1  1 MiB   BIOS boot (GRUB core for legacy BIOS)
+#   2  1 GiB   FAT32  -> /boot   (kernel, GRUB, EFI/BOOT/BOOTX64.EFI)
+#   3  rest    XFS    -> /
+#
+# Unattended use (for testing): set MELON_DISK, MELON_HOSTNAME, MELON_ROOTPW, MELON_USER,
+# MELON_USERPW and MELON_YES=1 (and optionally MELON_PROFILE, MELON_WIFI_SSID/MELON_WIFI_PSK).
+#
+# This is the quick installer. The desktop ISO's advertised installer is Calamares
+# (with the melon gauntlet); this one installs the same thing in a handful of prompts.
+#   MELON_PROFILE=base     console system
+#   MELON_PROFILE=desktop  everything the desktop ISO installs (KDE Plasma, Wayland, Flatpak, ...)
+set -e
+PATH=/usr/bin
+REPO=${MELON_REPO:-/media/melon/melon/repo}
+TARGET=/mnt/melon
+P=$(printf '\033[1;38;5;212m') B=$(printf '\033[1m') R=$(printf '\033[0m')
+
+say(){ printf '%s=>%s %s%s%s\n' "$P" "$R" "$B" "$*" "$R"; }
+die(){ printf '%s!! %s%s\n' "$P" "$*" "$R" >&2; exit 1; }
+ask(){ # ask VAR "question" [default]
+  eval "cur=\${$1:-}"; [ -n "$cur" ] && return 0
+  printf '%s?%s %s%s: ' "$P" "$R" "$2" "${3:+ [$3]}"; read -r ans; [ -z "$ans" ] && ans=$3; eval "$1=\$ans"; }
+askpw(){ eval "cur=\${$1:-}"; [ -n "$cur" ] && return 0
+  while :; do printf '%s?%s %s: ' "$P" "$R" "$2"; stty -echo; read -r a; stty echo; echo
+    printf '%s?%s again: ' "$P" "$R"; stty -echo; read -r b; stty echo; echo
+    [ -n "$a" ] && [ "$a" = "$b" ] && break; echo "passwords did not match or were empty"; done; eval "$1=\$a"; }
+
+[ "$(id -u)" = 0 ] || die "needs root"
+[ -f "$REPO/x86_64/Packages.adb" ] || die "package repository not found at $REPO (are you on the live ISO?)"
+
+# theme music, at 30% volume, for as long as this runs
+ICE_PID=
+if [ -f /usr/share/melon/.ice ] && command -v mpg123 >/dev/null && [ -e /dev/snd/controlC0 ]; then
+  if amixer sget Master >/dev/null 2>&1; then
+    amixer -q -M sset Master 30% unmute 2>/dev/null
+    for c in PCM Speaker Headphone Front; do amixer -q -M sset "$c" 100% unmute 2>/dev/null; done
+  else
+    amixer -q -M sset PCM 30% unmute 2>/dev/null
+  fi
+  mpg123 -q --loop -1 /usr/share/melon/.ice >/dev/null 2>&1 &
+  ICE_PID=$!
+fi
+stop_ice(){ [ -n "$ICE_PID" ] && kill "$ICE_PID" 2>/dev/null; ICE_PID=; }
+trap stop_ice EXIT
+trap 'stop_ice; exit 130' INT TERM
+[ -t 1 ] && [ -z "${MELON_YES:-}" ] && sh /usr/share/melon/.glove
+cat <<EOF
+  This puts melon on a whole disk. Everything on that disk will be erased.
+
+EOF
+say "Disks"
+lsblk -d -n -o NAME,SIZE,MODEL,TYPE | grep -v -E ' (rom|loop)$' | grep -v '^loop' | sed 's/^/   /'
+echo
+ask MELON_DISK "Disk to install to (e.g. sda, nvme0n1, vda)"
+DISK=/dev/${MELON_DISK#/dev/}
+[ -b "$DISK" ] || die "$DISK is not a block device"
+PROFILES=$(ls /usr/share/melon/profiles 2>/dev/null | grep -v "\.services$" | xargs)
+DEFPROFILE=base; [ -f /usr/share/melon/profiles/desktop ] && DEFPROFILE=desktop
+ask MELON_PROFILE "What to install ($PROFILES)" $DEFPROFILE
+[ -f /usr/share/melon/profiles/$MELON_PROFILE ] || die "unknown profile $MELON_PROFILE"
+ask MELON_HOSTNAME "Hostname" melon
+askpw MELON_ROOTPW "Root password"
+ask MELON_USER "Your user name (empty for none)" ""
+[ -n "$MELON_USER" ] && askpw MELON_USERPW "Password for $MELON_USER"
+if ls -d /sys/class/net/*/wireless >/dev/null 2>&1; then
+  ask MELON_WIFI_SSID "Wi-Fi network name (empty to skip)" ""
+  [ -n "$MELON_WIFI_SSID" ] && askpw MELON_WIFI_PSK "Wi-Fi password"
+fi
+if [ "${MELON_YES:-}" != 1 ]; then
+  printf '\n%sErase %s and install melon? Type YES:%s ' "$B" "$DISK" "$R"; read -r ok; [ "$ok" = YES ] || die "aborted"
+fi
+
+case $DISK in *[0-9]) PP=${DISK}p ;; *) PP=$DISK ;; esac
+say "Partitioning $DISK"
+for m in $(grep "^$DISK" /proc/mounts | cut -d' ' -f2 | sort -r); do umount "$m"; done
+wipefs -a -q "$DISK"
+sfdisk -q -W always "$DISK" <<EOF
+label: gpt
+size=1MiB, type=21686148-6449-6E6F-744E-656564454649, name="bios"
+size=1GiB, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name="boot"
+type=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709, name="melon"
+EOF
+partx -u "$DISK" 2>/dev/null || true; sleep 1; mdev -s; sleep 1
+for n in 2 3; do [ -b "$PP$n" ] || die "partition $PP$n did not appear"; done
+
+say "Creating filesystems (FAT32 /boot, XFS /)"
+mkfs.vfat -F 32 -n MELONBOOT "${PP}2" >/dev/null
+mkfs.xfs -q -f -L melon "${PP}3"
+
+say "Mounting"
+mkdir -p $TARGET; mount -t xfs "${PP}3" $TARGET
+mkdir -p $TARGET/boot; mount -t vfat -o umask=0077 "${PP}2" $TARGET/boot
+mkdir -p $TARGET/dev $TARGET/proc $TARGET/sys $TARGET/run $TARGET/etc/apk/keys
+cp /etc/apk/keys/* $TARGET/etc/apk/keys/
+for d in dev proc sys; do mount --bind /$d $TARGET/$d; done
+
+say "Installing packages with apk"
+PKGS=$(grep -v '^#' /usr/share/melon/profiles/$MELON_PROFILE)
+apk --root $TARGET --initdb --arch x86_64 --keys-dir /etc/apk/keys --repositories-file /dev/null \
+    --repository "$REPO/x86_64/Packages.adb" --no-cache add $PKGS
+
+say "Configuring the system"
+mkdir -p $TARGET/var/lib/melon
+cp -a "$REPO" $TARGET/var/lib/melon/repo
+echo "/var/lib/melon/repo/x86_64/Packages.adb" > $TARGET/etc/apk/repositories
+echo "$MELON_HOSTNAME" > $TARGET/etc/hostname
+sed -i "s/^127.0.1.1.*/127.0.1.1\t$MELON_HOSTNAME/" $TARGET/etc/hosts
+ROOT_UUID=$(blkid -s UUID -o value "${PP}3"); BOOT_UUID=$(blkid -s UUID -o value "${PP}2")
+cat > $TARGET/etc/fstab <<EOF
+# <device>                                 <mountpoint> <type> <options>                 <dump> <pass>
+UUID=$ROOT_UUID  /            xfs    defaults,noatime          0      1
+UUID=$BOOT_UUID                             /boot        vfat   defaults,umask=0077       0      2
+tmpfs                                      /tmp         tmpfs  nosuid,nodev,mode=1777    0      0
+EOF
+echo "root:$MELON_ROOTPW" | chroot $TARGET chpasswd -c sha512
+if [ -n "$MELON_USER" ]; then
+  chroot $TARGET adduser -D -s /bin/bash -G users "$MELON_USER"
+  for g in wheel audio video input render plugdev netdev kvm cdrom; do chroot $TARGET addgroup "$MELON_USER" $g 2>/dev/null || true; done
+  echo "$MELON_USER:$MELON_USERPW" | chroot $TARGET chpasswd -c sha512
+fi
+SVCS="getty-tty1 getty-tty2 getty-tty3 mdevd syslogd klogd crond ntpd dhcp"
+[ -f /usr/share/melon/profiles/$MELON_PROFILE.services ] && SVCS="$SVCS $(cat /usr/share/melon/profiles/$MELON_PROFILE.services)"
+if [ -n "${MELON_WIFI_SSID:-}" ]; then
+  wpa_passphrase "$MELON_WIFI_SSID" "$MELON_WIFI_PSK" | grep -v '#psk' >> $TARGET/etc/wpa_supplicant/wpa_supplicant.conf
+  SVCS="$SVCS wpa_supplicant dhcp-wifi"
+fi
+if [ "${MELON_SERIAL:-0}" = 1 ]; then   # serial console, for headless machines and VMs
+  printf 'GRUB_SERIAL=1\nGRUB_CMDLINE_LINUX="console=tty0 console=ttyS0,115200"\n' >> $TARGET/etc/default/grub
+  SVCS="$SVCS getty-ttyS0"
+fi
+for s in $SVCS; do ln -sfn /etc/sv/$s $TARGET/var/service/$s; done
+
+say "Installing GRUB for BIOS and UEFI"
+chroot $TARGET grub-install --target=i386-pc --boot-directory=/boot "$DISK" 2>&1 | grep -v '^Installing for' || true
+chroot $TARGET grub-install --target=x86_64-efi --efi-directory=/boot --boot-directory=/boot --removable --no-nvram 2>&1 | grep -v '^Installing for' || true
+[ -f $TARGET/boot/EFI/BOOT/BOOTX64.EFI ] || die "UEFI GRUB was not installed"
+[ -f $TARGET/boot/grub/i386-pc/core.img ] || die "BIOS GRUB was not installed"
+chroot $TARGET melon-update-grub
+
+say "Finishing"
+sync
+for d in dev proc sys; do umount $TARGET/$d; done
+umount $TARGET/boot; umount $TARGET
+cat <<EOF
+
+${P}  melon is installed on $DISK.${R}
+  Remove the install media and run ${B}reboot${R}.
+
+EOF

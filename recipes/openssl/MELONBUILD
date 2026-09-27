@@ -1,0 +1,16 @@
+pkgname=openssl
+pkgver=3.5.5
+pkgdesc="Toolkit for TLS and cryptography"
+license=Apache-2.0
+url=https://www.openssl.org
+source=(openssl-3.5.5.tar.gz)
+subpackages=(openssl-dev libssl3 libcrypto3)
+depends=(libssl3 libcrypto3)
+depends_libssl3="libcrypto3"
+pkgdesc_libssl3="OpenSSL TLS library"
+pkgdesc_libcrypto3="OpenSSL crypto library"
+makedepends=(zlib-dev)
+build(){ ./Configure linux-x86_64 --prefix=/usr --libdir=lib --openssldir=/etc/ssl shared no-tests no-docs no-zlib enable-ktls >/dev/null; make -j$JOBS >/dev/null; }
+package(){ make DESTDIR=$pkgdir install_sw install_ssldirs >/dev/null; rm -f $pkgdir/usr/bin/c_rehash; }
+pkg_libssl3(){ amove 'usr/lib/libssl.so.*'; }
+pkg_libcrypto3(){ amove 'usr/lib/libcrypto.so.*' usr/lib/engines-3 usr/lib/ossl-modules etc/ssl; }

@@ -1,0 +1,24 @@
+pkgname=busybox
+pkgver=1.37.0
+pkgdesc="Size optimized toolbox of many common UNIX utilities"
+license=GPL-2.0-only
+url=https://busybox.net
+source=(busybox-1.37.0.tar.bz2)
+build(){
+  make defconfig >/dev/null
+  set_cfg(){ sed -i "/^\(# \)\?$1[= ]/d" .config; echo "$1=$2" >> .config; }
+  unset_cfg(){ sed -i "/^$1=/d" .config; echo "# $1 is not set" >> .config; }
+  unset_cfg CONFIG_TC
+  unset_cfg CONFIG_FEATURE_TC_INGRESS
+  set_cfg CONFIG_UNICODE_SUPPORT y
+  set_cfg CONFIG_FEATURE_MDEV_DAEMON y
+  set_cfg CONFIG_FEATURE_INSTALLER y
+  set_cfg CONFIG_EXTRA_CFLAGS "\"\""
+  yes "" 2>/dev/null | make oldconfig CROSS_COMPILE=$TARGET- >/dev/null || [ -f .config ]
+  make -j$JOBS CROSS_COMPILE=$TARGET- CC=$TARGET-gcc HOSTCC=gcc busybox >/dev/null
+}
+package(){
+  install -Dm755 busybox $pkgdir/usr/bin/busybox
+  ln -s busybox $pkgdir/usr/bin/sh
+  install -Dm755 examples/udhcp/simple.script $pkgdir/usr/share/udhcpc/default.script
+}

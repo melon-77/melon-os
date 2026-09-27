@@ -1,0 +1,19 @@
+pkgname=runit
+pkgver=2.3.0
+pkgdesc="UNIX init scheme with service supervision"
+license=BSD-3-Clause
+url=https://smarden.org/runit/
+source=(runit-2.3.0.tar.gz)
+builddir=$srcdir/admin/runit-2.3.0/src
+build(){
+  echo "$CC $CFLAGS" > conf-cc
+  echo "$CC $LDFLAGS" > conf-ld
+  # probe programs run on the build host through the musl loader in /lib
+  make -j1 >/dev/null
+}
+package(){
+  mkdir -p $pkgdir/usr/bin
+  for c in $(cat ../package/commands); do install -m755 $c $pkgdir/usr/bin/; done
+  ln -s runit-init $pkgdir/usr/bin/init
+  mkdir -p $pkgdir/usr/share/man/man8; cp ../man/*.8 $pkgdir/usr/share/man/man8/
+}

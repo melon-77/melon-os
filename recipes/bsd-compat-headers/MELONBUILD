@@ -1,0 +1,8 @@
+pkgname=bsd-compat-headers
+pkgver=0.7.2
+pkgrel=1
+pkgdesc="BSD/glibc compatibility headers (sys/cdefs.h) for musl"
+license=BSD-2-Clause
+depends=(musl-dev)
+builddir=$srcdir
+package(){ install -Dm644 $startdir/cdefs.h $pkgdir/usr/include/sys/cdefs.h; }

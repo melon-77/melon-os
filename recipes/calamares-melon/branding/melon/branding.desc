@@ -1,0 +1,40 @@
+---
+componentName:  melon
+
+welcomeStyleCalamares:   false
+welcomeExpandingLogo:   true
+windowExpanding:    normal
+windowSize: 1024px,700px
+windowPlacement: center
+sidebar: widget
+navigation: widget
+
+strings:
+    productName:         melon Linux
+    shortProductName:    melon
+    version:             rolling
+    shortVersion:        rolling
+    versionedName:       melon Linux (rolling)
+    shortVersionedName:  melon
+    bootloaderEntryName: melon
+    productUrl:          https://example.invalid/melon
+    supportUrl:          https://example.invalid/melon
+    knownIssuesUrl:      https://example.invalid/melon
+    releaseNotesUrl:     https://example.invalid/melon
+
+images:
+    productLogo:         "logo.png"
+    productIcon:         "icon.png"
+    productWelcome:      "welcome.png"
+
+slideshow:               "show.qml"
+slideshowAPI:            2
+
+style:
+   SidebarBackground:        "#16301c"
+   SidebarText:              "#e9f5e1"
+   SidebarTextCurrent:       "#16301c"
+   SidebarBackgroundCurrent: "#f0a35e"
+
+uploadServer :
+    type :    "none"

@@ -1,0 +1,2 @@
+#!/bin/sh
+mkdir -p /var/spool/cron/crontabs; exec crond -f -c /var/spool/cron/crontabs

@@ -1,0 +1,5 @@
+#!/bin/sh
+# reboot the system through runit
+[ "$(id -u)" = 0 ] || { echo "reboot: must be root" >&2; exit 1; }
+sync
+exec runit-init 6

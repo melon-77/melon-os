@@ -1,0 +1,28 @@
+pkgname=grub
+pkgver=2.14
+pkgdesc="GNU GRUB bootloader (BIOS and UEFI)"
+license=GPL-3.0-or-later
+url=https://www.gnu.org/software/grub/
+source=(grub-2.14.tar.xz)
+makedepends=(util-linux-dev bsd-compat-headers)
+depends=(busybox)
+_common="--disable-werror --disable-nls --disable-grub-mkfont --disable-device-mapper --disable-liblzma --disable-libzfs --disable-grub-emu-sdl --disable-grub-mount --disable-efiemu"
+# firmware-side code is freestanding and is compiled with the build host's gcc; the userland tools with the melon toolchain
+_tgt="CFLAGS= LDFLAGS= CXXFLAGS= HOST_CFLAGS=-O2 TARGET_CFLAGS=-Os TARGET_CC=gcc TARGET_OBJCOPY=objcopy TARGET_STRIP=strip TARGET_NM=nm TARGET_RANLIB=ranlib BUILD_CC=gcc"
+build(){
+  for p in pc efi; do
+    t=x86_64; [ $p = pc ] && t=i386
+    mkdir -p b-$p; ( cd b-$p; env $_tgt ../configure $conf_flags --target=$t --with-platform=$p $_common --program-prefix= >/dev/null; make -j$JOBS >/dev/null )
+  done
+}
+package(){
+  for p in pc efi; do make -C b-$p DESTDIR=$pkgdir install >/dev/null; done
+  rm -rf $pkgdir/usr/share/info $pkgdir/usr/share/man
+  mkdir -p $pkgdir/etc/default
+  cat > $pkgdir/etc/default/grub <<'CFG'
+GRUB_DISTRIBUTOR="melon"
+GRUB_TIMEOUT=3
+GRUB_CMDLINE_LINUX_DEFAULT="quiet"
+CFG
+}
+options=('!strip')

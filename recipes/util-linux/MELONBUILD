@@ -1,0 +1,28 @@
+pkgname=util-linux
+pkgver=2.41.3
+pkgdesc="Disk, filesystem and system utilities (fdisk, lsblk, mount, ...)"
+license="GPL-2.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause"
+url=https://github.com/util-linux/util-linux
+source=(util-linux-2.41.3.tar.xz)
+makedepends=(zlib-dev ncurses-dev)
+subpackages=(util-linux-dev libblkid libuuid libmount libsmartcols libfdisk)
+depends_libmount="libblkid"
+depends_libfdisk="libblkid libuuid"
+for _l in libblkid libuuid libmount libsmartcols libfdisk; do eval "pkgdesc_${_l}='util-linux $_l library'"; done
+build(){
+  ./configure $conf_flags --disable-all-programs --enable-libblkid --enable-libuuid --enable-libmount \
+    --enable-libsmartcols --enable-libfdisk --enable-fdisks --enable-lsblk --enable-blkid --enable-findmnt \
+    --enable-mount --enable-losetup --enable-wipefs --enable-mkswap --enable-swapon --enable-partx --enable-uuidgen \
+    --enable-lscpu --enable-fstrim --enable-mountpoint --enable-findfs --enable-blkdiscard --enable-lsfd=no \
+    --without-systemd --without-udev --without-python --without-readline --without-ncurses --without-tinfo \
+    --disable-liblastlog2 --disable-pam-lastlog2 --disable-nls --disable-makeinstall-chown --disable-makeinstall-setuid \
+    --disable-asciidoc --disable-poman --without-econf --disable-year2038 >/dev/null
+  make -j$JOBS >/dev/null
+}
+package(){ make DESTDIR=$pkgdir install >/dev/null; rm -rf $pkgdir/usr/share/{man,doc,bash-completion}; }
+pkg_libblkid(){ amove 'usr/lib/libblkid.so.*'; }
+pkg_libuuid(){ amove 'usr/lib/libuuid.so.*'; }
+pkg_libmount(){ amove 'usr/lib/libmount.so.*'; }
+pkg_libsmartcols(){ amove 'usr/lib/libsmartcols.so.*'; }
+pkg_libfdisk(){ amove 'usr/lib/libfdisk.so.*'; }
+pkg_dev(){ default_dev; }

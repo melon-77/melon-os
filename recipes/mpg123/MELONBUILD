@@ -1,0 +1,13 @@
+pkgname=mpg123
+pkgver=1.33.3
+pkgdesc="Fast console MPEG audio player and decoder library"
+license=LGPL-2.1-only
+url=https://www.mpg123.de
+source=(mpg123-1.33.3.tar.bz2)
+makedepends=(alsa-lib-dev)
+subpackages=(mpg123-dev mpg123-libs)
+depends=(mpg123-libs)
+pkgdesc_mpg123_libs="mpg123 decoder libraries"
+build(){ ./configure $conf_flags --with-audio=alsa --with-default-audio=alsa --with-cpu=x86-64 --enable-int-quality >/dev/null; make -j$JOBS >/dev/null; }
+package(){ make DESTDIR=$pkgdir install >/dev/null; rm -rf $pkgdir/usr/share/man; }
+pkg_libs(){ amove 'usr/lib/lib*.so.*' usr/lib/mpg123; }

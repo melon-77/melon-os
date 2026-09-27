@@ -1,0 +1,10 @@
+pkgname=inih
+pkgver=61
+pkgdesc="Simple .INI file parser in C"
+license=BSD-3-Clause
+url=https://github.com/benhoyt/inih
+source=(inih-61.tar.gz)
+builddir=$srcdir/inih-r61
+subpackages=(inih-dev)
+build(){ meson_setup -Ddefault_library=shared -Ddistro_install=true build >/dev/null; ninja -C build >/dev/null; }
+package(){ DESTDIR=$pkgdir ninja -C build install >/dev/null; }

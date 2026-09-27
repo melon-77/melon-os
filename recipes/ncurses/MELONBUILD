@@ -1,0 +1,36 @@
+pkgname=ncurses
+pkgver=6.6
+pkgrel=1
+pkgdesc="Console display library"
+license=MIT
+url=https://invisible-island.net/ncurses/
+source=(ncurses-6.6.tar.gz)
+builddir=$srcdir/ncurses-6.6-20251231
+subpackages=(ncurses-dev ncurses-terminfo ncurses-terminfo-base ncurses-libs)
+depends=(ncurses-terminfo-base ncurses-libs)
+depends_ncurses_libs="ncurses-terminfo-base"
+depends_ncurses_terminfo="ncurses-terminfo-base"
+pkgdesc_ncurses_libs="ncurses libraries"
+pkgdesc_ncurses_terminfo="full terminfo database"
+pkgdesc_ncurses_terminfo_base="terminfo entries for common terminals"
+build(){
+  ./configure $conf_flags --with-shared --without-debug --without-ada --without-cxx-binding --enable-widec \
+    --without-normal --enable-pc-files --with-pkg-config-libdir=/usr/lib/pkgconfig --disable-stripping \
+    --with-build-cc=gcc --with-tic-path=/usr/bin/tic --with-infocmp-path=/usr/bin/infocmp \
+    --disable-root-access --with-default-terminfo-dir=/usr/share/terminfo >/dev/null
+  make -j$JOBS >/dev/null
+}
+package(){
+  make DESTDIR=$pkgdir TIC_PATH=/usr/bin/tic install >/dev/null
+  # non-wide compatibility names
+  for l in ncurses form panel menu; do
+    ln -sf lib${l}w.so $pkgdir/usr/lib/lib$l.so
+    [ -f $pkgdir/usr/lib/pkgconfig/${l}w.pc ] && ln -sf ${l}w.pc $pkgdir/usr/lib/pkgconfig/$l.pc
+  done
+  ln -sf libncursesw.so $pkgdir/usr/lib/libcurses.so; ln -sf libncursesw.so $pkgdir/usr/lib/libtinfo.so; ln -sf libncursesw.so $pkgdir/usr/lib/libtinfow.so; ln -sf ncursesw.pc $pkgdir/usr/lib/pkgconfig/tinfo.pc
+  rm -rf $pkgdir/usr/share/man
+}
+pkg_terminfo_base(){ local t; for t in ansi console dumb linux rxvt rxvt-unicode screen screen-256color sun tmux tmux-256color vt100 vt102 vt200 vt220 vt52 xterm xterm-256color xterm-color xterm-xfree86 alacritty foot kitty xterm-kitty konsole konsole-256color putty st st-256color; do
+  for f in $pkgdir/usr/share/terminfo/*/$t; do [ -e "$f" ] && amove "${f#$pkgdir/}"; done; done; amove usr/share/tabset; }
+pkg_terminfo(){ amove usr/share/terminfo; }
+pkg_libs(){ amove 'usr/lib/lib*.so.*'; }

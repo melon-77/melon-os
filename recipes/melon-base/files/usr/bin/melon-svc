@@ -1,0 +1,12 @@
+#!/bin/sh
+# melon-svc: manage runit services
+#   melon-svc list | enable <svc>... | disable <svc>... | status [svc] | restart <svc>
+SV=/etc/sv RUN=/var/service
+case "$1" in
+  list)   for s in $SV/*; do n=${s##*/}; [ -L $RUN/$n ] && st=enabled || st=disabled; printf '%-18s %s\n' $n $st; done ;;
+  enable) shift; for s; do [ -d $SV/$s ] || { echo "no such service: $s" >&2; continue; }; ln -sfn $SV/$s $RUN/$s && echo "enabled $s"; done ;;
+  disable) shift; for s; do [ -L $RUN/$s ] && { sv down $RUN/$s 2>/dev/null; rm -f $RUN/$s; echo "disabled $s"; }; done ;;
+  status) shift; if [ $# -gt 0 ]; then sv status "$@"; else sv status $RUN/* 2>/dev/null; fi ;;
+  restart|start|stop) c=$1; shift; for s; do sv $c $RUN/$s; done ;;
+  *) echo "usage: melon-svc list|enable|disable|status|start|stop|restart [service...]"; exit 1 ;;
+esac

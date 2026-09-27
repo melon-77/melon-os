@@ -138,7 +138,9 @@ Rebuilding the kernel takes about an hour on 2 cores.
 20. **Some generators must come from the host, not the sysroot:** `wayland-scanner` 1.24 in
     `/usr/local`, Mesa's `mesa_clc`/`vtn_bindgen2` in `hosttools/bin` (built against host LLVM), and the
     Qt 6 host tools in `hosttools/qt6` (`scripts/host-qt.sh`, same Qt version as the target, passed as
-    `QT_HOST_PATH`). The host also needs `libltdl-dev` (libffi's autoreconf).
+    `QT_HOST_PATH`). The host also needs `libltdl-dev` (libffi's autoreconf). Meson only finds programs for a
+    cross build in the cross file's `[binaries]`, never on `PATH`, so `melon-build` lists the host Qt tools
+    (moc, uic, rcc, ...) and `bwrap` there.
 21. **Never kill build processes with `pkill -f <pattern>`** when your own shell's command line contains
     the pattern: it kills your shell too. Find the PID and kill that.
 22. **Edit scripts that may be running (`melon-build`, `mkiso.sh`, queue scripts) through a temporary file
@@ -154,7 +156,9 @@ Rebuilding the kernel takes about an hour on 2 cores.
     rules (polkit policies, GSettings schemas) that earlier melon packages installed (upower).
 27. **Host packages the build needs** besides the toolchain: `tcl` (sqlite's amalgamation), `hwdata`
     (libdisplay-info reads `pnp.ids` at build time), `publicsuffix` (libpsl's built-in list), `autopoint`
-    (cryptsetup's autoreconf), `libltdl-dev`, `libxml2-utils` (shared-mime-info runs `xmllint`).
+    (cryptsetup's autoreconf), `libltdl-dev`, `libxml2-utils` (shared-mime-info runs `xmllint`), `appstream` +
+    `libappstream-dev` + `itstool` (appstream's metainfo), `nasm` (FFmpeg's x86 assembly), `bubblewrap` (meson checks
+    for `bwrap` in flatpak and xdg-desktop-portal).
 28. **Only encrypted installs have an initramfs.** `melon-mkinitramfs` builds it when
     `/etc/melon/encrypted-root` exists; `melon-update-grub` then writes `cryptroot=UUID=<luks>
     root=/dev/mapper/melonroot` and an `initrd` line. Everything else still boots straight from the kernel.

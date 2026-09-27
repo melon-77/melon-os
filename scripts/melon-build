@@ -49,6 +49,16 @@ ar = '$TARGET-ar'
 strip = '$TARGET-strip'
 llvm-config = '$SYSROOT/usr/bin/llvm-config'
 pkg-config = 'pkg-config'
+# Qt's code generators must be the host builds (rule 20); for cross builds meson only finds them here, never on PATH
+moc = '$M/hosttools/qt6/libexec/moc'
+uic = '$M/hosttools/qt6/libexec/uic'
+rcc = '$M/hosttools/qt6/libexec/rcc'
+lrelease = '$M/hosttools/qt6/bin/lrelease'
+lupdate = '$M/hosttools/qt6/bin/lupdate'
+qmlcachegen = '$M/hosttools/qt6/libexec/qmlcachegen'
+qmltyperegistrar = '$M/hosttools/qt6/libexec/qmltyperegistrar'
+# the sandbox helper projects compile in; melon's lives here (the build host needs one too for meson's check)
+bwrap = '/usr/bin/bwrap'
 [properties]
 needs_exe_wrapper = false
 sys_root = '$SYSROOT'

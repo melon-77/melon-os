@@ -1,0 +1,11 @@
+--- a/meson.build	2026-09-27 16:18:39.278222738 -0700
++++ b/meson.build	2026-09-27 16:18:39.286412272 -0700
+@@ -278,7 +278,7 @@
+   if value != ''
+     version = ''
+ 
+-    if can_run_host_binaries
++    if can_run_host_binaries and not meson.is_cross_build()   # melon: the build host has no bwrap to ask
+       result = run_command(
+         value, '--version',
+         capture : true,

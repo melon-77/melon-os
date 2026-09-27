@@ -1,11 +1,11 @@
 pkgname=sqlite
 pkgver=3.46.1
-pkgrel=0
+pkgrel=1
 pkgdesc="sqlite (graphics stack)"
 license=custom
 source=(sqlite-3.46.1.tar.xz)
 builddir=$srcdir/sqlite3-3.46.1
 makedepends=(zlib-dev)
 subpackages=(sqlite-dev)
-build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --enable-threadsafe --disable-readline --disable-editline; make -j$JOBS; }
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --enable-threadsafe --disable-readline --disable-editline CPPFLAGS="-DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_UNLOCK_NOTIFY=1 -DSQLITE_SECURE_DELETE=1"; make -j$JOBS; }
 package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

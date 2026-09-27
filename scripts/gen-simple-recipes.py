@@ -55,7 +55,7 @@ ROWS = [
  ('glslang','16.2.0','glslang_16.2.0.orig.tar.gz','glslang-16.2.0','cmake','spirv-tools-dev',"-DALLOW_EXTERNAL_SPIRV_TOOLS=ON -DGLSLANG_TESTS=OFF -DENABLE_OPT=ON -DBUILD_SHARED_LIBS=ON",''),
  ('libva','2.23.0','libva_2.23.0.orig.tar.gz','libva-2.23.0','meson','libdrm-dev wayland-dev libx11-dev libxext-dev libxfixes-dev',"-Dwith_glx=no -Dwith_wayland=yes -Dwith_x11=yes -Denable_docs=false",''),
  ('libvdpau','1.5','libvdpau_1.5.orig.tar.bz2','libvdpau-1.5','meson','libx11-dev libxext-dev',"-Ddocumentation=false",''),
- ('sqlite','3.46.1','sqlite3_3.46.1.orig.tar.xz','sqlite3-3.46.1','auto','zlib-dev',"--disable-static --enable-threadsafe --disable-readline --disable-editline",''),
+ ('sqlite','3.46.1','sqlite3_3.46.1.orig.tar.xz','sqlite3-3.46.1','auto','zlib-dev',"--disable-static --enable-threadsafe --disable-readline --disable-editline CPPFLAGS=\"-DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_UNLOCK_NOTIFY=1 -DSQLITE_SECURE_DELETE=1\"",''),
  ('libxslt','1.1.45','libxslt_1.1.45.orig.tar.xz','libxslt-1.1.45','auto','libxml2-dev',"--disable-static --without-python --without-crypto --without-debugger",''),
  ('libseccomp','2.6.0','libseccomp_2.6.0.orig.tar.gz','libseccomp-2.6.0','auto','',"--disable-static --disable-python",''),
  ('libusb','1.0.29','libusb-1.0_1.0.29.orig.tar.bz2','libusb-1.0.29','auto','eudev-dev',"--disable-static",''),
@@ -110,7 +110,7 @@ ROWS = [
 ]
 
 # pkgrel for recipes whose build changed without a version change (rule 6 in AGENTS.md)
-PKGREL = {'npth': 1, 'libjpeg-turbo': 1, 'networkmanager': 0, 'power-profiles-daemon': 0}
+PKGREL = {'sqlite': 1, 'npth': 1, 'libjpeg-turbo': 1, 'networkmanager': 0, 'power-profiles-daemon': 0}
 
 def recipe(r):
     name, ver, tb, top, system, mdeps, opts, extra = r

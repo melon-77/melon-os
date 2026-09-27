@@ -19,7 +19,7 @@ mod(){ # mod <debian-name> <dir-prefix> [cmake args...]
   local src=$(ls -d ${dir}*${QV}* | head -1)
   echo "=== $(date +%T) $src"
   cmake -S $src -B b-$deb $common -DCMAKE_PREFIX_PATH=$H "$@" >/dev/null
-  ninja -C b-$deb -j$(nproc) >/dev/null
+  ninja -C b-$deb -j${JOBS:-$(nproc)} >/dev/null
   ninja -C b-$deb install >/dev/null
   rm -rf $src b-$deb
   touch $H/.done-$deb
@@ -28,6 +28,7 @@ mod qt6-base qtbase -DFEATURE_opengl=ON -DINPUT_opengl=desktop -DFEATURE_xcb=OFF
     -DFEATURE_sql=OFF -DFEATURE_printsupport=OFF -DFEATURE_network=ON -DFEATURE_widgets=ON -DFEATURE_dbus=ON \
     -DFEATURE_system_pcre2=OFF -DFEATURE_system_zlib=ON -DFEATURE_system_harfbuzz=OFF -DFEATURE_system_freetype=OFF
 mod qt6-shadertools qtshadertools
+mod qt6-svg qtsvg                  # qtdeclarative's svgtoqml host tool is only built when QtSvg is there
 mod qt6-declarative qtdeclarative -DFEATURE_qml_debug=OFF
 mod qt6-wayland qtwayland
 mod qt6-tools qttools -DFEATURE_assistant=OFF -DFEATURE_designer=OFF -DFEATURE_distancefieldgenerator=OFF \

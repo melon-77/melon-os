@@ -1,0 +1,21 @@
+# The desktop profile: installed on top of the base system by both installers.
+# (docs/desktop-config.txt has the owner's choices behind this list.)
+# session plumbing
+eudev dbus elogind polkit linux-pam
+# graphics
+mesa mesa-dri mesa-vulkan mesa-va xwayland vulkan-loader
+# Plasma (minimal) on Wayland
+melon-desktop kwin plasma-workspace plasma-desktop plasma-integration systemsettings kscreen powerdevil
+plasma-nm plasma-pa bluedevil breeze kscreenlocker polkit-kde-agent-1 xdg-desktop-portal-kde milou
+kde-cli-tools plasma-systemmonitor kinfocenter kf6-breeze-icons kf6-qqc2-desktop-style kf6-kimageformats
+sddm sddm-kcm
+# apps
+dolphin konsole kde-spectacle plasma-discover nano
+# services
+pipewire wireplumber networkmanager bluez upower power-profiles-daemon
+# fonts
+melon-fonts hicolor-icon-theme shared-mime-info
+# Flatpak (Firefox, VLC, Steam and Prism come from Flathub on first boot) and gaming
+flatpak xdg-desktop-portal gamemode
+# disks
+cryptsetup dosfstools

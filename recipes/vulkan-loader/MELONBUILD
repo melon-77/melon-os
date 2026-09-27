@@ -1,10 +1,16 @@
 pkgname=vulkan-loader
 pkgver=1.4.341.0
-pkgdesc="vulkan-loader (graphics stack)"
-license=custom
+pkgrel=0
+pkgdesc="Vulkan ICD loader (libvulkan)"
+license=Apache-2.0
+url=https://github.com/KhronosGroup/Vulkan-Loader
 source=(vulkan-loader-1.4.341.0.tar.xz)
 builddir=$srcdir/vulkan-loader-1.4.341.0
 makedepends=(vulkan-headers wayland-dev libx11-dev libxrandr-dev)
 subpackages=(vulkan-loader-dev)
-build(){ cmake_setup -B build -DBUILD_WSI_XCB_SUPPORT=ON -DBUILD_WSI_XLIB_SUPPORT=ON -DBUILD_WSI_WAYLAND_SUPPORT=ON -DBUILD_TESTS=OFF -DVULKAN_HEADERS_INSTALL_DIR=$SYSROOT/usr; ninja -C build; }
+# The Debian tarball drops loader/generated; regenerate it from the Vulkan registry (as Debian does).
+build(){ mkdir -p loader/generated
+  cmake_setup -B build -DBUILD_WSI_XCB_SUPPORT=ON -DBUILD_WSI_XLIB_SUPPORT=ON -DBUILD_WSI_WAYLAND_SUPPORT=ON -DBUILD_TESTS=OFF \
+    -DVULKAN_HEADERS_INSTALL_DIR=$SYSROOT/usr -DLOADER_CODEGEN=ON
+  ninja -C build loader_codegen; ninja -C build -j$JOBS; }
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

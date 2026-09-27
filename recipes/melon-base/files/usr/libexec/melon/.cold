@@ -137,11 +137,14 @@ umount /run/melon-src
 mkdir -p $TARGET/dev $TARGET/proc $TARGET/sys $TARGET/run
 for d in dev proc sys; do mount --bind /$d $TARGET/$d; done
 
-EXTRA=$(grep -v '^#' /usr/share/melon/profiles/$MELON_PROFILE | grep -vxF -f /usr/share/melon/profiles/base || true)
-if [ -n "$EXTRA" ]; then
-  say "Installing the $MELON_PROFILE profile with apk"
-  apk --root $TARGET --arch $ARCH --repositories-file /dev/null --repository "$REPO/$ARCH/Packages.adb" --no-cache add $EXTRA
-fi
+# make the new system's package set match the profile: the system image can hold more than the profile
+# (the desktop ISO's image has the desktop and the live-only installer packages), or less
+grep -v '^#' /usr/share/melon/profiles/$MELON_PROFILE | grep . > /tmp/melon-want
+DEL=$(grep -vxF -f /tmp/melon-want $TARGET/etc/apk/world | xargs || true)
+ADD=$(grep -vxF -f $TARGET/etc/apk/world /tmp/melon-want | xargs || true)
+APKT="apk --root $TARGET --arch $ARCH --repositories-file /dev/null --repository $REPO/$ARCH/Packages.adb --no-cache"
+if [ -n "$DEL" ]; then say "Removing what the $MELON_PROFILE profile doesn't include"; $APKT del $DEL >/dev/null; fi
+if [ -n "$ADD" ]; then say "Installing the $MELON_PROFILE profile with apk"; $APKT add $ADD; fi
 
 say "Configuring the system"
 mkdir -p $TARGET/var/lib/melon

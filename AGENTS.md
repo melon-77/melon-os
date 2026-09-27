@@ -34,7 +34,8 @@ scripts/toolchain.sh    cross toolchain, part 1 (binutils, headers, gcc stage 1)
 scripts/toolchain-finish.sh  part 2 (musl, full gcc)
 scripts/melon-build     build ONE recipe -> signed .apk(s) in repo/x86_64, reindex, install into sysroot
 scripts/build-all.sh    build a list of recipes in order, logs to logs/pkg-<name>.log
-scripts/mkiso.sh        live/installer ISO from the repo
+scripts/mkiso.sh        live/installer ISO: rootfs.sqfs (pristine apk-installed system, copied to disk by the
+                        installers) + live.sqfs (small live-session layer) + a repo of extra packages
 scripts/qemu-test.py    headless boot + install + reboot test over the serial console
 recipes/<name>/MELONBUILD   one directory per recipe (see below)
 recipes/<name>/*.patch      applied automatically with patch -p1, in name order

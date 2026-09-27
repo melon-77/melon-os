@@ -1,0 +1,13 @@
+pkgname=hunspell
+pkgver=1.7.2
+pkgrel=0
+pkgdesc="Hunspell spell checker (the engine behind KDE's Sonnet)"
+license="MPL-1.1 OR GPL-2.0-or-later OR LGPL-2.1-or-later"
+url=https://hunspell.github.io
+source=(hunspell-1.7.2.tar.gz)
+subpackages=(hunspell-dev libhunspell)
+depends=(libhunspell)
+pkgdesc_libhunspell="Hunspell spell checking library"
+build(){ ./configure $conf_flags --disable-static --disable-nls --without-ui --without-readline; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man; }
+pkg_libhunspell(){ amove 'usr/lib/libhunspell-*.so.*'; }

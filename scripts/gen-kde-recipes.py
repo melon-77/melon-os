@@ -16,7 +16,7 @@ QTDIRS = ('-DINSTALL_BINDIR=lib/qt6/bin -DINSTALL_PUBLICBINDIR=usr/bin -DINSTALL
           '-DINSTALL_MKSPECSDIR=lib/qt6/mkspecs -DINSTALL_DOCDIR=share/doc/qt6 -DINSTALL_EXAMPLESDIR=share/doc/qt6/examples')
 KDE = (QT + ' -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_QTPLUGINDIR=lib/qt6/plugins '
        '-DKDE_INSTALL_QMLDIR=lib/qt6/qml -DKDE_INSTALL_LIBEXECDIR=libexec -DKF_IGNORE_PLATFORM_CHECK=ON '
-       '-DBUILD_WITH_QT6=ON -DQT_MAJOR_VERSION=6')
+       '-DBUILD_WITH_QT6=ON -DQT_MAJOR_VERSION=6 -DWITH_X11=OFF')   # melon's Qt is Wayland-only (no xcb)
 
 QTBASE = (QT + ' ' + QTDIRS + ' -DQT_BUILD_EXAMPLES=OFF -DQT_BUILD_TESTS=OFF '
   '-DFEATURE_opengl=ON -DINPUT_opengl=desktop -DFEATURE_egl=ON -DFEATURE_eglfs=OFF -DFEATURE_xcb=OFF '
@@ -50,12 +50,14 @@ KF6 = ('kcoreaddons kconfig ki18n kwidgetsaddons kwindowsystem kguiaddons kcodec
        'kservice knotifications kjobwidgets solid sonnet ktextwidgets kxmlgui kbookmarks kpackage kidletime '
        'kstatusnotifieritem kwallet attica kirigami ksvg kdeclarative kded kio kcmutils knewstuff knotifyconfig '
        'kparts kpty kunitconversion krunner kquickcharts qqc2-desktop-style frameworkintegration kdesu '
-       'kfilemetadata threadweaver networkmanager-qt modemmanager-qt bluez-qt kimageformats').split()
+       'kfilemetadata threadweaver networkmanager-qt bluez-qt kimageformats').split()
 for k in KF6:
     extra = KDE
     if k == 'breeze-icons': extra += ' -DWITH_ICON_GENERATION=OFF -DBINARY_ICONS_RESOURCE=OFF'
     if k == 'kwallet': extra += ' -DBUILD_KWALLETD=ON -DBUILD_KWALLET_QUERY=OFF'
     if k == 'kfilemetadata': extra += ' -DKFILEMETADATA_USE_TAGLIB=OFF'
+    if k == 'kpty': extra += ' -DCMAKE_DISABLE_FIND_PACKAGE_UTEMPTER=ON'   # no utmp logging on musl
+    if k == 'kwindowsystem': extra += ' -DKWINDOWSYSTEM_X11=OFF'           # its own switch, not WITH_X11
     ORDER.append((f'kf6-{k}', f'kf6-{k}', extra, 'kde'))
 PLASMA = [
  ('kdecoration',''), ('kwayland',''), ('layer-shell-qt',''), ('plasma-activities',''), ('plasma-activities-stats',''),

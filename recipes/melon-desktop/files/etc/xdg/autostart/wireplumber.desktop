@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=WirePlumber
+Exec=wireplumber
+NoDisplay=true
+X-KDE-autostart-phase=0
+OnlyShowIn=KDE;

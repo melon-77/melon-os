@@ -1,0 +1,53 @@
+#!/bin/sh
+# melon-repo: manage extra package repositories.
+#
+#   melon-repo list                show the configured repositories
+#   melon-repo enable alpine       add Alpine's main + community repos as the tagged repo "@alpine"
+#   melon-repo disable alpine      remove them again
+#
+# The Alpine repo is opt-in and tagged: apk only takes a package from it when you ask for it with the
+# tag, e.g. "apk add htop@alpine". Everything else keeps coming from melon. Alpine is also musl-based,
+# so its binaries run on melon; melon's musl provides the library name Alpine packages link against.
+set -eu
+REPOS=/etc/apk/repositories
+ARCH=$(apk --print-arch)
+ALPINE_BRANCH=${ALPINE_BRANCH:-latest-stable}
+ALPINE_MIRROR=${ALPINE_MIRROR:-https://dl-cdn.alpinelinux.org/alpine}
+KEYSRC=/usr/share/melon/alpine-keys
+
+need_root(){ [ "$(id -u)" = 0 ] || { echo "melon-repo: run this as root (sudo melon-repo $*)" >&2; exit 1; }; }
+
+alpine_keys(){ # the Alpine signing keys for this architecture (list from Alpine's alpine-keys package)
+  case $ARCH in
+    x86_64) echo 4a6a0840 5261cecb 6165ee59 ;;
+    x86)    echo 4a6a0840 5243ef4b 61666e3f ;;
+    *) echo "melon-repo: no Alpine keys for $ARCH" >&2; exit 1 ;;
+  esac
+}
+
+case "${1:-list}" in
+  list)
+    grep -v '^[[:space:]]*#' $REPOS 2>/dev/null | grep . || echo "(no repositories configured)"
+    ;;
+  enable)
+    [ "${2:-}" = alpine ] || { echo "usage: melon-repo enable alpine" >&2; exit 2; }
+    need_root enable alpine
+    mkdir -p /etc/apk/keys
+    for k in $(alpine_keys); do
+      install -m644 $KEYSRC/alpine-devel@lists.alpinelinux.org-$k.rsa.pub /etc/apk/keys/
+    done
+    if ! grep -q '^@alpine ' $REPOS 2>/dev/null; then
+      printf '@alpine %s/%s/main\n@alpine %s/%s/community\n' \
+        "$ALPINE_MIRROR" "$ALPINE_BRANCH" "$ALPINE_MIRROR" "$ALPINE_BRANCH" >> $REPOS
+    fi
+    echo "Alpine ($ALPINE_BRANCH) is enabled as @alpine. Install from it with: apk add <name>@alpine"
+    ;;
+  disable)
+    [ "${2:-}" = alpine ] || { echo "usage: melon-repo disable alpine" >&2; exit 2; }
+    need_root disable alpine
+    sed -i '/^@alpine /d' $REPOS
+    for k in $(alpine_keys); do rm -f /etc/apk/keys/alpine-devel@lists.alpinelinux.org-$k.rsa.pub; done
+    echo "Alpine repo removed."
+    ;;
+  *) sed -n '2,10s/^# \{0,1\}//p' "$0"; exit 2 ;;
+esac

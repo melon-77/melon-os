@@ -7,7 +7,8 @@
 #   3  rest    XFS    -> /
 #
 # Unattended use (for testing): set MELON_DISK, MELON_HOSTNAME, MELON_ROOTPW, MELON_USER,
-# MELON_USERPW and MELON_YES=1 (and optionally MELON_PROFILE, MELON_WIFI_SSID/MELON_WIFI_PSK).
+# MELON_USERPW and MELON_YES=1 (and optionally MELON_PROFILE, MELON_WIFI_SSID/MELON_WIFI_PSK,
+# MELON_ALPINE=y to add Alpine's repo as the opt-in tagged repo "@alpine").
 #
 # This is the quick installer. The desktop ISO's advertised installer is Calamares
 # (with the melon gauntlet); this one installs the same thing in a handful of prompts.
@@ -77,6 +78,7 @@ if ls -d /sys/class/net/*/wireless >/dev/null 2>&1; then
   ask MELON_WIFI_SSID "Wi-Fi network name (empty to skip)" ""
   [ -n "$MELON_WIFI_SSID" ] && askpw MELON_WIFI_PSK "Wi-Fi password"
 fi
+ask MELON_ALPINE "Also offer Alpine's packages as an opt-in @alpine repo (y/n)" n
 if [ "${MELON_YES:-}" != 1 ]; then
   printf '\n%sErase %s and install melon? Type YES:%s ' "$B" "$DISK" "$R"; read -r ok; [ "$ok" = YES ] || die "aborted"
 fi
@@ -147,16 +149,49 @@ if [ -n "$MELON_USER" ]; then
   echo "$MELON_USER:$MELON_USERPW" | chroot $TARGET chpasswd -c sha512
 fi
 SVCS="getty-tty1 getty-tty2 getty-tty3 mdevd syslogd klogd crond ntpd dhcp"
-[ -f /usr/share/melon/profiles/$MELON_PROFILE.services ] && SVCS="$SVCS $(cat /usr/share/melon/profiles/$MELON_PROFILE.services)"
+# <profile>.services: one service per line; "name" enables it, "-name" drops a base service
+# (the desktop profile swaps mdevd/dhcp for udevd and NetworkManager)
+if [ -f /usr/share/melon/profiles/$MELON_PROFILE.services ]; then
+  for s in $(grep -v '^#' /usr/share/melon/profiles/$MELON_PROFILE.services); do
+    case $s in -*) SVCS=$(printf '%s\n' $SVCS | grep -vxF -- "${s#-}" | xargs) ;; *) SVCS="$SVCS $s" ;; esac
+  done
+fi
 if [ -n "${MELON_WIFI_SSID:-}" ]; then
-  wpa_passphrase "$MELON_WIFI_SSID" "$MELON_WIFI_PSK" | grep -v '#psk' >> $TARGET/etc/wpa_supplicant/wpa_supplicant.conf
-  SVCS="$SVCS wpa_supplicant dhcp-wifi"
+  if [ -d $TARGET/etc/NetworkManager ]; then
+    # desktop: NetworkManager owns Wi-Fi, so hand it the network instead of wpa_supplicant's own config
+    NMC=$TARGET/etc/NetworkManager/system-connections; mkdir -p $NMC
+    cat > "$NMC/melon-wifi.nmconnection" <<EOF
+[connection]
+id=$MELON_WIFI_SSID
+type=wifi
+autoconnect=true
+
+[wifi]
+mode=infrastructure
+ssid=$MELON_WIFI_SSID
+
+[wifi-security]
+key-mgmt=wpa-psk
+psk=$MELON_WIFI_PSK
+
+[ipv4]
+method=auto
+
+[ipv6]
+method=auto
+EOF
+    chmod 600 "$NMC/melon-wifi.nmconnection"
+  else
+    wpa_passphrase "$MELON_WIFI_SSID" "$MELON_WIFI_PSK" | grep -v '#psk' >> $TARGET/etc/wpa_supplicant/wpa_supplicant.conf
+    SVCS="$SVCS wpa_supplicant dhcp-wifi"
+  fi
 fi
 if [ "${MELON_SERIAL:-0}" = 1 ]; then   # serial console, for headless machines and VMs
   printf 'GRUB_SERIAL=1\nGRUB_CMDLINE_LINUX="console=tty0 console=ttyS0,115200"\n' >> $TARGET/etc/default/grub
   SVCS="$SVCS getty-ttyS0"
 fi
-for s in $SVCS; do ln -sfn /etc/sv/$s $TARGET/var/service/$s; done
+for s in $SVCS; do if [ -d $TARGET/etc/sv/$s ]; then ln -sfn /etc/sv/$s $TARGET/var/service/$s; fi; done
+case $MELON_ALPINE in y|Y|yes) say "Adding Alpine as the opt-in @alpine repo"; chroot $TARGET melon-repo enable alpine >/dev/null || true ;; esac
 
 say "Installing GRUB for BIOS and UEFI"
 chroot $TARGET grub-install --target=i386-pc --boot-directory=/boot "$DISK" 2>&1 | grep -v '^Installing for' || true

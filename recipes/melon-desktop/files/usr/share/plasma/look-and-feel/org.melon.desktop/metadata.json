@@ -1,0 +1,4 @@
+{ "KPackageStructure": "Plasma/LookAndFeel",
+  "KPlugin": { "Id": "org.melon.desktop", "Name": "melon", "Description": "melon dark: Breeze with green and cantaloupe accents",
+               "Authors": [{ "Name": "melon" }], "License": "GPL-2.0-or-later", "Version": "1.0" },
+  "X-Plasma-APIVersion": "2" }

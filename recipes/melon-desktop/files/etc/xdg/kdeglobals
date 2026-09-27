@@ -1,0 +1,12 @@
+[KDE]
+LookAndFeelPackage=org.melon.desktop
+widgetStyle=Breeze
+
+[General]
+ColorScheme=MelonDark
+AccentColor=111,191,74
+fixed=Hack,10,-1,5,50,0,0,0,0,0
+font=Noto Sans,10,-1,5,50,0,0,0,0,0
+
+[Icons]
+Theme=breeze-dark

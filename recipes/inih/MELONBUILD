@@ -6,5 +6,5 @@ url=https://github.com/benhoyt/inih
 source=(inih-61.tar.gz)
 builddir=$srcdir/inih-r61
 subpackages=(inih-dev)
-build(){ meson_setup -Ddefault_library=shared -Ddistro_install=true build >/dev/null; ninja -C build >/dev/null; }
-package(){ DESTDIR=$pkgdir ninja -C build install >/dev/null; }
+build(){ meson_setup -Ddefault_library=shared -Ddistro_install=true build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

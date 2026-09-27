@@ -9,7 +9,7 @@ build(){
   echo "$CC $CFLAGS" > conf-cc
   echo "$CC $LDFLAGS" > conf-ld
   # probe programs run on the build host through the musl loader in /lib
-  make -j1 >/dev/null
+  make -j1
 }
 package(){
   mkdir -p $pkgdir/usr/bin

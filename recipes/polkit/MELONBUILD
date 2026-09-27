@@ -1,0 +1,23 @@
+pkgname=polkit
+pkgver=127
+pkgdesc="Authorization framework for privileged actions (polkit, duktape JS engine)"
+license=LGPL-2.0-or-later
+url=https://github.com/polkit-org/polkit
+source=(polkit-127.tar.gz)
+makedepends=(glib-dev expat-dev duktape-dev linux-pam-dev elogind-dev)
+subpackages=(polkit-dev polkit-libs)
+depends=(polkit-libs dbus)
+pkgdesc_polkit_libs="polkit libraries"
+options=(keepdirs)
+build(){ meson_setup -Dsession_tracking=elogind -Dprivileged_group=wheel -Dsystemdsystemunitdir=/nonexistent -Dintrospection=false \
+    -Dman=false -Dtests=false -Dauthfw=pam -Dexamples=false -Dgtk_doc=false -Dpolkitd_user=polkitd \
+    -Dpam_include=base-auth build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/nonexistent $pkgdir/usr/share/doc $pkgdir/usr/lib/sysusers.d $pkgdir/usr/lib/tmpfiles.d
+  mkdir -p $pkgdir/etc/polkit-1/rules.d
+  cat > $pkgdir/etc/polkit-1/rules.d/10-melon-wheel.rules <<'RULES'
+// members of wheel are administrators (same people who can use sudo)
+polkit.addAdminRule(function(action, subject) { return ["unix-group:wheel"]; });
+RULES
+  mkdir -p $pkgdir/etc/sv/polkitd
+  printf '#!/bin/sh\nexec 2>&1\nsv check dbus || exit 1\nexec /usr/lib/polkit-1/polkitd --no-debug\n' > $pkgdir/etc/sv/polkitd/run; chmod 755 $pkgdir/etc/sv/polkitd/run; }
+pkg_libs(){ amove 'usr/lib/libpolkit-*.so.*'; }

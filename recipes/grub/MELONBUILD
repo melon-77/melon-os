@@ -13,11 +13,11 @@ _tgt="CFLAGS= LDFLAGS= CXXFLAGS= HOST_CFLAGS=-O2 TARGET_CFLAGS=-Os TARGET_CC=gcc
 build(){
   for p in pc efi; do
     t=x86_64; [ $p = pc ] && t=i386
-    mkdir -p b-$p; ( cd b-$p; env $_tgt ../configure $conf_flags --target=$t --with-platform=$p $_common --program-prefix= >/dev/null; make -j$JOBS >/dev/null )
+    mkdir -p b-$p; ( cd b-$p; env $_tgt ../configure $conf_flags --target=$t --with-platform=$p $_common --program-prefix=; make -j$JOBS )
   done
 }
 package(){
-  for p in pc efi; do make -C b-$p DESTDIR=$pkgdir install >/dev/null; done
+  for p in pc efi; do make -C b-$p DESTDIR=$pkgdir install; done
   rm -rf $pkgdir/usr/share/info $pkgdir/usr/share/man
   install -Dm644 $startdir/unicode.pf2 $pkgdir/usr/share/grub/unicode.pf2
   mkdir -p $pkgdir/etc/default

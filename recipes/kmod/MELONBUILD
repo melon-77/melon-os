@@ -9,9 +9,9 @@ subpackages=(kmod-dev kmod-libs)
 depends=(kmod-libs)
 pkgdesc_kmod_libs="libkmod library"
 build(){ meson_setup -Dmanpages=false -Ddocs=false -Dxz=disabled -Dzstd=enabled -Dzlib=enabled -Dopenssl=enabled \
-    -Dbashcompletiondir=no -Dfishcompletiondir=no -Dzshcompletiondir=no -Dmoduledir=/usr/lib/modules build >/dev/null
-  ninja -C build >/dev/null; }
-package(){ DESTDIR=$pkgdir ninja -C build install >/dev/null
+    -Dbashcompletiondir=no -Dfishcompletiondir=no -Dzshcompletiondir=no -Dmoduledir=/usr/lib/modules build
+  ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install
   for t in depmod insmod lsmod modinfo modprobe rmmod; do ln -sf kmod $pkgdir/usr/bin/$t; done
   mkdir -p $pkgdir/etc/modprobe.d $pkgdir/etc/depmod.d; }
 pkg_libs(){ amove 'usr/lib/libkmod.so.*'; }

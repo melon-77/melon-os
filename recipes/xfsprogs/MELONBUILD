@@ -8,7 +8,7 @@ makedepends=(util-linux-dev userspace-rcu-dev inih-dev linux-headers)
 build(){
   export DEBUG=-DNDEBUG OPTIMIZER="$CFLAGS" LOCAL_CONFIGURE_OPTIONS=
   ./configure $conf_flags --enable-gettext=no --disable-libicu --enable-scrub=no --enable-lto=no \
-     --with-systemd-unit-dir=no --with-udev-rule-dir=no --with-crond-dir=no >/dev/null
-  make -j$JOBS BUILD_CC=gcc >/dev/null
+     --with-systemd-unit-dir=no --with-udev-rule-dir=no --with-crond-dir=no
+  make -j$JOBS BUILD_CC=gcc
 }
-package(){ make DIST_ROOT=$pkgdir install >/dev/null; rm -rf $pkgdir/usr/share/{man,doc} $pkgdir/usr/lib/xfsprogs/xfs_scrub* ; }
+package(){ make DIST_ROOT=$pkgdir install; rm -rf $pkgdir/usr/share/{man,doc} $pkgdir/usr/lib/xfsprogs/xfs_scrub* ; }

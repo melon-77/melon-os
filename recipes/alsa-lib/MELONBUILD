@@ -5,5 +5,5 @@ license=LGPL-2.1-or-later
 url=https://www.alsa-project.org
 source=(alsa-lib-1.2.15.3.tar.bz2)
 subpackages=(alsa-lib-dev)
-build(){ ./configure $conf_flags --disable-python --disable-static --without-debug >/dev/null; make -j$JOBS >/dev/null; }
-package(){ make DESTDIR=$pkgdir install >/dev/null; }
+build(){ ./configure $conf_flags --disable-python --disable-static --without-debug; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; }

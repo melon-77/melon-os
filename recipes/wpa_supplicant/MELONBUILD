@@ -42,7 +42,7 @@ CONFIG_DEBUG_SYSLOG=y
 CONFIG_DEBUG_FILE=y
 CFG
   export CFLAGS="$CFLAGS -I$SYSROOT/usr/include/libnl3" PKG_CONFIG=pkg-config
-  make -j$JOBS BINDIR=/usr/bin LIBDIR=/usr/lib >/dev/null
+  make -j$JOBS BINDIR=/usr/bin LIBDIR=/usr/lib
 }
 package(){
   install -Dm755 wpa_supplicant $pkgdir/usr/bin/wpa_supplicant

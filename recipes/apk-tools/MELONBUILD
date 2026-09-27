@@ -6,7 +6,7 @@ url=https://gitlab.alpinelinux.org/alpine/apk-tools
 source=(apk-tools-3.0.8.tar.gz)
 makedepends=(openssl-dev zlib-dev zstd-dev)
 subpackages=(apk-tools-dev)
-build(){ meson_setup -Dlua=disabled -Ddocs=disabled -Dhelp=disabled -Dpython=disabled -Dtests=disabled -Dcrypto_backend=openssl -Dzstd=enabled build >/dev/null; ninja -C build >/dev/null; }
-package(){ DESTDIR=$pkgdir ninja -C build install >/dev/null
+build(){ meson_setup -Dlua=disabled -Ddocs=disabled -Dhelp=disabled -Dpython=disabled -Dtests=disabled -Dcrypto_backend=openssl -Dzstd=enabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install
   install -Dm644 $M/keys/melon-signing.rsa.pub $pkgdir/etc/apk/keys/melon-signing.rsa.pub
   mkdir -p $pkgdir/etc/apk/protected_paths.d $pkgdir/usr/lib/apk/db; }

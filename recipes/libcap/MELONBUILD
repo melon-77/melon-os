@@ -1,0 +1,10 @@
+pkgname=libcap
+pkgver=2.75
+pkgdesc="POSIX 1003.1e capabilities library"
+license="BSD-3-Clause OR GPL-2.0-only"
+url=https://sites.google.com/site/fullycapable/
+source=(libcap-2.75.tar.xz)
+subpackages=(libcap-dev)
+_m="prefix=/usr lib=lib sbindir=bin GOLANG=no PAM_CAP=no RAISE_SETFCAP=no BUILD_CC=gcc CC=$CC AR=$AR RANLIB=$RANLIB USE_GPERF=no SHARED=yes"
+build(){ make -j$JOBS $_m; }
+package(){ make $_m DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man; chmod 755 $pkgdir/usr/lib/libcap.so.* $pkgdir/usr/lib/libpsx.so.* 2>/dev/null || true; }

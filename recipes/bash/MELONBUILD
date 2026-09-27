@@ -12,10 +12,10 @@ build(){
     bash_cv_func_sigsetjmp=present bash_cv_printf_a_format=yes bash_cv_unusable_rtsigs=no \
     bash_cv_dev_fd=standard bash_cv_dev_stdin=present bash_cv_wcwidth_broken=no bash_cv_func_strcoll_broken=no
   ./configure $conf_flags --without-bash-malloc --with-curses --enable-readline --disable-nls \
-     --with-installed-readline=no >/dev/null
-  make -j$JOBS >/dev/null
+     --with-installed-readline=no
+  make -j$JOBS
 }
-package(){ make DESTDIR=$pkgdir install >/dev/null; rm -rf $pkgdir/usr/share/{man,info,doc,locale} $pkgdir/usr/lib/bash $pkgdir/usr/include; rm -f $pkgdir/usr/bin/bashbug;
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{man,info,doc,locale} $pkgdir/usr/lib/bash $pkgdir/usr/include; rm -f $pkgdir/usr/bin/bashbug;
   mkdir -p $pkgdir/etc/bash
   cat > $pkgdir/etc/bash/bashrc <<'RC'
 # melon system-wide bashrc

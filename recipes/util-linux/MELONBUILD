@@ -16,10 +16,10 @@ build(){
     --enable-lscpu --enable-fstrim --enable-mountpoint --enable-findfs --enable-blkdiscard --enable-lsfd=no \
     --without-systemd --without-udev --without-python --without-readline --without-ncurses --without-tinfo \
     --disable-liblastlog2 --disable-pam-lastlog2 --disable-nls --disable-makeinstall-chown --disable-makeinstall-setuid \
-    --disable-asciidoc --disable-poman --without-econf --disable-year2038 >/dev/null
-  make -j$JOBS >/dev/null
+    --disable-asciidoc --disable-poman --without-econf --disable-year2038
+  make -j$JOBS
 }
-package(){ make DESTDIR=$pkgdir install >/dev/null; rm -rf $pkgdir/usr/share/{man,doc,bash-completion}; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{man,doc,bash-completion}; }
 pkg_libblkid(){ amove 'usr/lib/libblkid.so.*'; }
 pkg_libuuid(){ amove 'usr/lib/libuuid.so.*'; }
 pkg_libmount(){ amove 'usr/lib/libmount.so.*'; }

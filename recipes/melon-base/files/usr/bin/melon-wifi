@@ -1,0 +1,40 @@
+#!/bin/sh
+# melon-wifi: connect to a Wi-Fi network from the console.
+#   melon-wifi                    list the networks in range
+#   melon-wifi "Name" "password"  connect (and remember it for the next boots)
+#   melon-wifi "Name"             connect to an open network
+set -eu
+[ "$(id -u)" = 0 ] || exec sudo "$0" "$@"
+CONF=/etc/wpa_supplicant/wpa_supplicant.conf
+IFACE=$(for i in /sys/class/net/*; do if [ -d $i/wireless ]; then echo ${i##*/}; break; fi; done)
+[ -n "$IFACE" ] || { echo "melon-wifi: no Wi-Fi adapter found (driver or firmware missing? try: dmesg | grep -i firmware)" >&2; exit 1; }
+ip link set "$IFACE" up 2>/dev/null || true
+svc_on(){ for s in "$@"; do [ -e /var/service/$s ] || ln -s /etc/sv/$s /var/service/$s; done; }
+
+if [ $# -eq 0 ]; then
+  svc_on wpa_supplicant; sleep 2
+  wpa_cli -i "$IFACE" scan >/dev/null 2>&1 || true; sleep 4
+  echo "Networks in range (signal, name):"
+  wpa_cli -i "$IFACE" scan_results 2>/dev/null | awk -F'\t' 'NR>1 && $5!="" {print "  " $3 " dBm  " $5}' | sort -rn -k1 | uniq
+  echo; echo 'Connect with: melon-wifi "Name" "password"'
+  exit 0
+fi
+
+ssid=$1 psk=${2:-}
+mkdir -p "$(dirname $CONF)"; [ -f $CONF ] || printf 'ctrl_interface=/run/wpa_supplicant\nupdate_config=1\n' > $CONF
+if [ -n "$psk" ]; then
+  wpa_passphrase "$ssid" "$psk" | grep -v '^\s*#psk=' >> $CONF
+else
+  printf 'network={\n\tssid="%s"\n\tkey_mgmt=NONE\n}\n' "$ssid" >> $CONF
+fi
+chmod 600 $CONF
+svc_on wpa_supplicant dhcp-wifi
+wpa_cli -i "$IFACE" reconfigure >/dev/null 2>&1 || sv restart /var/service/wpa_supplicant >/dev/null 2>&1 || true
+printf 'Connecting to %s ' "$ssid"
+for i in $(seq 1 30); do
+  addr=$(ip -4 -o addr show dev "$IFACE" 2>/dev/null | awk '{print $4}')
+  if [ -n "$addr" ] && [ -s /etc/resolv.conf ]; then echo; echo "Connected: $addr"; exit 0; fi
+  printf '.'; sleep 1
+done
+echo; echo "Not connected yet. Check the password, or look at: tail /var/log/wpa_supplicant/current" >&2
+exit 1

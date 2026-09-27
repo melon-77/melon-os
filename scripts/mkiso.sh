@@ -85,8 +85,8 @@ cat > $LIVE/etc/motd <<'MOTD'
 
     melonfetch        show system info
     melon-svc list    list services
-    wpa_passphrase "SSID" "password" >> /etc/wpa_supplicant/wpa_supplicant.conf
-    melon-svc enable wpa_supplicant dhcp-wifi      connect to Wi-Fi
+    melon-wifi        list Wi-Fi networks;  melon-wifi "Name" "password"  to connect
+    (wired networks connect by themselves within a few seconds; ip addr shows the address)
     melon-repo enable alpine    opt-in Alpine packages (apk add <name>@alpine)
 
 MOTD

@@ -1,0 +1,26 @@
+pkgname=qemu-guest-agent
+pkgver=10.2.1
+pkgrel=0
+pkgdesc="QEMU guest agent: lets KVM/QEMU hosts (virt-manager, Proxmox, GNOME Boxes) shut down, freeze and query the VM"
+license=GPL-2.0-or-later
+url=https://www.qemu.org
+source=(qemu-10.2.1.tar.xz)
+builddir=$srcdir/qemu-10.2.1
+makedepends=(glib-dev linux-headers)
+# only the guest agent: no emulators, no tools, no optional features
+build(){
+  PKG_CONFIG=pkg-config ./configure --cross-prefix=$TARGET- --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libexecdir=/usr/libexec \
+    --without-default-features --disable-system --disable-user --disable-linux-user --disable-tools --disable-docs \
+    --disable-werror --disable-install-blobs --enable-guest-agent --disable-debug-info --target-list=
+  make -j$JOBS qemu-ga; }
+package(){ install -Dm755 build/qga/qemu-ga $pkgdir/usr/bin/qemu-ga
+  mkdir -p $pkgdir/etc/sv/qemu-ga
+  cat > $pkgdir/etc/sv/qemu-ga/run <<'RUN'
+#!/bin/sh
+exec 2>&1
+# only in KVM/QEMU guests that have the agent channel; elsewhere the service switches itself off
+dev=/dev/virtio-ports/org.qemu.guest_agent.0
+[ -e $dev ] || { sv down qemu-ga >/dev/null 2>&1; exit 0; }
+exec qemu-ga -m virtio-serial -p $dev -l /var/log/qemu-ga.log
+RUN
+  chmod 755 $pkgdir/etc/sv/qemu-ga/run; }

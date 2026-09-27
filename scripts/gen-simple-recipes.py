@@ -105,6 +105,8 @@ ROWS = [
  ('yaml-cpp','0.8.0','yaml-cpp_0.8.0+dfsg.orig.tar.xz','jbeder-yaml-cpp-f732014','cmake','',"-DYAML_BUILD_SHARED_LIBS=ON -DYAML_CPP_BUILD_TESTS=OFF -DYAML_CPP_BUILD_TOOLS=OFF -DYAML_CPP_BUILD_CONTRIB=OFF",''),
  ('dosfstools','4.2','dosfstools_4.2.orig.tar.gz','dosfstools-4.2','auto','',"--enable-compat-symlinks --without-udev",''),
  ('nano','8.7.1','nano_8.7.1.orig.tar.xz','nano-8.7.1','auto','ncurses-dev',"--disable-nls --enable-utf8 --disable-libmagic --sysconfdir=/etc",''),
+ # VM guest support
+ ('libtirpc','1.3.7','libtirpc_1.3.7.orig.tar.bz2','libtirpc-1.3.7','auto','bsd-compat-headers',"--disable-static --disable-gssapi",''),
 ]
 
 # pkgrel for recipes whose build changed without a version change (rule 6 in AGENTS.md)

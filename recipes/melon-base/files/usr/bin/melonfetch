@@ -72,6 +72,7 @@ cpu=$(sed -n 's/^model name[[:space:]]*: //p' /proc/cpuinfo | head -1 | sed 's/ 
 cores=$(grep -c ^processor /proc/cpuinfo)
 host=$(cat /sys/class/dmi/id/product_name 2>/dev/null); vendor=$(cat /sys/class/dmi/id/sys_vendor 2>/dev/null)
 case $host in ""|"To be filled"*|"System Product Name") host=$vendor ;; esac
+virt=$(melon-detect-virt 2>/dev/null) && host="${host:-virtual machine} ${D}(${virt} VM)${R}"
 gpu=; for c in /sys/class/drm/card[0-9]; do [ -r $c/device/vendor ] || continue
   drv=$(basename "$(readlink $c/device/driver 2>/dev/null)")
   case $(cat $c/device/vendor) in 0x1002) v=AMD;; 0x8086) v=Intel;; 0x10de) v=NVIDIA;; 0x1af4) v=virtio;; 0x1234) v=QEMU;; *) v=GPU;; esac

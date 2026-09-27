@@ -19,3 +19,5 @@ melon-fonts hicolor-icon-theme shared-mime-info
 flatpak xdg-desktop-portal gamemode
 # disks
 cryptsetup dosfstools
+# running in a VM (each tool only starts under its own hypervisor)
+melon-vm-guest

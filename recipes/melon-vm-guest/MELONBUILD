@@ -1,0 +1,9 @@
+pkgname=melon-vm-guest
+pkgver=1
+pkgrel=0
+pkgdesc="Guest tools for running melon in a VM: QEMU/KVM agent, VMware tools, Hyper-V daemons (each only starts in its own hypervisor)"
+license=MIT
+depends=(qemu-guest-agent open-vm-tools hvtools)
+builddir=$srcdir
+package(){ mkdir -p $pkgdir/usr/share/melon
+  echo "qemu-ga vmtoolsd hv_kvp_daemon hv_vss_daemon hv_fcopy_uio_daemon" > $pkgdir/usr/share/melon/vm-guest.services; }

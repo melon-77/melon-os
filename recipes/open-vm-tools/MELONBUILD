@@ -1,0 +1,41 @@
+pkgname=open-vm-tools
+pkgver=13.0.10
+pkgrel=0
+pkgdesc="VMware guest tools: screen auto-resize (resolutionKMS), time sync, clean shutdown, shared folders (vmhgfs-fuse)"
+license=LGPL-2.1-or-later
+url=https://github.com/vmware/open-vm-tools
+source=(open-vm-tools-13.0.10.tar.xz)
+builddir=$srcdir/open-vm-tools-stable-13.0.10
+makedepends=(glib-dev libtirpc-dev fuse3-dev openssl-dev libdrm-dev eudev-dev linux-headers)
+# The musl patches come from Alpine's open-vm-tools package (aports, community/open-vm-tools).
+# No X11 desktop helper (vmware-user): the Plasma session is Wayland, where resizing goes through
+# vmwgfx and vmtoolsd's resolutionKMS plugin.
+prepare(){ cd open-vm-tools; autoreconf -fi >/dev/null 2>&1; }
+build(){
+  cd open-vm-tools
+  export CUSTOM_PROCPS_NAME=procps CFLAGS="$CFLAGS -Wno-unused-but-set-variable -D_GNU_SOURCE" CXXFLAGS="$CXXFLAGS -std=gnu++11"
+  ./configure $conf_flags --with-udev-rules-dir=/usr/lib/udev/rules.d --without-x --without-dnet --without-xerces \
+    --without-icu --without-kernel-modules --without-pam --without-xmlsec1 --disable-vgauth --disable-deploypkg \
+    --disable-containerinfo --disable-servicediscovery --disable-salt-minion --disable-libappmonitor --disable-docs \
+    --disable-tests --enable-resolutionkms --with-fuse=fuse3 --with-tirpc --disable-werror --disable-glibc-check
+  make -j$JOBS; }
+package(){
+  make -C open-vm-tools DESTDIR=$pkgdir install
+  rm -rf $pkgdir/usr/share/doc $pkgdir/etc/pam.d $pkgdir/usr/lib/systemd
+  local conf=$pkgdir/etc/vmware-tools share=$pkgdir/usr/share/open-vm-tools
+  [ -f $conf/tools.conf.example ] && mv $conf/tools.conf.example $conf/tools.conf
+  mkdir -p $share
+  [ -f $conf/statechange.subr ] && mv $conf/statechange.subr $share/
+  [ -f $conf/poweroff-vm-default ] && cp $conf/poweroff-vm-default $share/statechange.sh
+  for f in $conf/*-vm-default; do [ -f "$f" ] && { rm "$f"; ln -s ../../usr/share/open-vm-tools/statechange.sh "$f"; }; done
+  rm -f $conf/scripts/vmware/network
+  mkdir -p $pkgdir/var/log/vmware $pkgdir/etc/sv/vmtoolsd
+  cat > $pkgdir/etc/sv/vmtoolsd/run <<'RUN'
+#!/bin/sh
+exec 2>&1
+# only in VMware guests; elsewhere the service switches itself off
+vmware-checkvm >/dev/null 2>&1 || { sv down vmtoolsd >/dev/null 2>&1; exit 0; }
+modprobe -q vmw_vmci 2>/dev/null; modprobe -q vmw_vsock_vmci_transport 2>/dev/null
+exec vmtoolsd
+RUN
+  chmod 755 $pkgdir/etc/sv/vmtoolsd/run; }

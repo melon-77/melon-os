@@ -1,5 +1,6 @@
 pkgname=xkeyboard-config
 pkgver=2.46
+pkgrel=0
 pkgdesc="xkeyboard-config (graphics stack)"
 license=custom
 source=(xkeyboard-config-2.46.tar.xz)

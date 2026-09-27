@@ -1,5 +1,6 @@
 pkgname=xtrans
 pkgver=1.6.0
+pkgrel=0
 pkgdesc="xtrans (graphics stack)"
 license=custom
 source=(xtrans-1.6.0.tar.gz)

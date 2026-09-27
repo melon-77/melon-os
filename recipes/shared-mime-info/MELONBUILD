@@ -1,5 +1,6 @@
 pkgname=shared-mime-info
 pkgver=2.4
+pkgrel=0
 pkgdesc="shared-mime-info (graphics stack)"
 license=custom
 source=(shared-mime-info-2.4.tar.bz2)

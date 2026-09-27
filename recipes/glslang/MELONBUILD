@@ -1,5 +1,6 @@
 pkgname=glslang
 pkgver=16.2.0
+pkgrel=0
 pkgdesc="glslang (graphics stack)"
 license=custom
 source=(glslang-16.2.0.tar.gz)

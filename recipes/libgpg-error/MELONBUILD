@@ -1,5 +1,6 @@
 pkgname=libgpg-error
 pkgver=1.58
+pkgrel=0
 pkgdesc="libgpg-error (graphics stack)"
 license=custom
 source=(libgpg-error-1.58.tar.bz2)

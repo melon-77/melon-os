@@ -1,5 +1,6 @@
 pkgname=libassuan
 pkgver=3.0.2
+pkgrel=0
 pkgdesc="libassuan (graphics stack)"
 license=custom
 source=(libassuan-3.0.2.tar.bz2)

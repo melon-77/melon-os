@@ -1,5 +1,6 @@
 pkgname=popt
 pkgver=1.19
+pkgrel=0
 pkgdesc="popt (graphics stack)"
 license=custom
 source=(popt-1.19.tar.xz)

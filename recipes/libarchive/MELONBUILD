@@ -1,5 +1,6 @@
 pkgname=libarchive
 pkgver=3.8.5
+pkgrel=0
 pkgdesc="libarchive (graphics stack)"
 license=custom
 source=(libarchive-3.8.5.tar.xz)

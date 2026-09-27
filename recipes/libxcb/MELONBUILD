@@ -1,5 +1,6 @@
 pkgname=libxcb
 pkgver=1.17.0
+pkgrel=0
 pkgdesc="libxcb (graphics stack)"
 license=custom
 source=(libxcb-1.17.0.tar.gz)

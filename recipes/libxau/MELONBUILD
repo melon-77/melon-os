@@ -1,5 +1,6 @@
 pkgname=libxau
 pkgver=1.0.11
+pkgrel=0
 pkgdesc="libxau (graphics stack)"
 license=custom
 source=(libxau-1.0.11.tar.gz)

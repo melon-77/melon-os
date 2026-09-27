@@ -1,5 +1,6 @@
 pkgname=libxi
 pkgver=1.8.2
+pkgrel=0
 pkgdesc="libxi (graphics stack)"
 license=custom
 source=(libxi-1.8.2.tar.gz)

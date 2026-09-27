@@ -1,5 +1,6 @@
 pkgname=libfontenc
 pkgver=1.1.8
+pkgrel=0
 pkgdesc="libfontenc (graphics stack)"
 license=custom
 source=(libfontenc-1.1.8.tar.gz)

@@ -1,5 +1,6 @@
 pkgname=libevdev
 pkgver=1.13.6
+pkgrel=0
 pkgdesc="libevdev (graphics stack)"
 license=custom
 source=(libevdev-1.13.6.tar.xz)

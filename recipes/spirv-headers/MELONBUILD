@@ -1,5 +1,6 @@
 pkgname=spirv-headers
 pkgver=1.4.341.0
+pkgrel=0
 pkgdesc="spirv-headers (graphics stack)"
 license=custom
 source=(spirv-headers-1.4.341.0.tar.gz)

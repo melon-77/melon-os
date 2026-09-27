@@ -1,10 +1,11 @@
 pkgname=power-profiles-daemon
 pkgver=0.30
+pkgrel=0
 pkgdesc="power-profiles-daemon (graphics stack)"
 license=custom
 source=(power-profiles-daemon-0.30.tar.bz2)
 builddir=$srcdir/power-profiles-daemon-0.30
 makedepends=(glib-dev libgudev-dev polkit-dev upower-dev)
 subpackages=(power-profiles-daemon-dev)
-build(){ meson_setup -Dsystemdsystemunitdir=/usr/lib/systemd/system -Dpylint=disabled -Dtests=false -Dmanpage=disabled -Dbashcomp=disabled -Dzshcomp=/nonexistent build; ninja -C build; }
+build(){ meson_setup -Dsystemdsystemunitdir=/usr/lib/systemd/system -Dpylint=disabled -Dtests=false -Dmanpage=disabled -Dbashcomp=disabled -Dzshcomp= build; ninja -C build; }
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

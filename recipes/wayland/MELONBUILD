@@ -1,5 +1,6 @@
 pkgname=wayland
 pkgver=1.24.0
+pkgrel=0
 pkgdesc="wayland (graphics stack)"
 license=custom
 source=(wayland-1.24.0.tar.gz)

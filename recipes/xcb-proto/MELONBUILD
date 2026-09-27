@@ -1,5 +1,6 @@
 pkgname=xcb-proto
 pkgver=1.17.0
+pkgrel=0
 pkgdesc="xcb-proto (graphics stack)"
 license=custom
 source=(xcb-proto-1.17.0.tar.gz)

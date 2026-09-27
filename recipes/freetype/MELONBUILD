@@ -1,5 +1,6 @@
 pkgname=freetype
 pkgver=2.14.2
+pkgrel=0
 pkgdesc="freetype (graphics stack)"
 license=custom
 source=(freetype-2.14.2.tar.xz)

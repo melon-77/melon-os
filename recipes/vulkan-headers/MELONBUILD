@@ -1,5 +1,6 @@
 pkgname=vulkan-headers
 pkgver=1.4.341
+pkgrel=0
 pkgdesc="vulkan-headers (graphics stack)"
 license=custom
 source=(vulkan-headers-1.4.341.tar.gz)

@@ -1,5 +1,6 @@
 pkgname=libxfont2
 pkgver=2.0.6
+pkgrel=0
 pkgdesc="libxfont2 (graphics stack)"
 license=custom
 source=(libxfont2-2.0.6.tar.gz)

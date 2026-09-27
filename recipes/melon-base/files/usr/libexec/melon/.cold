@@ -161,7 +161,7 @@ UUID=$BOOT_UUID                             /boot        vfat   defaults,umask=0
 tmpfs                                      /tmp         tmpfs  nosuid,nodev,mode=1777    0      0
 EOF
 # a swap file (RAM size, at most 8 GiB, and never more than an eighth of the disk); the desktop adds zram
-memk=$(awk '/MemTotal/{print $2}' /proc/meminfo); freek=$(df -k $TARGET | awk 'NR==2{print $4}')
+memk=$(awk '/MemTotal/{print $2}' /proc/meminfo); freek=$(df -Pk $TARGET | awk 'NR==2{print $4}')
 swapm=$(( memk / 1024 )); [ $swapm -gt 8192 ] && swapm=8192
 [ $(( freek / 1024 / 8 )) -lt $swapm ] && swapm=$(( freek / 1024 / 8 ))
 if [ $swapm -ge 256 ]; then

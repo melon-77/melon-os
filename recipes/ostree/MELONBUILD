@@ -1,5 +1,6 @@
 pkgname=ostree
 pkgver=2025.7
+pkgrel=0
 pkgdesc="ostree (graphics stack)"
 license=custom
 source=(ostree-2025.7.tar.xz)

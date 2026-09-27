@@ -1,5 +1,6 @@
 pkgname=libgudev
 pkgver=238
+pkgrel=0
 pkgdesc="libgudev (graphics stack)"
 license=custom
 source=(libgudev-238.tar.xz)

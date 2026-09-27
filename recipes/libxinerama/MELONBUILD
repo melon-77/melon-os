@@ -1,5 +1,6 @@
 pkgname=libxinerama
 pkgver=1.1.4
+pkgrel=0
 pkgdesc="libxinerama (graphics stack)"
 license=custom
 source=(libxinerama-1.1.4.tar.gz)

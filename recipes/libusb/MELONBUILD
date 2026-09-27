@@ -1,5 +1,6 @@
 pkgname=libusb
 pkgver=1.0.29
+pkgrel=0
 pkgdesc="libusb (graphics stack)"
 license=custom
 source=(libusb-1.0.29.tar.bz2)

@@ -1,5 +1,6 @@
 pkgname=xdg-dbus-proxy
 pkgver=0.1.7
+pkgrel=0
 pkgdesc="xdg-dbus-proxy (graphics stack)"
 license=custom
 source=(xdg-dbus-proxy-0.1.7.tar.xz)

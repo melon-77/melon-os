@@ -1,5 +1,6 @@
 pkgname=libxfixes
 pkgver=6.0.0
+pkgrel=0
 pkgdesc="libxfixes (graphics stack)"
 license=custom
 source=(libxfixes-6.0.0.tar.gz)

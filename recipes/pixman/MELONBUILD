@@ -1,5 +1,6 @@
 pkgname=pixman
 pkgver=0.46.4
+pkgrel=0
 pkgdesc="pixman (graphics stack)"
 license=custom
 source=(pixman-0.46.4.tar.gz)

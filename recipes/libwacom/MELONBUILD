@@ -1,5 +1,6 @@
 pkgname=libwacom
 pkgver=2.18.0
+pkgrel=0
 pkgdesc="libwacom (graphics stack)"
 license=custom
 source=(libwacom-2.18.0.tar.gz)

@@ -1,5 +1,6 @@
 pkgname=libxrandr
 pkgver=1.5.4
+pkgrel=0
 pkgdesc="libxrandr (graphics stack)"
 license=custom
 source=(libxrandr-1.5.4.tar.gz)

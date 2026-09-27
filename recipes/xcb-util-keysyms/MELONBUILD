@@ -1,5 +1,6 @@
 pkgname=xcb-util-keysyms
 pkgver=0.4.1
+pkgrel=0
 pkgdesc="xcb-util-keysyms (graphics stack)"
 license=custom
 source=(xcb-util-keysyms-0.4.1.tar.xz)

@@ -1,5 +1,6 @@
 pkgname=libva
 pkgver=2.23.0
+pkgrel=0
 pkgdesc="libva (graphics stack)"
 license=custom
 source=(libva-2.23.0.tar.gz)

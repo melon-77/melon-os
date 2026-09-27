@@ -1,5 +1,6 @@
 pkgname=libx11
 pkgver=1.8.13
+pkgrel=0
 pkgdesc="libx11 (graphics stack)"
 license=custom
 source=(libx11-1.8.13.tar.gz)

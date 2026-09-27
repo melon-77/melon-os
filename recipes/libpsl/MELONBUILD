@@ -1,5 +1,6 @@
 pkgname=libpsl
 pkgver=0.21.2
+pkgrel=0
 pkgdesc="libpsl (graphics stack)"
 license=custom
 source=(libpsl-0.21.2.tar.xz)

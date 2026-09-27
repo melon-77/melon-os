@@ -2,5 +2,5 @@
 exec 2>&1
 [ -r conf ] && . ./conf
 IFACE=${IFACE:-$(for i in /sys/class/net/*; do [ -d $i/wireless ] && { echo ${i##*/}; break; }; done)}
-[ -n "$IFACE" ] || { sleep 30; exit 1; }
+[ -n "$IFACE" ] || { sleep 2; exit 1; }
 exec udhcpc -f -S -i "$IFACE" -R -t 0 -A 5

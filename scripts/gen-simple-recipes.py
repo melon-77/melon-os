@@ -63,7 +63,7 @@ ROWS = [
  ('libndp','1.9','libndp_1.9.orig.tar.gz','libndp-1.9','auto','',"--disable-static CFLAGS=\"$CFLAGS -Wno-error=incompatible-pointer-types\"",''),
  ('libyaml','0.2.5','libyaml_0.2.5.orig.tar.gz','libyaml-0.2.5','auto','',"--disable-static",''),
  ('libfyaml','0.9.4','libfyaml_0.9.4.orig.tar.gz','pantoniou-libfyaml-deb1ec7','cmake','',"-DBUILD_SHARED_LIBS=ON -DENABLE_NETWORK=OFF -DBUILD_TESTING=OFF",''),
- ('libpsl','0.21.2','libpsl_0.21.2.orig.tar.xz','libpsl-0.21.2','meson','',"-Dtests=false -Ddocs=false -Druntime=no -Dbuiltin=true",''),
+ ('libpsl','0.21.2','libpsl_0.21.2.orig.tar.xz','libpsl-0.21.2','meson','',"-Dtests=false -Ddocs=false -Druntime=no -Dbuiltin=true -Dpsl_file=/usr/share/publicsuffix/public_suffix_list.dat",''),
  ('nghttp2','1.68.0','nghttp2_1.68.0.orig.tar.gz','nghttp2-1.68.0','cmake','openssl-dev zlib-dev',"-DENABLE_LIB_ONLY=ON -DENABLE_STATIC_LIB=OFF -DBUILD_STATIC_LIBS=OFF",''),
  ('curl','8.18.0','curl_8.18.0.orig.tar.gz','curl-8.18.0','auto','openssl-dev zlib-dev zstd-dev nghttp2-dev libpsl-dev',"--disable-static --with-openssl --with-nghttp2 --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-libidn2 --without-brotli --disable-manual --disable-ldap --enable-ipv6",''),
  ('libxmlb','0.3.24','libxmlb_0.3.24.orig.tar.gz','libxmlb-0.3.24','meson','glib-dev zstd-dev',"-Dintrospection=false -Dgtkdoc=false -Dtests=false -Dcli=false -Dlzma=disabled -Dzstd=enabled -Dstemmer=false",''),
@@ -85,7 +85,6 @@ ROWS = [
  ('upower','1.91.1','upower_1.91.1.orig.tar.bz2','upower-v1.91.1','meson','glib-dev libgudev-dev polkit-dev',"-Dsystemdsystemunitdir=no -Didevice=disabled -Dintrospection=disabled -Dgtk-doc=false -Dman=false -Dos_backend=linux -Dudevrulesdir=/usr/lib/udev/rules.d -Dudevhwdbdir=/usr/lib/udev/hwdb.d -Dpolkit=enabled",''),
  ('power-profiles-daemon','0.30','power-profiles-daemon_0.30.orig.tar.bz2','power-profiles-daemon-0.30','meson','glib-dev libgudev-dev polkit-dev upower-dev',"-Dsystemdsystemunitdir=/usr/lib/systemd/system -Dpylint=disabled -Dtests=false -Dmanpage=disabled -Dbashcomp=disabled -Dzshcomp=/nonexistent",''),
  ('vulkan-headers','1.4.341','../vulkan-headers-1.4.341.tar.gz','vulkan-headers-1.4.341','cmake','',"",'noarch'),
- ('vulkan-loader','1.4.341.0','vulkan-loader_1.4.341.0.orig.tar.xz','vulkan-loader-1.4.341.0','cmake','vulkan-headers wayland-dev libx11-dev libxrandr-dev',"-DBUILD_WSI_XCB_SUPPORT=ON -DBUILD_WSI_XLIB_SUPPORT=ON -DBUILD_WSI_WAYLAND_SUPPORT=ON -DBUILD_TESTS=OFF -DVULKAN_HEADERS_INSTALL_DIR=$SYSROOT/usr",''),
  ('gdk-pixbuf','2.44.5','gdk-pixbuf_2.44.5+dfsg.orig.tar.xz','gdk-pixbuf-2.44.5','meson','glib-dev libpng-dev libjpeg-turbo-dev shared-mime-info',"-Dintrospection=disabled -Dgtk_doc=false -Dman=false -Dtests=false -Dinstalled_tests=false -Dothers=disabled -Dtiff=disabled -Dgif=disabled -Dglycin=disabled -Dbuiltin_loaders=png,jpeg",''),
  ('npth','1.8','npth_1.8.orig.tar.bz2','npth-1.8','auto','',"--disable-static",''),
  ('libgpg-error','1.58','libgpg-error_1.58.orig.tar.bz2','libgpg-error-1.58','auto','',"--disable-static --disable-doc --disable-tests --disable-nls --enable-install-gpg-error-config",''),
@@ -105,6 +104,7 @@ ROWS = [
  ('popt','1.19','popt_1.19+dfsg.orig.tar.xz','popt-1.19','auto','',"--disable-static --disable-nls",''),
  ('yaml-cpp','0.8.0','yaml-cpp_0.8.0+dfsg.orig.tar.xz','jbeder-yaml-cpp-f732014','cmake','',"-DYAML_BUILD_SHARED_LIBS=ON -DYAML_CPP_BUILD_TESTS=OFF -DYAML_CPP_BUILD_TOOLS=OFF -DYAML_CPP_BUILD_CONTRIB=OFF",''),
  ('dosfstools','4.2','dosfstools_4.2.orig.tar.gz','dosfstools-4.2','auto','',"--enable-compat-symlinks --without-udev",''),
+ ('nano','8.7.1','nano_8.7.1.orig.tar.xz','nano-8.7.1','auto','ncurses-dev',"--disable-nls --enable-utf8 --disable-libmagic --sysconfdir=/etc",''),
 ]
 
 def recipe(r):

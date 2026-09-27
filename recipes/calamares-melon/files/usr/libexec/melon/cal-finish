@@ -38,6 +38,11 @@ if [ "$swapm" -ge 256 ]; then
   echo "/swapfile                                   none         swap   defaults,pri=10        0      0" >> "$ROOT/etc/fstab"
 fi
 
+say "removing the live-only installer packages"
+if [ -f /usr/share/melon/profiles/live-only ]; then
+  apk --root "$ROOT" --arch "$ARCH" --repositories-file /dev/null --no-cache del $(cat /usr/share/melon/profiles/live-only) >/dev/null || true
+fi
+
 say "packages from the ISO"
 mkdir -p "$ROOT/var/lib/melon"
 cp -a "$REPO" "$ROOT/var/lib/melon/repo"

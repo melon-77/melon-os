@@ -18,18 +18,35 @@ PKGS=${PKGS:-"melon-base linux-melon linux-firmware wpa_supplicant xfsprogs grub
 _p=; for x in $PKGS; do
   if ls $M/repo/$APK_ARCH/$x-[0-9]*.apk >/dev/null 2>&1; then _p="$_p $x"; else echo "warning: $x is not built for $APK_ARCH, left out"; fi
 done; PKGS=${_p# }
+# MELON_EDITION=desktop: the Plasma live ISO. Its system image already contains the desktop (the installers
+# copy it as is) plus the live-only installer packages, which both installers remove from the new system.
+EDITION=${MELON_EDITION:-console}
 DESKTOP_PKGS=${DESKTOP_PKGS:-}
+LIVE_ONLY=
+if [ "$EDITION" = desktop ]; then
+  DESKTOP_PKGS=${DESKTOP_PKGS:-$(grep -v '^#' $M/scripts/desktop-packages.txt | xargs)}
+  LIVE_ONLY=${LIVE_ONLY:-calamares-melon}
+  OUTISO=$M/out/melon-desktop-$DATE-$ISOARCH.iso
+fi
 step(){ printf '\033[1;35m== %s\033[0m\n' "$*"; }
 apkx(){ $APK --arch $APK_ARCH --keys-dir $M/keys/trusted --repositories-file /dev/null --repository $REPO/$APK_ARCH/Packages.adb --no-cache "$@"; }
 
 step "system layer (what gets installed)"
 rm -rf $ROOT $LIVE $ISO $INITRD; mkdir -p $ROOT $LIVE $ISO/boot/grub $ISO/melon $INITRD
-apkx --root $ROOT --initdb add $PKGS
+if [ "$EDITION" = desktop ]; then
+  _p=; for x in $DESKTOP_PKGS $LIVE_ONLY; do
+    if ls $M/repo/$APK_ARCH/$x-[0-9]*.apk >/dev/null 2>&1; then _p="$_p $x"; else echo "warning: $x is not built for $APK_ARCH, left out"; fi
+  done; DESKTOP_PKGS=${_p# }
+  apkx --root $ROOT --initdb add $PKGS $DESKTOP_PKGS
+else
+  apkx --root $ROOT --initdb add $PKGS
+fi
 rm -rf $ROOT/var/cache/apk/*
 mkdir -p $ROOT/usr/share/melon/profiles
 printf '%s\n' $PKGS > $ROOT/usr/share/melon/profiles/base
+[ -n "$LIVE_ONLY" ] && printf '%s\n' $LIVE_ONLY > $ROOT/usr/share/melon/profiles/live-only
 if [ -n "$DESKTOP_PKGS" ]; then
-  printf '%s\n' $PKGS $DESKTOP_PKGS > $ROOT/usr/share/melon/profiles/desktop
+  printf '%s\n' $PKGS $(printf '%s\n' $DESKTOP_PKGS | grep -vxF "${LIVE_ONLY:-@none@}") > $ROOT/usr/share/melon/profiles/desktop
   # services for the desktop profile: udev replaces mdev, NetworkManager replaces the dhcp/wpa services
   printf '%s\n' -mdevd -dhcp udevd dbus elogind polkitd NetworkManager bluetoothd power-profiles-daemon zram sddm \
     > $ROOT/usr/share/melon/profiles/desktop.services
@@ -42,7 +59,24 @@ echo melon-live > $LIVE/etc/hostname
 sed 's/^root:[^:]*:/root::/' $ROOT/etc/shadow > $LIVE/etc/shadow; chmod 640 $LIVE/etc/shadow
 echo 'GETTY_ARGS="-n -l /usr/bin/melon-autologin"' > $LIVE/etc/sv/getty-tty1/conf
 echo 'GETTY_ARGS="-n -l /usr/bin/melon-autologin"' > $LIVE/etc/sv/getty-ttyS0/conf
-for s in getty-tty1 getty-tty2 getty-tty3 getty-ttyS0 mdevd syslogd klogd dhcp; do ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
+if [ "$EDITION" = desktop ]; then
+  for s in getty-tty2 getty-tty3 getty-ttyS0 syslogd klogd udevd dbus elogind polkitd NetworkManager bluetoothd \
+           power-profiles-daemon zram sddm; do ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
+  # the live user: logs in automatically to Plasma, may use doas without a password, has the installer on the desktop
+  awk -F: '$1!="live"' $ROOT/etc/passwd > $LIVE/etc/passwd; echo 'live:x:1000:1000:melon live:/home/live:/bin/bash' >> $LIVE/etc/passwd
+  awk -F: '$1!="live"' $LIVE/etc/shadow > $LIVE/etc/shadow.t; echo 'live::20000:0:99999:7:::' >> $LIVE/etc/shadow.t
+  mv $LIVE/etc/shadow.t $LIVE/etc/shadow; chmod 640 $LIVE/etc/shadow
+  awk -F: -v OFS=: '$1=="live"{next} $1 ~ /^(wheel|audio|video|input|render|plugdev|netdev|users)$/{$4=($4==""?"live":$4",live")} {print}' \
+    $ROOT/etc/group > $LIVE/etc/group; echo 'live:x:1000:' >> $LIVE/etc/group
+  mkdir -p $LIVE/home/live/Desktop $LIVE/etc/sddm.conf.d
+  cp -a $ROOT/etc/skel/. $LIVE/home/live/
+  install -m755 $ROOT/usr/share/applications/melon-install.desktop $LIVE/home/live/Desktop/melon-install.desktop 2>/dev/null || true
+  chown -R 1000:1000 $LIVE/home/live
+  printf '[Autologin]\nUser=live\nSession=plasma\nRelogin=false\n' > $LIVE/etc/sddm.conf.d/20-live.conf
+  { cat $ROOT/etc/doas.conf 2>/dev/null; echo 'permit nopass live'; } > $LIVE/etc/doas.conf; chmod 600 $LIVE/etc/doas.conf
+else
+  for s in getty-tty1 getty-tty2 getty-tty3 getty-ttyS0 mdevd syslogd klogd dhcp; do ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
+fi
 echo "/media/melon/melon/repo/$APK_ARCH/Packages.adb" > $LIVE/etc/apk/repositories
 install -m644 $M/recipes/melon-sounds/ice.mp3 $LIVE/usr/share/melon/.ice
 cat > $LIVE/etc/motd <<'MOTD'
@@ -59,7 +93,7 @@ MOTD
 
 step "squashfs"
 mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet
-mksquashfs $LIVE $ISO/melon/live.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet -all-root
+mksquashfs $LIVE $ISO/melon/live.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet   # built as root; /home/live keeps its owner
 
 step "package repository (extras only; the base system comes from rootfs.sqfs)"
 mkdir -p $ISO/melon/repo/$APK_ARCH
@@ -104,7 +138,8 @@ menuentry 'melon live (serial console)' {
   initrd /boot/initramfs.img
 }
 CFG
-mkdir -p $M/out; rm -f $M/out/melon-*-$ISOARCH.iso
+mkdir -p $M/out
+if [ "$EDITION" = desktop ]; then rm -f $M/out/melon-desktop-*-$ISOARCH.iso; else rm -f $M/out/melon-2*-$ISOARCH.iso; fi
 $M/hosttools/grub$ARCH_SUFFIX/bin/grub-mkrescue -o $OUTISO $ISO -- -volid MELON 2>&1 | grep -v -E '^xorriso|^Drive|^Media|^libisofs|^Added|^ISO image|^Writing|^Written|^$' || true
 ( cd $M/out && sha256sum melon-*.iso > SHA256SUMS )
 ls -la $OUTISO

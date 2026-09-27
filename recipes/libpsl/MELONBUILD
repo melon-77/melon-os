@@ -5,5 +5,5 @@ license=custom
 source=(libpsl-0.21.2.tar.xz)
 builddir=$srcdir/libpsl-0.21.2
 subpackages=(libpsl-dev)
-build(){ meson_setup -Dtests=false -Ddocs=false -Druntime=no -Dbuiltin=true build; ninja -C build; }
+build(){ meson_setup -Dtests=false -Ddocs=false -Druntime=no -Dbuiltin=true -Dpsl_file=/usr/share/publicsuffix/public_suffix_list.dat build; ninja -C build; }
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

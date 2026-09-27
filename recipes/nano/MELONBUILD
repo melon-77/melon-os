@@ -1,0 +1,10 @@
+pkgname=nano
+pkgver=8.7.1
+pkgdesc="nano (graphics stack)"
+license=custom
+source=(nano-8.7.1.tar.xz)
+builddir=$srcdir/nano-8.7.1
+makedepends=(ncurses-dev)
+subpackages=(nano-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-nls --enable-utf8 --disable-libmagic --sysconfdir=/etc; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

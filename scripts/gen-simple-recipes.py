@@ -60,9 +60,9 @@ ROWS = [
  ('libseccomp','2.6.0','libseccomp_2.6.0.orig.tar.gz','libseccomp-2.6.0','auto','',"--disable-static --disable-python",''),
  ('libusb','1.0.29','libusb-1.0_1.0.29.orig.tar.bz2','libusb-1.0.29','auto','eudev-dev',"--disable-static",''),
  ('sbc','2.1','sbc_2.1.orig.tar.gz','sbc-2.1','auto','',"--disable-static --disable-tester --disable-tools",''),
- ('libndp','1.9','libndp_1.9.orig.tar.gz','libndp-1.9','auto','',"--disable-static",''),
- ('libyaml','0.2.5','libyaml_0.2.5.orig.tar.gz','yaml-0.2.5','auto','',"--disable-static",''),
- ('libfyaml','0.9.4','libfyaml_0.9.4.orig.tar.gz','libfyaml-0.9.4','auto','',"--disable-static --disable-network",''),
+ ('libndp','1.9','libndp_1.9.orig.tar.gz','libndp-1.9','auto','',"--disable-static CFLAGS=\"$CFLAGS -Wno-error=incompatible-pointer-types\"",''),
+ ('libyaml','0.2.5','libyaml_0.2.5.orig.tar.gz','libyaml-0.2.5','auto','',"--disable-static",''),
+ ('libfyaml','0.9.4','libfyaml_0.9.4.orig.tar.gz','pantoniou-libfyaml-deb1ec7','cmake','',"-DBUILD_SHARED_LIBS=ON -DENABLE_NETWORK=OFF -DBUILD_TESTING=OFF",''),
  ('libpsl','0.21.2','libpsl_0.21.2.orig.tar.xz','libpsl-0.21.2','meson','',"-Dtests=false -Ddocs=false -Druntime=no -Dbuiltin=true",''),
  ('nghttp2','1.68.0','nghttp2_1.68.0.orig.tar.gz','nghttp2-1.68.0','cmake','openssl-dev zlib-dev',"-DENABLE_LIB_ONLY=ON -DENABLE_STATIC_LIB=OFF -DBUILD_STATIC_LIBS=OFF",''),
  ('curl','8.18.0','curl_8.18.0.orig.tar.gz','curl-8.18.0','auto','openssl-dev zlib-dev zstd-dev nghttp2-dev libpsl-dev',"--disable-static --with-openssl --with-nghttp2 --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-libidn2 --without-brotli --disable-manual --disable-ldap --enable-ipv6",''),
@@ -100,6 +100,11 @@ ROWS = [
  ('xdg-dbus-proxy','0.1.7','xdg-dbus-proxy_0.1.7.orig.tar.xz','xdg-dbus-proxy-0.1.7','meson','glib-dev',"-Dman=disabled -Dtests=false",''),
  ('json-glib','1.10.8','json-glib_1.10.8+ds.orig.tar.xz','json-glib-1.10.8','meson','glib-dev',"-Dintrospection=disabled -Dgtk_doc=disabled -Dman=false -Dtests=false -Dnls=disabled",''),
  ('ostree','2025.7','ostree_2025.7.orig.tar.xz','libostree-2025.7','auto','glib-dev curl-dev gpgme-dev libarchive-dev fuse3-dev openssl-dev zlib-dev',"--with-curl --without-soup --without-soup3 --with-openssl --disable-gtk-doc --disable-man --without-selinux --without-libsystemd --without-dracut --without-mkinitcpio --without-grub2 --without-avahi --without-ed25519-libsodium --disable-glibtest --without-composefs --disable-introspection --without-libmount",''),
+ # installer support (Calamares, LUKS)
+ ('json-c','0.18','json-c_0.18+ds.orig.tar.xz','json-c-json-c-0.18-20240915','cmake','',"-DBUILD_STATIC_LIBS=OFF -DBUILD_TESTING=OFF -DDISABLE_WERROR=ON -DBUILD_APPS=OFF",''),
+ ('popt','1.19','popt_1.19+dfsg.orig.tar.xz','popt-1.19','auto','',"--disable-static --disable-nls",''),
+ ('yaml-cpp','0.8.0','yaml-cpp_0.8.0+dfsg.orig.tar.xz','jbeder-yaml-cpp-f732014','cmake','',"-DYAML_BUILD_SHARED_LIBS=ON -DYAML_CPP_BUILD_TESTS=OFF -DYAML_CPP_BUILD_TOOLS=OFF -DYAML_CPP_BUILD_CONTRIB=OFF",''),
+ ('dosfstools','4.2','dosfstools_4.2.orig.tar.gz','dosfstools-4.2','auto','',"--enable-compat-symlinks --without-udev",''),
 ]
 
 def recipe(r):

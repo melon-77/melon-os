@@ -1,0 +1,11 @@
+pkgname=kpmcore
+pkgver=25.12.3
+pkgdesc="KDE partitioning library (used by the Calamares installer)"
+license=GPL-3.0-or-later
+url=https://invent.kde.org/system/kpmcore
+source=(kpmcore-25.12.3.tar.xz)
+makedepends=(qt6-qtbase-dev kf6-kcoreaddons-dev kf6-ki18n-dev kf6-kwidgetsaddons-dev polkit-qt-1-dev util-linux-dev)
+depends=(util-linux dosfstools xfsprogs cryptsetup)
+subpackages=(kpmcore-dev)
+build(){ cmake_setup -B build -DQT_HOST_PATH=/home/claude/melon/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=/home/claude/melon/hosttools/qt6/lib/cmake -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_QTPLUGINDIR=lib/qt6/plugins -DKDE_INSTALL_QMLDIR=lib/qt6/qml -DKDE_INSTALL_LIBEXECDIR=libexec -DKF_IGNORE_PLATFORM_CHECK=ON -DBUILD_WITH_QT6=ON -DQT_MAJOR_VERSION=6 -DBUILD_TESTING=OFF; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

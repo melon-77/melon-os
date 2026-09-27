@@ -1,0 +1,21 @@
+#!/bin/sh
+# cal-certificate NAME: print the gauntlet survivor certificate (SVG) for NAME
+name=$(printf '%s' "${1:-melon user}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+day=$(date '+%B %d, %Y')
+cat <<SVG
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1130" viewBox="0 0 1600 1130">
+  <rect width="1600" height="1130" fill="#16301c"/>
+  <rect x="40" y="40" width="1520" height="1050" fill="none" stroke="#f0a35e" stroke-width="10" rx="24"/>
+  <rect x="70" y="70" width="1460" height="990" fill="none" stroke="#9fe3a0" stroke-width="3" rx="16"/>
+  <text x="800" y="230" text-anchor="middle" font-family="Noto Serif, serif" font-size="92" fill="#f0a35e" font-weight="bold">Certificate of Survival</text>
+  <text x="800" y="330" text-anchor="middle" font-family="Noto Sans, sans-serif" font-size="40" fill="#e9f5e1">This certifies that</text>
+  <text x="800" y="470" text-anchor="middle" font-family="Noto Serif, serif" font-size="110" fill="#ffffff" font-style="italic">$name</text>
+  <line x1="360" y1="510" x2="1240" y2="510" stroke="#f0a35e" stroke-width="4"/>
+  <text x="800" y="610" text-anchor="middle" font-family="Noto Sans, sans-serif" font-size="40" fill="#e9f5e1">answered all 200 questions of the melon gauntlet</text>
+  <text x="800" y="670" text-anchor="middle" font-family="Noto Sans, sans-serif" font-size="40" fill="#e9f5e1">and installed melon Linux the long way.</text>
+  <circle cx="800" cy="850" r="95" fill="#f0a35e"/>
+  <circle cx="800" cy="850" r="78" fill="#7cc36e"/>
+  <text x="800" y="868" text-anchor="middle" font-family="Noto Sans, sans-serif" font-size="46" fill="#16301c" font-weight="bold">melon</text>
+  <text x="800" y="1010" text-anchor="middle" font-family="Noto Sans, sans-serif" font-size="32" fill="#9fb8a0">$day</text>
+</svg>
+SVG

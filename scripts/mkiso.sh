@@ -13,7 +13,7 @@ ROOT=$WORK/liveroot LIVE=$WORK/livelayer ISO=$WORK/iso INITRD=$WORK/initrd
 DATE=$(date +%Y%m%d)
 ISOARCH=$([ $MELON_ARCH = x86 ] && echo i686 || echo x86_64)
 OUTISO=$M/out/melon-$DATE-$ISOARCH.iso
-PKGS=${PKGS:-"melon-base linux-melon linux-firmware wpa_supplicant xfsprogs grub zstd openssl ca-certificates ncurses-terminfo musl-utils alsa-utils mpg123 kmod"}
+PKGS=${PKGS:-"melon-base linux-melon linux-firmware wpa_supplicant xfsprogs grub zstd openssl ca-certificates cryptsetup ncurses-terminfo musl-utils alsa-utils mpg123 kmod"}
 # leave out optional packages that haven't been built for this architecture yet (with a warning)
 _p=; for x in $PKGS; do
   if ls $M/repo/$APK_ARCH/$x-[0-9]*.apk >/dev/null 2>&1; then _p="$_p $x"; else echo "warning: $x is not built for $APK_ARCH, left out"; fi

@@ -3,7 +3,7 @@ pkgver=0.9.4
 pkgdesc="libfyaml (graphics stack)"
 license=custom
 source=(libfyaml-0.9.4.tar.gz)
-builddir=$srcdir/libfyaml-0.9.4
+builddir=$srcdir/pantoniou-libfyaml-deb1ec7
 subpackages=(libfyaml-dev)
-build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-network; make -j$JOBS; }
-package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }
+build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DENABLE_NETWORK=OFF -DBUILD_TESTING=OFF; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

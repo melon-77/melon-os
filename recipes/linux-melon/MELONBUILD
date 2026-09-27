@@ -1,6 +1,6 @@
 pkgname=linux-melon
 pkgver=7.0.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Linux kernel for melon (generic x86_64 flavour)"
 license=GPL-2.0-only
 url=https://kernel.org

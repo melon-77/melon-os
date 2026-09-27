@@ -1,0 +1,12 @@
+#!/bin/sh
+# melon-install-gui: start the graphical installer (Calamares with the gauntlet) from the live desktop.
+# The music plays in the live user's own audio session (PipeWire) at 30% of full volume for as long as
+# the installer runs; Calamares itself runs as root through doas.
+music=
+if [ -f /usr/share/melon/.ice ] && command -v mpg123 >/dev/null; then
+  mpg123 -q --loop -1 -f 9830 /usr/share/melon/.ice >/dev/null 2>&1 &   # -f: 32768 is 100%
+  music=$!
+fi
+trap '[ -n "$music" ] && kill $music 2>/dev/null' EXIT INT TERM
+doas env WAYLAND_DISPLAY="$WAYLAND_DISPLAY" XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" QT_QPA_PLATFORM=wayland \
+  XDG_SESSION_TYPE=wayland calamares "$@"

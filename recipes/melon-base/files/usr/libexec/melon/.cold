@@ -8,7 +8,8 @@
 #
 # Unattended use (for testing): set MELON_DISK, MELON_HOSTNAME, MELON_ROOTPW, MELON_USER,
 # MELON_USERPW and MELON_YES=1 (and optionally MELON_PROFILE, MELON_WIFI_SSID/MELON_WIFI_PSK,
-# MELON_ALPINE=y to add Alpine's repo as the opt-in tagged repo "@alpine").
+# MELON_ALPINE=y to add Alpine's repo as the opt-in tagged repo "@alpine", MELON_ENCRYPT=y with
+# MELON_LUKSPW to encrypt / with LUKS2; /boot stays plain and a small initramfs asks for the passphrase).
 #
 # This is the quick installer. The desktop ISO's advertised installer is Calamares
 # (with the melon gauntlet); this one installs the same thing in a handful of prompts.
@@ -79,6 +80,11 @@ if ls -d /sys/class/net/*/wireless >/dev/null 2>&1; then
   [ -n "$MELON_WIFI_SSID" ] && askpw MELON_WIFI_PSK "Wi-Fi password"
 fi
 ask MELON_ALPINE "Also offer Alpine's packages as an opt-in @alpine repo (y/n)" n
+ENCRYPT=n
+if command -v cryptsetup >/dev/null; then
+  ask MELON_ENCRYPT "Encrypt the system with a passphrase (LUKS) (y/n)" n
+  case $MELON_ENCRYPT in y|Y|yes) ENCRYPT=y; askpw MELON_LUKSPW "Disk encryption passphrase" ;; esac
+fi
 if [ "${MELON_YES:-}" != 1 ]; then
   printf '\n%sErase %s and install melon? Type YES:%s ' "$B" "$DISK" "$R"; read -r ok; [ "$ok" = YES ] || die "aborted"
 fi
@@ -110,10 +116,18 @@ BOOTP=$PP$BOOTN ROOTP=$PP$ROOTN
 
 say "Creating filesystems (FAT32 /boot, XFS /)"
 mkfs.vfat -F 32 -n MELONBOOT "$BOOTP" >/dev/null
-mkfs.xfs -q -f -L melon "$ROOTP"
+ROOTDEV=$ROOTP
+if [ $ENCRYPT = y ]; then
+  say "Encrypting $ROOTP (LUKS2)"
+  modprobe -q dm_crypt 2>/dev/null || true
+  printf '%s' "$MELON_LUKSPW" | cryptsetup luksFormat --batch-mode --type luks2 "$ROOTP" -
+  printf '%s' "$MELON_LUKSPW" | cryptsetup open --key-file - "$ROOTP" melonroot
+  ROOTDEV=/dev/mapper/melonroot
+fi
+mkfs.xfs -q -f -L melon "$ROOTDEV"
 
 say "Mounting"
-mkdir -p $TARGET; mount -t xfs "$ROOTP" $TARGET
+mkdir -p $TARGET; mount -t xfs "$ROOTDEV" $TARGET
 mkdir -p $TARGET/boot; mount -t vfat -o umask=0077 "$BOOTP" $TARGET/boot
 say "Copying the melon system"
 mkdir -p /run/melon-src; mount -t squashfs -o loop,ro "$SYSIMG" /run/melon-src
@@ -135,13 +149,23 @@ cp -a "$REPO" $TARGET/var/lib/melon/repo
 echo "/var/lib/melon/repo/$ARCH/Packages.adb" > $TARGET/etc/apk/repositories
 echo "$MELON_HOSTNAME" > $TARGET/etc/hostname
 sed -i "s/^127.0.1.1.*/127.0.1.1\t$MELON_HOSTNAME/" $TARGET/etc/hosts
-ROOT_UUID=$(blkid -s UUID -o value "$ROOTP"); BOOT_UUID=$(blkid -s UUID -o value "$BOOTP")
+ROOT_UUID=$(blkid -s UUID -o value "$ROOTDEV"); BOOT_UUID=$(blkid -s UUID -o value "$BOOTP")
 cat > $TARGET/etc/fstab <<EOF
 # <device>                                 <mountpoint> <type> <options>                 <dump> <pass>
 UUID=$ROOT_UUID  /            xfs    defaults,noatime          0      1
 UUID=$BOOT_UUID                             /boot        vfat   defaults,umask=0077       0      2
 tmpfs                                      /tmp         tmpfs  nosuid,nodev,mode=1777    0      0
 EOF
+# a swap file (RAM size, at most 8 GiB, and never more than an eighth of the disk); the desktop adds zram
+memk=$(awk '/MemTotal/{print $2}' /proc/meminfo); freek=$(df -k $TARGET | awk 'NR==2{print $4}')
+swapm=$(( memk / 1024 )); [ $swapm -gt 8192 ] && swapm=8192
+[ $(( freek / 1024 / 8 )) -lt $swapm ] && swapm=$(( freek / 1024 / 8 ))
+if [ $swapm -ge 256 ]; then
+  say "Creating a ${swapm} MiB swap file"
+  fallocate -l ${swapm}M $TARGET/swapfile 2>/dev/null || dd if=/dev/zero of=$TARGET/swapfile bs=1M count=$swapm 2>/dev/null
+  chmod 600 $TARGET/swapfile; mkswap $TARGET/swapfile >/dev/null
+  echo "/swapfile                                  none         swap   defaults,pri=10           0      0" >> $TARGET/etc/fstab
+fi
 echo "root:$MELON_ROOTPW" | chroot $TARGET chpasswd -c sha512
 if [ -n "$MELON_USER" ]; then
   chroot $TARGET adduser -D -s /bin/bash -G users "$MELON_USER"
@@ -198,12 +222,18 @@ chroot $TARGET grub-install --target=i386-pc --boot-directory=/boot "$DISK" 2>&1
 chroot $TARGET grub-install --target=$EFI_TARGET --efi-directory=/boot --boot-directory=/boot --removable --no-nvram 2>&1 | grep -v '^Installing for' || true
 [ -f $TARGET/boot/EFI/BOOT/$EFI_FILE ] || die "UEFI GRUB was not installed"
 [ -f $TARGET/boot/grub/i386-pc/core.img ] || die "BIOS GRUB was not installed"
-MELON_ROOT_DEV="$ROOTP" MELON_BOOT_DEV="$BOOTP" chroot $TARGET melon-update-grub
+if [ $ENCRYPT = y ]; then
+  say "Building the unlock initramfs"
+  mkdir -p $TARGET/etc/melon; : > $TARGET/etc/melon/encrypted-root
+  chroot $TARGET melon-mkinitramfs
+fi
+MELON_ROOT_DEV="$ROOTDEV" MELON_BOOT_DEV="$BOOTP" chroot $TARGET melon-update-grub
 
 say "Finishing"
 sync
 for d in dev proc sys; do umount $TARGET/$d; done
 umount $TARGET/boot; umount $TARGET
+[ $ENCRYPT = y ] && cryptsetup close melonroot
 cat <<EOF
 
 ${P}  melon is installed on $DISK.${R}

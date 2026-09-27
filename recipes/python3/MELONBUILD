@@ -1,0 +1,22 @@
+pkgname=python3
+pkgver=3.14.4
+pkgdesc="The Python 3 interpreter and standard library"
+license=PSF-2.0
+url=https://www.python.org
+source=(Python-3.14.4.tar.xz)
+builddir=$srcdir/Python-3.14.4
+makedepends=(libffi-dev zlib-dev openssl-dev expat-dev ncurses-dev sqlite-dev)
+subpackages=(python3-dev)
+# Cross builds need a host Python of the same version (scripts/host-python.sh -> hosttools/python).
+build(){
+  ./configure $conf_flags --with-build-python=$M/hosttools/python/bin/python3.14 --enable-shared --with-ensurepip=no \
+    --with-system-expat --without-system-libmpdec --with-openssl=$SYSROOT/usr --disable-test-modules --without-doc-strings \
+    --with-lto=no --enable-ipv6 ac_cv_file__dev_ptmx=yes ac_cv_file__dev_ptc=no ac_cv_buggy_getaddrinfo=no
+  make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install
+  local l=$pkgdir/usr/lib/python3.14
+  # the parts nobody uses at runtime on melon (tests, IDLE, Tk demos, pip bootstrap)
+  rm -rf $l/test $l/idlelib $l/tkinter $l/turtledemo $l/ensurepip $l/turtle.py $l/pydoc_data $pkgdir/usr/share/man
+  find $pkgdir/usr/lib/python3.14 -name '__pycache__' -prune -exec rm -rf {} +
+  ln -sf python3.14 $pkgdir/usr/bin/python3; ln -sf python3 $pkgdir/usr/bin/python; }
+pkg_dev(){ default_dev; amove usr/lib/python3.14/config-3.14-* usr/bin/python3*-config; }

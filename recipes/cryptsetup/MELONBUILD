@@ -1,0 +1,16 @@
+pkgname=cryptsetup
+pkgver=2.8.4
+pkgdesc="Disk encryption (LUKS) setup tool and library"
+license="GPL-2.0-or-later"
+url=https://gitlab.com/cryptsetup/cryptsetup
+source=(cryptsetup-2.8.4.tar.gz)
+makedepends=(device-mapper-dev json-c-dev popt-dev openssl-dev util-linux-dev linux-headers)
+subpackages=(cryptsetup-dev cryptsetup-libs)
+depends=(cryptsetup-libs)
+pkgdesc_cryptsetup_libs="cryptsetup library (libcryptsetup)"
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --with-crypto_backend=openssl --enable-internal-sse-argon2 --disable-asciidoc \
+    --disable-nls --disable-ssh-token --disable-external-tokens --disable-veritysetup --disable-integritysetup --disable-selinux \
+    --with-tmpfilesdir=/nonexistent
+  make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/nonexistent $pkgdir/usr/share/man; }
+pkg_libs(){ amove 'usr/lib/libcryptsetup.so.*'; }

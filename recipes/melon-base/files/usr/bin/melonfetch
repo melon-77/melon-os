@@ -85,6 +85,8 @@ bat=; for b in /sys/class/power_supply/BAT*; do [ -r $b/capacity ] && bat="$(cat
 wifi=; for w in /sys/class/net/*/wireless; do [ -d "$w" ] && wifi=$(basename "$(dirname "$w")"); done
 ip=$(ip -4 -o addr 2>/dev/null | awk '$2!="lo"{split($4,a,"/"); print a[1] " (" $2 ")"; exit}')
 user=$(id -un) hn=$(cat /proc/sys/kernel/hostname)
+# installed through the full Calamares gauntlet (all 200 questions)
+badge=; [ -r /etc/melon/gauntlet-survivor ] && badge="${O}★ gauntlet survivor${R} ${D}since $(cat /etc/melon/gauntlet-survivor)${R}"
 
 title="${P}${user}${R}${B}@${R}${P}${hn}${R}   ${B}${O}m e l o n${R}"
 rule="${D}$(printf '%*s' $(( ${#user} + ${#hn} + 13 )) '' | sed 's/ /─/g')${R}"
@@ -105,6 +107,7 @@ ${gpu:+$(L gpu "$gpu")
 $(L disk "$(bar $du $dt) ${D}$(awk -v u=$du -v t=$dt 'BEGIN{printf "%.1f/%.1f", u/1024, t/1024}') GiB${R}")
 ${bat:+$(L battery "$bat")
 }${ip:+$(L network "$ip${wifi:+ ${D}wifi: $wifi${R}}")
+}${badge:+$(L badge "$badge")
 }
 $(i=0; s=""; while [ $i -lt 8 ]; do s="$s${E}[4${i}m   "; i=$((i+1)); done; printf '%s%s' "$s" "$R")
 $(i=0; s=""; while [ $i -lt 8 ]; do s="$s${E}[10${i}m   "; i=$((i+1)); done; printf '%s%s' "$s" "$R")"

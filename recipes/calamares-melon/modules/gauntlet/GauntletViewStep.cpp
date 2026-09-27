@@ -1,0 +1,102 @@
+#include "GauntletViewStep.h"
+
+#include "GlobalStorage.h"
+#include "JobQueue.h"
+#include "utils/Variant.h"
+
+void
+GauntletConfig::setProgress( int p )
+{
+    if ( p < 0 )
+    {
+        p = 0;
+    }
+    if ( p != m_progress )
+    {
+        m_progress = p;
+        emit progressChanged();
+    }
+}
+
+void
+GauntletConfig::setPassed( bool p )
+{
+    if ( p == m_passed )
+    {
+        return;
+    }
+    m_passed = p;
+    if ( auto* gs = Calamares::JobQueue::instance() ? Calamares::JobQueue::instance()->globalStorage() : nullptr )
+    {
+        // the finishing job reads this to hand out the rewards
+        gs->insert( QStringLiteral( "melonGauntletPassed" ), p );
+        gs->insert( QStringLiteral( "melonGauntletMistakes" ), m_mistakes );
+    }
+    emit passedChanged( p );
+}
+
+void
+GauntletConfig::setAlpine( bool a )
+{
+    if ( a == m_alpine )
+    {
+        return;
+    }
+    m_alpine = a;
+    if ( auto* gs = Calamares::JobQueue::instance() ? Calamares::JobQueue::instance()->globalStorage() : nullptr )
+    {
+        // read by the contextualprocess job "melon-alpine" (opt-in @alpine repo)
+        gs->insert( QStringLiteral( "melonAlpine" ), a ? QStringLiteral( "yes" ) : QStringLiteral( "no" ) );
+    }
+    emit alpineChanged();
+}
+
+void
+GauntletConfig::recordMistake()
+{
+    ++m_mistakes;
+    emit progressChanged();
+}
+
+GauntletViewStep::GauntletViewStep( QObject* parent )
+    : Calamares::QmlViewStep( parent )
+    , m_config( new GauntletConfig( this ) )
+{
+    connect( m_config, &GauntletConfig::passedChanged, this, &GauntletViewStep::nextStatusChanged );
+}
+
+GauntletViewStep::~GauntletViewStep() {}
+
+QString
+GauntletViewStep::prettyName() const
+{
+    return tr( "The gauntlet" );
+}
+
+bool
+GauntletViewStep::isNextEnabled() const
+{
+    return m_config->passed();
+}
+
+bool
+GauntletViewStep::isBackEnabled() const
+{
+    // going back to the earlier pages is fine; progress is kept
+    return true;
+}
+
+void
+GauntletViewStep::setConfigurationMap( const QVariantMap& map )
+{
+    m_config->configure( Calamares::getInteger( map, "delay", 3 ), Calamares::getInteger( map, "setback", 10 ) );
+    Calamares::QmlViewStep::setConfigurationMap( map );  // parent last: it loads the QML
+}
+
+QObject*
+GauntletViewStep::getConfig()
+{
+    return m_config;
+}
+
+CALAMARES_PLUGIN_FACTORY_DEFINITION( GauntletViewStepFactory, registerPlugin< GauntletViewStep >(); )

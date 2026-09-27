@@ -1,6 +1,6 @@
 pkgname=melon-desktop
 pkgver=0.1
-pkgrel=0
+pkgrel=1
 pkgdesc="melon desktop: Plasma defaults, melon dark theme, wallpapers, splash, SDDM config and desktop services"
 license=MIT
 # The desktop package list itself lives in the ISO profile (scripts/mkiso.sh DESKTOP_PKGS), so this

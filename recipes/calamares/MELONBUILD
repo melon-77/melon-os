@@ -1,0 +1,21 @@
+pkgname=calamares
+pkgver=3.3.14
+pkgdesc="Calamares system installer (runs the melon gauntlet on the desktop live ISO)"
+license=GPL-3.0-or-later
+url=https://calamares.io
+source=(calamares-3.3.14.tar.gz)
+makedepends=(qt6-qtbase-dev qt6-qtdeclarative-dev qt6-qtsvg-dev qt6-qttools-dev kf6-kcoreaddons-dev kf6-kdbusaddons-dev
+  kf6-kcrash-dev kpmcore-dev yaml-cpp-dev python3-dev polkit-qt-1-dev extra-cmake-modules)
+depends=(squashfs-tools kpmcore cryptsetup python3)
+subpackages=(calamares-dev)
+# Python job modules through the bundled pybind11; Python is the melon one (cross), found by hand.
+# Modules melon doesn't use are skipped; melon's own steps run as shellprocess jobs (calamares-melon).
+build(){ cmake_setup -B build -DQT_HOST_PATH=/home/claude/melon/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=/home/claude/melon/hosttools/qt6/lib/cmake -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_QTPLUGINDIR=lib/qt6/plugins -DKDE_INSTALL_QMLDIR=lib/qt6/qml -DKDE_INSTALL_LIBEXECDIR=libexec -DKF_IGNORE_PLATFORM_CHECK=ON -DBUILD_WITH_QT6=ON -DQT_MAJOR_VERSION=6 -DWITH_QT6=ON -DWITH_PYTHON=ON -DWITH_PYBIND11=ON -DBUILD_TESTING=OFF \
+    -DINSTALL_CONFIG=OFF -DINSTALL_POLKIT=ON -DWITH_APPSTREAM=OFF -DWITH_KF5DBus=OFF -DBUILD_APPDATA=OFF \
+    -DCMAKE_DISABLE_FIND_PACKAGE_LIBPWQUALITY=ON -DCMAKE_DISABLE_FIND_PACKAGE_PythonQt=ON \
+    -DPython_EXECUTABLE=$M/hosttools/python/bin/python3.14 -DPython_INCLUDE_DIR=$SYSROOT/usr/include/python3.14 \
+    -DPython_LIBRARY=$SYSROOT/usr/lib/libpython3.14.so -DPython3_EXECUTABLE=$M/hosttools/python/bin/python3.14 \
+    -DPython3_INCLUDE_DIR=$SYSROOT/usr/include/python3.14 -DPython3_LIBRARY=$SYSROOT/usr/lib/libpython3.14.so \
+    "-DSKIP_MODULES=dracut dracutlukscfg initcpio initcpiocfg initramfs initramfscfg plymouthcfg zfs zfshostid openrcdmcryptcfg tracking webview netinstall packagechooser packagechooserq oemid license interactiveterminal plasmalnf dummycpp dummypython dummyprocess dummypythonqt fsresizer rawfs removeuser luksopenswaphookcfg services-systemd services-openrc packages hostinfo keyboardq localeq usersq welcomeq summaryq finishedq"
+  ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

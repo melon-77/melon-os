@@ -1,0 +1,8 @@
+#!/bin/sh
+# Calamares job "prepare": runs on the live system with the new system mounted at $1.
+set -eu
+ROOT=$1
+mkdir -p "$ROOT/usr/local/bin"
+for t in useradd usermod groupadd; do
+  install -m755 /usr/libexec/melon/cal-shims/shadow-shim "$ROOT/usr/local/bin/$t"
+done

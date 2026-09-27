@@ -1,6 +1,6 @@
 pkgname=melon-base
 pkgver=0.1
-pkgrel=10
+pkgrel=11
 pkgdesc="melon base system: init scripts, services, configuration and tools"
 license=MIT
 depends=(melon-layout musl busybox bash runit apk-tools ncurses-terminfo-base util-linux opendoas)

@@ -177,4 +177,6 @@ if [ $INSTALL = 1 ]; then
   all=("$pkgname"); for sp in "${subpackages[@]:-}"; do [ -n "$sp" ] && [[ $sp != *-doc ]] && all+=("$sp"); done
   msg "sysroot: ${all[*]}"; sysroot_add "${all[@]}"
 fi
+# free the disk: build trees are large (set MELON_KEEP_WORK=1 to keep them for debugging)
+[ "${MELON_KEEP_WORK:-0}" = 1 ] || rm -rf "$WORK/pkg/$name"
 msg done

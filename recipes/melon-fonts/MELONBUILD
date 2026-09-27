@@ -1,0 +1,29 @@
+pkgname=melon-fonts
+pkgver=1.0
+pkgdesc="Desktop fonts: Noto Sans/Serif (Latin, Greek, Cyrillic), Noto Color Emoji and Hack"
+license=OFL-1.1
+source=(fonts-noto-core_20201225-2_all.deb fonts-noto-color-emoji_2.047-0ubuntu0.24.04.1_all.deb hack-3.003.tar.gz)
+subpackages=(font-noto font-noto-emoji font-hack)
+builddir=$srcdir
+options=('!strip')
+depends=(font-noto font-noto-emoji font-hack)
+pkgdesc_font_noto="Noto Sans and Noto Serif (Latin, Greek, Cyrillic)"
+pkgdesc_font_noto_emoji="Noto Color Emoji"
+pkgdesc_font_hack="Hack monospace font"
+package(){
+  mkdir -p x; for d in $srcdir/*.deb; do dpkg-deb -x $d x; done
+  # only the core Latin/Greek/Cyrillic families; the full Noto set is hundreds of MB
+  install -d $pkgbase/font-noto/usr/share/fonts/noto $pkgbase/font-noto-emoji/usr/share/fonts/noto $pkgbase/font-hack/usr/share/fonts/hack
+  for f in x/usr/share/fonts/truetype/noto/Noto{Sans,Serif,SansMono}-*.ttf; do [ -f "$f" ] && cp "$f" $pkgbase/font-noto/usr/share/fonts/noto/; done
+  cp x/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf $pkgbase/font-noto-emoji/usr/share/fonts/noto/
+  cp $srcdir/Hack-3.003/build/ttf/*.ttf $pkgbase/font-hack/usr/share/fonts/hack/
+  mkdir -p $pkgdir/etc/fonts/conf.d
+  cat > $pkgdir/etc/fonts/local.conf <<'FC'
+<?xml version="1.0"?><!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+  <alias><family>sans-serif</family><prefer><family>Noto Sans</family><family>Noto Color Emoji</family></prefer></alias>
+  <alias><family>serif</family><prefer><family>Noto Serif</family><family>Noto Color Emoji</family></prefer></alias>
+  <alias><family>monospace</family><prefer><family>Hack</family><family>Noto Sans Mono</family><family>Noto Color Emoji</family></prefer></alias>
+</fontconfig>
+FC
+}

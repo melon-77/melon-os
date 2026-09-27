@@ -1,0 +1,10 @@
+pkgname=libdisplay-info
+pkgver=0.3.0
+pkgdesc="libdisplay-info (graphics stack)"
+license=custom
+source=(libdisplay-info-0.3.0.tar.bz2)
+builddir=$srcdir/libdisplay-info-0.3.0
+makedepends=(hwdata)
+subpackages=(libdisplay-info-dev)
+build(){ meson_setup  build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

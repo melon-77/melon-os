@@ -1,0 +1,10 @@
+pkgname=gpgme
+pkgver=2.0.1
+pkgdesc="gpgme (graphics stack)"
+license=custom
+source=(gpgme-2.0.1.tar.bz2)
+builddir=$srcdir/gpgme-2.0.1
+makedepends=(libassuan-dev libgpg-error-dev gnupg)
+subpackages=(gpgme-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-gpg-test --disable-gpgsm-test --disable-gpgconf-test --disable-g13-test --enable-languages= --with-libgpg-error-prefix=$SYSROOT/usr --with-libassuan-prefix=$SYSROOT/usr; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

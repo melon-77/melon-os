@@ -1,0 +1,11 @@
+pkgname=xdg-desktop-portal
+pkgver=1.21.1
+pkgdesc="Desktop integration portals for sandboxed apps (file pickers, screen sharing, ...)"
+license=LGPL-2.1-or-later
+url=https://github.com/flatpak/xdg-desktop-portal
+source=(xdg-desktop-portal-1.21.1.tar.xz)
+makedepends=(glib-dev fuse3-dev pipewire-dev gdk-pixbuf-dev flatpak-dev bubblewrap json-glib-dev)
+subpackages=(xdg-desktop-portal-dev)
+build(){ meson_setup -Dsystemd=disabled -Ddocumentation=disabled -Dtests=disabled -Dgeoclue=disabled -Dflatpak-interfaces=enabled \
+   -Dsandboxed-image-validation=true -Dsandboxed-sound-validation=false -Dman-pages=disabled -Dinstalled-tests=false build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/lib/systemd $pkgdir/usr/share/doc; }

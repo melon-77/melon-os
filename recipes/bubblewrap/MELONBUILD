@@ -1,0 +1,10 @@
+pkgname=bubblewrap
+pkgver=0.11.1
+pkgdesc="bubblewrap (graphics stack)"
+license=custom
+source=(bubblewrap-0.11.1.tar.xz)
+builddir=$srcdir/bubblewrap-0.11.1
+makedepends=(libcap-dev)
+subpackages=(bubblewrap-dev)
+build(){ meson_setup -Dman=disabled -Dbash_completion=disabled -Dzsh_completion=disabled -Dselinux=disabled -Dtests=false build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

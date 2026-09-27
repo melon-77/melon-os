@@ -1,0 +1,9 @@
+pkgname=sbc
+pkgver=2.1
+pkgdesc="sbc (graphics stack)"
+license=custom
+source=(sbc-2.1.tar.gz)
+builddir=$srcdir/sbc-2.1
+subpackages=(sbc-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-tester --disable-tools; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

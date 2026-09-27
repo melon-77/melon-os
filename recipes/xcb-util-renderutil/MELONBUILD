@@ -1,0 +1,10 @@
+pkgname=xcb-util-renderutil
+pkgver=0.3.10
+pkgdesc="xcb-util-renderutil (graphics stack)"
+license=custom
+source=(xcb-util-renderutil-0.3.10.tar.xz)
+builddir=$srcdir/xcb-util-renderutil-0.3.10
+makedepends=(libxcb-dev)
+subpackages=(xcb-util-renderutil-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

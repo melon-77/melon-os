@@ -1,0 +1,10 @@
+pkgname=nghttp2
+pkgver=1.68.0
+pkgdesc="nghttp2 (graphics stack)"
+license=custom
+source=(nghttp2-1.68.0.tar.gz)
+builddir=$srcdir/nghttp2-1.68.0
+makedepends=(openssl-dev zlib-dev)
+subpackages=(nghttp2-dev)
+build(){ cmake_setup -B build -DENABLE_LIB_ONLY=ON -DENABLE_STATIC_LIB=OFF -DBUILD_STATIC_LIBS=OFF; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

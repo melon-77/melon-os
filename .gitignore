@@ -10,3 +10,6 @@
 # never commit the private repository signing key
 /keys/*.rsa
 !/keys/*.rsa.pub
+/work-*/
+/tools-*/
+/sysroot-*/

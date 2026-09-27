@@ -1,0 +1,10 @@
+pkgname=curl
+pkgver=8.18.0
+pkgdesc="curl (graphics stack)"
+license=custom
+source=(curl-8.18.0.tar.gz)
+builddir=$srcdir/curl-8.18.0
+makedepends=(openssl-dev zlib-dev zstd-dev nghttp2-dev libpsl-dev)
+subpackages=(curl-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --with-openssl --with-nghttp2 --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-libidn2 --without-brotli --disable-manual --disable-ldap --enable-ipv6; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

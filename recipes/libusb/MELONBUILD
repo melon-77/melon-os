@@ -1,0 +1,10 @@
+pkgname=libusb
+pkgver=1.0.29
+pkgdesc="libusb (graphics stack)"
+license=custom
+source=(libusb-1.0.29.tar.bz2)
+builddir=$srcdir/libusb-1.0.29
+makedepends=(eudev-dev)
+subpackages=(libusb-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

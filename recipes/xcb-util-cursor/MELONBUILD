@@ -1,0 +1,10 @@
+pkgname=xcb-util-cursor
+pkgver=0.1.6
+pkgdesc="xcb-util-cursor (graphics stack)"
+license=custom
+source=(xcb-util-cursor-0.1.6.tar.gz)
+builddir=$srcdir/xcb-util-cursor-0.1.6
+makedepends=(xcb-util-renderutil-dev xcb-util-image-dev)
+subpackages=(xcb-util-cursor-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

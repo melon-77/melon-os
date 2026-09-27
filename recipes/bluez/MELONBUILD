@@ -1,0 +1,10 @@
+pkgname=bluez
+pkgver=5.85
+pkgdesc="bluez (graphics stack)"
+license=custom
+source=(bluez-5.85.tar.gz)
+builddir=$srcdir/bluez-5.85
+makedepends=(glib-dev dbus-dev eudev-dev linux-headers)
+subpackages=(bluez-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-systemd --enable-library --disable-cups --disable-obex --disable-mesh --disable-midi --disable-manpages --disable-client --disable-monitor --with-udevdir=/usr/lib/udev --with-dbusconfdir=/usr/share --disable-asha --disable-bap --disable-bass --disable-mcp --disable-vcp --disable-micp --disable-csip; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

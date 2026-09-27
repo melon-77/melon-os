@@ -1,0 +1,32 @@
+pkgname=lua5.4
+pkgver=5.4.8
+pkgdesc="Lua 5.4 scripting language (used by WirePlumber)"
+license=MIT
+url=https://www.lua.org
+source=(lua-5.4.8.tar.gz)
+builddir=$srcdir/lua-5.4.8
+subpackages=(lua5.4-dev)
+build(){
+  cd src
+  make CC="$CC" AR="$AR rcu" RANLIB="$RANLIB" MYCFLAGS="$CFLAGS -fPIC -DLUA_USE_LINUX" MYLDFLAGS="$LDFLAGS" liblua.a lua luac
+  $CC -shared -Wl,-soname,liblua5.4.so.0 -o liblua5.4.so.0.0.0 -Wl,--whole-archive liblua.a -Wl,--no-whole-archive -lm $LDFLAGS
+}
+package(){
+  cd src
+  install -Dm755 lua $pkgdir/usr/bin/lua5.4; install -Dm755 luac $pkgdir/usr/bin/luac5.4
+  install -Dm755 liblua5.4.so.0.0.0 $pkgdir/usr/lib/liblua5.4.so.0.0.0
+  ln -s liblua5.4.so.0.0.0 $pkgdir/usr/lib/liblua5.4.so.0; ln -s liblua5.4.so.0 $pkgdir/usr/lib/liblua5.4.so
+  mkdir -p $pkgdir/usr/include/lua5.4; cp lua.h luaconf.h lualib.h lauxlib.h lua.hpp $pkgdir/usr/include/lua5.4/
+  mkdir -p $pkgdir/usr/lib/pkgconfig; cat > $pkgdir/usr/lib/pkgconfig/lua5.4.pc <<'PC'
+prefix=/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include/lua5.4
+Name: Lua
+Description: An extensible extension language
+Version: 5.4.8
+Libs: -L${libdir} -llua5.4
+Libs.private: -lm
+Cflags: -I${includedir}
+PC
+  ln -s lua5.4.pc $pkgdir/usr/lib/pkgconfig/lua-5.4.pc; ln -s lua5.4.pc $pkgdir/usr/lib/pkgconfig/lua.pc
+}

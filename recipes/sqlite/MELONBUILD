@@ -1,0 +1,10 @@
+pkgname=sqlite
+pkgver=3.46.1
+pkgdesc="sqlite (graphics stack)"
+license=custom
+source=(sqlite-3.46.1.tar.xz)
+builddir=$srcdir/sqlite3-3.46.1
+makedepends=(zlib-dev)
+subpackages=(sqlite-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --enable-threadsafe --disable-readline --disable-editline; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

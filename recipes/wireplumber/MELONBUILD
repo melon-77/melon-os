@@ -1,0 +1,10 @@
+pkgname=wireplumber
+pkgver=0.5.13
+pkgdesc="wireplumber (graphics stack)"
+license=custom
+source=(wireplumber-0.5.13.tar.gz)
+builddir=$srcdir/wireplumber-0.5.13-84429b47943d789389fbde17c06b82efb197d04e
+makedepends=(pipewire-dev lua5.4-dev glib-dev elogind-dev)
+subpackages=(wireplumber-dev)
+build(){ meson_setup -Dsystem-lua=true -Dsystem-lua-version=5.4 -Dintrospection=disabled -Ddoc=disabled -Dsystemd=disabled -Dsystemd-user-service=false -Dsystemd-system-service=false -Delogind=enabled -Dtests=false -Ddbus-tests=false build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

@@ -1,0 +1,10 @@
+pkgname=libxmlb
+pkgver=0.3.24
+pkgdesc="libxmlb (graphics stack)"
+license=custom
+source=(libxmlb-0.3.24.tar.gz)
+builddir=$srcdir/libxmlb-0.3.24
+makedepends=(glib-dev zstd-dev)
+subpackages=(libxmlb-dev)
+build(){ meson_setup -Dintrospection=false -Dgtkdoc=false -Dtests=false -Dcli=false -Dlzma=disabled -Dzstd=enabled -Dstemmer=false build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

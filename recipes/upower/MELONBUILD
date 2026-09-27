@@ -1,0 +1,10 @@
+pkgname=upower
+pkgver=1.91.1
+pkgdesc="upower (graphics stack)"
+license=custom
+source=(upower-1.91.1.tar.bz2)
+builddir=$srcdir/upower-v1.91.1
+makedepends=(glib-dev libgudev-dev polkit-dev)
+subpackages=(upower-dev)
+build(){ meson_setup -Dsystemdsystemunitdir=no -Didevice=disabled -Dintrospection=disabled -Dgtk-doc=false -Dman=false -Dos_backend=linux -Dudevrulesdir=/usr/lib/udev/rules.d -Dudevhwdbdir=/usr/lib/udev/hwdb.d -Dpolkit=enabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

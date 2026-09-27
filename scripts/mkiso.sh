@@ -40,11 +40,14 @@ rm -rf $ROOT/var/cache/apk/*
 step "squashfs"
 mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet -e boot/vmlinuz-melon boot/System.map-melon
 step "package repository"
-mkdir -p $ISO/melon/repo/x86_64; cp $REPO/x86_64/*.apk $REPO/x86_64/Packages.adb $ISO/melon/repo/x86_64/
+mkdir -p $ISO/melon/repo/x86_64
+$APK --arch x86_64 --keys-dir $M/keys/trusted --repositories-file /dev/null --repository $REPO/x86_64/Packages.adb \
+     --no-cache fetch --recursive --output $ISO/melon/repo/x86_64 $PKGS ${DESKTOP_PKGS:-} >/dev/null
+( cd $ISO/melon/repo/x86_64 && $APK --keys-dir $M/keys/trusted --sign-key $M/keys/melon-signing.rsa mkndx -d "melon $DATE" -o Packages.adb *.apk )
 
 step "initramfs"
 mkdir -p $INITRD/bin $INITRD/lib $INITRD/dev
-cp $ROOT/usr/bin/busybox $INITRD/bin/busybox
+cp $ROOT/usr/bin/busybox $INITRD/bin/busybox; ln -s busybox $INITRD/bin/sh
 cp $ROOT/usr/lib/libc.so $INITRD/lib/ld-musl-x86_64.so.1
 cp $M/iso-files/init $INITRD/init
 (cd $INITRD && find . | cpio -o -H newc --quiet | zstd -q -19 > $ISO/boot/initramfs.img)

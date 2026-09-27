@@ -103,6 +103,18 @@ Rebuilding the kernel takes about an hour on 2 cores.
 8. **GCC's target libraries install to `tools/x86_64-melon-linux-musl/lib64`**, not `lib`.
 9. Anything that runs cross-built binaries on the build host needs `/lib/ld-musl-x86_64.so.1`
    (a symlink to `sysroot/usr/lib/libc.so`).
+10. **Module handling uses kmod, not BusyBox.** BusyBox's `depmod -b` produced a modules.dep that
+    `modprobe` couldn't resolve, so no drivers loaded. The kernel package runs `depmod -a` (kmod) in its
+    post-install, and `kmod` is a dependency of `linux-melon`.
+11. **The build host needs `zstd`** (the kernel compresses bzImage with it), `mtools`, `xorriso` and
+    `squashfs-tools`.
+12. **GRUB on a serial console:** `terminal_output gfxterm` replaces the serial output unless `serial`
+    is listed too. `melon-update-grub` handles this when `GRUB_SERIAL=1` is set in `/etc/default/grub`.
+13. **`melon-update-grub` is given the root and boot devices explicitly** by the installer
+    (`MELON_ROOT_DEV`, `MELON_BOOT_DEV`). Guessing them from inside a chroot picked the wrong filesystem UUID.
+
+To resume a failed long build without unpacking again (for example the kernel):
+`MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
 
 ## Testing (required before you commit a change that affects boot or install)
 

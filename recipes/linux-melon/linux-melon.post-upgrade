@@ -1,4 +1,4 @@
 #!/bin/sh
-for d in /usr/lib/modules/*; do [ -d "$d" ] && depmod -b /usr "${d##*/}" 2>/dev/null; done
-[ -x /usr/bin/melon-update-grub ] && /usr/bin/melon-update-grub
+for d in /usr/lib/modules/*; do [ -d "$d" ] && depmod -a "${d##*/}"; done
+[ -x /usr/bin/melon-update-grub ] && [ -f /boot/grub/grub.cfg ] && /usr/bin/melon-update-grub
 exit 0

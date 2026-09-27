@@ -1,0 +1,9 @@
+pkgname=musl-obstack
+pkgver=1.2.3
+pkgdesc="obstack functions for musl"
+license=GPL-2.0-or-later
+url=https://github.com/void-linux/musl-obstack
+source=(musl-obstack-1.2.3.tar.gz)
+subpackages=(musl-obstack-dev)
+build(){ ./bootstrap.sh; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; }

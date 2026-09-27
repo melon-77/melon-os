@@ -1,0 +1,10 @@
+pkgname=libxfont2
+pkgver=2.0.6
+pkgdesc="libxfont2 (graphics stack)"
+license=custom
+source=(libxfont2-2.0.6.tar.gz)
+builddir=$srcdir/libXfont2-2.0.6
+makedepends=(freetype-dev libfontenc-dev xtrans)
+subpackages=(libxfont2-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-devel-docs; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

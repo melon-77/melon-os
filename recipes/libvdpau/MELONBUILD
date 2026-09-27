@@ -1,0 +1,10 @@
+pkgname=libvdpau
+pkgver=1.5
+pkgdesc="libvdpau (graphics stack)"
+license=custom
+source=(libvdpau-1.5.tar.bz2)
+builddir=$srcdir/libvdpau-1.5
+makedepends=(libx11-dev libxext-dev)
+subpackages=(libvdpau-dev)
+build(){ meson_setup -Ddocumentation=false build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

@@ -1,0 +1,10 @@
+pkgname=libdrm
+pkgver=2.4.131
+pkgdesc="libdrm (graphics stack)"
+license=custom
+source=(libdrm-2.4.131.tar.xz)
+builddir=$srcdir/libdrm-2.4.131
+makedepends=(libpciaccess-dev)
+subpackages=(libdrm-dev)
+build(){ meson_setup -Dintel=enabled -Dradeon=enabled -Damdgpu=enabled -Dnouveau=enabled -Dvmwgfx=enabled -Dtests=false -Dman-pages=disabled -Dvalgrind=disabled -Dcairo-tests=disabled -Dudev=false build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

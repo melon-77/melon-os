@@ -1,0 +1,10 @@
+pkgname=libxdmcp
+pkgver=1.1.5
+pkgdesc="libxdmcp (graphics stack)"
+license=custom
+source=(libxdmcp-1.1.5.tar.gz)
+builddir=$srcdir/libXdmcp-1.1.5
+makedepends=(xorgproto)
+subpackages=(libxdmcp-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-docs; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

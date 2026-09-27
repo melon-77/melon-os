@@ -10,8 +10,8 @@ subpackages=(musl-dev musl-utils)
 depends_musl_dev="musl linux-headers"
 depends_musl_utils="musl"
 pkgdesc_musl_utils="musl libc utilities (ldd, getconf-like helpers)"
-provides_musl=("so:libc.so=1" "so:libc.musl-x86_64.so.1=1")
+provides_musl=("so:libc.so=1" "so:libc.musl-$APK_ARCH.so.1=1")
 build(){ ./configure --target=$CHOST --prefix=/usr --syslibdir=/usr/lib CROSS_COMPILE=$CHOST-; make -j$JOBS; }
-package(){ make DESTDIR=$pkgdir install; ln -sf libc.so $pkgdir/usr/lib/ld-musl-x86_64.so.1; }
+package(){ make DESTDIR=$pkgdir install; ln -sf libc.so $pkgdir/usr/lib/$MUSL_LDSO; }
 pkg_dev(){ amove usr/include 'usr/lib/*.a' 'usr/lib/*.o' usr/lib/musl-gcc.specs; }
-pkg_utils(){ mkdir -p $subpkgdir/usr/bin; ln -sf ../lib/ld-musl-x86_64.so.1 $subpkgdir/usr/bin/ldd; }
+pkg_utils(){ mkdir -p $subpkgdir/usr/bin; ln -sf ../lib/$MUSL_LDSO $subpkgdir/usr/bin/ldd; }

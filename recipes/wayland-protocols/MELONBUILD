@@ -1,0 +1,10 @@
+pkgname=wayland-protocols
+pkgver=1.47
+pkgdesc="wayland-protocols (graphics stack)"
+license=custom
+source=(wayland-protocols-1.47.tar.xz)
+builddir=$srcdir/wayland-protocols-1.47
+makedepends=(wayland-dev)
+build(){ meson_setup -Dtests=false build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }
+options=('!strip')

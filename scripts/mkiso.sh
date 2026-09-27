@@ -11,11 +11,12 @@ set -euo pipefail
 APK=$M/hosttools/bin/apk
 ROOT=$WORK/liveroot LIVE=$WORK/livelayer ISO=$WORK/iso INITRD=$WORK/initrd
 DATE=$(date +%Y%m%d)
-OUTISO=$M/out/melon-$DATE-x86_64.iso
+ISOARCH=$([ $MELON_ARCH = x86 ] && echo i686 || echo x86_64)
+OUTISO=$M/out/melon-$DATE-$ISOARCH.iso
 PKGS=${PKGS:-"melon-base linux-melon linux-firmware wpa_supplicant xfsprogs grub zstd openssl ncurses-terminfo musl-utils alsa-utils mpg123 kmod"}
 DESKTOP_PKGS=${DESKTOP_PKGS:-}
 step(){ printf '\033[1;35m== %s\033[0m\n' "$*"; }
-apkx(){ $APK --arch x86_64 --keys-dir $M/keys/trusted --repositories-file /dev/null --repository $REPO/x86_64/Packages.adb --no-cache "$@"; }
+apkx(){ $APK --arch $APK_ARCH --keys-dir $M/keys/trusted --repositories-file /dev/null --repository $REPO/$APK_ARCH/Packages.adb --no-cache "$@"; }
 
 step "system layer (what gets installed)"
 rm -rf $ROOT $LIVE $ISO $INITRD; mkdir -p $ROOT $LIVE $ISO/boot/grub $ISO/melon $INITRD
@@ -33,7 +34,7 @@ sed 's/^root:[^:]*:/root::/' $ROOT/etc/shadow > $LIVE/etc/shadow; chmod 640 $LIV
 echo 'GETTY_ARGS="-n -l /usr/bin/melon-autologin"' > $LIVE/etc/sv/getty-tty1/conf
 echo 'GETTY_ARGS="-n -l /usr/bin/melon-autologin"' > $LIVE/etc/sv/getty-ttyS0/conf
 for s in getty-tty1 getty-tty2 getty-tty3 getty-ttyS0 mdevd syslogd klogd dhcp; do ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
-echo "/media/melon/melon/repo/x86_64/Packages.adb" > $LIVE/etc/apk/repositories
+echo "/media/melon/melon/repo/$APK_ARCH/Packages.adb" > $LIVE/etc/apk/repositories
 install -m644 $M/recipes/melon-sounds/ice.mp3 $LIVE/usr/share/melon/.ice
 cat > $LIVE/etc/motd <<'MOTD'
 
@@ -51,18 +52,18 @@ mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 15 -noapp
 mksquashfs $LIVE $ISO/melon/live.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet -all-root
 
 step "package repository (extras only; the base system comes from rootfs.sqfs)"
-mkdir -p $ISO/melon/repo/x86_64
+mkdir -p $ISO/melon/repo/$APK_ARCH
 if [ -n "$DESKTOP_PKGS" ]; then
-  apkx fetch --recursive --output $ISO/melon/repo/x86_64 $DESKTOP_PKGS >/dev/null
+  apkx fetch --recursive --output $ISO/melon/repo/$APK_ARCH $DESKTOP_PKGS >/dev/null
 fi
 # always carry the small, commonly wanted extras so an offline install can still add them
-apkx fetch --recursive --output $ISO/melon/repo/x86_64 melon-base bash busybox musl apk-tools >/dev/null
-( cd $ISO/melon/repo/x86_64 && $APK --keys-dir $M/keys/trusted --sign-key $M/keys/melon-signing.rsa mkndx -d "melon $DATE" -o Packages.adb *.apk )
+apkx fetch --recursive --output $ISO/melon/repo/$APK_ARCH melon-base bash busybox musl apk-tools >/dev/null
+( cd $ISO/melon/repo/$APK_ARCH && $APK --keys-dir $M/keys/trusted --sign-key $M/keys/melon-signing.rsa mkndx -d "melon $DATE" -o Packages.adb *.apk )
 
 step "initramfs"
 mkdir -p $INITRD/bin $INITRD/lib $INITRD/dev
 cp $ROOT/usr/bin/busybox $INITRD/bin/busybox; ln -s busybox $INITRD/bin/sh
-cp $ROOT/usr/lib/libc.so $INITRD/lib/ld-musl-x86_64.so.1
+cp $ROOT/usr/lib/libc.so $INITRD/lib/$MUSL_LDSO
 cp $M/iso-files/init $INITRD/init
 (cd $INITRD && find . | cpio -o -H newc --quiet | zstd -q -19 > $ISO/boot/initramfs.img)
 
@@ -93,7 +94,7 @@ menuentry 'melon live (serial console)' {
   initrd /boot/initramfs.img
 }
 CFG
-mkdir -p $M/out; rm -f $M/out/melon-*-x86_64.iso
-$M/hosttools/grub/bin/grub-mkrescue -o $OUTISO $ISO -- -volid MELON 2>&1 | grep -v -E '^xorriso|^Drive|^Media|^libisofs|^Added|^ISO image|^Writing|^Written|^$' || true
-( cd $M/out && sha256sum $(basename $OUTISO) > SHA256SUMS )
+mkdir -p $M/out; rm -f $M/out/melon-*-$ISOARCH.iso
+$M/hosttools/grub$ARCH_SUFFIX/bin/grub-mkrescue -o $OUTISO $ISO -- -volid MELON 2>&1 | grep -v -E '^xorriso|^Drive|^Media|^libisofs|^Added|^ISO image|^Writing|^Written|^$' || true
+( cd $M/out && sha256sum melon-*.iso > SHA256SUMS )
 ls -la $OUTISO

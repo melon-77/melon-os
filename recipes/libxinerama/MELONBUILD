@@ -1,0 +1,10 @@
+pkgname=libxinerama
+pkgver=1.1.4
+pkgdesc="libxinerama (graphics stack)"
+license=custom
+source=(libxinerama-1.1.4.tar.gz)
+builddir=$srcdir/libXinerama-1.1.4
+makedepends=(libxext-dev)
+subpackages=(libxinerama-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --enable-malloc0returnsnull=no; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

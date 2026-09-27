@@ -13,7 +13,7 @@ pkgdesc_libatomic="GCC atomic operations library"
 pkgdesc_libgomp="GCC OpenMP runtime"
 builddir=$srcdir
 package(){
-  L=$TOOLS/$TARGET/lib64; mkdir -p $pkgdir/usr/lib $pkgdir/usr/include
+  L=$TOOLS/$TARGET/lib64; [ -d $L ] || L=$TOOLS/$TARGET/lib; mkdir -p $pkgdir/usr/lib $pkgdir/usr/include
   cp -a $L/libgcc_s.so* $L/libstdc++.so* $L/libatomic.so* $L/libgomp.so* $pkgdir/usr/lib/ 2>/dev/null || true
   cp -a $L/libstdc++.a $L/libstdc++fs.a $L/libsupc++.a $pkgdir/usr/lib/ 2>/dev/null || true
   cp -a $TOOLS/$TARGET/include/c++ $pkgdir/usr/include/

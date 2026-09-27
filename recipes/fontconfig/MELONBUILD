@@ -1,0 +1,10 @@
+pkgname=fontconfig
+pkgver=2.17.1
+pkgdesc="fontconfig (graphics stack)"
+license=custom
+source=(fontconfig-2.17.1.tar.gz)
+builddir=$srcdir/fontconfig-2.17.1-6d0a98982ec351c165c9224c8b7dbdfca3010e47
+makedepends=(freetype-dev expat-dev)
+subpackages=(fontconfig-dev)
+build(){ meson_setup -Ddoc=disabled -Dtests=disabled -Dtools=enabled -Dcache-build=disabled -Dnls=disabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

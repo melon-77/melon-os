@@ -1,0 +1,10 @@
+pkgname=libxcb
+pkgver=1.17.0
+pkgdesc="libxcb (graphics stack)"
+license=custom
+source=(libxcb-1.17.0.tar.gz)
+builddir=$srcdir/libxcb-1.17.0
+makedepends=(xcb-proto libxau-dev libxdmcp-dev)
+subpackages=(libxcb-dev)
+build(){ export XCBPROTO_XCBINCLUDEDIR=$SYSROOT/usr/share/xcb XCBPROTO_XCBPYTHONDIR=$(ls -d $SYSROOT/usr/lib/python3*/site-packages | head -1); [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-devel-docs --without-doxygen --enable-xinput --enable-xkb; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

@@ -1,0 +1,10 @@
+pkgname=libxdamage
+pkgver=1.1.7
+pkgdesc="libxdamage (graphics stack)"
+license=custom
+source=(libxdamage-1.1.7.tar.xz)
+builddir=$srcdir/libXdamage-1.1.7
+makedepends=(libxfixes-dev)
+subpackages=(libxdamage-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

@@ -1,0 +1,10 @@
+pkgname=spirv-tools
+pkgver=2026.1
+pkgdesc="spirv-tools (graphics stack)"
+license=custom
+source=(spirv-tools-2026.1.tar.gz)
+builddir=$srcdir/KhronosGroup-SPIRV-Tools-fbe4f3a
+makedepends=(spirv-headers)
+subpackages=(spirv-tools-dev)
+build(){ cmake_setup -B build -DSPIRV-Headers_SOURCE_DIR=$SYSROOT/usr -DSPIRV_SKIP_TESTS=ON -DSPIRV_SKIP_EXECUTABLES=OFF -DSPIRV_WERROR=OFF -DSPIRV_TOOLS_BUILD_STATIC=OFF -DBUILD_SHARED_LIBS=ON; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

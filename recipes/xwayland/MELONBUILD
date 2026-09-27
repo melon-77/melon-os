@@ -1,0 +1,12 @@
+pkgname=xwayland
+pkgver=24.1.10
+pkgdesc="X server that runs X11 apps and games inside a Wayland session"
+license=MIT
+url=https://xorg.freedesktop.org
+source=(xwayland-24.1.10.tar.xz)
+makedepends=(xorgproto xtrans libxkbfile-dev libxfont2-dev libxcvt-dev pixman-dev libdrm-dev mesa-dev libepoxy-dev
+  libxshmfence-dev wayland-dev wayland-protocols openssl-dev libx11-dev libxau-dev libxdmcp-dev)
+build(){ meson_setup -Dxvfb=false -Dglamor=true -Dsha1=libcrypto -Dsecure-rpc=false -Dxdmcp=false -Dxcsecurity=true \
+   -Ddocs=false -Ddevel-docs=false -Dlibdecor=false -Ddri3=true -Dxwayland_eglstream=false -Dxkb_dir=/usr/share/X11/xkb \
+   -Dxkb_output_dir=/var/lib/xkb build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/man; }

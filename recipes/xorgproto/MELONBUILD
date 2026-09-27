@@ -1,0 +1,9 @@
+pkgname=xorgproto
+pkgver=2025.1
+pkgdesc="xorgproto (graphics stack)"
+license=custom
+source=(xorgproto-2025.1.tar.gz)
+builddir=$srcdir/xorgproto-2025.1
+build(){ meson_setup -Dlegacy=false build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }
+options=('!strip')

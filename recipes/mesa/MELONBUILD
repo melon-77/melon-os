@@ -1,0 +1,29 @@
+pkgname=mesa
+pkgver=26.0.8
+pkgdesc="OpenGL, EGL, GBM and Vulkan drivers (AMD, Intel, NVIDIA nouveau, virtual, software)"
+license=MIT
+url=https://www.mesa3d.org
+source=(mesa-26.0.8.tar.xz)
+makedepends=(libdrm-dev wayland-dev wayland-protocols libx11-dev libxext-dev libxfixes-dev libxshmfence-dev libxxf86vm-dev
+  libxrandr-dev libxcb-dev expat-dev zlib-dev zstd-dev llvm-dev elfutils-dev libva-dev eudev-dev spirv-tools-dev glslang-dev
+  xorgproto)
+subpackages=(mesa-dev mesa-va mesa-vulkan mesa-dri)
+depends=(mesa-dri)
+pkgdesc_mesa_dri="Mesa OpenGL drivers (radeonsi, iris, nouveau, llvmpipe, virgl)"
+pkgdesc_mesa_vulkan="Mesa Vulkan drivers (RADV for AMD, ANV for Intel)"
+pkgdesc_mesa_va="Mesa VA-API video decode drivers"
+build(){
+  # mesa_clc (OpenCL-C shader compiler used by the Intel drivers) runs on the build host; see hosttools/bin
+  PATH=$M/hosttools/bin:$PATH meson_setup \
+    -Dplatforms=wayland,x11 -Dgallium-drivers=radeonsi,iris,nouveau,llvmpipe,softpipe,virgl \
+    -Dvulkan-drivers=amd,intel -Dvulkan-layers=device-select \
+    -Degl=enabled -Dgbm=enabled -Dglx=dri -Dgles1=disabled -Dgles2=enabled -Dopengl=true -Dglvnd=disabled \
+    -Dllvm=enabled -Dshared-llvm=enabled -Dmesa-clc=system -Dgallium-va=enabled -Dvideo-codecs=all_free \
+    -Dvalgrind=disabled -Dlibunwind=disabled -Dlmsensors=disabled -Dbuild-tests=false -Dxmlconfig=enabled \
+    -Dzstd=enabled -Dintel-rt=disabled -Dgallium-rusticl=false -Dmicrosoft-clc=disabled build
+  PATH=$M/hosttools/bin:$PATH ninja -C build -j$JOBS
+}
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc; }
+pkg_dri(){ amove usr/lib/dri 'usr/lib/libgallium-*.so' usr/share/drirc.d; }
+pkg_vulkan(){ amove 'usr/lib/libvulkan_*.so' usr/share/vulkan 'usr/lib/libVkLayer_*.so'; }
+pkg_va(){ amove 'usr/lib/dri/*_drv_video.so'; }

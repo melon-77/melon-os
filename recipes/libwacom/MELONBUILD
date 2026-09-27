@@ -1,0 +1,10 @@
+pkgname=libwacom
+pkgver=2.18.0
+pkgdesc="libwacom (graphics stack)"
+license=custom
+source=(libwacom-2.18.0.tar.gz)
+builddir=$srcdir/libwacom-libwacom-2.18.0
+makedepends=(glib-dev eudev-dev libevdev-dev libgudev-dev)
+subpackages=(libwacom-dev)
+build(){ meson_setup -Dtests=disabled -Ddocumentation=disabled -Dudev-dir=/usr/lib/udev build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

@@ -1,0 +1,10 @@
+pkgname=libxml2
+pkgver=2.15.2
+pkgdesc="libxml2 (graphics stack)"
+license=custom
+source=(libxml2-2.15.2.tar.xz)
+builddir=$srcdir/libxml2-2.15.2
+makedepends=(zlib-dev)
+subpackages=(libxml2-dev)
+build(){ meson_setup -Dpython=disabled -Dicu=disabled -Dlzma=disabled -Dzlib=enabled -Dhistory=disabled -Dreadline=disabled -Ddocs=disabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

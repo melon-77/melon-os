@@ -9,10 +9,11 @@ import sys, time, pexpect, os
 
 mode = sys.argv[1]
 uefi = '--uefi' in sys.argv
+i686 = '--i686' in sys.argv          # 32-bit ISO / disk: run in qemu-system-i386
 args = [a for a in sys.argv[2:] if not a.startswith('--')]
-log = open(f'/home/claude/melon/logs/qemu-{mode}{"-uefi" if uefi else ""}.log', 'w')
+log = open(f'/home/claude/melon/logs/qemu-{mode}{"-uefi" if uefi else ""}{"-i686" if "--i686" in sys.argv else ""}.log', 'w')
 
-cmd = ['qemu-system-x86_64', '-m', '3072', '-smp', '2', '-nographic', '-no-reboot',
+cmd = ['qemu-system-i386' if i686 else 'qemu-system-x86_64', '-m', '1024' if i686 else '3072', '-smp', '2', '-nographic', '-no-reboot',
        '-audiodev', 'wav,id=snd0,path=/home/claude/melon/logs/audio-capture.wav',
        '-device', 'intel-hda', '-device', 'hda-duplex,audiodev=snd0',
        '-netdev', 'user,id=n0', '-device', 'virtio-net-pci,netdev=n0',

@@ -1,0 +1,10 @@
+pkgname=libxfixes
+pkgver=6.0.0
+pkgdesc="libxfixes (graphics stack)"
+license=custom
+source=(libxfixes-6.0.0.tar.gz)
+builddir=$srcdir/libXfixes-6.0.0
+makedepends=(libx11-dev)
+subpackages=(libxfixes-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

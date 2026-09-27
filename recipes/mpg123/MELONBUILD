@@ -8,6 +8,6 @@ makedepends=(alsa-lib-dev)
 subpackages=(mpg123-dev mpg123-libs)
 depends=(mpg123-libs)
 pkgdesc_mpg123_libs="mpg123 decoder libraries"
-build(){ ./configure $conf_flags --with-audio=alsa --with-default-audio=alsa --with-cpu=x86-64 --enable-int-quality; make -j$JOBS; }
+build(){ ./configure $conf_flags --with-audio=alsa --with-default-audio=alsa --with-cpu=$([ $MELON_ARCH = x86 ] && echo x86 || echo x86-64) --enable-int-quality; make -j$JOBS; }
 package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man; }
 pkg_libs(){ amove 'usr/lib/lib*.so.*' usr/lib/mpg123; }

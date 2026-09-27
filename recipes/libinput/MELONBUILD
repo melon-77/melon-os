@@ -1,0 +1,10 @@
+pkgname=libinput
+pkgver=1.31.1
+pkgdesc="libinput (graphics stack)"
+license=custom
+source=(libinput-1.31.1.tar.gz)
+builddir=$srcdir/libinput-1.31.1-1920686963fe224f7d2f4fe195cbed651e11d455
+makedepends=(eudev-dev libevdev-dev mtdev-dev libwacom-dev)
+subpackages=(libinput-dev)
+build(){ meson_setup -Ddocumentation=false -Dtests=false -Ddebug-gui=false -Dlibwacom=true -Dudev-dir=/usr/lib/udev -Dlua-plugins=disabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

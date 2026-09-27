@@ -1,0 +1,8 @@
+pkgname=argp-standalone
+pkgver=1.4.1
+pkgdesc="Hierarchical argument parsing library (glibc argp for musl), static"
+license=LGPL-2.1-or-later
+url=https://github.com/ericonr/argp-standalone
+source=(argp-standalone-1.4.1.tar.gz)
+build(){ autoreconf -fi; ./configure $conf_flags CFLAGS="$CFLAGS -fPIC"; make -j$JOBS; }
+package(){ install -Dm644 libargp.a $pkgdir/usr/lib/libargp.a; install -Dm644 argp.h $pkgdir/usr/include/argp.h; }

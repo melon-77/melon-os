@@ -8,10 +8,10 @@ source=(linux-7.0.tar.gz)
 builddir=$srcdir/linux-7.0
 depends=(linux-firmware-amdgpu kmod)
 options=('!strip')
-_kmake(){ env -u PKG_CONFIG_SYSROOT_DIR -u PKG_CONFIG_LIBDIR -u CFLAGS -u CXXFLAGS -u LDFLAGS -u CC -u CXX -u LD -u AR -u NM -u STRIP -u OBJCOPY -u READELF -u OBJDUMP -u AS -u RANLIB make ARCH=x86_64 CROSS_COMPILE=$TARGET- HOSTCC=gcc KBUILD_BUILD_USER=melon KBUILD_BUILD_HOST=melon "$@"; }
+_kmake(){ env -u PKG_CONFIG_SYSROOT_DIR -u PKG_CONFIG_LIBDIR -u CFLAGS -u CXXFLAGS -u LDFLAGS -u CC -u CXX -u LD -u AR -u NM -u STRIP -u OBJCOPY -u READELF -u OBJDUMP -u AS -u RANLIB make ARCH=$KARCH CROSS_COMPILE=$TARGET- HOSTCC=gcc KBUILD_BUILD_USER=melon KBUILD_BUILD_HOST=melon "$@"; }
 build(){
-  _kmake x86_64_defconfig
-  scripts/kconfig/merge_config.sh -m .config $startdir/config-melon
+  _kmake ${KARCH}_defconfig
+  scripts/kconfig/merge_config.sh -m .config $startdir/config-melon $([ $MELON_ARCH = x86 ] && echo $startdir/config-melon-x86)
   _kmake olddefconfig
   _kmake -j$JOBS bzImage modules 2>&1 | grep -E 'error|Error' | head -20 || true
   [ -f arch/x86/boot/bzImage ]

@@ -1,0 +1,10 @@
+pkgname=libgudev
+pkgver=238
+pkgdesc="libgudev (graphics stack)"
+license=custom
+source=(libgudev-238.tar.xz)
+builddir=$srcdir/libgudev-238
+makedepends=(glib-dev eudev-dev)
+subpackages=(libgudev-dev)
+build(){ meson_setup -Dintrospection=disabled -Dvapi=disabled -Dtests=disabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

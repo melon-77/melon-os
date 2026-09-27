@@ -1,0 +1,10 @@
+pkgname=libpng
+pkgver=1.6.57
+pkgdesc="libpng (graphics stack)"
+license=custom
+source=(libpng-1.6.57.tar.gz)
+builddir=$srcdir/libpng-1.6.57
+makedepends=(zlib-dev)
+subpackages=(libpng-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

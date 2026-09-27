@@ -1,0 +1,10 @@
+pkgname=libfontenc
+pkgver=1.1.8
+pkgdesc="libfontenc (graphics stack)"
+license=custom
+source=(libfontenc-1.1.8.tar.gz)
+builddir=$srcdir/libfontenc-1.1.8
+makedepends=(zlib-dev xorgproto)
+subpackages=(libfontenc-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

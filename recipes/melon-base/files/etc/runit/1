@@ -14,12 +14,22 @@ mountpoint -q /sys/fs/cgroup || mount -t cgroup2 -o nsdelegate cgroup2 /sys/fs/c
 [ -d /sys/firmware/efi/efivars ] && { mountpoint -q /sys/firmware/efi/efivars || mount -t efivarfs efivarfs /sys/firmware/efi/efivars 2>/dev/null; }
 ln -sf /proc/self/fd /dev/fd; ln -sf fd/0 /dev/stdin; ln -sf fd/1 /dev/stdout; ln -sf fd/2 /dev/stderr
 
-msg "Starting devices"
-mdev -s
-# coldplug: load drivers for hardware that is already present
-find /sys/devices -name modalias -type f -exec cat {} + 2>/dev/null | sort -u | xargs -r modprobe -a -b -q 2>/dev/null
+if [ -x /usr/bin/udevd ]; then
+  # desktop systems: eudev handles devices; the udevd service takes over once stage 2 starts
+  msg "Starting devices (udev)"
+  udevd --daemon
+  udevadm trigger --action=add --type=subsystems
+  udevadm trigger --action=add --type=devices
+  udevadm settle --timeout=20
+  udevadm control --exit
+else
+  msg "Starting devices"
+  mdev -s
+  # coldplug: load drivers for hardware that is already present
+  find /sys/devices -name modalias -type f -exec cat {} + 2>/dev/null | sort -u | xargs -r modprobe -a -b -q 2>/dev/null
+  mdev -s
+fi
 [ -s /etc/modules ] && grep -v '^#' /etc/modules | xargs -r modprobe -a -q
-mdev -s
 
 # point ALSA at the speakers rather than HDMI audio (sound codecs finish probing a moment later)
 ( sleep 4; melon-sound-default --write >/dev/null 2>&1 ) &

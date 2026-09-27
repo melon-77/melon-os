@@ -1,0 +1,9 @@
+pkgname=pixman
+pkgver=0.46.4
+pkgdesc="pixman (graphics stack)"
+license=custom
+source=(pixman-0.46.4.tar.gz)
+builddir=$srcdir/pixman-0.46.4
+subpackages=(pixman-dev)
+build(){ meson_setup -Dtests=disabled -Ddemos=disabled -Dgtk=disabled -Dlibpng=disabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

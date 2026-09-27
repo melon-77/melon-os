@@ -98,7 +98,7 @@ ROWS = [
  ('bubblewrap','0.11.1','bubblewrap_0.11.1.orig.tar.xz','bubblewrap-0.11.1','meson','libcap-dev',"-Dman=disabled -Dbash_completion=disabled -Dzsh_completion=disabled -Dselinux=disabled -Dtests=false",''),
  ('xdg-dbus-proxy','0.1.7','xdg-dbus-proxy_0.1.7.orig.tar.xz','xdg-dbus-proxy-0.1.7','meson','glib-dev',"-Dman=disabled -Dtests=false",''),
  ('json-glib','1.10.8','json-glib_1.10.8+ds.orig.tar.xz','json-glib-1.10.8','meson','glib-dev',"-Dintrospection=disabled -Dgtk_doc=disabled -Dman=false -Dtests=false -Dnls=disabled",''),
- ('ostree','2025.7','ostree_2025.7.orig.tar.xz','libostree-2025.7','auto','glib-dev curl-dev gpgme-dev libarchive-dev fuse3-dev openssl-dev zlib-dev',"--with-curl --without-soup --without-soup3 --with-openssl --disable-gtk-doc --disable-man --without-selinux --without-libsystemd --without-dracut --without-mkinitcpio --without-grub2 --without-avahi --without-ed25519-libsodium --disable-glibtest --without-composefs --disable-introspection --without-libmount",''),
+ ('ostree','2025.7','ostree_2025.7.orig.tar.xz','libostree-2025.7','auto','glib-dev curl-dev gpgme-dev libarchive-dev fuse3-dev openssl-dev zlib-dev xz-dev e2fsprogs-dev',"--with-curl --without-soup --without-soup3 --with-openssl --disable-gtk-doc --disable-man --without-selinux --without-libsystemd --without-dracut --without-mkinitcpio --without-grub2 --without-avahi --without-ed25519-libsodium --disable-glibtest --without-composefs --disable-introspection --without-libmount",''),
  # installer support (Calamares, LUKS)
  ('json-c','0.18','json-c_0.18+ds.orig.tar.xz','json-c-json-c-0.18-20240915','cmake','',"-DBUILD_STATIC_LIBS=OFF -DBUILD_TESTING=OFF -DDISABLE_WERROR=ON -DBUILD_APPS=OFF",''),
  ('popt','1.19','popt_1.19+dfsg.orig.tar.xz','popt-1.19','auto','',"--disable-static --disable-nls",''),
@@ -110,7 +110,7 @@ ROWS = [
 ]
 
 # pkgrel for recipes whose build changed without a version change (rule 6 in AGENTS.md)
-PKGREL = {'sqlite': 1, 'npth': 1, 'libjpeg-turbo': 1, 'networkmanager': 0, 'power-profiles-daemon': 0}
+PKGREL = {'sqlite': 1, 'npth': 1, 'libjpeg-turbo': 1, 'networkmanager': 0, 'power-profiles-daemon': 0, 'ostree': 1}
 
 def recipe(r):
     name, ver, tb, top, system, mdeps, opts, extra = r

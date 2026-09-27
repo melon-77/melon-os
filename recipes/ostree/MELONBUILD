@@ -1,11 +1,11 @@
 pkgname=ostree
 pkgver=2025.7
-pkgrel=0
+pkgrel=1
 pkgdesc="ostree (graphics stack)"
 license=custom
 source=(ostree-2025.7.tar.xz)
 builddir=$srcdir/libostree-2025.7
-makedepends=(glib-dev curl-dev gpgme-dev libarchive-dev fuse3-dev openssl-dev zlib-dev)
+makedepends=(glib-dev curl-dev gpgme-dev libarchive-dev fuse3-dev openssl-dev zlib-dev xz-dev e2fsprogs-dev)
 subpackages=(ostree-dev)
 build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --with-curl --without-soup --without-soup3 --with-openssl --disable-gtk-doc --disable-man --without-selinux --without-libsystemd --without-dracut --without-mkinitcpio --without-grub2 --without-avahi --without-ed25519-libsodium --disable-glibtest --without-composefs --disable-introspection --without-libmount; make -j$JOBS; }
 package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

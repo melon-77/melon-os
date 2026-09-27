@@ -1,0 +1,17 @@
+pkgname=e2fsprogs
+pkgver=1.47.2
+pkgrel=0
+pkgdesc="ext2/3/4 filesystem utilities"
+license="GPL-2.0-or-later AND LGPL-2.0-or-later AND MIT"
+url=https://e2fsprogs.sourceforge.net
+source=(e2fsprogs-1.47.2.tar.gz)
+makedepends=(util-linux-dev)
+subpackages=(e2fsprogs-dev e2fsprogs-libs)
+depends=(e2fsprogs-libs)
+pkgdesc_e2fsprogs_libs="ext2/3/4 filesystem libraries (libext2fs, libe2p, libcom_err, libss)"
+# libuuid and libblkid come from util-linux; no fsck wrapper (util-linux has one), no systemd/udev/cron files
+build(){ ./configure $conf_flags --enable-elf-shlibs --disable-static --disable-libuuid --disable-libblkid \
+  --disable-uuidd --disable-fsck --disable-nls --disable-e2initrd-helper --with-udev-rules-dir=no \
+  --with-systemd-unit-dir=no --with-crond-dir=no; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install install-libs; rm -rf $pkgdir/usr/share/{doc,man,info,locale}; }
+pkg_libs(){ amove 'usr/lib/lib*.so.*' 'lib/lib*.so.*'; }

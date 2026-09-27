@@ -7,6 +7,7 @@ set -uo pipefail
 M=$(cd "$(dirname "$0")/.." && pwd)
 S=$M/sources
 mkdir -p $S/deb $S/firmware $S/fonts $S/git
+[ -f $S/MANIFEST.tsv ] || { echo "sources/MANIFEST.tsv is missing" >&2; exit 1; }
 fail=0
 ok(){ [ -f "$S/$1" ] && [ "$2" = - -o "$(sha256sum "$S/$1" | cut -d' ' -f1)" = "$2" ]; }
 

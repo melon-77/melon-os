@@ -1,0 +1,10 @@
+pkgname=libx11
+pkgver=1.8.13
+pkgdesc="libx11 (graphics stack)"
+license=custom
+source=(libx11-1.8.13.tar.gz)
+builddir=$srcdir/libX11-1.8.13
+makedepends=(libxcb-dev xtrans xorgproto)
+subpackages=(libx11-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-specs --without-xmlto --without-fop --enable-malloc0returnsnull=no; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

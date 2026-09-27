@@ -3,7 +3,7 @@
 #
 # Layout (GPT, boots on both BIOS and UEFI):
 #   1  1 MiB   BIOS boot (GRUB core for legacy BIOS)
-#   2  1 GiB   FAT32  -> /boot   (kernel, GRUB, EFI/BOOT/BOOTX64.EFI)
+#   2  1 GiB   FAT32  -> /boot   (kernel, GRUB, EFI/BOOT/BOOTX64.EFI or BOOTIA32.EFI)
 #   3  rest    XFS    -> /
 #
 # Unattended use (for testing): set MELON_DISK, MELON_HOSTNAME, MELON_ROOTPW, MELON_USER,
@@ -31,6 +31,8 @@ askpw(){ eval "cur=\${$1:-}"; [ -n "$cur" ] && return 0
 
 [ "$(id -u)" = 0 ] || die "needs root"
 SYSIMG=${MELON_SYSIMG:-/media/melon/melon/rootfs.sqfs}
+ARCH=$(apk --print-arch)
+case $ARCH in x86) EFI_TARGET=i386-efi EFI_FILE=BOOTIA32.EFI ;; *) EFI_TARGET=x86_64-efi EFI_FILE=BOOTX64.EFI ;; esac
 [ -f "$SYSIMG" ] || die "melon system image not found at $SYSIMG (are you on the live ISO?)"
 
 # theme music, at 30% volume, for as long as this runs
@@ -83,22 +85,34 @@ case $DISK in *[0-9]) PP=${DISK}p ;; *) PP=$DISK ;; esac
 say "Partitioning $DISK"
 for m in $(grep "^$DISK" /proc/mounts | cut -d' ' -f2 | sort -r); do umount "$m"; done
 wipefs -a -q "$DISK"
-sfdisk -q -W always "$DISK" <<EOF
+if [ "$ARCH" = x86 ]; then
+  # 32-bit machines: classic MBR with an active boot partition. Many old BIOSes won't boot a GPT disk.
+  sfdisk -q -W always "$DISK" <<EOF
+label: dos
+size=1GiB, type=ef, bootable
+type=83
+EOF
+  BOOTN=1 ROOTN=2
+else
+  sfdisk -q -W always "$DISK" <<EOF
 label: gpt
 size=1MiB, type=21686148-6449-6E6F-744E-656564454649, name="bios"
 size=1GiB, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name="boot"
 type=4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709, name="melon"
 EOF
-partx -u "$DISK" 2>/dev/null || true; sleep 1; mdev -s; sleep 1
-for n in 2 3; do [ -b "$PP$n" ] || die "partition $PP$n did not appear"; done
+  BOOTN=2 ROOTN=3
+fi
+partx -u "$DISK" 2>/dev/null || true; sleep 1; command -v udevadm >/dev/null && udevadm settle 2>/dev/null; mdev -s 2>/dev/null; sleep 1
+for n in $BOOTN $ROOTN; do [ -b "$PP$n" ] || die "partition $PP$n did not appear"; done
+BOOTP=$PP$BOOTN ROOTP=$PP$ROOTN
 
 say "Creating filesystems (FAT32 /boot, XFS /)"
-mkfs.vfat -F 32 -n MELONBOOT "${PP}2" >/dev/null
-mkfs.xfs -q -f -L melon "${PP}3"
+mkfs.vfat -F 32 -n MELONBOOT "$BOOTP" >/dev/null
+mkfs.xfs -q -f -L melon "$ROOTP"
 
 say "Mounting"
-mkdir -p $TARGET; mount -t xfs "${PP}3" $TARGET
-mkdir -p $TARGET/boot; mount -t vfat -o umask=0077 "${PP}2" $TARGET/boot
+mkdir -p $TARGET; mount -t xfs "$ROOTP" $TARGET
+mkdir -p $TARGET/boot; mount -t vfat -o umask=0077 "$BOOTP" $TARGET/boot
 say "Copying the melon system"
 mkdir -p /run/melon-src; mount -t squashfs -o loop,ro "$SYSIMG" /run/melon-src
 tar -C /run/melon-src --exclude=./boot -cf - . | tar -C $TARGET -xpf -
@@ -110,16 +124,16 @@ for d in dev proc sys; do mount --bind /$d $TARGET/$d; done
 EXTRA=$(grep -v '^#' /usr/share/melon/profiles/$MELON_PROFILE | grep -vxF -f /usr/share/melon/profiles/base || true)
 if [ -n "$EXTRA" ]; then
   say "Installing the $MELON_PROFILE profile with apk"
-  apk --root $TARGET --arch x86_64 --repositories-file /dev/null --repository "$REPO/x86_64/Packages.adb" --no-cache add $EXTRA
+  apk --root $TARGET --arch $ARCH --repositories-file /dev/null --repository "$REPO/$ARCH/Packages.adb" --no-cache add $EXTRA
 fi
 
 say "Configuring the system"
 mkdir -p $TARGET/var/lib/melon
 cp -a "$REPO" $TARGET/var/lib/melon/repo
-echo "/var/lib/melon/repo/x86_64/Packages.adb" > $TARGET/etc/apk/repositories
+echo "/var/lib/melon/repo/$ARCH/Packages.adb" > $TARGET/etc/apk/repositories
 echo "$MELON_HOSTNAME" > $TARGET/etc/hostname
 sed -i "s/^127.0.1.1.*/127.0.1.1\t$MELON_HOSTNAME/" $TARGET/etc/hosts
-ROOT_UUID=$(blkid -s UUID -o value "${PP}3"); BOOT_UUID=$(blkid -s UUID -o value "${PP}2")
+ROOT_UUID=$(blkid -s UUID -o value "$ROOTP"); BOOT_UUID=$(blkid -s UUID -o value "$BOOTP")
 cat > $TARGET/etc/fstab <<EOF
 # <device>                                 <mountpoint> <type> <options>                 <dump> <pass>
 UUID=$ROOT_UUID  /            xfs    defaults,noatime          0      1
@@ -146,10 +160,10 @@ for s in $SVCS; do ln -sfn /etc/sv/$s $TARGET/var/service/$s; done
 
 say "Installing GRUB for BIOS and UEFI"
 chroot $TARGET grub-install --target=i386-pc --boot-directory=/boot "$DISK" 2>&1 | grep -v '^Installing for' || true
-chroot $TARGET grub-install --target=x86_64-efi --efi-directory=/boot --boot-directory=/boot --removable --no-nvram 2>&1 | grep -v '^Installing for' || true
-[ -f $TARGET/boot/EFI/BOOT/BOOTX64.EFI ] || die "UEFI GRUB was not installed"
+chroot $TARGET grub-install --target=$EFI_TARGET --efi-directory=/boot --boot-directory=/boot --removable --no-nvram 2>&1 | grep -v '^Installing for' || true
+[ -f $TARGET/boot/EFI/BOOT/$EFI_FILE ] || die "UEFI GRUB was not installed"
 [ -f $TARGET/boot/grub/i386-pc/core.img ] || die "BIOS GRUB was not installed"
-MELON_ROOT_DEV="${PP}3" MELON_BOOT_DEV="${PP}2" chroot $TARGET melon-update-grub
+MELON_ROOT_DEV="$ROOTP" MELON_BOOT_DEV="$BOOTP" chroot $TARGET melon-update-grub
 
 say "Finishing"
 sync

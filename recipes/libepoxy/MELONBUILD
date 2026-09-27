@@ -1,0 +1,10 @@
+pkgname=libepoxy
+pkgver=1.5.10
+pkgdesc="libepoxy (graphics stack)"
+license=custom
+source=(libepoxy-1.5.10.tar.gz)
+builddir=$srcdir/libepoxy-1.5.10
+makedepends=(mesa-dev)
+subpackages=(libepoxy-dev)
+build(){ meson_setup -Ddocs=false -Dtests=false -Dx11=true -Degl=yes -Dglx=yes build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

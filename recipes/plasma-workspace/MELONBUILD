@@ -1,0 +1,9 @@
+pkgname=plasma-workspace
+pkgver=6.6.6
+pkgdesc="plasma-workspace"
+license="LGPL-2.1-or-later OR GPL-2.0-or-later (see sources)"
+source=(plasma-workspace-6.6.6.tar.xz)
+builddir=$srcdir/plasma-workspace-6.6.6
+subpackages=(plasma-workspace-dev)
+build(){ cmake_setup -B build -DQT_HOST_PATH=/home/claude/melon/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=/home/claude/melon/hosttools/qt6/lib/cmake -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_QTPLUGINDIR=lib/qt6/plugins -DKDE_INSTALL_QMLDIR=lib/qt6/qml -DKDE_INSTALL_LIBEXECDIR=libexec -DKF_IGNORE_PLATFORM_CHECK=ON -DBUILD_WITH_QT6=ON -DQT_MAJOR_VERSION=6 -DPLASMA_WAYLAND_DEFAULT_SESSION=ON; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

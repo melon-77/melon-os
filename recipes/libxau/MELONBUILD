@@ -1,0 +1,10 @@
+pkgname=libxau
+pkgver=1.0.11
+pkgdesc="libxau (graphics stack)"
+license=custom
+source=(libxau-1.0.11.tar.gz)
+builddir=$srcdir/libXau-1.0.11
+makedepends=(xorgproto)
+subpackages=(libxau-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

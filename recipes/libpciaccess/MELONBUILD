@@ -1,0 +1,10 @@
+pkgname=libpciaccess
+pkgver=0.18.1
+pkgdesc="libpciaccess (graphics stack)"
+license=custom
+source=(libpciaccess-0.18.1.tar.gz)
+builddir=$srcdir/libpciaccess-0.18.1
+makedepends=(zlib-dev)
+subpackages=(libpciaccess-dev)
+build(){ meson_setup -Dzlib=enabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

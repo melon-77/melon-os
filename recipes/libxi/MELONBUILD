@@ -1,0 +1,10 @@
+pkgname=libxi
+pkgver=1.8.2
+pkgdesc="libxi (graphics stack)"
+license=custom
+source=(libxi-1.8.2.tar.gz)
+builddir=$srcdir/libXi-1.8.2
+makedepends=(libxext-dev libxfixes-dev)
+subpackages=(libxi-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-docs --disable-specs --enable-malloc0returnsnull=no; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

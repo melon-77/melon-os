@@ -1,0 +1,9 @@
+pkgname=musl-fts
+pkgver=1.2.7
+pkgdesc="fts(3) file hierarchy traversal for musl"
+license=BSD-3-Clause
+url=https://github.com/void-linux/musl-fts
+source=(musl-fts-1.2.7.tar.gz)
+subpackages=(musl-fts-dev)
+build(){ ./bootstrap.sh; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; }

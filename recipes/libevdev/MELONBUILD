@@ -1,0 +1,9 @@
+pkgname=libevdev
+pkgver=1.13.6
+pkgdesc="libevdev (graphics stack)"
+license=custom
+source=(libevdev-1.13.6.tar.xz)
+builddir=$srcdir/libevdev-1.13.6
+subpackages=(libevdev-dev)
+build(){ meson_setup -Dtests=disabled -Ddocumentation=disabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

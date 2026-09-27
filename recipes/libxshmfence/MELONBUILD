@@ -1,0 +1,10 @@
+pkgname=libxshmfence
+pkgver=1.3.3
+pkgdesc="libxshmfence (graphics stack)"
+license=custom
+source=(libxshmfence-1.3.3.tar.gz)
+builddir=$srcdir/libxshmfence-1.3.3
+makedepends=(xorgproto)
+subpackages=(libxshmfence-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

@@ -1,0 +1,9 @@
+pkgname=mtdev
+pkgver=1.1.7
+pkgdesc="mtdev (graphics stack)"
+license=custom
+source=(mtdev-1.1.7.tar.gz)
+builddir=$srcdir/mtdev-1.1.7
+subpackages=(mtdev-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

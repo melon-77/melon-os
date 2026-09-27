@@ -1,0 +1,10 @@
+pkgname=harfbuzz
+pkgver=12.3.2
+pkgdesc="harfbuzz (graphics stack)"
+license=custom
+source=(harfbuzz-12.3.2.tar.xz)
+builddir=$srcdir/harfbuzz-12.3.2
+makedepends=(freetype-dev glib-dev)
+subpackages=(harfbuzz-dev)
+build(){ meson_setup -Dtests=disabled -Ddocs=disabled -Dintrospection=disabled -Dcairo=disabled -Dicu=disabled -Dfreetype=enabled -Dglib=enabled -Dgobject=disabled -Dutilities=disabled build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

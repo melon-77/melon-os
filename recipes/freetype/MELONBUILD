@@ -1,0 +1,10 @@
+pkgname=freetype
+pkgver=2.14.2
+pkgdesc="freetype (graphics stack)"
+license=custom
+source=(freetype-2.14.2.tar.xz)
+builddir=$srcdir/freetype-2.14.2
+makedepends=(zlib-dev libpng-dev)
+subpackages=(freetype-dev)
+build(){ meson_setup -Dharfbuzz=disabled -Dbrotli=disabled -Dbzip2=disabled -Dpng=enabled -Dzlib=system build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

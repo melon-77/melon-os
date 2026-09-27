@@ -1,0 +1,10 @@
+pkgname=libxrender
+pkgver=0.9.12
+pkgdesc="libxrender (graphics stack)"
+license=custom
+source=(libxrender-0.9.12.tar.gz)
+builddir=$srcdir/libXrender-0.9.12
+makedepends=(libx11-dev)
+subpackages=(libxrender-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --enable-malloc0returnsnull=no; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

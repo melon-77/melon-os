@@ -1,0 +1,9 @@
+pkgname=libjpeg-turbo
+pkgver=2.1.5
+pkgdesc="libjpeg-turbo (graphics stack)"
+license=custom
+source=(libjpeg-turbo-2.1.5.tar.gz)
+builddir=$srcdir/libjpeg-turbo-2.1.5
+subpackages=(libjpeg-turbo-dev)
+build(){ cmake_setup -B build -DENABLE_STATIC=OFF -DWITH_JPEG8=ON -DCMAKE_INSTALL_DEFAULT_LIBDIR=lib; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

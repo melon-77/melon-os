@@ -1,0 +1,10 @@
+pkgname=libva
+pkgver=2.23.0
+pkgdesc="libva (graphics stack)"
+license=custom
+source=(libva-2.23.0.tar.gz)
+builddir=$srcdir/libva-2.23.0
+makedepends=(libdrm-dev wayland-dev libx11-dev libxext-dev libxfixes-dev)
+subpackages=(libva-dev)
+build(){ meson_setup -Dwith_glx=no -Dwith_wayland=yes -Dwith_x11=yes -Denable_docs=false build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

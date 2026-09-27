@@ -1,0 +1,10 @@
+pkgname=libxext
+pkgver=1.3.4
+pkgdesc="libxext (graphics stack)"
+license=custom
+source=(libxext-1.3.4.tar.gz)
+builddir=$srcdir/libXext-1.3.4
+makedepends=(libx11-dev)
+subpackages=(libxext-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-specs --without-xmlto --enable-malloc0returnsnull=no; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

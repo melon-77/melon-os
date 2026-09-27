@@ -5,7 +5,7 @@ set -euo pipefail
 . /home/claude/melon/scripts/env.sh
 APK=$M/hosttools/bin/apk
 KEY=$M/keys/melon-signing.rsa
-ARCH=x86_64
+ARCH=$APK_ARCH
 OUT=$REPO/$ARCH
 mkdir -p "$OUT"
 
@@ -44,6 +44,7 @@ c = '$TARGET-gcc'
 cpp = '$TARGET-g++'
 ar = '$TARGET-ar'
 strip = '$TARGET-strip'
+llvm-config = '$SYSROOT/usr/bin/llvm-config'
 pkg-config = 'pkg-config'
 [properties]
 needs_exe_wrapper = false
@@ -51,8 +52,8 @@ sys_root = '$SYSROOT'
 pkg_config_libdir = '$PKG_CONFIG_LIBDIR'
 [host_machine]
 system = 'linux'
-cpu_family = 'x86_64'
-cpu = 'x86_64'
+cpu_family = '$MESON_CPU_FAMILY'
+cpu = '$MESON_CPU'
 endian = 'little'
 EOF
 export MESON_CROSS
@@ -60,7 +61,7 @@ export MESON_CROSS
 CMAKE_TC=$WORK/cmake-toolchain.cmake
 cat > $CMAKE_TC <<EOF
 set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_PROCESSOR x86_64)
+set(CMAKE_SYSTEM_PROCESSOR $MESON_CPU)
 set(CMAKE_C_COMPILER $TARGET-gcc)
 set(CMAKE_CXX_COMPILER $TARGET-g++)
 set(CMAKE_SYSROOT $SYSROOT)
@@ -74,7 +75,9 @@ export CMAKE_TC
 cmake_setup(){ cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TC" -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
   -DCMAKE_INSTALL_SBINDIR=bin -DCMAKE_INSTALL_LIBEXECDIR=libexec -DCMAKE_INSTALL_SYSCONFDIR=/etc -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_TESTING=OFF "$@"; }
-meson_setup(){ meson setup --cross-file "$MESON_CROSS" --prefix=/usr --libdir=lib --sbindir=bin --libexecdir=libexec --sysconfdir=/etc --localstatedir=/var --buildtype=release -Db_lto=false "$@"; }
+# the cross file supplies the target pkg-config settings; the environment is left to native (build-host) lookups
+meson_setup(){ local args=(); while IFS= read -r -d '' a; do args+=("$a"); done < <(python3 $M/scripts/meson-filter-opts.py "$@"; printf '\0')
+  env -u PKG_CONFIG_LIBDIR -u PKG_CONFIG_SYSROOT_DIR -u PKG_CONFIG_PATH meson setup --cross-file "$MESON_CROSS" --prefix=/usr --libdir=lib --sbindir=bin --libexecdir=libexec --sysconfdir=/etc --localstatedir=/var --buildtype=release -Db_lto=false "${args[@]}"; }
 
 srcdir=$WORK/pkg/$name/src
 pkgbase=$WORK/pkg/$name/pkg

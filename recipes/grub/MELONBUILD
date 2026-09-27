@@ -12,7 +12,7 @@ _common="--disable-werror --disable-nls --disable-grub-mkfont --disable-device-m
 _tgt="CFLAGS= LDFLAGS= CXXFLAGS= HOST_CFLAGS=-O2 TARGET_CFLAGS=-Os TARGET_CC=gcc TARGET_OBJCOPY=objcopy TARGET_STRIP=strip TARGET_NM=nm TARGET_RANLIB=ranlib BUILD_CC=gcc"
 build(){
   for p in pc efi; do
-    t=x86_64; [ $p = pc ] && t=i386
+    t=${EFI_TARGET%-efi}; [ $p = pc ] && t=i386
     mkdir -p b-$p; ( cd b-$p; env $_tgt ../configure $conf_flags --target=$t --with-platform=$p $_common --program-prefix=; make -j$JOBS )
   done
 }

@@ -1,0 +1,10 @@
+pkgname=libxcursor
+pkgver=1.2.3
+pkgdesc="libxcursor (graphics stack)"
+license=custom
+source=(libxcursor-1.2.3.tar.gz)
+builddir=$srcdir/libXcursor-1.2.3
+makedepends=(libxrender-dev libxfixes-dev)
+subpackages=(libxcursor-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

@@ -1,0 +1,8 @@
+pkgname=plasma-wayland-protocols
+pkgver=1.20.0
+pkgdesc="plasma-wayland-protocols"
+license="LGPL-2.1-or-later OR GPL-2.0-or-later (see sources)"
+source=(plasma-wayland-protocols-1.20.0.tar.xz)
+builddir=$srcdir/plasma-wayland-protocols-1.20.0
+build(){ cmake_setup -B build ; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

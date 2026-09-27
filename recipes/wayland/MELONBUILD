@@ -1,0 +1,10 @@
+pkgname=wayland
+pkgver=1.24.0
+pkgdesc="wayland (graphics stack)"
+license=custom
+source=(wayland-1.24.0.tar.gz)
+builddir=$srcdir/wayland-1.24.0
+makedepends=(libffi-dev expat-dev)
+subpackages=(wayland-dev)
+build(){ meson_setup -Ddocumentation=false -Dtests=false -Ddtd_validation=false build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

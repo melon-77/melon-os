@@ -1,0 +1,10 @@
+pkgname=glslang
+pkgver=16.2.0
+pkgdesc="glslang (graphics stack)"
+license=custom
+source=(glslang-16.2.0.tar.gz)
+builddir=$srcdir/glslang-16.2.0
+makedepends=(spirv-tools-dev)
+subpackages=(glslang-dev)
+build(){ cmake_setup -B build -DALLOW_EXTERNAL_SPIRV_TOOLS=ON -DGLSLANG_TESTS=OFF -DENABLE_OPT=ON -DBUILD_SHARED_LIBS=ON; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

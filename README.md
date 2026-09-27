@@ -1,5 +1,10 @@
 # melon Linux
 
+> **Contributing: open pull requests against the `testing` branch only, never `main`.**
+> `main` is the stable branch that ISOs and the package repository are built from. Changes reach it only
+> when the owner has personally reviewed and tested them on `testing` and decides to bring them over.
+> Pull requests against `main` will be closed.
+
 A from-scratch, rolling x86_64 distribution:
 
 | | |

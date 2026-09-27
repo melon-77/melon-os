@@ -118,13 +118,30 @@ step "grub"
 cat > $ISO/boot/grub/grub.cfg <<'CFG'
 set timeout=5
 set default=0
-serial --unit=0 --speed=115200
-terminal_input console serial
-terminal_output console serial
+# serial console only where there is a serial port (most VMs and PCs have none)
+if serial --unit=0 --speed=115200; then
+  terminal_input console serial
+  terminal_output console serial
+fi
+# melon is 64-bit: say so instead of booting into a black screen on a 32-bit CPU or VM
+# (VirtualBox VMs created as "Other Linux" 32-bit have no 64-bit mode)
+insmod cpuid
+if cpuid -l; then set melon_cpu64=1; fi
+if [ "$melon_cpu64" != 1 ]; then
+  echo "melon needs a 64-bit (x86_64) processor, and this computer or virtual machine doesn't offer one."
+  echo ""
+  echo "VirtualBox: Settings > General > Basic, set Version to 'Other Linux (64-bit)'."
+  echo "  If only 32-bit versions are listed: turn on VT-x / AMD-V (SVM) in the PC's BIOS, and in"
+  echo "  Windows turn off Hyper-V / Memory integrity so VirtualBox can use them."
+  echo "Other VM apps (VMware, Hyper-V, QEMU): choose a 64-bit Linux guest."
+  echo ""
+  echo "Press any key to power off."
+  sleep --interruptible 3600
+  halt
+fi
 insmod all_video
-# hand the kernel a graphical framebuffer: the screen keeps working through simpledrm even in VMs
-# (VirtualBox, VMware, Hyper-V) whose display adapter has no working driver
-set gfxpayload=1024x768,auto
+# the kernel starts in the firmware's own mode (VGA text on BIOS, so its first messages and errors
+# stay visible; the GOP framebuffer on UEFI)
 set menu_color_normal=light-gray/black
 set menu_color_highlight=black/light-magenta
 menuentry 'melon live' {

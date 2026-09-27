@@ -124,6 +124,26 @@ Rebuilding the kernel takes about an hour on 2 cores.
     FAT `/boot` dirty.
 17. **`sudo` is a small front end for doas** (`recipes/opendoas/sudo`). Rules live in `/etc/doas.conf`
     (`permit persist :wheel`). New users get their shell setup from `/etc/skel`.
+18. **melon binaries run on the build host.** `/lib/ld-musl-x86_64.so.1` points at the sysroot's `libc.so`
+    and `/etc/ld-musl-x86_64.path` lists `sysroot/usr/lib` (same for `i386` in 32-bit builds), so
+    build-time generators from earlier packages (glib-compile-resources, kconfig_compiler, ...) just run.
+    Meson's cross file sets `needs_exe_wrapper=false` for the same reason.
+19. **`meson_setup` drops `-D` options the project doesn't have** (`scripts/meson-filter-opts.py`) and
+    unsets the `PKG_CONFIG_*` variables for native lookups. Upstream renames options often; a stale
+    option must not fail the whole build.
+20. **Some generators must come from the host, not the sysroot:** `wayland-scanner` 1.24 in
+    `/usr/local`, Mesa's `mesa_clc`/`vtn_bindgen2` in `hosttools/bin` (built against host LLVM), and the
+    Qt 6 host tools in `hosttools/qt6` (`scripts/host-qt.sh`, same Qt version as the target, passed as
+    `QT_HOST_PATH`). The host also needs `libltdl-dev` (libffi's autoreconf).
+21. **Never kill build processes with `pkill -f <pattern>`** when your own shell's command line contains
+    the pattern: it kills your shell too. Find the PID and kill that.
+22. **Edit scripts that may be running (`melon-build`, `mkiso.sh`, queue scripts) through a temporary file
+    and `mv`.** bash reads scripts while running them, so an in-place edit corrupts a running build.
+23. **Never type keys or checksums from memory.** The Flathub key is downloaded from Flathub's own
+    `.flatpakrepo` at first use; Alpine's public keys in `melon-base` were fetched from Alpine's aports
+    and checked against the sha512sums in Alpine's `alpine-keys` APKBUILD.
+24. **musl ships `libc.musl-<arch>.so.1`** (a symlink to the loader), the library name Alpine binaries link
+    against. That's what lets opt-in `@alpine` packages run on melon.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
@@ -159,7 +179,14 @@ the serial port, so tests don't need a screen. The test also records the sound c
   It asks base or desktop and installs exactly what the desktop ISO installs. It plays
   `/usr/share/melon/.ice` (from the `melon-sounds` package, live ISO only) at 30% volume while it runs.
 - Unattended install variables: `MELON_DISK MELON_HOSTNAME MELON_ROOTPW MELON_USER MELON_USERPW
-  MELON_PROFILE MELON_YES=1 MELON_SERIAL=1 MELON_WIFI_SSID MELON_WIFI_PSK`.
+  MELON_PROFILE MELON_YES=1 MELON_SERIAL=1 MELON_WIFI_SSID MELON_WIFI_PSK MELON_ALPINE=y`.
+- **Profiles** live in `/usr/share/melon/profiles/` on the live system: `<name>` is the package list,
+  `<name>.services` the runit services (`name` enables one, `-name` drops a base service). `mkiso.sh`
+  writes them. The desktop profile swaps `mdevd`/`dhcp` for `udevd` and NetworkManager, and the
+  installer gives NetworkManager the Wi-Fi network instead of wpa_supplicant.
+- **Other distros' repos are opt-in only.** Both installers offer Alpine as the tagged repo `@alpine`
+  (`melon-repo enable alpine`); apk only uses it for packages asked for as `name@alpine`. Void isn't
+  offered (xbps, not apk). Never make a foreign repo untagged or on by default.
 
 ## Sources
 

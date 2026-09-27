@@ -20,7 +20,7 @@ mod(){ # mod <debian-name> <dir-prefix> [cmake args...]
   ninja -C b-$deb install >/dev/null
   rm -rf $src b-$deb
 }
-mod qt6-base qtbase -DFEATURE_opengl=OFF -DFEATURE_xcb=OFF -DFEATURE_glib=OFF -DFEATURE_icu=OFF \
+mod qt6-base qtbase -DFEATURE_opengl=ON -DINPUT_opengl=desktop -DFEATURE_xcb=OFF -DFEATURE_glib=OFF -DFEATURE_icu=OFF \
     -DFEATURE_sql=OFF -DFEATURE_printsupport=OFF -DFEATURE_network=ON -DFEATURE_widgets=ON -DFEATURE_dbus=ON \
     -DFEATURE_system_pcre2=OFF -DFEATURE_system_zlib=ON -DFEATURE_system_harfbuzz=OFF -DFEATURE_system_freetype=OFF
 mod qt6-shadertools qtshadertools

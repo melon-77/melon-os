@@ -13,7 +13,11 @@ ROOT=$WORK/liveroot LIVE=$WORK/livelayer ISO=$WORK/iso INITRD=$WORK/initrd
 DATE=$(date +%Y%m%d)
 ISOARCH=$([ $MELON_ARCH = x86 ] && echo i686 || echo x86_64)
 OUTISO=$M/out/melon-$DATE-$ISOARCH.iso
-PKGS=${PKGS:-"melon-base linux-melon linux-firmware wpa_supplicant xfsprogs grub zstd openssl ncurses-terminfo musl-utils alsa-utils mpg123 kmod"}
+PKGS=${PKGS:-"melon-base linux-melon linux-firmware wpa_supplicant xfsprogs grub zstd openssl ca-certificates ncurses-terminfo musl-utils alsa-utils mpg123 kmod"}
+# leave out optional packages that haven't been built for this architecture yet (with a warning)
+_p=; for x in $PKGS; do
+  if ls $M/repo/$APK_ARCH/$x-[0-9]*.apk >/dev/null 2>&1; then _p="$_p $x"; else echo "warning: $x is not built for $APK_ARCH, left out"; fi
+done; PKGS=${_p# }
 DESKTOP_PKGS=${DESKTOP_PKGS:-}
 step(){ printf '\033[1;35m== %s\033[0m\n' "$*"; }
 apkx(){ $APK --arch $APK_ARCH --keys-dir $M/keys/trusted --repositories-file /dev/null --repository $REPO/$APK_ARCH/Packages.adb --no-cache "$@"; }
@@ -24,7 +28,12 @@ apkx --root $ROOT --initdb add $PKGS
 rm -rf $ROOT/var/cache/apk/*
 mkdir -p $ROOT/usr/share/melon/profiles
 printf '%s\n' $PKGS > $ROOT/usr/share/melon/profiles/base
-[ -n "$DESKTOP_PKGS" ] && printf '%s\n' $PKGS $DESKTOP_PKGS > $ROOT/usr/share/melon/profiles/desktop
+if [ -n "$DESKTOP_PKGS" ]; then
+  printf '%s\n' $PKGS $DESKTOP_PKGS > $ROOT/usr/share/melon/profiles/desktop
+  # services for the desktop profile: udev replaces mdev, NetworkManager replaces the dhcp/wpa services
+  printf '%s\n' -mdevd -dhcp udevd dbus elogind polkitd NetworkManager bluetoothd power-profiles-daemon zram sddm \
+    > $ROOT/usr/share/melon/profiles/desktop.services
+fi
 cp $ROOT/boot/vmlinuz-melon $ISO/boot/vmlinuz
 
 step "live layer"
@@ -44,6 +53,7 @@ cat > $LIVE/etc/motd <<'MOTD'
     melon-svc list    list services
     wpa_passphrase "SSID" "password" >> /etc/wpa_supplicant/wpa_supplicant.conf
     melon-svc enable wpa_supplicant dhcp-wifi      connect to Wi-Fi
+    melon-repo enable alpine    opt-in Alpine packages (apk add <name>@alpine)
 
 MOTD
 

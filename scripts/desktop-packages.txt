@@ -19,7 +19,7 @@ plasma5support ksystemstats kf6-kquickcharts kf6-kunitconversion kf6-threadweave
 # started over D-Bus when Plasma or Dolphin asks for drives (USB sticks, SD cards)
 udisks2
 # everyday tools the installer and users expect
-e2fsprogs xz bzip2
+e2fsprogs xz bzip2 ffmpeg
 # fonts
 melon-fonts hicolor-icon-theme shared-mime-info
 # Flatpak (Firefox, VLC, Steam and Prism come from Flathub on first boot) and gaming

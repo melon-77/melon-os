@@ -1,0 +1,14 @@
+pkgname=x264
+pkgver=0.165.3222
+pkgrel=0
+pkgdesc="H.264 video encoder library (screen recording to MP4)"
+license=GPL-2.0-or-later
+url=https://www.videolan.org/developers/x264.html
+source=(x264-0.165.3222.tar.gz)
+builddir=$srcdir/x264-master
+subpackages=(x264-dev)
+# the library only; ffmpeg does the rest. Its x86 code is nasm syntax (the cross environment's AS is GNU as)
+build(){ AS=nasm ./configure --host=$CHOST --cross-prefix=$TARGET- --sysroot=$SYSROOT --prefix=/usr --libdir=/usr/lib --enable-shared \
+           --enable-pic --disable-cli --disable-lavf --disable-swscale --disable-ffms --disable-gpac --disable-lsmash \
+           --extra-cflags="$CFLAGS" --extra-ldflags="$LDFLAGS"; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; }

@@ -25,6 +25,7 @@ deb/e2fsprogs_1.47.2.orig.tar.gz	6dcd67ff9d8b13274ba3f088e4318be4f5b71412cd86352
 deb/elfutils_0.194.orig.tar.bz2	09e2ff033d39baa8b388a2d7fbc5390bfde99ae3b7c67c7daaf7433fbcf0f01e	apt	elfutils=0.194-4
 deb/expat_2.7.4.orig.tar.gz	5b356795b889d3e5b379433ece069b8781bf0727f6959ad3bbc9da0c22164f59	apt	expat=2.7.4-1ubuntu0.2
 deb/ffmpeg_8.0.1.orig.tar.xz	05ee0b03119b45c0bdb4df654b96802e909e0a752f72e4fe3794f487229e5a41	apt	ffmpeg=7:8.0.1-3ubuntu2
+deb/flac_1.5.0+ds.orig.tar.xz	51d6a5bf5a37b67f9af847daa07c07091f6bf1583d5abb7fbb064bc68428b0f1	apt	flac=1.5.0+ds-5
 deb/flatpak_1.16.6.orig.tar.xz	1e63e7f3fe44b602f34d92a6fe46fd8a3bc6be9460c03c2681e57976c658eec3	apt	flatpak=1.16.6-1
 deb/fontconfig_2.17.1.orig.tar.gz	f07504cef87f171ee1748352e2df9b9f125352f620fa0d03a9284306ea2c40a4	apt	fontconfig=2.17.1-3ubuntu1
 deb/fonts-hack_3.003.orig.tar.gz	3c6f1a20e86744077e83c9bacf879a5b13f659f1c07e9c5c57d6efc3cbe66c07	apt	fonts-hack=3.003-4
@@ -144,6 +145,7 @@ deb/libbytesize_2.12.orig.tar.gz	e8b39afc6580f5777c9b1c8488e21fcbb60a3effdac7399
 deb/libcanberra_0.30.orig.tar.xz	c2b671e67e0c288a69fc33dc1b6f1b534d07882c2aceed37004bf48c601afa72	apt	libcanberra=0.30-18ubuntu3
 deb/libcap2_2.75.orig.tar.xz	de4e7e064c9ba451d5234dd46e897d7c71c96a9ebf9a0c445bc04f4742d83632	apt	libcap2=1:2.75-10ubuntu2
 deb/libdisplay-info_0.3.0.orig.tar.bz2	915cc6713b7b2e173a90f9db248fb8994f9668171fecc1e9fded5e36bb34d890	apt	libdisplay-info=0.3.0-1
+deb/libdmtx_0.7.8.orig.tar.gz	2394bf1d1d693a5a4ca3cfcc1bb28a4d878bdb831ea9ca8f3d5c995d274bdc39	apt	libdmtx=0.7.8-1
 deb/libdrm_2.4.131.orig.tar.xz	45ba9983b51c896406a3d654de81d313b953b76e6391e2797073d543c5f617d5	apt	libdrm=2.4.131-1
 deb/libei_1.5.0.orig-munit.tar.bz2	2407d9d6b6bb99c4c5c7dc0ba25b760faff952c3374b68c78802e8de91b610e9	apt	libei=1.5.0-3
 deb/libei_1.5.0.orig.tar.bz2	da1fba92daccd0667bc46c3ee952d4ae8cfc6bdb4c0bb4d34df26528fb240618	apt	libei=1.5.0-3
@@ -151,6 +153,7 @@ deb/libepoxy_1.5.10.orig.tar.gz	a7ced37f4102b745ac86d6a70a9da399cc139ff168ba6b80
 deb/libevdev_1.13.6+dfsg.orig.tar.xz	6643222f13cfbead0e30b8b74600f6d335f6ebb1ad8cbaf85783e36886689071	apt	libevdev=1.13.6+dfsg-1
 deb/libffi_3.5.2.orig.tar.gz	dd19253d3007f366319a51d248a40c9e5fcace4498cbea990b566291844e4e30	apt	libffi=3.5.2-4
 deb/libfontenc_1.1.8.orig.tar.gz	b55039f70959a1b2f02f4ec8db071e5170528d2c9180b30575dccf7510d7fb9f	apt	libfontenc=1:1.1.8-1build2
+deb/libfreeaptx_0.2.2.orig.tar.gz	272860781cd055583ddfc520c66a765e676c74c5018c98f8293ea86011aeaad6	apt	libfreeaptx=0.2.2-1build1
 deb/libfyaml_0.9.4.orig.tar.gz	e76b79f0e98dc9a143c57bc4b7dfce27e0155deee4c373a86059d0599cbcc29e	apt	libfyaml=0.9.4-1
 deb/libgcrypt20_1.12.0.orig.tar.bz2	0311454e678189bad62a7e9402a9dd793025efff6e7449898616e2fc75e0f4f5	apt	libgcrypt20=1.12.0-2ubuntu1.1
 deb/libglvnd_1.7.0.orig.tar.gz	073e7292788d4d3eeb45ea6c7bdcce9bfdb3b3eef8d7dbd47f2f30dce046ef98	apt	libglvnd=1.7.0-3
@@ -163,6 +166,7 @@ deb/libjpeg-turbo_2.1.5.orig.tar.gz	254f3642b04e309fee775123133c6464181addc15049
 deb/libksba_1.6.7.orig.tar.bz2	cf72510b8ebb4eb6693eef765749d83677a03c79291a311040a5bfd79baab763	apt	libksba=1.6.7-2build1
 deb/libkscreen_6.6.4.orig.tar.xz	18f8cf65fcc788a7188d72a17d6e0f107e044e07623d5c012d063d901d67b59d	apt	libkscreen=4:6.6.4-0ubuntu1
 deb/libksysguard_6.6.4.orig.tar.xz	9dd0a5a8d3f12d65351fab8c132365dd65f0f9976d6831598ce30ebbfa291a89	apt	libksysguard=4:6.6.4-0ubuntu1
+deb/liblc3_1.1.3+dfsg.orig.tar.xz	3b8b36c405bf08e5756bf416b01547dab92e6f57ebf51d7580e18a1cadba6c96	apt	liblc3=1.1.3+dfsg-1build1
 deb/libndp_1.9.orig.tar.gz	e564f5914a6b1b799c3afa64c258824a801c1b79a29e2fe6525b682249c65261	apt	libndp=1.9-1build1
 deb/libnl3_3.12.0.orig.tar.gz	fc51ca7196f1a3f5fdf6ffd3864b50f4f9c02333be28be4eeca057e103c0dd18	apt	libnl3=3.12.0-2
 deb/libnvme_1.16.1.orig.tar.xz	39570e89807296ade6985e08922f874d3799ce89ac1bcb05849a454cdc965710	apt	libnvme=1.16.1-4
@@ -183,7 +187,9 @@ deb/libusb-1.0_1.0.29.orig.tar.bz2	5977fc950f8d1395ccea9bd48c06b3f808fd3c2c961b4
 deb/libva_2.23.0.orig.tar.gz	b10aceb30e93ddf13b2030eb70079574ba437be9b3b76065caf28a72c07e23e7	apt	libva=2.23.0-1ubuntu1
 deb/libvdpau_1.5.orig.tar.bz2	a5d50a42b8c288febc07151ab643ac8de06a18446965c7241f89b4e810821913	apt	libvdpau=1.5-4
 deb/libvorbis_1.3.7.orig.tar.gz	0e982409a9c3fc82ee06e08205b1355e5c6aa4c36bca58146ef399621b0ce5ab	apt	libvorbis=1.3.7-3build2
+deb/libvpx_1.16.0.orig.tar.gz	7a479a3c66b9f5d5542a4c6a1b7d3768a983b1e5c14c60a9396edc9b649e015c	apt	libvpx=1.16.0-3
 deb/libwacom_2.18.0.orig.tar.gz	9038d27d9b6290d460d7c97376826adf181bfa2a8e25877ce1bc6595a604cb68	apt	libwacom=2.18.0-1
+deb/libwebp_1.5.0.orig.tar.gz	7d6fab70cf844bf6769077bd5d7a74893f8ffd4dfb42861745750c63c2a5c92c	apt	libwebp=1.5.0-0.1build1
 deb/libx11_1.8.13.orig.tar.gz	acf0e7cd7541110e6330ecb539441a2d53061f386ec7be6906dfde0de2598470	apt	libx11=2:1.8.13-1
 deb/libxau_1.0.11.orig.tar.gz	3a321aaceb803577a4776a5efe78836eb095a9e44bbc7a465d29463e1a14f189	apt	libxau=1:1.0.11-1build2
 deb/libxcb_1.17.0.orig.tar.gz	2c69287424c9e2128cb47ffe92171e10417041ec2963bceafb65cb3fcf8f0b85	apt	libxcb=1.17.0-2ubuntu1
@@ -232,6 +238,7 @@ deb/open-vm-tools_13.0.10.orig.tar.xz	90f09355e93b6248cc9a62d70ab5ac7d9c0a696313
 deb/opencv_4.10.0+dfsg.orig.tar.xz	4ca619efbad524c550771ab110332fc81293fb720bd03980fe58bc15f9ca3be8	apt	opencv=4.10.0+dfsg-7ubuntu5
 deb/opendoas_6.8.2.orig.tar.xz	6192dedbbf66d8e9437c982864ce473ab662b7262a9fadf488cced12e830a466	apt	opendoas=6.8.2-1build1
 deb/openssl_3.5.5.orig.tar.gz	b28c91532a8b65a1f983b4c28b7488174e4a01008e29ce8e69bd789f28bc2a89	apt	openssl=3.5.5-1ubuntu3.5
+deb/opus_1.6.1.orig.tar.xz	001ac615b9f8f8994b229ad2b1a5969ed12ab48b0d154d0af1016a5899cd6ba1	apt	opus=1.6.1-1
 deb/ostree_2025.7.orig.tar.xz	af8d080b9585e7fd1faba8f022967e1c268ae62e20ecf32ee7b364c1e307570b	apt	ostree=2025.7-3build1
 deb/pam_1.7.0.orig.tar.xz	57dcd7a6b966ecd5bbd95e1d11173734691e16b68692fa59661cdae9b13b1697	apt	pam=1.7.0-5ubuntu3.2
 deb/pcre2_10.46.orig.tar.gz	8d28d7f2c3b970c3a4bf3776bcbb5adfc923183ce74bc8df1ebaad8c1985bd07	apt	pcre2=10.46-1build1
@@ -298,6 +305,7 @@ deb/wireless-regdb_2026.05.30.orig.tar.gz	1a2e41d23d4034e055ef87112a13ad70615d32
 deb/wireplumber_0.5.13.orig.tar.gz	15001955451db3a79fdd3d6535aedada14ed5eea4638e2ac10b6b3f2a2282e3e	apt	wireplumber=0.5.13-1ubuntu1
 deb/wpa_2.11.orig.tar.xz	9f1109e2aef8e591004bec8e9d8dd363be61c2edaf99f4cc14e35b74316d5a45	apt	wpa=2:2.11-0ubuntu5
 deb/x11-xkb-utils_7.7+9build1.tar.xz	2f7fee7b72120f32dcad6bf8f49d00994d064cdbe5aaffc93920356a3c84cdd8	apt	x11-xkb-utils=7.7+9build1
+deb/x264_0.165.3222+gitb35605ac.orig.tar.gz	4672fb415c34bf16e2ed9cd43d1ab865158f586c7f1406d507f7f44516fb5ec8	apt	x264=2:0.165.3222+gitb35605ac-3build1
 deb/xcb-proto_1.17.0.orig.tar.gz	392d3c9690f8c8202a68fdb89c16fd55159ab8d65000a6da213f4a1576e97a16	apt	xcb-proto=1.17.0-1build1
 deb/xcb-util-cursor_0.1.6.orig.tar.gz	eae38b2dfc5c529a886e507ef576b12d2a20aa1f149608e4853af760f31be60b	apt	xcb-util-cursor=0.1.6-1
 deb/xcb-util-image_0.4.0.orig.tar.bz2	2db96a37d78831d643538dd1b595d7d712e04bdccf8896a5e18ce0f398ea2ffc	apt	xcb-util-image=0.4.0-2build2
@@ -333,6 +341,7 @@ firmware/linux-firmware-mediatek_20240318.git3b128b60-0ubuntu3.1_all.deb	473ea1b
 firmware/linux-firmware-misc_20240318.git3b128b60-0ubuntu3.1_all.deb	284873f9312a9a267d96213cfab229c1a6e3924a6149c3b0fdc1a42a853e7b22	pool	http://archive.ubuntu.com/ubuntu/pool/main/l/linux-firmware-misc/linux-firmware-misc_20240318.git3b128b60-0ubuntu3.1_all.deb
 firmware/linux-firmware-qualcomm-wireless_20240318.git3b128b60-0ubuntu3.1_all.deb	f333f7c1525949720b87e67dfee80e129ffff33d61fa97050428cd720392563c	pool	http://archive.ubuntu.com/ubuntu/pool/main/l/linux-firmware-qualcomm-wireless/linux-firmware-qualcomm-wireless_20240318.git3b128b60-0ubuntu3.1_all.deb
 firmware/linux-firmware-realtek_20240318.git3b128b60-0ubuntu3.1_all.deb	93b11d4f7d086727f6d0fa980c4ee8439dbad50305e8958ca3f71be272f64833	pool	http://archive.ubuntu.com/ubuntu/pool/main/l/linux-firmware-realtek/linux-firmware-realtek_20240318.git3b128b60-0ubuntu3.1_all.deb
+flac-1.5.0.tar.xz	-	link	deb/flac_1.5.0+ds.orig.tar.xz
 fonts/ca-certificates_20260601~24.04.1_all.deb	6bac2a01979e210d9eac1d4d56747ec709ea60654744d66705dc3c36e7629e50	pool	http://archive.ubuntu.com/ubuntu/pool/main/c/ca-certificates/ca-certificates_20260601~24.04.1_all.deb
 fonts/fonts-hack-ttf_3.003-3_all.deb	1f7a793bfb64d941379b5be8719789797fb47ed0da52f22a43f7345a072ce35b	pool	http://archive.ubuntu.com/ubuntu/pool/universe/f/fonts-hack/fonts-hack-ttf_3.003-3_all.deb
 fonts/fonts-noto-color-emoji_2.047-0ubuntu0.24.04.1_all.deb	b102b62ce6a7313315223cff5e052bdf8fc0ad162c9e961ce0dc2202bc139ce2	pool	http://archive.ubuntu.com/ubuntu/pool/main/f/fonts-noto-color-emoji/fonts-noto-color-emoji_2.047-0ubuntu0.24.04.1_all.deb
@@ -479,11 +488,13 @@ libbytesize-2.12.tar.gz	-	link	deb/libbytesize_2.12.orig.tar.gz
 libcanberra-0.30.tar.xz	-	link	deb/libcanberra_0.30.orig.tar.xz
 libcap-2.75.tar.xz	-	link	deb/libcap2_2.75.orig.tar.xz
 libdisplay-info-0.3.0.tar.bz2	-	link	deb/libdisplay-info_0.3.0.orig.tar.bz2
+libdmtx-0.7.8.tar.gz	-	link	deb/libdmtx_0.7.8.orig.tar.gz
 libdrm-2.4.131.tar.xz	-	link	deb/libdrm_2.4.131.orig.tar.xz
 libepoxy-1.5.10.tar.gz	-	link	deb/libepoxy_1.5.10.orig.tar.gz
 libevdev-1.13.6.tar.xz	-	link	deb/libevdev_1.13.6+dfsg.orig.tar.xz
 libffi-3.5.2.tar.gz	-	link	deb/libffi_3.5.2.orig.tar.gz
 libfontenc-1.1.8.tar.gz	-	link	deb/libfontenc_1.1.8.orig.tar.gz
+libfreeaptx-0.2.2.tar.gz	-	link	deb/libfreeaptx_0.2.2.orig.tar.gz
 libfyaml-0.9.4.tar.gz	-	link	deb/libfyaml_0.9.4.orig.tar.gz
 libgcrypt-1.12.0.tar.bz2	-	link	deb/libgcrypt20_1.12.0.orig.tar.bz2
 libgpg-error-1.58.tar.bz2	-	link	deb/libgpg-error_1.58.orig.tar.bz2
@@ -494,6 +505,7 @@ libjpeg-turbo-2.1.5.tar.gz	-	link	deb/libjpeg-turbo_2.1.5.orig.tar.gz
 libksba-1.6.7.tar.bz2	-	link	deb/libksba_1.6.7.orig.tar.bz2
 libkscreen-6.6.4.tar.xz	-	link	deb/libkscreen_6.6.4.orig.tar.xz
 libksysguard-6.6.4.tar.xz	-	link	deb/libksysguard_6.6.4.orig.tar.xz
+liblc3-1.1.3.tar.xz	-	link	deb/liblc3_1.1.3+dfsg.orig.tar.xz
 libndp-1.9.tar.gz	-	link	deb/libndp_1.9.orig.tar.gz
 libnl-3.12.0.tar.gz	-	link	deb/libnl3_3.12.0.orig.tar.gz
 libnvme-1.16.1.tar.xz	-	link	deb/libnvme_1.16.1.orig.tar.xz
@@ -511,7 +523,9 @@ libusb-1.0.29.tar.bz2	-	link	deb/libusb-1.0_1.0.29.orig.tar.bz2
 libva-2.23.0.tar.gz	-	link	deb/libva_2.23.0.orig.tar.gz
 libvdpau-1.5.tar.bz2	-	link	deb/libvdpau_1.5.orig.tar.bz2
 libvorbis-1.3.7.tar.gz	-	link	deb/libvorbis_1.3.7.orig.tar.gz
+libvpx-1.16.0.tar.gz	-	link	deb/libvpx_1.16.0.orig.tar.gz
 libwacom-2.18.0.tar.gz	-	link	deb/libwacom_2.18.0.orig.tar.gz
+libwebp-1.5.0.tar.gz	-	link	deb/libwebp_1.5.0.orig.tar.gz
 libx11-1.8.13.tar.gz	-	link	deb/libx11_1.8.13.orig.tar.gz
 libxau-1.0.11.tar.gz	-	link	deb/libxau_1.0.11.orig.tar.gz
 libxcb-1.17.0.tar.gz	-	link	deb/libxcb_1.17.0.orig.tar.gz
@@ -568,6 +582,7 @@ open-vm-tools-13.0.10.tar.xz	-	link	deb/open-vm-tools_13.0.10.orig.tar.xz
 opencv-4.10.0.tar.xz	-	link	deb/opencv_4.10.0+dfsg.orig.tar.xz
 opendoas-6.8.2.tar.xz	-	link	deb/opendoas_6.8.2.orig.tar.xz
 openssl-3.5.5.tar.gz	-	link	deb/openssl_3.5.5.orig.tar.gz
+opus-1.6.1.tar.xz	-	link	deb/opus_1.6.1.orig.tar.xz
 ostree-2025.7.tar.xz	-	link	deb/ostree_2025.7.orig.tar.xz
 pcre2-10.46.tar.gz	-	link	deb/pcre2_10.46.orig.tar.gz
 pipewire-1.6.2.tar.gz	-	link	deb/pipewire_1.6.2.orig.tar.gz
@@ -632,6 +647,7 @@ wireless-regdb-2026.05.30.tar.gz	-	link	deb/wireless-regdb_2026.05.30.orig.tar.g
 wireplumber-0.5.13.tar.gz	-	link	deb/wireplumber_0.5.13.orig.tar.gz
 wpa-2.11.tar.xz	-	link	deb/wpa_2.11.orig.tar.xz
 x11-xkb-utils-7.7+9.tar.xz	-	link	deb/x11-xkb-utils_7.7+9build1.tar.xz
+x264-0.165.3222.tar.gz	-	link	deb/x264_0.165.3222+gitb35605ac.orig.tar.gz
 xcb-proto-1.17.0.tar.gz	-	link	deb/xcb-proto_1.17.0.orig.tar.gz
 xcb-util-0.4.1.tar.gz	-	link	deb/xcb-util_0.4.1.orig.tar.gz
 xcb-util-cursor-0.1.6.tar.gz	-	link	deb/xcb-util-cursor_0.1.6.orig.tar.gz

@@ -234,7 +234,8 @@ scripts/qemu-test.py live out/melon-*-x86_64.iso /tmp/disk.img --luks     # inst
 scripts/qemu-test.py disk /tmp/disk.img --luks                            # boot it, typing the passphrase
 MELON_EDITION=desktop scripts/mkiso.sh                                    # the Plasma live ISO (desktop edition)
 scripts/qemu-test.py desktop out/melon-desktop-*-x86_64.iso              # services ready, Plasma running, a USB stick mounts through
-                                                                          # UDisks2, nmcli online; LOOK at logs/qemu-desktop.ppm
+                                                                          # UDisks2, screen-recording encoders work, nmcli online;
+                                                                          # LOOK at logs/qemu-desktop.ppm
 qemu-img create -f raw /tmp/desk.img 16G
 scripts/qemu-test.py desktop-install out/melon-desktop-*-x86_64.iso /tmp/desk.img   # install, SDDM greeter stays up,
                                                                           # log in through it, Plasma runs; LOOK at both screenshots

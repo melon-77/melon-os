@@ -1,0 +1,10 @@
+pkgname=opus
+pkgver=1.6.1
+pkgrel=0
+pkgdesc="Opus audio codec library"
+license=BSD-3-Clause
+url=https://opus-codec.org/
+source=(opus-1.6.1.tar.xz)
+subpackages=(opus-dev)
+build(){ meson_setup -Dtests=disabled -Ddocs=disabled -Dextra-programs=disabled -Dcustom-modes=true build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

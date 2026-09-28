@@ -67,7 +67,6 @@ for k in KF6:
     if k == 'kpty': extra += ' -DCMAKE_DISABLE_FIND_PACKAGE_UTEMPTER=ON'   # no utmp logging on musl
     if k == 'ktextwidgets': extra += ' -DWITH_TEXT_TO_SPEECH=OFF'         # no qtspeech in melon yet
     if k == 'syntax-highlighting': extra += ' -DKATEHIGHLIGHTINGINDEXER_EXECUTABLE=$PWD/host-indexer/bin/katehighlightingindexer'
-    if k == 'prison': extra += ' -DWITH_DMTX=OFF'   # no Data Matrix yet; ZXing reads codes (Spectacle's QR scanning)
     ORDER.append((f'kf6-{k}', f'kf6-{k}', extra, 'kde'))
 PLASMA = [
  ('kdecoration',''), ('kwayland',''), ('layer-shell-qt',''), ('plasma-activities',''), ('plasma-activities-stats',''),
@@ -91,7 +90,7 @@ for n, extra in PLASMA:
 PKGREL = {n: 1 for n in ('qt6-qtbase kf6-kwindowsystem kf6-kguiaddons kf6-kdbusaddons kf6-kcrash kf6-kglobalaccel '
                          'kf6-kjobwidgets kf6-kidletime kf6-kstatusnotifieritem kf6-kio kf6-qqc2-desktop-style kf6-kdesu '
                          'kglobalacceld').split()}
-PKGREL['kf6-prison'] = 1   # with ZXing: barcode reading and PDF417
+PKGREL['kf6-prison'] = 2   # 1: with ZXing: barcode reading and PDF417; 2: Data Matrix (libdmtx)
 PKGREL['kf6-kitemmodels'] = PKGREL['kf6-bluez-qt'] = 1   # rebuilt with their QML modules (first built before Qt QML existed)
 PKGREL['qt6-qt5compat'] = PKGREL['qt6-qtmultimedia'] = PKGREL['qt6-qtwayland'] = 1   # with their QML modules
 PKGREL['kwin'] = 1   # X11 on: in KWin 6.6 it also switches Xwayland support, which startplasma asks for

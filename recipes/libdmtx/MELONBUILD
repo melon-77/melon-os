@@ -1,0 +1,10 @@
+pkgname=libdmtx
+pkgver=0.7.8
+pkgrel=0
+pkgdesc="Data Matrix barcode library (Prison)"
+license=BSD-2-Clause
+url=https://github.com/dmtx/libdmtx
+source=(libdmtx-0.7.8.tar.gz)
+subpackages=(libdmtx-dev)
+build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DBUILD_TESTING=OFF; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

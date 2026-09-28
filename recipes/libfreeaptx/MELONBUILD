@@ -1,0 +1,11 @@
+pkgname=libfreeaptx
+pkgver=0.2.2
+pkgrel=0
+pkgdesc="aptX and aptX HD audio codec (Bluetooth headphones)"
+license=LGPL-2.1-or-later
+url=https://github.com/regularhunter/libfreeaptx
+source=(libfreeaptx-0.2.2.tar.gz)
+subpackages=(libfreeaptx-dev)
+_mk(){ make CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" PREFIX=/usr LIBDIR=lib "$@"; }
+build(){ _mk -j$JOBS; }
+package(){ _mk DESTDIR=$pkgdir install; }

@@ -16,6 +16,12 @@
 """
 import sys, time, pexpect, os
 import re as _re
+import types, pexpect.expect, pexpect.pty_spawn, pexpect.utils
+# pexpect times its timeouts with the wall clock, and WSL's clock jumps (hours at a time after the laptop sleeps,
+# or back and forth while Windows and NTP disagree) would end them at once: give it the monotonic clock
+_mono = types.SimpleNamespace(**{k: getattr(time, k) for k in dir(time) if not k.startswith('_')})
+_mono.time = time.monotonic
+for _m in (pexpect.expect, pexpect.pty_spawn, pexpect.utils): _m.time = _mono
 M = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 mode = sys.argv[1]
@@ -112,8 +118,8 @@ else:
     disk, = args
     cmd += disk_args(disk) + ['-boot', 'c']
 
-t0 = time.time()
-def step(s): print(f'[{time.time()-t0:7.1f}s] {s}', flush=True)
+t0 = time.monotonic()
+def step(s): print(f'[{time.monotonic()-t0:7.1f}s] {s}', flush=True)
 p = pexpect.spawn(cmd[0], cmd[1:], encoding='utf-8', codec_errors='replace', timeout=600)
 p.logfile_read = log
 PROMPT = r'@melon[\w-]*.*[#$] '

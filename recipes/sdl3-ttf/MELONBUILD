@@ -1,0 +1,14 @@
+pkgname=sdl3-ttf
+pkgver=3.2.2
+pkgrel=0
+pkgdesc="SDL3_ttf: draws TrueType/OpenType text with FreeType, shaped by HarfBuzz"
+license=Zlib
+url=https://github.com/libsdl-org/SDL_ttf
+source=(sdl3-ttf-3.2.2.tar.xz)
+builddir=$srcdir/SDL3_ttf-3.2.2
+makedepends=(sdl3-dev freetype-dev harfbuzz-dev)
+subpackages=(sdl3-ttf-dev)
+# No plutosvg in melon, so no colour emoji through SDL_ttf.
+build(){ cmake_setup -B build -DSDLTTF_VENDORED=OFF -DSDLTTF_STRICT=ON -DSDLTTF_HARFBUZZ=ON -DSDLTTF_PLUTOSVG=OFF -DSDLTTF_SAMPLES=OFF
+  ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

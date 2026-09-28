@@ -136,6 +136,17 @@ cd "$builddir" 2>/dev/null || cd "$srcdir"
 msg build; build
 cd "$builddir" 2>/dev/null || cd "$srcdir"
 msg package; package
+# cross-build safety net: some builds install under build-machine paths (pkg-config puts the sysroot in front of
+# path variables; the host Qt reports its own qml/plugins dirs). Move such files to where they belong, and report
+# files that have a build-machine path compiled in (those need a fix in the recipe).
+_relocate(){ [ -d "$pkgdir$1" ] || return 0; msg "LEAK: files installed under $1, moved to $2"
+  mkdir -p "$pkgdir$2"; cp -a "$pkgdir$1/." "$pkgdir$2/"; rm -rf "$pkgdir$1"; }
+_relocate "$SYSROOT" /
+_relocate "$M/hosttools/qt6/qml" /usr/lib/qt6/qml
+_relocate "$M/hosttools/qt6/plugins" /usr/lib/qt6/plugins
+[ -d "$pkgdir${M%/*}" ] && find "$pkgdir${M%%/${M#/*/}}" -depth -type d -empty -delete 2>/dev/null || true
+grep -rlaE "$SYSROOT/(usr/(share|lib|libexec|bin)|etc)|$M/hosttools" "$pkgdir" 2>/dev/null | sed "s|^$pkgdir||" | while read -r f; do
+  msg "LEAK: build-machine path compiled into $f"; done || true
 
 varname(){ printf '%s' "$1" | tr -c 'a-zA-Z0-9' '_'; }
 # ---------- subpackage helpers ----------

@@ -42,7 +42,8 @@ case $ARCH in x86) EFI_TARGET=i386-efi EFI_FILE=BOOTIA32.EFI ;; *) EFI_TARGET=x8
 ICE_PID=
 if [ -f /usr/share/melon/.ice ] && command -v mpg123 >/dev/null; then
   # play on the card that has the speakers, not the GPU's HDMI audio (card 0 on many laptops)
-  ICE_CARD=$(melon-sound-default 2>/dev/null) ICE_PCM=$(melon-sound-default --pcm 2>/dev/null)
+  # no sound card (servers, many VMs) is fine: set -e must not end the install here
+  ICE_CARD=$(melon-sound-default 2>/dev/null || true) ICE_PCM=$(melon-sound-default --pcm 2>/dev/null || true)
   if [ -n "$ICE_CARD" ]; then
     if amixer -c "$ICE_CARD" sget Master >/dev/null 2>&1; then
       amixer -c "$ICE_CARD" -q -M sset Master 30% unmute 2>/dev/null || true
@@ -181,7 +182,8 @@ if [ $swapm -ge 256 ]; then
 fi
 echo "root:$MELON_ROOTPW" | chroot $TARGET chpasswd -c sha512
 if [ -n "$MELON_USER" ]; then
-  chroot $TARGET adduser -D -s /bin/bash -G users "$MELON_USER"
+  # -g: the login screen shows the full-name field, and BusyBox's default for it is "Linux User"
+  chroot $TARGET adduser -D -s /bin/bash -G users -g "$MELON_USER" "$MELON_USER"
   for g in wheel audio video input render plugdev netdev kvm cdrom; do chroot $TARGET addgroup "$MELON_USER" $g 2>/dev/null || true; done
   echo "$MELON_USER:$MELON_USERPW" | chroot $TARGET chpasswd -c sha512
 fi

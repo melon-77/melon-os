@@ -1,6 +1,6 @@
 pkgname=shared-mime-info
 pkgver=2.4
-pkgrel=0
+pkgrel=1
 pkgdesc="shared-mime-info (graphics stack)"
 license=custom
 source=(shared-mime-info-2.4.tar.bz2)
@@ -9,3 +9,4 @@ makedepends=(libxml2-dev glib-dev)
 subpackages=(shared-mime-info-dev)
 build(){ meson_setup -Dupdate-mimedb=false -Dbuild-translations=false -Dbuild-tests=false -Dbuild-tools=true build; ninja -C build; }
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }
+triggers_shared_mime_info=(/usr/share/mime/packages)

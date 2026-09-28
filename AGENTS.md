@@ -80,6 +80,9 @@ Things the builder gives you:
   differently named subpackage. Non-alphanumerics become `_` (e.g. `libstdc++-dev` -> `pkg_libstdc___dev`).
   Use `amove path...` (globs allowed, relative to `$pkgdir`) to move files into the subpackage.
 - Per-subpackage variables use the same mangling: `depends_<x>`, `pkgdesc_<x>`, `provides_<x>` (array).
+- Triggers: `triggers_<x>=(dir ...)` plus a `<pkg>.trigger` script; apk runs the script (with the changed
+  directories as arguments) after any transaction that touches those directories, and when `<pkg>` itself is
+  installed. Use them for caches other packages feed, e.g. `recipes/shared-mime-info`.
 - `options=('!strip')` skips stripping. `options=(keepdirs)` keeps empty directories.
 - After packaging, files in `/bin`, `/sbin`, `/lib`, `/usr/sbin` are folded into `/usr/bin` and `/usr/lib`,
   `.la` files are deleted, and ELF files are stripped.
@@ -189,6 +192,13 @@ Rebuilding the kernel takes about an hour on 2 cores.
     silently leave their QML modules out (`Could NOT find Qt6Qml` in the log); rebuild them with a pkgrel bump.
 37. **KWin needs `KWIN_BUILD_X11=ON`** even in a Wayland-only session: in 6.6 that switch also carries Xwayland,
     and startplasma starts KWin with `--xwayland`.
+38. **SDDM's greeter runs on VT 7** (`-DSDDM_INITIAL_VT=7`). SDDM only counts a VT as busy when a logind session
+    is on it, so with its default (VT 1) the greeter fights getty-tty1 for the terminal and crash-loops
+    (`Failed to take control of "/dev/tty1"`, helper exit 5). Installed systems keep text logins on tty1-3.
+    The live ISO has no getty on tty1 and never showed it: test desktop changes on an *installed* system
+    (`qemu-test.py desktop-install`).
+39. **`set -e` and `VAR=$(cmd)`: a failing `cmd` ends the script.** An assignment's exit status is its last command
+    substitution. Probes that may find nothing (no sound card, no network) need `|| true` inside the `$( )`.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
@@ -216,6 +226,9 @@ scripts/qemu-test.py live out/melon-*-x86_64.iso /tmp/disk.img --luks     # inst
 scripts/qemu-test.py disk /tmp/disk.img --luks                            # boot it, typing the passphrase
 MELON_EDITION=desktop scripts/mkiso.sh                                    # the Plasma live ISO (desktop edition)
 scripts/qemu-test.py desktop out/melon-desktop-*-x86_64.iso              # services ready, Plasma running; LOOK at logs/qemu-desktop.ppm
+qemu-img create -f raw /tmp/desk.img 16G
+scripts/qemu-test.py desktop-install out/melon-desktop-*-x86_64.iso /tmp/desk.img   # install, SDDM greeter stays up,
+                                                                          # log in through it, Plasma runs; LOOK at both screenshots
 ```
 
 Logs go to `logs/qemu-*.log`. The tests use KVM when `/dev/kvm` is usable (WSL2 has it); without it QEMU runs in

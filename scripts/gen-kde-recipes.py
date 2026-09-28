@@ -39,11 +39,13 @@ ORDER = [
  ('qt6-qtpositioning','qt6-positioning', QT+' '+QTDIRS, 'qt'),
  ('qt6-qtlocation','qt6-location', QT+' '+QTDIRS, 'qt'),   # plasma-workspace needs QtLocation
  ('qt6-qtwebview','qt6-webview', QT+' '+QTDIRS, 'qt'),   # Discover; no QtWebEngine backend (a whole Chromium)
- ('qt6-qtspeech','qt6-speech', QT+' '+QTDIRS, 'qt'),   # KTextEditor needs the module; no speech engine yet
+ ('qt6-qtspeech','qt6-speech', QT+' '+QTDIRS+' -DFEATURE_flite=ON -DFEATURE_speechd=OFF', 'qt'),   # speech through Flite, sound through Qt Multimedia
  ('qt6-qt5compat','qt6-5compat', QT+' '+QTDIRS, 'qt'),
  ('qt6-qttools','qt6-tools', QT+' '+QTDIRS+' -DFEATURE_assistant=OFF -DFEATURE_designer=OFF -DFEATURE_distancefieldgenerator=OFF '
    '-DFEATURE_pixeltool=OFF -DFEATURE_qtdiag=OFF -DFEATURE_clang=OFF -DFEATURE_qdoc=OFF -DFEATURE_linguist=ON', 'qt'),
- ('qt6-qtmultimedia','qt6-multimedia', QT+' '+QTDIRS+' -DFEATURE_ffmpeg=OFF -DFEATURE_gstreamer=OFF -DFEATURE_pulseaudio=OFF', 'qt'),
+ ('qt6-qttranslations','qt6-translations', QT+' '+QTDIRS, 'qt'),   # Qt's own strings (dialogs, shortcuts), via the host lrelease
+ # playback through FFmpeg, sound through PulseAudio (PipeWire's pulse server)
+ ('qt6-qtmultimedia','qt6-multimedia', QT+' '+QTDIRS+' -DFEATURE_ffmpeg=ON -DFEATURE_gstreamer=OFF -DFEATURE_pulseaudio=ON', 'qt'),
  ('extra-cmake-modules','kf6-extra-cmake-modules', '-DBUILD_DOC=OFF', 'noarch-kde'),
  ('plasma-wayland-protocols','plasma-wayland-protocols', '', 'noarch-kde'),
  ('polkit-qt-1','polkit-qt-1', KDE, 'kde'),
@@ -65,7 +67,6 @@ for k in KF6:
     if k == 'kwallet': extra += ' -DBUILD_KSECRETD=ON -DBUILD_KWALLETD=OFF -DBUILD_KWALLET_QUERY=OFF'   # ksecretd is the store in 6.x; the legacy bridge needs libsecret
     if k == 'kfilemetadata': extra += ' -DKFILEMETADATA_USE_TAGLIB=OFF'
     if k == 'kpty': extra += ' -DCMAKE_DISABLE_FIND_PACKAGE_UTEMPTER=ON'   # no utmp logging on musl
-    if k == 'ktextwidgets': extra += ' -DWITH_TEXT_TO_SPEECH=OFF'         # no qtspeech in melon yet
     if k == 'syntax-highlighting': extra += ' -DKATEHIGHLIGHTINGINDEXER_EXECUTABLE=$PWD/host-indexer/bin/katehighlightingindexer'
     ORDER.append((f'kf6-{k}', f'kf6-{k}', extra, 'kde'))
 PLASMA = [
@@ -92,7 +93,10 @@ PKGREL = {n: 1 for n in ('qt6-qtbase kf6-kwindowsystem kf6-kguiaddons kf6-kdbusa
                          'kglobalacceld').split()}
 PKGREL['kf6-prison'] = 2   # 1: with ZXing: barcode reading and PDF417; 2: Data Matrix (libdmtx)
 PKGREL['kf6-kitemmodels'] = PKGREL['kf6-bluez-qt'] = 1   # rebuilt with their QML modules (first built before Qt QML existed)
-PKGREL['qt6-qt5compat'] = PKGREL['qt6-qtmultimedia'] = PKGREL['qt6-qtwayland'] = 1   # with their QML modules
+PKGREL['qt6-qt5compat'] = PKGREL['qt6-qtwayland'] = 1   # with their QML modules
+PKGREL['qt6-qtspeech'] = 1   # Flite
+PKGREL['kf6-ktextwidgets'] = 1   # Speak Text
+PKGREL['qt6-qtmultimedia'] = 3   # 1: with its QML modules; 2: FFmpeg and PulseAudio backends; 3: no sysroot paths in its qmake module
 PKGREL['kwin'] = 1   # X11 on: in KWin 6.6 it also switches Xwayland support, which startplasma asks for
 PKGREL['sddm'] = 3   # 1: QML components back from the host Qt's qml dir; 2: PAM services; 3: greeter on VT 7, clear of getty-tty1
 PKGREL['qcoro'] = 1   # shared libraries instead of static ones
@@ -123,6 +127,8 @@ POST = {
             " printf 'auth\\tinclude\\tbase-auth\\naccount\\tinclude\\tbase-account\\npassword\\tinclude\\tbase-password\\nsession\\tinclude\\tbase-session\\n' > $pkgdir/etc/pam.d/sddm;"
             " printf 'auth\\trequired\\tpam_permit.so\\naccount\\tinclude\\tbase-account\\npassword\\trequired\\tpam_deny.so\\nsession\\tinclude\\tbase-session\\n' > $pkgdir/etc/pam.d/sddm-autologin;"
             " printf 'auth\\trequired\\tpam_permit.so\\naccount\\trequired\\tpam_permit.so\\npassword\\trequired\\tpam_deny.so\\nsession\\trequired\\tpam_unix.so\\n-session\\toptional\\tpam_elogind.so\\n' > $pkgdir/etc/pam.d/sddm-greeter;",
+    # its qmake module lists the include/library directories pkg-config found, with the sysroot in front (rule 32)
+    'qt6-qtmultimedia': ' sed -i "s|$SYSROOT||g" $pkgdir/usr/lib/qt6/mkspecs/modules/qt_lib_multimedia_private.pri;',
     # QCA exports absolute /usr paths in its CMake targets; make them relative so they resolve inside the sysroot too
     'qca': " sed -i 's|\"/usr/|\"${_IMPORT_PREFIX}/|g' $pkgdir/usr/lib/cmake/Qca-qt6/Qca-qt6Targets*.cmake;"
            " sed -i 's|^set(_IMPORT_PREFIX \"/usr\")$|get_filename_component(_IMPORT_PREFIX \"${CMAKE_CURRENT_LIST_DIR}/../../..\" ABSOLUTE)|'"

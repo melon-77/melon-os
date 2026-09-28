@@ -15,7 +15,7 @@ dolphin konsole kde-spectacle plasma-discover nano
 pipewire wireplumber networkmanager bluez upower power-profiles-daemon
 # runtime pieces nothing links against (loaded by name, QML imports, data files)
 xkeyboard-config qt6-qtwayland qt6-qt5compat qt6-qtimageformats qt6-qtlocation qt6-qtsvg kf6-kded kactivitymanagerd
-plasma5support ksystemstats kf6-kquickcharts kf6-kunitconversion kf6-threadweaver hwdata
+plasma5support ksystemstats kf6-kquickcharts kf6-kunitconversion kf6-threadweaver hwdata qt6-qttranslations
 # started over D-Bus when Plasma or Dolphin asks for drives (USB sticks, SD cards)
 udisks2
 # everyday tools the installer and users expect

@@ -27,6 +27,7 @@ deb/expat_2.7.4.orig.tar.gz	5b356795b889d3e5b379433ece069b8781bf0727f6959ad3bbc9
 deb/ffmpeg_8.0.1.orig.tar.xz	05ee0b03119b45c0bdb4df654b96802e909e0a752f72e4fe3794f487229e5a41	apt	ffmpeg=7:8.0.1-3ubuntu2
 deb/flac_1.5.0+ds.orig.tar.xz	51d6a5bf5a37b67f9af847daa07c07091f6bf1583d5abb7fbb064bc68428b0f1	apt	flac=1.5.0+ds-5
 deb/flatpak_1.16.6.orig.tar.xz	1e63e7f3fe44b602f34d92a6fe46fd8a3bc6be9460c03c2681e57976c658eec3	apt	flatpak=1.16.6-1
+deb/flite_2.2.orig.tar.gz	ab1555fe5adc3f99f1d4a1a0eb1596d329fd6d74f1464a0097c81f53c0cf9e5c	apt	flite=2.2-7build1
 deb/fontconfig_2.17.1.orig.tar.gz	f07504cef87f171ee1748352e2df9b9f125352f620fa0d03a9284306ea2c40a4	apt	fontconfig=2.17.1-3ubuntu1
 deb/fonts-hack_3.003.orig.tar.gz	3c6f1a20e86744077e83c9bacf879a5b13f659f1c07e9c5c57d6efc3cbe66c07	apt	fonts-hack=3.003-4
 deb/fonts-noto-color-emoji_2.051.orig.tar.xz	ca084e447d6154ad807a3765c51cfb02a8e9ad870505fe9a5cb396116f2d39ed	apt	fonts-noto-color-emoji=2.051-1build1
@@ -280,6 +281,7 @@ deb/qt6-shadertools_6.10.2.orig.tar.xz	18d9dbbc4f7e6e96e6ed89a9965dc032e2b58158b
 deb/qt6-speech_6.10.2.orig.tar.xz	d937f6c715792b0d8f036e94513ebfc8def6b988a65f3ff30a7f4a8cc1263014	apt	qt6-speech=6.10.2-1
 deb/qt6-svg_6.10.2.orig.tar.xz	f07ff80f38caf235187200345392ca7479445ddf49a36c3694cd52a735dad6e1	apt	qt6-svg=6.10.2-2
 deb/qt6-tools_6.10.2.orig.tar.xz	1e3d2c07c1fd76d2425c6eaeeaa62ffaff5f79210c4e1a5bc2a6a9db668d5b24	apt	qt6-tools=6.10.2-1
+deb/qt6-translations_6.10.2.orig.tar.xz	b3b3813bc9d76b545716dc8b6e659fa71b6e2bc14569e9fab6dab8b30650a644	apt	qt6-translations=6.10.2-1
 deb/qt6-wayland_6.10.2.orig.tar.xz	391998eb432719df26a6a67d8efdc67f8bf2afdd76c1ee3381ebff4fe7527ee2	apt	qt6-wayland=6.10.2-4
 deb/qt6-webview_6.10.2.orig.tar.xz	7ec406ff0998900ccef0ff8e4e5b1fbf15e4e18f3b43eb72e8b2aeda0dd0eab4	apt	qt6-webview=6.10.2-1
 deb/readline_8.3.orig.tar.gz	fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc	apt	readline=8.3-4
@@ -342,6 +344,7 @@ firmware/linux-firmware-misc_20240318.git3b128b60-0ubuntu3.1_all.deb	284873f9312
 firmware/linux-firmware-qualcomm-wireless_20240318.git3b128b60-0ubuntu3.1_all.deb	f333f7c1525949720b87e67dfee80e129ffff33d61fa97050428cd720392563c	pool	http://archive.ubuntu.com/ubuntu/pool/main/l/linux-firmware-qualcomm-wireless/linux-firmware-qualcomm-wireless_20240318.git3b128b60-0ubuntu3.1_all.deb
 firmware/linux-firmware-realtek_20240318.git3b128b60-0ubuntu3.1_all.deb	93b11d4f7d086727f6d0fa980c4ee8439dbad50305e8958ca3f71be272f64833	pool	http://archive.ubuntu.com/ubuntu/pool/main/l/linux-firmware-realtek/linux-firmware-realtek_20240318.git3b128b60-0ubuntu3.1_all.deb
 flac-1.5.0.tar.xz	-	link	deb/flac_1.5.0+ds.orig.tar.xz
+flite-2.2.tar.gz	-	link	deb/flite_2.2.orig.tar.gz
 fonts/ca-certificates_20260601~24.04.1_all.deb	6bac2a01979e210d9eac1d4d56747ec709ea60654744d66705dc3c36e7629e50	pool	http://archive.ubuntu.com/ubuntu/pool/main/c/ca-certificates/ca-certificates_20260601~24.04.1_all.deb
 fonts/fonts-hack-ttf_3.003-3_all.deb	1f7a793bfb64d941379b5be8719789797fb47ed0da52f22a43f7345a072ce35b	pool	http://archive.ubuntu.com/ubuntu/pool/universe/f/fonts-hack/fonts-hack-ttf_3.003-3_all.deb
 fonts/fonts-noto-color-emoji_2.047-0ubuntu0.24.04.1_all.deb	b102b62ce6a7313315223cff5e052bdf8fc0ad162c9e961ce0dc2202bc139ce2	pool	http://archive.ubuntu.com/ubuntu/pool/main/f/fonts-noto-color-emoji/fonts-noto-color-emoji_2.047-0ubuntu0.24.04.1_all.deb
@@ -621,6 +624,7 @@ qt6-qtshadertools-6.10.2.tar.xz	-	link	deb/qt6-shadertools_6.10.2.orig.tar.xz
 qt6-qtspeech-6.10.2.tar.xz	-	link	deb/qt6-speech_6.10.2.orig.tar.xz
 qt6-qtsvg-6.10.2.tar.xz	-	link	deb/qt6-svg_6.10.2.orig.tar.xz
 qt6-qttools-6.10.2.tar.xz	-	link	deb/qt6-tools_6.10.2.orig.tar.xz
+qt6-qttranslations-6.10.2.tar.xz	-	link	deb/qt6-translations_6.10.2.orig.tar.xz
 qt6-qtwayland-6.10.2.tar.xz	-	link	deb/qt6-wayland_6.10.2.orig.tar.xz
 qt6-qtwebview-6.10.2.tar.xz	-	link	deb/qt6-webview_6.10.2.orig.tar.xz
 readline-8.3.tar.gz	-	link	deb/readline_8.3.orig.tar.gz

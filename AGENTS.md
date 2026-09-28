@@ -26,6 +26,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | desktop plumbing | D-Bus, elogind, polkit, PipeWire + WirePlumber, NetworkManager, BlueZ, CUPS, UDisks2 | console profile keeps `dhcp` + wpa_supplicant |
 | graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe | |
 | gaming | Flatpak 1.16 + Flathub, GameMode | Steam is glibc-only, so it can't run natively on musl: `melon-first-boot` offers Steam (and Firefox, VLC, Prism Launcher) from Flathub on first login |
+| Nix | Nix 2.35 (`nix-daemon` service, on by default) + Home Manager | nixpkgs binaries bring their own glibc in `/nix/store`, so they run on musl; `/nix` is made by `nix`'s post-install, build users `nixbld1`–`32`; `home-manager` runs `release-26.05` until it's in the user's profile (issue #10) |
 
 Owner's config (`CONFIG_*` answers) lives in `docs/config.txt`. Don't change those choices without the owner's approval.
 

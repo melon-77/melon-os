@@ -1,0 +1,12 @@
+#!/bin/sh
+# nix-daemon runs builds as these users (build-users-group in /etc/nix/nix.conf). Nix finds them through the member
+# list of the nixbld group, so each one is also added there, not only given nixbld as its primary group.
+grep -q '^nixbld:' /etc/group || addgroup -S nixbld || { echo "nix: couldn't add the nixbld group" >&2; exit 1; }
+for i in $(seq 1 32); do
+  u=nixbld$i
+  grep -q "^$u:" /etc/passwd || adduser -S -D -H -h /var/empty -s /sbin/nologin -G nixbld -g "Nix build user $i" $u ||
+    { echo "nix: couldn't add the build user $u" >&2; exit 1; }
+  grep -q "^nixbld:.*[:,]$u\(,\|$\)" /etc/group || addgroup $u nixbld ||
+    { echo "nix: couldn't add $u to the nixbld group" >&2; exit 1; }
+done
+exit 0

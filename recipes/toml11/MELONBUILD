@@ -1,0 +1,11 @@
+pkgname=toml11
+pkgver=4.4.0
+pkgrel=0
+pkgdesc="TOML for Modern C++ (header-only; Nix's builtins.fromTOML)"
+license=MIT
+url=https://github.com/ToruNiina/toml11
+source=(toml11-4.4.0.tar.gz)
+options=('!strip')
+# Nix finds it through its CMake config (lib/cmake/toml11), so it stays in the one package
+build(){ cmake_setup -B build -DTOML11_PRECOMPILE=OFF -DTOML11_BUILD_TESTS=OFF; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

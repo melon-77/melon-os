@@ -1,0 +1,14 @@
+pkgname=libgit2
+pkgver=1.9.7
+pkgrel=0
+pkgdesc="Git library (Nix reads local git repositories and flakes with it)"
+license="GPL-2.0-only WITH GCC-exception-2.0"
+url=https://libgit2.org
+# upstream's tag: Ubuntu's +ds tarball has the bundled llhttp and collision-detecting SHA1 removed
+source=(libgit2-1.9.7.tar.gz)
+makedepends=(openssl-dev zlib-dev)
+subpackages=(libgit2-dev)
+build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DBUILD_TESTS=OFF -DBUILD_CLI=OFF -DBUILD_EXAMPLES=OFF \
+  -DUSE_SSH=OFF -DUSE_HTTPS=OpenSSL -DUSE_SHA1=CollisionDetection -DUSE_SHA256=HTTPS -DUSE_HTTP_PARSER=builtin \
+  -DREGEX_BACKEND=builtin -DUSE_BUNDLED_ZLIB=OFF -DUSE_GSSAPI=OFF; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

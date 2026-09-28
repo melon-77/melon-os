@@ -1,0 +1,15 @@
+#!/bin/sh
+# Nix keeps its store and state under /nix, which no package ships (packages only use /usr, /etc, /var and /boot).
+# The daemon creates the rest of /nix/var itself when it starts. Owners and modes are set only on what this script
+# creates, never on something that already exists.
+fail(){ echo "nix: $*" >&2; exit 1; }
+grep -q '^nixbld:' /etc/group || fail "the nixbld group doesn't exist"
+[ -L /nix ] && fail "/nix is a symbolic link"
+[ -e /nix ] || mkdir -m 0755 /nix || fail "couldn't create /nix"
+[ -d /nix ] || fail "/nix isn't a directory"
+[ -L /nix/store ] && fail "/nix/store is a symbolic link"
+if [ ! -e /nix/store ]; then
+  # the store: group nixbld may add to it, the sticky bit keeps anyone from removing what isn't theirs
+  mkdir /nix/store && chown root:nixbld /nix/store && chmod 1775 /nix/store || fail "couldn't create /nix/store"
+fi
+exit 0

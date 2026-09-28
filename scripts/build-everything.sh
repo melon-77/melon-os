@@ -32,7 +32,9 @@ DESKTOP_LIBS="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio lib
 # AppStream has Qt bindings (Discover), and Flatpak and the portal build against AppStream: right after Qt
 KDE=$(python3 $M/scripts/gen-kde-recipes.py | sed "s/\bqt6-qtbase\b/qt6-qtbase appstream flatpak xdg-desktop-portal/")
 INSTALLERS="kpmcore calamares calamares-melon melon-desktop"
-ALL=$(printf '%s\n' $BASE $PLUMBING $SIMPLE $DESKTOP_LIBS $KDE $INSTALLERS | awk '!seen[$0]++')
+# Nix and what only it needs (on both ISOs); after curl, libarchive and the rest of $SIMPLE
+NIX="boost-libs libblake3 toml11 nlohmann-json libsodium brotli gc libgit2 nix home-manager"
+ALL=$(printf '%s\n' $BASE $PLUMBING $SIMPLE $NIX $DESKTOP_LIBS $KDE $INSTALLERS | awk '!seen[$0]++')
 # recipes nobody listed yet go at the end
 EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))
 ALL="$ALL $EXTRA"

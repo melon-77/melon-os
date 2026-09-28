@@ -1,0 +1,15 @@
+pkgname=gc
+pkgver=8.2.12
+pkgrel=0
+pkgdesc="Boehm-Demers-Weiser garbage collector (Nix's evaluator)"
+license=MIT
+url=https://www.hboehm.info/gc/
+source=(gc-8.2.12.tar.gz)
+builddir=$srcdir/bdwgc-bdwgc-b5cca92
+subpackages=(gc-dev)
+# as Nix's own packaging builds it: C++ support and the large heap configuration (evaluating nixpkgs needs it);
+# GCC's atomic builtins instead of libatomic_ops
+build(){ [ -x configure ] || autoreconf -fi
+  ./configure $conf_flags --disable-static --enable-cplusplus --enable-large-config --with-libatomic-ops=none --disable-docs
+  make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc; }

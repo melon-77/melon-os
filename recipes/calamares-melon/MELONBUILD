@@ -1,6 +1,6 @@
 pkgname=calamares-melon
 pkgver=0.1
-pkgrel=6
+pkgrel=7
 pkgdesc="melon's Calamares setup: the gauntlet module, branding, job configs and finishing scripts (live ISO only)"
 license=GPL-3.0-or-later
 makedepends=(calamares-dev extra-cmake-modules qt6-qtbase-dev qt6-qtdeclarative-dev kf6-kcoreaddons-dev yaml-cpp-dev)

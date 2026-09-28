@@ -1,0 +1,45 @@
+# melon's boot menu, survivor edition (melon-update-grub picks it for gauntlet survivors)
+title-text: ""
+desktop-image: "background.png"
+desktop-color: "#0a0e0c"
+terminal-font: "DejaVu Sans Mono Regular 16"
+terminal-box: "menu_*.png"
+
++ boot_menu {
+  left = 7%
+  top = 28%
+  width = 38%
+  height = 40%
+  item_font = "Noto Sans Regular 24"
+  selected_item_font = "Noto Sans Bold 24"
+  item_color = "#f2e6c8"
+  selected_item_color = "#1a1204"
+  item_height = 44
+  item_padding = 18
+  item_spacing = 16
+  icon_width = 0
+  icon_height = 0
+  item_icon_space = 0
+  menu_pixmap_style = "menu_*.png"
+  selected_item_pixmap_style = "select_*.png"
+  scrollbar = false
+}
++ label {
+  id = "__timeout__"
+  left = 7%
+  top = 70%
+  width = 38%
+  height = 28
+  text = "Starting in %d seconds"
+  font = "Noto Sans Regular 18"
+  color = "#c9b07a"
+}
++ label {
+  left = 7%
+  top = 93%
+  width = 60%
+  height = 24
+  text = "Up/Down to choose  -  Enter to start  -  e to edit  -  c for a command line"
+  font = "Noto Sans Regular 16"
+  color = "#9a8a66"
+}

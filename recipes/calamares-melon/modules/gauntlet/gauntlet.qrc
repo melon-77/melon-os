@@ -2,5 +2,6 @@
 <qresource>
     <file>gauntlet.qml</file>
     <file>questions.js</file>
+    <file>trial.js</file>
 </qresource>
 </RCC>

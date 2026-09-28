@@ -26,16 +26,18 @@ rootfs=$(blkid -s TYPE -o value "$rootdev"); [ -n "$rootfs" ] || rootfs=xfs
 cmdline="$rootspec rootfstype=$rootfs rw ${GRUB_CMDLINE_LINUX_DEFAULT:-quiet} ${GRUB_CMDLINE_LINUX}"
 # kernel path relative to the filesystem grub reads it from
 if [ "$bootdev" != "$rootdev" ]; then kpath=""; else kpath="/boot"; fi
-# melon background (from melon-desktop); black menu backgrounds are transparent over it.
-# Gauntlet survivors (badge from the graphical installer) get their own background and a gold highlight.
-bg=/usr/share/melon/grub/background.png; hl=light-green
-if [ -f /etc/melon/gauntlet-survivor ] && [ -f /usr/share/melon/grub/background-survivor.png ]; then
-  bg=/usr/share/melon/grub/background-survivor.png; hl=yellow
+# the melon boot menu theme (from melon-desktop); gauntlet survivors (badge from the graphical installer) get the
+# gold edition. /boot may be its own partition, so the theme is copied next to grub.cfg.
+theme=/usr/share/melon/grub/themes/melon
+if [ -f /etc/melon/gauntlet-survivor ] && [ -f /usr/share/melon/.rewards/grub/themes/melon-gold/theme.txt ]; then
+  theme=/usr/share/melon/.rewards/grub/themes/melon-gold
 fi
-bgline=
-if [ -f "$bg" ]; then
-  cp "$bg" /boot/grub/melon-bg.png
-  bgline="; insmod png; background_image -m stretch $kpath/grub/melon-bg.png"
+rm -rf /boot/grub/themes/melon /boot/grub/melon-bg.png
+themeline=
+if [ -f "$theme/theme.txt" ]; then
+  mkdir -p /boot/grub/themes && cp -r "$theme" /boot/grub/themes/melon
+  for f in /boot/grub/themes/melon/*.pf2; do themeline="$themeline; loadfont $kpath/grub/themes/melon/${f##*/}"; done
+  themeline="; insmod png$themeline; set theme=$kpath/grub/themes/melon/theme.txt"
 fi
 # other systems on this machine (dual boot): Windows Boot Manager on any EFI system partition (UEFI), Windows'
 # bootmgr on an NTFS partition (BIOS). Partitions that aren't mounted are looked at read-only in a temporary directory.
@@ -66,9 +68,9 @@ insmod xfs
 insmod ext2
 search --no-floppy --fs-uuid --set=root $bootuuid
 $( [ "${GRUB_SERIAL:-0}" = 1 ] && printf 'serial --unit=0 --speed=115200\nterminal_input console serial\nterminal_output console serial\n' )
-if loadfont unicode; then set gfxmode=auto; insmod all_video; insmod gfxterm; terminal_output gfxterm $( [ "${GRUB_SERIAL:-0}" = 1 ] && echo serial )$bgline; fi
+if loadfont unicode; then set gfxmode=auto; insmod all_video; insmod gfxterm; terminal_output gfxterm $( [ "${GRUB_SERIAL:-0}" = 1 ] && echo serial )$themeline; fi
 set menu_color_normal=light-gray/black
-set menu_color_highlight=black/$hl
+set menu_color_highlight=black/light-green
 # keep a graphical framebuffer for the kernel (simpledrm), so the console shows even without a GPU driver
 set gfxpayload=keep
 CFG

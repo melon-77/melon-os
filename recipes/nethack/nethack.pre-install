@@ -1,0 +1,4 @@
+#!/bin/sh
+# the game is setgid games so every user can write the shared high scores and their own saves
+addgroup -S games 2>/dev/null
+exit 0

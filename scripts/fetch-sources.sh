@@ -2,7 +2,7 @@
 # fetch-sources.sh: download every source file listed in sources/MANIFEST.tsv and check its sha256.
 # For a new build machine; the files are the same ones the melon packages were built from.
 #   Ubuntu source archive (apt-get source, falling back to Launchpad's permanent file store),
-#   Ubuntu archive pool (.debs), and git tags on GitHub.
+#   Ubuntu archive pool (.debs), git tags on GitHub, and a few tarballs from upstream sites.
 set -uo pipefail
 M=$(cd "$(dirname "$0")/.." && pwd)
 S=$M/sources
@@ -25,7 +25,7 @@ while IFS=$'\t' read -r path sum method arg; do
         curl -fsSL -o "$S/$path" "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/$src/$ver/$file" ||
           curl -fsSL -o "$S/$path" "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/$src/${ver#*:}/$file" || true
       fi ;;
-    pool)  curl -fsSL -o "$S/$path" "$arg" || true ;;
+    pool|url)  curl -fsSL -o "$S/$path" "$arg" || true ;;
     inner) set -- $arg; tar -xOf "$S/$1" "$2" > "$S/$path" 2>/dev/null || true ;;
     git)
       set -- $arg; repo=$1 tag=$2; name=${file%.tar.*}

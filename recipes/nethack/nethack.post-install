@@ -1,0 +1,11 @@
+#!/bin/sh
+# scores and saves live outside the package (an upgrade must not reset them); the game writes them as group games
+d=/var/games/nethack
+mkdir -p $d/save
+for f in perm record logfile xlogfile livelog; do [ -e $d/$f ] || : > $d/$f; done
+chown root:games $d $d/save $d/perm $d/record $d/logfile $d/xlogfile $d/livelog
+chmod 0775 $d $d/save
+chmod 0664 $d/perm $d/record $d/logfile $d/xlogfile $d/livelog
+chown root:games /usr/lib/nethack/nethack
+chmod 2755 /usr/lib/nethack/nethack
+exit 0

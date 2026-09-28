@@ -25,6 +25,8 @@ PLUMBING="libffi pcre2 glib libcap duktape linux-pam eudev elogind polkit argp-s
   sqlite json-c popt device-mapper cryptsetup dosfstools squashfs-tools e2fsprogs bzip2 hunspell attr acl lm-sensors libogg libvorbis
   libtool sound-theme-freedesktop libcanberra icu boost-headers python3 readline keyutils gmp mpfr
   opus flac liblc3 libfreeaptx libsndfile flite lua5.4"
+# programs shipped on both ISOs (mkiso.sh PKGS); nethack needs ncurses and the same Lua tarball as lua5.4
+APPS="nethack"
 SIMPLE=$(python3 $M/scripts/gen-simple-recipes.py)
 DESKTOP_LIBS="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio libdaemon avahi cups qpdf poppler libcupsfilters libppd
   cups-filters modemmanager qrencode zxing-cpp opencv llvm mesa libepoxy xkbcomp xwayland vulkan-loader libvpx x264 libwebp libdmtx ffmpeg gamemode melon-fonts
@@ -34,7 +36,7 @@ KDE=$(python3 $M/scripts/gen-kde-recipes.py | sed "s/\bqt6-qtbase\b/qt6-qtbase a
 INSTALLERS="kpmcore calamares calamares-melon melon-desktop"
 # Nix and what only it needs (on both ISOs); after curl, libarchive and the rest of $SIMPLE
 NIX="boost-libs libblake3 toml11 nlohmann-json libsodium brotli gc libgit2 nix home-manager"
-ALL=$(printf '%s\n' $BASE $PLUMBING $SIMPLE $NIX $DESKTOP_LIBS $KDE $INSTALLERS | awk '!seen[$0]++')
+ALL=$(printf '%s\n' $BASE $PLUMBING $APPS $SIMPLE $NIX $DESKTOP_LIBS $KDE $INSTALLERS | awk '!seen[$0]++')
 # recipes nobody listed yet go at the end
 EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))
 ALL="$ALL $EXTRA"

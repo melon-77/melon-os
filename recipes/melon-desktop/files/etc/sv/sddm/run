@@ -2,4 +2,6 @@
 exec 2>&1
 sv check dbus >/dev/null || exit 1
 sv check elogind >/dev/null || exit 1
+# Qt wants a UTF-8 locale; runit starts services with an empty environment
+export LANG=C.UTF-8
 exec sddm

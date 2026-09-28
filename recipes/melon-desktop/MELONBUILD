@@ -1,6 +1,6 @@
 pkgname=melon-desktop
 pkgver=0.1
-pkgrel=4
+pkgrel=5
 pkgdesc="melon desktop: Plasma defaults, melon dark theme, wallpapers, splash, SDDM and GRUB look, desktop services, first-login app offer"
 license=MIT
 # The desktop package list itself lives in scripts/desktop-packages.txt (the ISO profile), so this
@@ -11,5 +11,5 @@ options=(keepdirs)
 package(){
   cp -a $startdir/files/. $pkgdir/
   chmod 755 $pkgdir/etc/sv/*/run $pkgdir/etc/sv/*/log/run $pkgdir/usr/bin/*
-  for s in NetworkManager bluetoothd power-profiles-daemon; do mkdir -p $pkgdir/var/log/$s; done
+  for s in NetworkManager bluetoothd power-profiles-daemon sddm; do mkdir -p $pkgdir/var/log/$s; done
 }

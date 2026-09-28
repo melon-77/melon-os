@@ -6,6 +6,8 @@
   qemu-test.py toram <iso> <disk.img>            boot with "copy to RAM", eject the CD, then use and install
   qemu-test.py desktop <desktop-iso>             boot the desktop ISO with graphics: services up, Plasma running,
                                                  screenshot in logs/qemu-desktop.png
+  qemu-test.py desktop-install <desktop-iso> <disk.img>   install the desktop profile, boot the installed disk
+                                                 with graphics, log in through SDDM: greeter stays up, Plasma starts
   --luks   install with an encrypted root (and type the passphrase when the installed disk boots)
   --vmware VMware-style virtual hardware: PVSCSI disk, VMXNET3 network, VMware SVGA
 """
@@ -45,6 +47,10 @@ if mode == 'desktop':
     # a real graphics card for KWin; the serial port stays the test's console
     cmd = [c for c in cmd if c != '-nographic'] + ['-display', 'none', '-serial', 'stdio', '-device', 'virtio-vga', '-m', '4096',
                                                  '-cdrom', iso, '-boot', 'd']
+elif mode == 'desktop-install':
+    iso, disk = args
+    base = cmd + ['-m', '4096']
+    cmd = base + ['-cdrom', iso] + disk_args(disk) + ['-boot', 'd']
 elif mode in ('live', 'toram'):
     iso, disk = args
     cmd += ['-cdrom', iso] + disk_args(disk) + ['-boot', 'd']
@@ -67,10 +73,9 @@ if mode == 'desktop':
     import socket
     step('waiting for GRUB')
     p.expect('melon live', timeout=300); time.sleep(1)
-    p.send('c'); p.expect('grub>', timeout=60)
-    for line in ['linux /boot/vmlinuz console=tty0 console=ttyS0,115200', 'initrd /boot/initramfs.img', 'boot']:
-        for ch in line: p.send(ch); time.sleep(0.08)   # GRUB drops keys that arrive too fast
-        p.send('\r'); time.sleep(1)
+    for _ in range(3):
+        p.send('\x1b[B'); time.sleep(0.3)          # down to "serial console" (a typed GRUB command line loses keys)
+    p.send('\r')
     p.expect(PROMPT, timeout=900); step('logged in on the serial console')
     ok = True
     for svc in ['dbus', 'elogind', 'polkitd', 'udevd', 'NetworkManager', 'sddm']:
@@ -97,6 +102,66 @@ if mode == 'desktop':
     step('screenshot: logs/qemu-desktop.ppm')
     sh('doas poweroff', expect=pexpect.EOF, timeout=300)
     step('desktop test: ' + ('OK' if ok else 'FAILED'))
+    sys.exit(0 if ok else 1)
+
+if mode == 'desktop-install':
+    import socket, re as _re
+    def mon(line):
+        m = socket.socket(socket.AF_UNIX); m.connect('/tmp/melon-qmon.sock'); time.sleep(0.3)
+        m.sendall(line.encode() + b'\n'); time.sleep(0.4); m.close()
+    def count(c):                                   # run c, return the number it echoes as N=<n>
+        m = _re.search(r'N=(\d+)', sh(f'echo N=$({c})')); return int(m.group(1)) if m else 0
+    step('waiting for GRUB')
+    p.expect('melon live', timeout=300); time.sleep(1)
+    for _ in range(3):
+        p.send('\x1b[B'); time.sleep(0.3)          # down to "serial console"
+    p.send('\r')
+    p.expect(PROMPT, timeout=900); step('logged in on the live desktop ISO')
+    sh('stty cols 160 rows 50; export TERM=vt100')
+    sh(f'export MELON_DISK={DISKNAME} MELON_HOSTNAME=melondesk MELON_ROOTPW=melonroot MELON_USER=jcole '
+       'MELON_USERPW=melonuser MELON_PROFILE=desktop MELON_YES=1 MELON_SERIAL=1 MELON_ENCRYPT=n')
+    out = sh('/usr/libexec/melon/.cold', timeout=3600)
+    ok = 'melon is installed' in out
+    step(f'desktop install: {"OK" if ok else "FAILED"}')
+    if not ok: print(out[-3000:])
+    p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)
+    if not ok: sys.exit(1)
+    # second boot: the installed disk, with a graphics card for SDDM and KWin; the serial port stays the test's console
+    cmd = [c for c in base if c != '-nographic'] + ['-display', 'none', '-serial', 'stdio', '-device', 'virtio-vga'] \
+          + disk_args(disk) + ['-boot', 'c']
+    p = pexpect.spawn(cmd[0], cmd[1:], encoding='utf-8', codec_errors='replace', timeout=600)
+    p.logfile_read = log
+    p.expect('login:', timeout=900); p.sendline('root'); p.expect('assword:'); p.sendline('melonroot')
+    p.expect(PROMPT, timeout=120); step('logged in on the installed desktop (serial console)')
+    sh('stty cols 160 rows 50; export TERM=vt100')
+    # (comm is cut to 15 characters: sddm-greeter-qt6 shows as sddm-greeter-qt)
+    greeter = "ps -o pid,comm | awk '$2 ~ /^sddm-greeter/{print $1}' | head -1"
+    for _ in range(60):
+        pid = count(greeter)
+        if pid: break
+        time.sleep(2)
+    step(f'greeter: {"running" if pid else "NOT RUNNING"}')
+    time.sleep(20)                                  # a crash-looping greeter comes back with a new pid
+    stable = pid and count(greeter) == pid and count("loginctl list-sessions --no-legend | awk '$3==\"sddm\" && $6==\"active\"' | wc -l") == 1
+    ok &= bool(stable); step('greeter after 20 s: ' + ('same process, active session' if stable else 'RESTARTED OR NO SESSION'))
+    mon(f'screendump {M}/logs/qemu-desktop-greeter.ppm'); time.sleep(3)
+    for ch in 'melonuser':
+        mon(f'sendkey {ch}'); time.sleep(0.15)
+    mon('sendkey ret'); step('typed the password into the greeter')
+    shell = "ps -o user,comm | awk '$1==\"jcole\" && $2==\"plasmashell\"' | wc -l"
+    for _ in range(60):
+        if count(shell): break
+        time.sleep(3)
+    time.sleep(20)                                  # let the desktop finish drawing
+    sess = count("loginctl list-sessions --no-legend | awk '$3==\"jcole\" && $6==\"active\"' | wc -l")
+    up = count(shell) == 1 and sess == 1; ok &= up
+    step(f'Plasma for jcole after 20 s: plasmashell={count(shell)} active sessions={sess}')
+    mime = count('[ -s /usr/share/mime/mime.cache ] && echo 1 || echo 0') == 1; ok &= mime
+    step('MIME cache: ' + ('present' if mime else 'MISSING'))
+    mon(f'screendump {M}/logs/qemu-desktop-installed.ppm'); time.sleep(3)
+    step('screenshots: logs/qemu-desktop-greeter.ppm, logs/qemu-desktop-installed.ppm')
+    p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)
+    step('installed desktop test: ' + ('OK' if ok else 'FAILED'))
     sys.exit(0 if ok else 1)
 
 if mode == 'live':

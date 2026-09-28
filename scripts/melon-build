@@ -194,8 +194,12 @@ make_apk(){ local sub=$1 dir=$2 desc=$3; shift 3; local deps=("$@")
   [ ${#deps[@]} -gt 0 ] && info+=(-I "depends:$(printf '%s\n' "${deps[@]}" | sort -u | xargs)")
   [ ${#provides[@]} -gt 0 ] && info+=(-I "provides:${provides[*]}")
   local scr=() st
-  for st in pre-install post-install pre-upgrade post-upgrade pre-deinstall post-deinstall; do
+  for st in pre-install post-install pre-upgrade post-upgrade pre-deinstall post-deinstall trigger; do
     [ -f "$startdir/$sub.$st" ] && scr+=(-s "$st:$startdir/$sub.$st"); done
+  # triggers_<x>=(dir ...): apk runs <sub>.trigger after any transaction that changes files in those directories
+  local tv="triggers_${vp}[@]" t
+  for t in ${!tv:-}; do scr+=(-t "$t"); done
+  if [ -f "$startdir/$sub.trigger" ] && [ -z "${!tv:-}" ]; then msg "$sub.trigger has no triggers_$vp directories"; exit 1; fi
   rm -f "$OUT/$sub"-[0-9]*.apk
   # written under a temporary name so a parallel reindex never reads a half-written package
   $APK --sign-key $KEY mkpkg -F "$dir" "${info[@]}" "${scr[@]}" -o "$OUT/.$sub.apk.tmp"

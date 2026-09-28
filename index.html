@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>melon Linux</title>
+<meta name="description" content="melon: a small, from-scratch Linux distribution with KDE Plasma, musl, runit and apk.">
+<meta property="og:title" content="melon Linux">
+<meta property="og:description" content="A small, from-scratch Linux distribution: KDE Plasma on Wayland, built on musl, runit and apk.">
+<meta property="og:image" content="assets/hero.jpg">
+<link rel="icon" href="assets/favicon.png">
+<style>
+  :root {
+    --bg: #0a0e0c; --bg2: #101712; --card: #141d17; --line: #223026;
+    --text: #e6f1de; --muted: #9db596; --green: #6fbf4a; --green2: #8fd46a; --orange: #f2a35e;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif; }
+  a { color: var(--green2); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  nav { position: sticky; top: 0; z-index: 10; background: rgba(10,14,12,.82); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  nav .wrap { display: flex; align-items: center; gap: 24px; height: 60px; }
+  nav .brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-weight: 700; font-size: 20px; letter-spacing: .5px; }
+  nav .brand img { width: 30px; height: 30px; }
+  nav .links { margin-left: auto; display: flex; gap: 22px; }
+  nav .links a { color: var(--muted); text-decoration: none; font-size: 15px; }
+  nav .links a:hover { color: var(--text); }
+
+  header.hero { position: relative; min-height: 88vh; display: flex; align-items: center;
+    background: url(assets/hero.jpg) center / cover no-repeat; }
+  header.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10,14,12,.55), rgba(10,14,12,0) 70%), linear-gradient(0deg, var(--bg), rgba(10,14,12,0) 30%); }
+  header.hero .wrap { position: relative; z-index: 1; width: 100%; }
+  .hero img.logo { width: 120px; height: 120px; filter: drop-shadow(0 10px 30px rgba(111,191,74,.35)); }
+  .hero h1 { font-size: clamp(48px, 8vw, 88px); line-height: 1; margin: 18px 0 10px; letter-spacing: 1px; font-weight: 800; }
+  .hero p.lead { font-size: clamp(18px, 2.2vw, 22px); color: #cfe2c5; max-width: 560px; margin: 0 0 30px; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 26px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 17px; }
+  .btn.primary { background: var(--green); color: #0b150c; box-shadow: 0 8px 30px rgba(111,191,74,.3); }
+  .btn.primary:hover { background: var(--green2); }
+  .btn.ghost { color: var(--text); border: 1px solid #3a4d3e; margin-left: 10px; }
+  .btn.ghost:hover { border-color: var(--green); }
+  .hero .small { color: var(--muted); font-size: 14px; margin-top: 14px; }
+
+  section { padding: 90px 0; }
+  section h2 { font-size: 36px; margin: 0 0 12px; }
+  section p.sub { color: var(--muted); margin: 0 0 40px; max-width: 680px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+  .card h3 { margin: 0 0 6px; font-size: 18px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .card .ico { width: 36px; height: 36px; border-radius: 10px; background: rgba(111,191,74,.14); display: grid; place-items: center; margin-bottom: 12px; color: var(--green2); font-size: 19px; }
+
+  .shots { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; }
+  .shots figure { margin: 0; }
+  .shots img { width: 100%; display: block; border-radius: 14px; border: 1px solid var(--line); }
+  .shots figcaption { color: var(--muted); font-size: 14px; margin-top: 8px; }
+  .shots .side { display: grid; gap: 18px; }
+
+  .stack { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .stack div { background: var(--bg2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .stack b { display: block; font-size: 13px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+
+  ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+  ol.steps li { counter-increment: s; position: relative; padding: 18px 20px 18px 64px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+  ol.steps li::before { content: counter(s); position: absolute; left: 18px; top: 16px; width: 30px; height: 30px; border-radius: 50%; background: var(--green); color: #0b150c; font-weight: 800; display: grid; place-items: center; }
+  code { background: #1b261e; padding: 2px 7px; border-radius: 6px; font-size: .92em; }
+
+  .gauntlet { display: grid; grid-template-columns: 180px 1fr; gap: 30px; align-items: center; background: linear-gradient(135deg, #16200f, #111a13); border: 1px solid #3a4a2a; border-radius: 20px; padding: 30px; }
+  .gauntlet img { width: 180px; height: 180px; }
+  .gauntlet h2 { color: #f0d27a; }
+
+  .req { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  footer { border-top: 1px solid var(--line); padding: 34px 0; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; }
+
+  @media (max-width: 760px) {
+    nav .links { display: none; }
+    .shots, .gauntlet { grid-template-columns: 1fr; }
+    .gauntlet img { width: 120px; height: 120px; }
+    .btn.ghost { margin: 12px 0 0; }
+  }
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="brand" href="#"><img src="assets/logo.svg" alt="">melon</a>
+  <div class="links">
+    <a href="#features">Features</a><a href="#screenshots">Screenshots</a><a href="#install">Install</a>
+    <a href="#download">Download</a><a href="https://github.com/xbfj/melon-os">GitHub</a>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <img class="logo" src="assets/logo.svg" alt="the melon logo">
+  <h1>melon</h1>
+  <p class="lead">A small Linux distribution built from scratch: KDE Plasma on Wayland, on top of musl, runit and apk.
+    Fast, quiet, and yours.</p>
+  <a class="btn primary" href="https://github.com/xbfj/melon-os/releases/latest">Download the ISO</a>
+  <a class="btn ghost" href="#install">How to install</a>
+  <div class="small">x86_64 &middot; UEFI and BIOS &middot; free and open source</div>
+</div></header>
+
+<section id="features"><div class="wrap">
+  <h2>Why melon</h2>
+  <p class="sub">Every package is compiled from upstream source by melon's own build scripts, signed, and shipped as a small
+    apk package. Nothing you don't need, everything you do.</p>
+  <div class="grid">
+    <div class="card"><div class="ico">&#9889;</div><h3>Light and fast</h3><p>musl libc, BusyBox and runit: a system that boots in seconds and stays out of your way.</p></div>
+    <div class="card"><div class="ico">&#127912;</div><h3>KDE Plasma on Wayland</h3><p>A complete, modern desktop with its own melon look, set up the moment you log in.</p></div>
+    <div class="card"><div class="ico">&#128230;</div><h3>Apps from Flathub</h3><p>Firefox, VLC, Steam and thousands more through Flatpak, offered on first login and in Discover.</p></div>
+    <div class="card"><div class="ico">&#128187;</div><h3>Laptop ready</h3><p>Touchpads, Wi-Fi (Intel, Realtek, MediaTek, Qualcomm), Bluetooth, webcams, hotkeys, USB drives and printers.</p></div>
+    <div class="card"><div class="ico">&#128273;</div><h3>Encryption built in</h3><p>One question in the installer gives you a LUKS2-encrypted system.</p></div>
+    <div class="card"><div class="ico">&#129309;</div><h3>Dual boot</h3><p>Install next to Windows: melon uses the free space and adds itself to your boot menu without touching Windows.</p></div>
+    <div class="card"><div class="ico">&#128260;</div><h3>Rolling updates</h3><p><code>apk upgrade</code> keeps everything current from melon's signed online repository.</p></div>
+    <div class="card"><div class="ico">&#127918;</div><h3>Gaming</h3><p>Steam through Flatpak, gamepads, Vulkan and GameMode ready to go.</p></div>
+  </div>
+</div></section>
+
+<section id="screenshots" style="padding-top:20px"><div class="wrap">
+  <h2>Screenshots</h2>
+  <p class="sub">Straight from melon's automated tests, running in a virtual machine.</p>
+  <div class="shots">
+    <figure><img src="assets/desktop.jpg" alt="the melon desktop with the welcome window" loading="lazy"><figcaption>The desktop on first login, offering apps from Flathub</figcaption></figure>
+    <div class="side">
+      <figure><img src="assets/login.jpg" alt="the melon login screen" loading="lazy"><figcaption>The login screen</figcaption></figure>
+      <figure><img src="assets/live.jpg" alt="the live session" loading="lazy"><figcaption>The live session, ready to try or install</figcaption></figure>
+    </div>
+  </div>
+</div></section>
+
+<section style="padding-top:20px"><div class="wrap">
+  <h2>What's inside</h2>
+  <p class="sub">A distribution you can read end to end.</p>
+  <div class="stack">
+    <div><b>Kernel</b>Linux 7.0</div><div><b>Desktop</b>KDE Plasma 6.6, Wayland</div><div><b>libc</b>musl 1.2.5</div>
+    <div><b>Init</b>runit</div><div><b>Packages</b>apk-tools 3</div><div><b>Devices</b>eudev, elogind</div>
+    <div><b>Audio</b>PipeWire</div><div><b>Network</b>NetworkManager</div><div><b>Boot</b>GRUB, BIOS and UEFI</div>
+    <div><b>Root filesystem</b>XFS</div><div><b>Apps</b>Flatpak + Flathub</div><div><b>Printing</b>CUPS + cups-filters</div>
+  </div>
+</div></section>
+
+<section id="install"><div class="wrap">
+  <h2>Install melon</h2>
+  <p class="sub">About ten minutes, most of it answering the gauntlet.</p>
+  <ol class="steps">
+    <li><b>Download the ISO</b> below and write it to a USB stick with <a href="https://rufus.ie">Rufus</a>,
+      <a href="https://etcher.balena.io">balenaEtcher</a>, <a href="https://www.ventoy.net">Ventoy</a> or <code>dd</code>.</li>
+    <li><b>Boot from the stick.</b> The live session starts Plasma on its own, so you can try melon first.</li>
+    <li><b>Keeping Windows?</b> Shrink it first in Windows' Disk Management (right-click C: &rarr; Shrink Volume) and leave
+      at least 20 GB unallocated. melon installs into that space and adds itself to your boot menu; GRUB lists Windows too.</li>
+    <li><b>Double-click "Install melon"</b> on the desktop and follow the installer. Then reboot and log in.</li>
+  </ol>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+  <div class="gauntlet">
+    <img src="assets/installer.svg" alt="the melon installer mascot">
+    <div>
+      <h2>Survive the gauntlet</h2>
+      <p>melon's installer asks you questions before it lets you in. Wrong answers send you back. Make it through and
+        you're rewarded: a survivor wallpaper collection, a golden boot screen and a certificate that says you earned it.</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="download"><div class="wrap">
+  <h2>Download</h2>
+  <p class="sub">The desktop ISO is a live system and installer in one. Builds are test releases for now.</p>
+  <a class="btn primary" href="https://github.com/xbfj/melon-os/releases/latest">Get melon desktop (x86_64, about 1.2 GB)</a>
+  <p class="small" style="color:var(--muted);margin-top:14px">Check your download against <code>SHA256SUMS</code> on the release page.</p>
+  <h3 style="margin-top:44px">System requirements</h3>
+  <div class="req">
+    <div class="card"><h3>Processor</h3><p>64-bit x86 (Intel or AMD)</p></div>
+    <div class="card"><h3>Memory</h3><p>4 GB, 8 GB recommended</p></div>
+    <div class="card"><h3>Storage</h3><p>20 GB or more</p></div>
+    <div class="card"><h3>Firmware</h3><p>UEFI or legacy BIOS</p></div>
+  </div>
+  <p style="color:var(--muted);margin-top:30px">Hardware not working? Run <code>sudo melon-hwreport</code> in Konsole and
+    <a href="https://github.com/xbfj/melon-os/issues">open an issue</a> with the file it writes.</p>
+</div></section>
+
+<footer><div class="wrap">
+  <span>melon Linux &middot; free and open source</span>
+  <span><a href="https://github.com/xbfj/melon-os">Source on GitHub</a> &middot; <a href="https://github.com/xbfj/melon-os/releases">Releases</a> &middot; <a href="https://github.com/xbfj/melon-os/issues">Issues</a></span>
+</div></footer>
+
+</body>
+</html>

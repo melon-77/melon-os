@@ -246,7 +246,9 @@ Rebuilding the kernel takes about an hour on 2 cores.
     crates.io into `sources/cargo`, pinned by the checksums in the project's `Cargo.lock`; `cargo_build` then builds
     offline with `--locked`, and `cargo_out` names the output directory. A build script that asks git for a commit
     hash finds melon's checkout: set `GIT_CEILING_DIRECTORIES=$srcdir`. `-sys` crates build their own static copy of
-    a C library for musl targets unless told otherwise (`PCRE2_SYS_STATIC=0` in ripgrep): link melon's.
+    a C library for musl targets unless told otherwise (`PCRE2_SYS_STATIC=0` in ripgrep): link melon's. **Every recipe
+    that puts Rust code into a package says `options=(rust)`**: the installers' "remove everything built with Rust"
+    option finds the packages by it (see Installers).
 
 47. **Flatpak must be built with X11 authorization (`-Dxauth=enabled`, libXau).** Without it, sandboxed X11 apps get
     the host's `DISPLAY` and a path to an Xauthority file that doesn't exist inside the sandbox. Xwayland refuses them
@@ -387,7 +389,14 @@ the serial port, so tests don't need a screen. The test also records the sound c
   menu, checksums of everything Windows owns before and after).
 - Unattended install variables: `MELON_DISK MELON_HOSTNAME MELON_ROOTPW MELON_USER MELON_USERPW
   MELON_PROFILE MELON_YES=1 MELON_SERIAL=1 MELON_WIFI_SSID MELON_WIFI_PSK MELON_ALPINE=y
-  MELON_ENCRYPT=y MELON_LUKSPW MELON_MODE=alongside`. With `MELON_YES=1`, questions that have a default take it.
+  MELON_ENCRYPT=y MELON_LUKSPW MELON_MODE=alongside MELON_NORUST=y`. With `MELON_YES=1`, questions that have a default take it.
+- **"Remove everything built with Rust"** (the owner's decision): a checkbox at the end of the gauntlet (next to the
+  Alpine one) and a question in the console installer (`MELON_NORUST=y`). `melon-remove-rust ROOT` (melon-base) runs
+  `apk del -r` on every installed package from `/usr/share/melon/rust-packages` (mkiso.sh lists the recipes with
+  `options=(rust)`), taking everything that depends on them along. **No safeguards, on purpose**: if the desktop
+  needs a Rust package, the desktop goes too. The reward comes first, so it stays whatever the removal takes:
+  `melon-rust-free ROOT USER` (melon-desktop, from `/usr/share/melon/.rewards/rust-free`) installs the
+  "farewell, Ferris" wallpaper, sets it on the user's first Plasma login and leaves the badge `/etc/melon/rust-free`.
 - **Profiles** live in `/usr/share/melon/profiles/` on the live system: `<name>` is the package list,
   `<name>.services` the runit services (`name` enables one, `-name` drops a base service). `mkiso.sh`
   writes them. The desktop profile swaps `mdevd`/`dhcp` for `udevd` and NetworkManager, and the

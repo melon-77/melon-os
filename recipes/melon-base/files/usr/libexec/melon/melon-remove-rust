@@ -1,0 +1,14 @@
+#!/bin/sh
+# melon-remove-rust [ROOT]: take everything built with Rust off the system at ROOT (default /): the installers'
+# "remove everything built with Rust" option. The packages are the ones whose recipes say options=(rust), which
+# mkiso.sh lists in /usr/share/melon/rust-packages, and apk del -r takes everything that depends on them along.
+# There are deliberately no safeguards: whatever needs them goes too, the desktop included.
+set -eu
+ROOT=${1:-/}
+L=$ROOT/usr/share/melon/rust-packages
+[ -s "$L" ] || { echo "melon-remove-rust: no Rust packages listed"; exit 0; }
+apkr(){ apk --root "$ROOT" --repositories-file /dev/null --no-cache "$@"; }
+inst=$(apkr info -e $(grep -v '^#' "$L") 2>/dev/null | xargs || true)
+[ -n "$inst" ] || { echo "melon-remove-rust: nothing built with Rust is installed"; exit 0; }
+echo "melon-remove-rust: removing $inst and everything that depends on them"
+apkr del -r $inst

@@ -7,6 +7,8 @@ url=https://github.com/BurntSushi/ripgrep
 source=(ripgrep-15.2.0.tar.gz)
 makedepends=(pcre2-dev)
 subpackages=(ripgrep-doc)
+# written in Rust: the installers' "remove everything built with Rust" option takes it off (melon-remove-rust)
+options=(rust)
 
 # PCRE2_SYS_STATIC=0: melon's PCRE2 (pcre2-sys builds its own static copy for musl targets otherwise)
 # GIT_CEILING_DIRECTORIES: build.rs asks git for a commit hash, and the source tree sits inside melon's checkout

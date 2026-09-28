@@ -211,6 +211,12 @@ Rebuilding the kernel takes about an hour on 2 cores.
 42. **`.pc` files and `*-config` scripts copy pkg-config's sysroot answers** (`Libs.private: -L<sysroot>/usr/lib`).
     melon-build turns sysroot paths in `.pc` files into plain `/usr` paths; a `*-config` script needs its recipe to
     do the same (`recipes/cups`). The `LEAK:` lines name what is left.
+43. **Kernel options with unmet dependencies vanish silently** in `olddefconfig` (the touchpad's
+    `I2C_DESIGNWARE_PLATFORM` needed `I2C_DESIGNWARE_CORE`; `HP_WMI` needed `X86_PLATFORM_DRIVERS_HP`). The kernel
+    recipe now stops when an option from `config-melon` isn't in the final `.config`: look its dependencies up in the
+    Kconfig files and add them. The built config ships as `/boot/config-melon`; check it, not the fragment. For a
+    real machine, `sudo melon-hwreport` lists every PCI/USB/ACPI/I2C device with the driver it got, plus the kernel's
+    firmware messages; map IDs to modules with `modprobe -R <modalias>` against the built kernel.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
@@ -241,7 +247,8 @@ scripts/qemu-test.py disk /tmp/disk.img --luks                            # boot
 MELON_EDITION=desktop scripts/mkiso.sh                                    # the Plasma live ISO (desktop edition)
 scripts/qemu-test.py desktop out/melon-desktop-*-x86_64.iso              # services ready, Plasma running, a USB stick mounts through
                                                                           # UDisks2, screen-recording encoders work, a text file prints
-                                                                          # to a virtual IPP Everywhere printer, nmcli online;
+                                                                          # to a virtual IPP Everywhere printer, nmcli online, and
+                                                                          # NetworkManager joins WPA2 Wi-Fi on mac80211_hwsim radios;
                                                                           # LOOK at logs/qemu-desktop.ppm
 qemu-img create -f raw /tmp/desk.img 16G
 scripts/qemu-test.py desktop-install out/melon-desktop-*-x86_64.iso /tmp/desk.img   # install, SDDM greeter stays up,

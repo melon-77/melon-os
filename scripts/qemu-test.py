@@ -149,6 +149,19 @@ if mode == 'desktop':
     online = _re.search(r'(^|[\r\n])connected', out) is not None; ok &= online   # (bash's bracketed-paste codes end in \r)
     step('nmcli: ' + ('NetworkManager connected' if online else 'NOT CONNECTED'))
     if not online: print(repr(out[-600:]))
+    # Wi-Fi the way Plasma's network applet does it (NetworkManager, which starts wpa_supplicant over D-Bus) on two
+    # virtual radios: wlan1 is a WPA2 access point run by a separate wpa_supplicant, NetworkManager joins it with wlan0
+    ap = ("printf '%s\\n' 'network={' 'ssid=\"melontest\"' 'mode=2' 'frequency=2437' 'key_mgmt=WPA-PSK' 'proto=RSN' "
+          "'pairwise=CCMP' 'psk=\"melonwifi\"' '}' > /tmp/ap.conf")
+    out = sh('modprobe mac80211_hwsim radios=2 && sleep 3 && nmcli -c no device set wlan1 managed no && ' + ap + ' && '
+             'wpa_supplicant -B -i wlan1 -c /tmp/ap.conf >/tmp/ap.log 2>&1 && sleep 3 && '
+             'nmcli -c no connection add type wifi ifname wlan0 con-name melontest ssid melontest wifi-sec.key-mgmt wpa-psk '
+             'wifi-sec.psk melonwifi ipv4.method disabled ipv6.method link-local >/dev/null && '
+             'nmcli -c no --wait 60 connection up melontest >/dev/null 2>&1; '
+             'nmcli -c no -t -f GENERAL.STATE device show wlan0 | sed "s/^GENERAL.STATE:/WIFI=/"', timeout=180)
+    wifi = 'WIFI=100' in out; ok &= wifi
+    step('Wi-Fi: ' + ('NetworkManager joined a WPA2 network on a virtual radio' if wifi else 'FAILED'))
+    if not wifi: print(out[-1500:]); print(sh('cat /tmp/ap.log; nmcli -c no device; tail -20 /var/log/NetworkManager/current'))
     m = socket.socket(socket.AF_UNIX); m.connect('/tmp/melon-qmon.sock'); time.sleep(0.5)
     m.sendall(f'screendump {M}/logs/qemu-desktop.ppm\n'.encode()); time.sleep(3); m.close()
     step('screenshot: logs/qemu-desktop.ppm')

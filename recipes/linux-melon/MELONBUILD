@@ -1,6 +1,6 @@
 pkgname=linux-melon
 pkgver=7.0.0
-pkgrel=3
+pkgrel=4
 pkgdesc="Linux kernel for melon (generic x86_64 flavour)"
 license=GPL-2.0-only
 url=https://kernel.org
@@ -13,6 +13,17 @@ build(){
   _kmake ${KARCH}_defconfig
   scripts/kconfig/merge_config.sh -m .config $startdir/config-melon $([ $MELON_ARCH = x86 ] && echo $startdir/config-melon-x86)
   _kmake olddefconfig
+  # every option the fragments ask for must survive olddefconfig: an unmet dependency drops one silently
+  # (that is how the touchpad's I2C controller driver went missing)
+  local bad; bad=$(cat $startdir/config-melon $([ $MELON_ARCH = x86 ] && echo $startdir/config-melon-x86) |
+    grep -E '^(CONFIG_[A-Za-z0-9_]+=|# CONFIG_[A-Za-z0-9_]+ is not set)' | while read -r l; do
+      case $l in "# "*) o=${l#\# }; o=${o%% *}; want=n ;; *) o=${l%%=*}; want=${l#*=} ;; esac
+      got=$(grep -m1 "^$o=" .config || true); got=${got#*=}; [ -n "$got" ] || got=n
+      [ "$got" = "$want" ] || echo "  $o: asked $want, got $got"
+    done)
+  # (the paused 32-bit build also merges the 64-bit fragment, where some options can't apply: warn only there)
+  [ -z "$bad" ] || { echo "config-melon options that did not survive olddefconfig (missing dependencies?):"; echo "$bad"
+                     [ $MELON_ARCH = x86 ] || return 1; }
   _kmake -j$JOBS bzImage modules 2>&1 | grep -E 'error|Error' | head -20 || true
   [ -f arch/x86/boot/bzImage ]
 }

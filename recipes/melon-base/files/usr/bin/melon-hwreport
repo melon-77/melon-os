@@ -1,0 +1,66 @@
+#!/bin/sh
+# melon-hwreport: which hardware this computer has and which driver and firmware each part got, written to one
+# text file to send along with a problem report ("my touchpad doesn't work"). Needs nothing but sysfs and BusyBox,
+# so it works when little else does. Run it with sudo to include the kernel log.
+#
+#   melon-hwreport [file]      default: ~/melon-hwreport-<date>.txt
+out=${1:-$HOME/melon-hwreport-$(date +%Y%m%d-%H%M).txt}
+drv(){ d=$(readlink "$1/driver" 2>/dev/null) && echo "${d##*/}" || echo -; }
+
+{
+. /etc/os-release 2>/dev/null
+echo "== melon hardware report, $(date)"
+echo "system: ${PRETTY_NAME:-melon}, kernel $(uname -r)"
+for f in sys_vendor product_name product_version board_name bios_version; do
+  printf '%s: %s\n' "$f" "$(cat /sys/class/dmi/id/$f 2>/dev/null)"
+done
+
+echo; echo "== PCI devices: slot class vendor:device driver"
+for d in /sys/bus/pci/devices/*; do
+  v=$(cat $d/vendor); p=$(cat $d/device)
+  echo "${d##*/} $(cat $d/class) ${v#0x}:${p#0x} $(drv $d)"
+done
+
+echo; echo "== USB devices: port vendor:product name drivers"
+for d in /sys/bus/usb/devices/*; do
+  [ -f $d/idVendor ] || continue
+  drivers=$(for i in $d/*:*; do [ -e "$i/driver" ] && drv "$i"; done | sort -u | xargs)
+  echo "${d##*/} $(cat $d/idVendor):$(cat $d/idProduct) $(cat $d/product 2>/dev/null) [${drivers:--}]"
+done
+
+echo; echo "== ACPI devices for I2C, GPIO, touchpads and platform keys: device id status driver"
+for d in /sys/bus/acpi/devices/*; do
+  h=$(cat $d/hid 2>/dev/null) || continue
+  case $h in AMDI00*|INT33*|INT34*|INTC1*|PNP0C50|ACPI0C50|SYNA*|ELAN*|MSFT*|HPQ*|PNP0F*) ;; *) continue ;; esac
+  echo "${d##*/} $h status=$(cat $d/status 2>/dev/null) $(drv $d/physical_node)"
+done
+
+echo; echo "== I2C devices: device name driver"
+for d in /sys/bus/i2c/devices/*; do [ -e "$d" ] && echo "${d##*/} $(cat $d/name 2>/dev/null) $(drv $d)"; done
+
+echo; echo "== input devices"
+grep -E '^(N|H):' /proc/bus/input/devices
+
+echo; echo "== network interfaces"
+ip link 2>&1
+
+echo; echo "== radio switches (rfkill): name type soft-blocked hard-blocked"
+for r in /sys/class/rfkill/rfkill*; do
+  [ -e "$r" ] && echo "$(cat $r/name) $(cat $r/type) soft=$(cat $r/soft) hard=$(cat $r/hard)"
+done
+
+echo; echo "== NetworkManager"
+nmcli -c no general 2>&1; nmcli -c no device 2>&1
+
+echo; echo "== loaded modules"
+cut -d' ' -f1 /proc/modules | sort | xargs
+
+echo; echo "== kernel messages about firmware, drivers and errors"
+if dmesg >/dev/null 2>&1; then
+  dmesg | grep -i -E 'firmware|fw|fail|error|i2c|hid|touchpad|elan|synaptics|iwl|rtw|mt79|ath1|brcm|amdgpu|i915|xe |snd|sof' | tail -200
+else
+  echo "(not readable as $(id -un): run sudo melon-hwreport to include the kernel log)"
+fi
+} > "$out" 2>&1
+
+echo "melon-hwreport: wrote $out"

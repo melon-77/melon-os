@@ -13,6 +13,11 @@ sddm sddm-kcm
 dolphin konsole kde-spectacle plasma-discover nano
 # services
 pipewire wireplumber networkmanager bluez upower power-profiles-daemon
+# runtime pieces nothing links against (loaded by name, QML imports, data files)
+xkeyboard-config qt6-qtwayland qt6-qt5compat qt6-qtimageformats qt6-qtlocation qt6-qtsvg kf6-kded kactivitymanagerd
+plasma5support ksystemstats kf6-kquickcharts kf6-kunitconversion kf6-threadweaver hwdata
+# everyday tools the installer and users expect
+e2fsprogs xz bzip2
 # fonts
 melon-fonts hicolor-icon-theme shared-mime-info
 # Flatpak (Firefox, VLC, Steam and Prism come from Flathub on first boot) and gaming

@@ -169,6 +169,27 @@ Rebuilding the kernel takes about an hour on 2 cores.
 29. **Two build queues may run at once** for the same arch: `melon-build` takes `flock repo/<arch>/.lock`
     around sysroot installs and reindexing, and writes packages under a temporary name first.
 
+32. **pkg-config puts the sysroot in front of path *variables*** (`xkb_base`, `dridriverdir`, dbus and polkit
+    dirs, ...). Builds then either install under `/home/.../sysroot/...` (melon-build moves those files back and
+    logs `LEAK: files installed under ...`) or compile the build machine's path into a program (logged as
+    `LEAK: build-machine path compiled into ...`). **Read the LEAK lines after every build**: compiled-in paths
+    need an explicit option (`-Dxkb_bin_dir=/usr/bin`, elogind's `-Ddbuspolicydir=...`) or a patch that strips
+    `meson.get_external_property('sys_root')` (libxkbcommon, Xwayland). Paths in dev files (`.pri`, sbom) are harmless.
+33. **Runtime dependencies nothing links against are not found automatically**: data (xkeyboard-config), QML
+    modules, programs started by name (kded6, xkbcomp), Qt platform plugins (qt6-qtwayland). Declare them in
+    `depends=` or list them in `scripts/desktop-packages.txt`.
+34. **runit readiness:** `sv` defaults to `/service`, so `SVDIR=/var/service` is set in stage 2 and `/etc/profile`.
+    `sv check <svc>` only means "the process exists" unless the service has a `./check` script; services others
+    wait for ship one (dbus: bus socket exists; elogind: seat0 is set up). Only runit starts elogind (its D-Bus
+    activation file runs /bin/false).
+35. **Image assembly installs BusyBox, then melon-base, then everything else** (`mkiso.sh`): install scripts need
+    /bin/sh and adduser, and the users they add (messagebus, polkitd, sddm) must not be overwritten by melon-base's
+    `/etc/passwd` arriving later.
+36. **Build Qt QML (qt6-qtdeclarative) before anything with QML parts.** Qt modules and frameworks built without it
+    silently leave their QML modules out (`Could NOT find Qt6Qml` in the log); rebuild them with a pkgrel bump.
+37. **KWin needs `KWIN_BUILD_X11=ON`** even in a Wayland-only session: in 6.6 that switch also carries Xwayland,
+    and startplasma starts KWin with `--xwayland`.
+
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
 
@@ -194,10 +215,11 @@ scripts/qemu-test.py disk /tmp/disk.img --uefi                            # UEFI
 scripts/qemu-test.py live out/melon-*-x86_64.iso /tmp/disk.img --luks     # install with an encrypted root
 scripts/qemu-test.py disk /tmp/disk.img --luks                            # boot it, typing the passphrase
 MELON_EDITION=desktop scripts/mkiso.sh                                    # the Plasma live ISO (desktop edition)
+scripts/qemu-test.py desktop out/melon-desktop-*-x86_64.iso              # services ready, Plasma running; LOOK at logs/qemu-desktop.ppm
 ```
 
-Logs go to `logs/qemu-*.log`. There's no KVM in the usual build container, so QEMU runs in software
-emulation and everything is slow. Use generous timeouts. The ISO's GRUB and the installed system both use
+Logs go to `logs/qemu-*.log`. The tests use KVM when `/dev/kvm` is usable (WSL2 has it); without it QEMU runs in
+software emulation and everything is slow. Use generous timeouts. The ISO's GRUB and the installed system both use
 the serial port, so tests don't need a screen. The test also records the sound card output to
 `logs/audio-capture.wav`, which lets you check that the installer music really plays.
 

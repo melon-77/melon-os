@@ -1,6 +1,6 @@
 pkgname=fuse3
 pkgver=3.18.2
-pkgrel=0
+pkgrel=1
 pkgdesc="fuse3 (graphics stack)"
 license=custom
 source=(fuse3-3.18.2.tar.gz)

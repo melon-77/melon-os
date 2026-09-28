@@ -1,5 +1,6 @@
 pkgname=dbus
 pkgver=1.16.2
+pkgrel=1
 pkgdesc="Message bus system (system and session bus)"
 license="AFL-2.1 OR GPL-2.0-or-later"
 url=https://www.freedesktop.org/wiki/Software/dbus
@@ -16,5 +17,7 @@ build(){ meson_setup -Dsystemd=disabled -Dx11_autolaunch=disabled -Ddoxygen_docs
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/run $pkgdir/var/run
   mkdir -p $pkgdir/etc/sv/dbus $pkgdir/var/lib/dbus
   printf '#!/bin/sh\nexec 2>&1\nmkdir -p /run/dbus\ndbus-uuidgen --ensure=/etc/machine-id\ndbus-uuidgen --ensure\nexec dbus-daemon --system --nofork --nopidfile\n' > $pkgdir/etc/sv/dbus/run
-  chmod 755 $pkgdir/etc/sv/dbus/run; }
+  # 'sv check dbus' (other services' run scripts) means ready: the system bus socket accepts connections
+  printf '#!/bin/sh\n[ -S /run/dbus/system_bus_socket ]\n' > $pkgdir/etc/sv/dbus/check
+  chmod 755 $pkgdir/etc/sv/dbus/run $pkgdir/etc/sv/dbus/check; }
 pkg_libs(){ amove 'usr/lib/libdbus-1.so.*'; }

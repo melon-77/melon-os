@@ -1,0 +1,17 @@
+--- a/include/meson.build
++++ b/include/meson.build
+@@ -204,7 +204,13 @@
+ conf_data.set('DPMSExtension', build_dpms ? '1' : false)
+ conf_data.set('DRI3', build_dri3 ? '1' : false)
+ if build_glx
+-    conf_data.set_quoted('DRI_DRIVER_PATH', dri_dep.get_variable(pkgconfig : 'dridriverdir'))
++    # melon: pkg-config puts the sysroot in front of dridriverdir when cross-compiling; this path is compiled in
++    _dridir = dri_dep.get_variable(pkgconfig : 'dridriverdir')
++    _sysroot = meson.get_external_property('sys_root', '')
++    if _sysroot != '' and _dridir.startswith(_sysroot)
++        _dridir = _dridir.replace(_sysroot, '')
++    endif
++    conf_data.set_quoted('DRI_DRIVER_PATH', _dridir)
+ endif
+ conf_data.set('MITSHM', build_mitshm ? '1' : false)
+ conf_data.set('PANORAMIX', build_xinerama ? '1' : false)

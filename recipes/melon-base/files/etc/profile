@@ -2,6 +2,7 @@
 export PATH=/usr/local/bin:/usr/bin
 export PAGER=less EDITOR=vi
 export CHARSET=UTF-8 LANG=C.UTF-8 LC_COLLATE=C
+export SVDIR=/var/service   # where melon's enabled services live (sv defaults to /service)
 umask 022
 for f in /etc/profile.d/*.sh; do [ -r "$f" ] && . "$f"; done; unset f
 if [ -n "$BASH_VERSION" ]; then

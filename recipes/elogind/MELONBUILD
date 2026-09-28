@@ -1,5 +1,6 @@
 pkgname=elogind
 pkgver=255.24
+pkgrel=3
 pkgdesc="Session, seat and power management (logind without systemd)"
 license="LGPL-2.1-or-later"
 url=https://github.com/elogind/elogind
@@ -9,7 +10,9 @@ subpackages=(elogind-dev libelogind)
 depends=(libelogind dbus)
 pkgdesc_libelogind="libelogind (sd-login compatible library)"
 options=(keepdirs)
-build(){ meson_setup --libexecdir=/usr/libexec/elogind -Dcgroup-controller=elogind -Ddefault-hierarchy=unified \
+# D-Bus directories given explicitly: pkg-config would put the sysroot in front of them when cross-compiling
+build(){ meson_setup --libexecdir=/usr/libexec/elogind -Ddbuspolicydir=/usr/share/dbus-1/system.d \
+  -Ddbussystemservicedir=/usr/share/dbus-1/system-services -Dcgroup-controller=elogind -Ddefault-hierarchy=unified \
     -Ddefault-kill-user-processes=false -Dhalt-path=/usr/bin/halt -Dreboot-path=/usr/bin/reboot -Dpoweroff-path=/usr/bin/poweroff \
     -Dman=disabled -Dhtml=disabled -Dpolkit=enabled -Dtests=false -Dpamconfdir=/etc/pam.d -Dpamlibdir=/usr/lib/security \
     -Dudevrulesdir=/usr/lib/udev/rules.d -Dsplit-usr=false -Dutmp=false -Dselinux=disabled -Dsmack=false \
@@ -17,5 +20,10 @@ build(){ meson_setup --libexecdir=/usr/libexec/elogind -Dcgroup-controller=elogi
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc
   mkdir -p $pkgdir/etc/sv/elogind
   printf '#!/bin/sh\nexec 2>&1\nsv check dbus || exit 1\nexec /usr/libexec/elogind/elogind\n' > $pkgdir/etc/sv/elogind/run
-  chmod 755 $pkgdir/etc/sv/elogind/run; }
+  # 'sv check elogind' (SDDM's run script) means ready: elogind is on the bus and has set up seat0
+  printf '#!/bin/sh\n[ -e /run/systemd/seats/seat0 ]\n' > $pkgdir/etc/sv/elogind/check
+  chmod 755 $pkgdir/etc/sv/elogind/run $pkgdir/etc/sv/elogind/check
+  # runit is the only thing that starts elogind: D-Bus activation would start a second, forking copy that
+  # races the supervised one
+  sed -i 's|^Exec=.*|Exec=/bin/false|' $pkgdir/usr/share/dbus-1/system-services/org.freedesktop.login1.service; }
 pkg_libelogind(){ amove 'usr/lib/libelogind.so.*'; }

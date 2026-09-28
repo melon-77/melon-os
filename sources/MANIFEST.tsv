@@ -289,6 +289,7 @@ deb/wayland_1.24.0.orig.tar.gz	c6d416e207d4d80d2577c316ce1554062b37f6e8776f81f25
 deb/wireless-regdb_2026.05.30.orig.tar.gz	1a2e41d23d4034e055ef87112a13ad70615d32232ff14dc1b73e84e11de201cb	apt	wireless-regdb=2026.05.30-0ubuntu1~26.04.1
 deb/wireplumber_0.5.13.orig.tar.gz	15001955451db3a79fdd3d6535aedada14ed5eea4638e2ac10b6b3f2a2282e3e	apt	wireplumber=0.5.13-1ubuntu1
 deb/wpa_2.11.orig.tar.xz	9f1109e2aef8e591004bec8e9d8dd363be61c2edaf99f4cc14e35b74316d5a45	apt	wpa=2:2.11-0ubuntu5
+deb/x11-xkb-utils_7.7+9build1.tar.xz	2f7fee7b72120f32dcad6bf8f49d00994d064cdbe5aaffc93920356a3c84cdd8	apt	x11-xkb-utils=7.7+9build1
 deb/xcb-proto_1.17.0.orig.tar.gz	392d3c9690f8c8202a68fdb89c16fd55159ab8d65000a6da213f4a1576e97a16	apt	xcb-proto=1.17.0-1build1
 deb/xcb-util-cursor_0.1.6.orig.tar.gz	eae38b2dfc5c529a886e507ef576b12d2a20aa1f149608e4853af760f31be60b	apt	xcb-util-cursor=0.1.6-1
 deb/xcb-util-image_0.4.0.orig.tar.bz2	2db96a37d78831d643538dd1b595d7d712e04bdccf8896a5e18ce0f398ea2ffc	apt	xcb-util-image=0.4.0-2build2
@@ -614,6 +615,7 @@ wayland-protocols-1.47.tar.xz	-	link	deb/wayland-protocols_1.47.orig.tar.xz
 wireless-regdb-2026.05.30.tar.gz	-	link	deb/wireless-regdb_2026.05.30.orig.tar.gz
 wireplumber-0.5.13.tar.gz	-	link	deb/wireplumber_0.5.13.orig.tar.gz
 wpa-2.11.tar.xz	-	link	deb/wpa_2.11.orig.tar.xz
+x11-xkb-utils-7.7+9.tar.xz	-	link	deb/x11-xkb-utils_7.7+9build1.tar.xz
 xcb-proto-1.17.0.tar.gz	-	link	deb/xcb-proto_1.17.0.orig.tar.gz
 xcb-util-0.4.1.tar.gz	-	link	deb/xcb-util_0.4.1.orig.tar.gz
 xcb-util-cursor-0.1.6.tar.gz	-	link	deb/xcb-util-cursor_0.1.6.orig.tar.gz

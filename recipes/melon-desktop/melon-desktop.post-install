@@ -1,0 +1,4 @@
+#!/bin/sh
+# SDDM keeps its state (last user, last session) here
+mkdir -p /var/lib/sddm && chown sddm:sddm /var/lib/sddm && chmod 750 /var/lib/sddm
+exit 0

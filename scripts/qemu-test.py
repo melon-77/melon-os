@@ -4,6 +4,8 @@
   qemu-test.py live  <iso> <disk.img> [--uefi]   boot the ISO, run the quick installer onto disk.img
   qemu-test.py disk  <disk.img> [--uefi]         boot the installed disk and check the system
   qemu-test.py toram <iso> <disk.img>            boot with "copy to RAM", eject the CD, then use and install
+  qemu-test.py desktop <desktop-iso>             boot the desktop ISO with graphics: services up, Plasma running,
+                                                 screenshot in logs/qemu-desktop.png
   --luks   install with an encrypted root (and type the passphrase when the installed disk boots)
   --vmware VMware-style virtual hardware: PVSCSI disk, VMXNET3 network, VMware SVGA
 """
@@ -27,6 +29,9 @@ cmd = ['qemu-system-i386' if i686 else 'qemu-system-x86_64', '-m', '1024' if i68
        '-device', 'virtio-serial', '-chardev', 'socket,path=/tmp/melon-qga.sock,server=on,wait=off,id=qga0',
        '-device', 'virtserialport,chardev=qga0,name=org.qemu.guest_agent.0',
        '-monitor', 'unix:/tmp/melon-qmon.sock,server,nowait']
+# hardware acceleration when the build host has it (WSL2 and most PCs do; the original build container didn't)
+if os.access('/dev/kvm', os.R_OK | os.W_OK) and not i686:
+    cmd += ['-enable-kvm', '-cpu', 'host']
 if uefi:
     cmd += ['-bios', '/usr/share/ovmf/OVMF.fd']
 if vmware:
@@ -35,7 +40,12 @@ def disk_args(img):
     if vmware:
         return ['-drive', f'file={img},if=none,format=raw,id=d0', '-device', 'scsi-hd,drive=d0,bus=scsi0.0']
     return ['-drive', f'file={img},if=virtio,format=raw']
-if mode in ('live', 'toram'):
+if mode == 'desktop':
+    iso, = args
+    # a real graphics card for KWin; the serial port stays the test's console
+    cmd = [c for c in cmd if c != '-nographic'] + ['-display', 'none', '-serial', 'stdio', '-device', 'virtio-vga', '-m', '4096',
+                                                 '-cdrom', iso, '-boot', 'd']
+elif mode in ('live', 'toram'):
     iso, disk = args
     cmd += ['-cdrom', iso] + disk_args(disk) + ['-boot', 'd']
 else:
@@ -52,6 +62,42 @@ def sh(c, timeout=300, expect=PROMPT):
     p.sendline(c)
     p.expect(expect, timeout=timeout)
     return p.before
+
+if mode == 'desktop':
+    import socket
+    step('waiting for GRUB')
+    p.expect('melon live', timeout=300); time.sleep(1)
+    p.send('c'); p.expect('grub>', timeout=60)
+    for line in ['linux /boot/vmlinuz console=tty0 console=ttyS0,115200', 'initrd /boot/initramfs.img', 'boot']:
+        for ch in line: p.send(ch); time.sleep(0.08)   # GRUB drops keys that arrive too fast
+        p.send('\r'); time.sleep(1)
+    p.expect(PROMPT, timeout=900); step('logged in on the serial console')
+    ok = True
+    for svc in ['dbus', 'elogind', 'polkitd', 'udevd', 'NetworkManager', 'sddm']:
+        for _ in range(30):                        # services settle in the first seconds after boot
+            out = sh(f'doas sv check /var/service/{svc} >/dev/null && echo SVC-READY || echo SVC-WAIT')
+            if 'SVC-READY' in out: break
+            time.sleep(2)
+        up = 'SVC-READY' in out; ok &= up; step(f'service {svc}: ' + ('ready' if up else 'NOT READY'))
+    found = False
+    for _ in range(40):                            # KWin and plasmashell after SDDM's autologin
+        out = sh('ps -o comm | grep -qx kwin_wayland && ps -o comm | grep -qx plasmashell && echo PLASMA-UP || echo waiting')
+        if 'PLASMA-UP' in out: found = True; break
+        time.sleep(5)
+    time.sleep(20)                                  # let the desktop finish drawing
+    # still there after settling, and inside a real logind session (a crash loop can look alive for a moment)
+    out = sh('echo SESSIONS=$(loginctl list-sessions --no-legend 2>/dev/null | grep -c seat0) '
+             'KWIN=$(ps -o comm | grep -cx kwin_wayland) SHELL=$(ps -o comm | grep -cx plasmashell)')
+    import re as _re
+    v = dict(_re.findall(r'(SESSIONS|KWIN|SHELL)=(\d+)', out))
+    stable = found and all(int(v.get(k, '0')) > 0 for k in ('SESSIONS', 'KWIN', 'SHELL')); ok &= stable
+    step(f"Plasma after 20 s: sessions={v.get('SESSIONS')} kwin={v.get('KWIN')} plasmashell={v.get('SHELL')}")
+    m = socket.socket(socket.AF_UNIX); m.connect('/tmp/melon-qmon.sock'); time.sleep(0.5)
+    m.sendall(f'screendump {M}/logs/qemu-desktop.ppm\n'.encode()); time.sleep(3); m.close()
+    step('screenshot: logs/qemu-desktop.ppm')
+    sh('doas poweroff', expect=pexpect.EOF, timeout=300)
+    step('desktop test: ' + ('OK' if ok else 'FAILED'))
+    sys.exit(0 if ok else 1)
 
 if mode == 'live':
     step('waiting for GRUB')

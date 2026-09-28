@@ -1,0 +1,14 @@
+pkgname=libvpx
+pkgver=1.16.0
+pkgrel=0
+pkgdesc="VP8/VP9 video codec library (screen recording to WebM)"
+license=BSD-3-Clause
+url=https://www.webmproject.org/
+source=(libvpx-1.16.0.tar.gz)
+subpackages=(libvpx-dev)
+# its own configure: CROSS is the tool prefix; nasm assembles the x86 code, CPU features are picked at run time
+build(){ CROSS=$TARGET- ./configure --target=x86_64-linux-gcc --prefix=/usr --libdir=/usr/lib --enable-shared --disable-static \
+           --enable-pic --disable-examples --disable-tools --disable-docs --disable-unit-tests --enable-vp8 --enable-vp9 \
+           --enable-vp9-highbitdepth --enable-runtime-cpu-detect --enable-postproc --enable-vp9-postproc --as=nasm
+         make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; }

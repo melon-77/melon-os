@@ -1,0 +1,13 @@
+pkgname=libwebp
+pkgver=1.5.0
+pkgrel=0
+pkgdesc="WebP image library and the cwebp/dwebp tools"
+license=BSD-3-Clause
+url=https://developers.google.com/speed/webp
+source=(libwebp-1.5.0.tar.gz)
+makedepends=(libpng-dev libjpeg-turbo-dev)
+subpackages=(libwebp-dev)
+build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DWEBP_BUILD_CWEBP=ON -DWEBP_BUILD_DWEBP=ON -DWEBP_BUILD_ANIM_UTILS=OFF \
+           -DWEBP_BUILD_GIF2WEBP=OFF -DWEBP_BUILD_IMG2WEBP=OFF -DWEBP_BUILD_VWEBP=OFF -DWEBP_BUILD_WEBPINFO=OFF -DWEBP_BUILD_WEBPMUX=OFF \
+           -DWEBP_BUILD_EXTRAS=OFF -DWEBP_BUILD_LIBWEBPMUX=ON; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/man; }

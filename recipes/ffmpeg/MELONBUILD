@@ -1,11 +1,11 @@
 pkgname=ffmpeg
 pkgver=8.0.1
-pkgrel=0
+pkgrel=2
 pkgdesc="FFmpeg audio/video libraries and tools (LGPL build; KPipeWire uses it for screen sharing and recording)"
 license=LGPL-2.1-or-later
 url=https://ffmpeg.org
 source=(ffmpeg-8.0.1.tar.xz)
-makedepends=(libdrm-dev libva-dev libvorbis-dev libogg-dev zlib-dev bzip2-dev xz-dev)
+makedepends=(libdrm-dev libva-dev libvorbis-dev libogg-dev zlib-dev bzip2-dev xz-dev libvpx-dev x264-dev opus-dev libwebp-dev)
 subpackages=(ffmpeg-dev ffmpeg-libs)
 depends=(ffmpeg-libs)
 pkgdesc_ffmpeg_libs="FFmpeg libraries (libavcodec, libavformat, libavutil, ...)"
@@ -14,6 +14,7 @@ pkgdesc_ffmpeg_libs="FFmpeg libraries (libavcodec, libavformat, libavutil, ...)"
 build(){ ./configure --prefix=/usr --enable-cross-compile --cross-prefix=$TARGET- --arch=x86_64 --target-os=linux \
   --sysroot=$SYSROOT --pkg-config=pkg-config --enable-shared --disable-static --enable-pic --disable-doc --disable-debug \
   --disable-autodetect --enable-zlib --enable-bzlib --enable-lzma --enable-iconv --enable-vaapi --enable-libdrm \
-  --enable-libvorbis --extra-cflags="$CFLAGS" --extra-ldflags="$LDFLAGS"; make -j$JOBS; }
-package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,man}; }
+  --enable-libvorbis --enable-libopus --enable-libvpx --enable-libwebp --enable-gpl --enable-libx264 --extra-cflags="$CFLAGS" --extra-ldflags="$LDFLAGS"; make -j$JOBS; }
+# Libs.private picks up the sysroot -L that pkg-config reports for the codec libraries (rule 32)
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,man}; sed -i "s| -L$SYSROOT/usr/lib||g" $pkgdir/usr/lib/pkgconfig/*.pc; }
 pkg_libs(){ amove 'usr/lib/lib*.so.*'; }

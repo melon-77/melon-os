@@ -76,7 +76,8 @@ PROMPT = r'@melon[\w-]*.*[#$] '
 def sh(c, timeout=300, expect=PROMPT):
     p.sendline(c)
     p.expect(expect, timeout=timeout)
-    return p.before
+    # without the terminal's echo of the command line, which contains every marker the command would print
+    return p.before.split('\n', 1)[-1]
 
 if mode == 'desktop':
     import socket
@@ -114,6 +115,17 @@ if mode == 'desktop':
     mounted = 'hello from the stick' in out and 'Mounted' in out; ok &= mounted
     step('USB stick through UDisks2: ' + ('mounted, file read, unmounted' if mounted else 'FAILED'))
     if not mounted: print(out[-2000:])
+    # codecs: a second of video through each encoder Spectacle's screen recorder (KPipeWire) asks ffmpeg for,
+    # Opus audio, and PipeWire's Bluetooth codecs
+    out = sh('cd /tmp; for e in libvpx-vp9:webm libx264:mp4 libwebp_anim:webp; do ffmpeg -v error -f lavfi '
+             '-i testsrc=duration=1:size=320x240:rate=10 -c:v ${e%:*} -y rec.${e#*:} && [ -s rec.${e#*:} ] && echo ENC-OK ${e%:*}; done; '
+             'ffmpeg -v error -f lavfi -i sine=duration=1 -c:a libopus -y rec.opus && echo ENC-OK libopus; cd; '
+             'ls /usr/lib/spa-0.2/bluez5/ | grep -oE "codec-bluez5-[a-z0-9]+" | xargs', timeout=180)
+    have = set(_re.findall(r'ENC-OK ([a-z0-9_-]+)', out)) | set(_re.findall(r'codec-bluez5-[a-z0-9]+', out))
+    missing = sorted({'libvpx-vp9', 'libx264', 'libwebp_anim', 'libopus',
+                      'codec-bluez5-sbc', 'codec-bluez5-opus', 'codec-bluez5-aptx', 'codec-bluez5-lc3'} - have); ok &= not missing
+    step('codecs: ' + ('VP9, H.264, WebP and Opus encode; Bluetooth codecs present' if not missing else f'MISSING {missing}'))
+    if missing: print(out[-2000:])
     # nmcli: the text-mode way to reach the network when the desktop won't start
     out = sh('nmcli -c no -t -f STATE general; nmcli -c no -t -f DEVICE,STATE device')
     online = _re.search(r'(^|[\r\n])connected', out) is not None; ok &= online   # (bash's bracketed-paste codes end in \r)

@@ -1,0 +1,12 @@
+pkgname=flac
+pkgver=1.5.0
+pkgrel=0
+pkgdesc="FLAC lossless audio codec: libFLAC and the flac/metaflac tools"
+license="BSD-3-Clause AND GPL-2.0-or-later"
+url=https://xiph.org/flac/
+source=(flac-1.5.0.tar.xz)
+makedepends=(libogg-dev)
+subpackages=(flac-dev)
+build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DBUILD_CXXLIBS=ON -DBUILD_PROGRAMS=ON -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF \
+           -DBUILD_DOCS=OFF -DINSTALL_MANPAGES=OFF -DWITH_OGG=ON; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc; }

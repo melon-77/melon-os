@@ -88,8 +88,11 @@ if [ -d /sys/firmware/efi ] || [ -n "$efidev" ]; then
   efidir=/boot; [ -n "$efidev" ] && efidir=/boot/efi
   EFI_TARGET=x86_64-efi; [ "$ARCH" = x86 ] && EFI_TARGET=i386-efi
   chroot "$ROOT" grub-install --target=$EFI_TARGET --efi-directory=$efidir --boot-directory=/boot --bootloader-id=melon 2>&1 | grep -v '^Installing for' || true
-  # also the removable-media path, for firmware that forgets boot entries
-  chroot "$ROOT" grub-install --target=$EFI_TARGET --efi-directory=$efidir --boot-directory=/boot --removable --no-nvram 2>&1 | grep -v '^Installing for' || true
+  # also the removable-media path, for firmware that forgets boot entries, but only on an EFI partition that is
+  # melon's alone: next to Windows or another system, EFI/BOOT is their fallback loader
+  if [ -z "$(ls "$ROOT$efidir/EFI" 2>/dev/null | grep -v -i -x -e BOOT -e melon)" ]; then
+    chroot "$ROOT" grub-install --target=$EFI_TARGET --efi-directory=$efidir --boot-directory=/boot --removable --no-nvram 2>&1 | grep -v '^Installing for' || true
+  fi
 fi
 # BIOS boot code as well when the disk has room for it (MBR disks, or GPT with a BIOS boot partition)
 chroot "$ROOT" grub-install --target=i386-pc --boot-directory=/boot "$disk" 2>&1 | grep -v '^Installing for' || true

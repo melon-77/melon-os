@@ -22,6 +22,8 @@ udisks2
 cups cups-filters avahi print-manager
 # everyday tools the installer and users expect
 e2fsprogs xz bzip2 ffmpeg
+# Calamares shrinks NTFS (Windows) for "Install alongside" with ntfsresize
+ntfs-3g
 # fonts
 melon-fonts hicolor-icon-theme shared-mime-info
 # Flatpak (Firefox, VLC, Steam and Prism come from Flathub on first boot) and gaming

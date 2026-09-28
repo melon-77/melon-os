@@ -24,6 +24,8 @@ deb/dolphin_25.12.3.orig.tar.xz	9961de7cc076d9d7d598bb7f53afdebcfba20567093231f4
 deb/dosfstools_4.2.orig.tar.gz	64926eebf90092dca21b14259a5301b7b98e7b1943e8a201c7d726084809b527	apt	dosfstools=4.2-1.2build1
 deb/duktape_2.7.0+tests.orig.tar.xz	012fe77bffc8daf8f68c6932c1c926ce155c09aed9a3705fb4606c19bfd093fd	apt	duktape=2.7.0+tests-0ubuntu4
 deb/e2fsprogs_1.47.2.orig.tar.gz	6dcd67ff9d8b13274ba3f088e4318be4f5b71412cd863524423fc49d39a6371f	apt	e2fsprogs=1.47.2-3ubuntu4
+deb/efibootmgr_18.orig.tar.bz2	2b195f912aa353f0d11f21f207684c91460fbc37f9a4f2673e63e5e32d108b10	apt	efibootmgr=18-4ubuntu1
+deb/efivar_39.orig.tar.gz	c9edd15f2eeeea63232f3e669a48e992c7be9aff57ee22672ac31f5eca1609a6	apt	efivar=39-2
 deb/elfutils_0.194.orig.tar.bz2	09e2ff033d39baa8b388a2d7fbc5390bfde99ae3b7c67c7daaf7433fbcf0f01e	apt	elfutils=0.194-4
 deb/expat_2.7.4.orig.tar.gz	5b356795b889d3e5b379433ece069b8781bf0727f6959ad3bbc9da0c22164f59	apt	expat=2.7.4-1ubuntu0.2
 deb/ffmpeg_8.0.1.orig.tar.xz	05ee0b03119b45c0bdb4df654b96802e909e0a752f72e4fe3794f487229e5a41	apt	ffmpeg=7:8.0.1-3ubuntu2
@@ -240,6 +242,7 @@ deb/ncurses_6.6+20251231.orig.tar.gz	e280541f4f601b8586bec305976c873fd641607f9bc
 deb/network-manager_1.54.3.orig.tar.bz2	e38d55611af8127e1a2b1a7b4952bded1f61917cbc49d4ee7a272ec3fcd7b51b	apt	network-manager=1.54.3-2ubuntu3.1
 deb/nghttp2_1.68.0.orig.tar.gz	2c16ffc588ad3f9e2613c3fad72db48ecb5ce15bc362fcc85b342e48daf51013	apt	nghttp2=1.68.0-2ubuntu0.2
 deb/npth_1.8.orig.tar.bz2	8bd24b4f23a3065d6e5b26e98aba9ce783ea4fd781069c1b35d149694e90ca3e	apt	npth=1.8-3build1
+deb/ntfs-3g_2022.10.3.orig.tar.gz	8bd7749ea9d8534c9f0664d48b576e90b96d45ec8803c9427f6ffaa2f0dde299	apt	ntfs-3g=1:2022.10.3-5ubuntu1.1
 deb/open-vm-tools_13.0.10.orig.tar.xz	90f09355e93b6248cc9a62d70ab5ac7d9c0a696313295c325d3acccfdd75a7bf	apt	open-vm-tools=2:13.0.10-1ubuntu1
 deb/opencv_4.10.0+dfsg.orig.tar.xz	4ca619efbad524c550771ab110332fc81293fb720bd03980fe58bc15f9ca3be8	apt	opencv=4.10.0+dfsg-7ubuntu5
 deb/opendoas_6.8.2.orig.tar.xz	6192dedbbf66d8e9437c982864ce473ab662b7262a9fadf488cced12e830a466	apt	opendoas=6.8.2-1build1
@@ -345,6 +348,8 @@ bzip2-1.0.8.tar.gz	-	link	deb/bzip2_1.0.8.orig.tar.gz
 cups-2.4.16.tar.gz	-	link	deb/cups_2.4.16.orig.tar.gz
 cups-filters-2.0.1.tar.xz	-	link	deb/cups-filters_2.0.1.orig.tar.xz
 e2fsprogs-1.47.2.tar.gz	-	link	deb/e2fsprogs_1.47.2.orig.tar.gz
+efibootmgr-18.tar.bz2	-	link	deb/efibootmgr_18.orig.tar.bz2
+efivar-39.tar.gz	-	link	deb/efivar_39.orig.tar.gz
 ffmpeg-8.0.1.tar.xz	-	link	deb/ffmpeg_8.0.1.orig.tar.xz
 firmware/linux-firmware-amd-graphics_20240318.git3b128b60-0ubuntu3.3_all.deb	7c6a6083e963fd9394d1f6471b6a94e787a76c6f98b262c2d9262b9a57308b53	pool	http://archive.ubuntu.com/ubuntu/pool/main/l/linux-firmware-amd-graphics/linux-firmware-amd-graphics_20240318.git3b128b60-0ubuntu3.3_all.deb
 firmware/linux-firmware-intel-graphics_20240318.git3b128b60-0ubuntu3.1_all.deb	ee2355785ed16466bab120effd242f77423847ec53bc01c5c334431427ea8254	pool	http://archive.ubuntu.com/ubuntu/pool/main/l/linux-firmware-intel-graphics/linux-firmware-intel-graphics_20240318.git3b128b60-0ubuntu3.1_all.deb
@@ -594,6 +599,7 @@ ncurses-6.6.tar.gz	-	link	deb/ncurses_6.6+20251231.orig.tar.gz
 networkmanager-1.54.3.tar.bz2	-	link	deb/network-manager_1.54.3.orig.tar.bz2
 nghttp2-1.68.0.tar.gz	-	link	deb/nghttp2_1.68.0.orig.tar.gz
 npth-1.8.tar.bz2	-	link	deb/npth_1.8.orig.tar.bz2
+ntfs-3g-2022.10.3.tar.gz	-	link	deb/ntfs-3g_2022.10.3.orig.tar.gz
 open-vm-tools-13.0.10.tar.xz	-	link	deb/open-vm-tools_13.0.10.orig.tar.xz
 opencv-4.10.0.tar.xz	-	link	deb/opencv_4.10.0+dfsg.orig.tar.xz
 opendoas-6.8.2.tar.xz	-	link	deb/opendoas_6.8.2.orig.tar.xz

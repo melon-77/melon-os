@@ -1,0 +1,14 @@
+pkgname=efivar
+pkgver=39
+pkgrel=0
+pkgdesc="Library and tool for UEFI variables (efibootmgr)"
+license=LGPL-2.1-or-later
+url=https://github.com/rhboot/efivar
+source=(efivar-39.tar.gz)
+subpackages=(efivar-dev)
+# makeguids runs during the build: HOSTCC compiles it for the build machine
+_mk(){ make TOPDIR="$builddir" CC="$CC" HOSTCC=gcc AR="$AR" NM="$NM" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" ERRORS= PREFIX=/usr LIBDIR=/usr/lib \
+         BINDIR=/usr/bin "$@"; }
+# only the library and tools: the man pages need mandoc
+build(){ _mk -C src -j$JOBS; }
+package(){ _mk -C src DESTDIR=$pkgdir install; }

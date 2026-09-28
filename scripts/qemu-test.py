@@ -8,6 +8,9 @@
                                                  a USB stick mounts through UDisks2, screenshot in logs/qemu-desktop.png
   qemu-test.py desktop-install <desktop-iso> <disk.img>   install the desktop profile, boot the installed disk
                                                  with graphics, log in through SDDM: greeter stays up, Plasma starts
+  qemu-test.py dualboot <iso> <disk.img>         a fake Windows disk (EFI partition, MSR, NTFS C:, free space): install
+                                                 alongside on UEFI, boot melon from the firmware's boot menu, Windows in
+                                                 GRUB, and nothing of Windows' changed
   --luks   install with an encrypted root (and type the passphrase when the installed disk boots)
   --vmware VMware-style virtual hardware: PVSCSI disk, VMXNET3 network, VMware SVGA
 """
@@ -60,6 +63,47 @@ if mode == 'desktop':
 elif mode == 'desktop-install':
     iso, disk = args
     base = cmd + ['-m', '4096']
+    cmd = base + ['-cdrom', iso] + disk_args(disk) + ['-boot', 'd']
+elif mode == 'dualboot':
+    import subprocess, hashlib
+    iso, disk = args
+    def run(*c, **k): return subprocess.run(list(c), check=True, capture_output=True, text=True, **k).stdout
+    # the fake Windows disk: 40 GiB GPT, 260 MiB EFI (Windows Boot Manager + fallback loader), 16 MiB MSR,
+    # 15 GiB NTFS "C:", the rest unallocated (what Windows' "Shrink Volume" leaves)
+    open(disk, 'wb').truncate(40 << 30)
+    run('sfdisk', '-q', disk, input='label: gpt\nsize=260MiB, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name="EFI system partition"\n'
+        'size=16MiB, type=E3C9E316-0B5C-4DB8-817D-F92DF00215AE, name="Microsoft reserved partition"\n'
+        'size=15GiB, type=EBD0A0A2-B9E5-4433-87C0-68B6B72699C7, name="Basic data partition"\n')
+    loop = run('losetup', '-P', '-f', '--show', disk).strip()
+    try:
+        run('mkfs.vfat', '-F', '32', '-n', 'SYSTEM', loop + 'p1'); run('mkntfs', '-Q', '-q', '-L', 'Windows', loop + 'p3')
+        os.makedirs('/tmp/melon-esp', exist_ok=True); run('mount', loop + 'p1', '/tmp/melon-esp')
+        for path, blob in (('EFI/Microsoft/Boot/bootmgfw.efi', b'fake windows boot manager\n' * 999),
+                           ('EFI/Boot/bootx64.efi', b'fake windows fallback loader\n' * 999)):
+            os.makedirs(os.path.dirname(f'/tmp/melon-esp/{path}'), exist_ok=True); open(f'/tmp/melon-esp/{path}', 'wb').write(blob)
+        run('umount', '/tmp/melon-esp')
+    finally:
+        run('losetup', '-d', loop)
+    def windows_state():
+        """checksums of everything Windows owns: its partition table entries, MSR, NTFS C:, its files on the EFI partition"""
+        loop = run('losetup', '-P', '-f', '--show', disk).strip()
+        try:
+            st = {'table': ''.join(l for l in run('sfdisk', '-d', disk).splitlines(True) if 'melon' not in l and not l.startswith(('last-lba', 'first-lba')))}
+            for n in ('p2', 'p3'):
+                st[n] = hashlib.sha256(open(loop + n, 'rb').read(64 << 20)).hexdigest()
+            run('mount', '-o', 'ro', loop + 'p1', '/tmp/melon-esp')
+            for path in ('EFI/Microsoft/Boot/bootmgfw.efi', 'EFI/Boot/bootx64.efi'):
+                st[path] = hashlib.sha256(open(f'/tmp/melon-esp/{path}', 'rb').read()).hexdigest()
+            run('umount', '/tmp/melon-esp')
+        finally:
+            run('losetup', '-d', loop)
+        return st
+    before = windows_state()
+    # UEFI with a firmware boot menu that survives reboots (writable OVMF variables)
+    run('cp', '/usr/share/OVMF/OVMF_VARS_4M.fd', '/tmp/melon-ovmf-vars.fd')
+    uefi_args = ['-drive', 'if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd',
+                 '-drive', 'if=pflash,format=raw,file=/tmp/melon-ovmf-vars.fd']
+    base = cmd + uefi_args
     cmd = base + ['-cdrom', iso] + disk_args(disk) + ['-boot', 'd']
 elif mode in ('live', 'toram'):
     iso, disk = args
@@ -249,6 +293,47 @@ if mode == 'desktop-install':
     step('screenshots: logs/qemu-desktop-greeter.ppm, -splash.ppm, -installed.ppm')
     p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)
     step('installed desktop test: ' + ('OK' if ok else 'FAILED'))
+    sys.exit(0 if ok else 1)
+
+if mode == 'dualboot':
+    step('waiting for GRUB (UEFI)')
+    p.expect('melon live', timeout=300); time.sleep(1)
+    for _ in range(3):
+        p.send('\x1b[B'); time.sleep(0.3)
+    p.send('\r')
+    p.expect(PROMPT, timeout=900); step('logged in on the live system')
+    sh('stty cols 160 rows 50; export TERM=vt100')
+    sh(f'export MELON_DISK={DISKNAME} MELON_HOSTNAME=melondual MELON_ROOTPW=melonroot MELON_USER=jcole MELON_USERPW=melonuser '
+       'MELON_PROFILE=base MELON_YES=1 MELON_SERIAL=1 MELON_ENCRYPT=n MELON_MODE=alongside')
+    out = sh('/usr/libexec/melon/.cold', timeout=3600)
+    ok = 'melon is installed' in out and 'next to the other systems' in out
+    step('install alongside: ' + ('OK' if ok else 'FAILED'))
+    if not ok: print(out[-3000:])
+    p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)
+    if not ok: sys.exit(1)
+    # boot the disk with no boot order given: the firmware must pick melon from its own boot menu
+    cmd = base + disk_args(disk)
+    p = pexpect.spawn(cmd[0], cmd[1:], encoding='utf-8', codec_errors='replace', timeout=600); p.logfile_read = log
+    i = p.expect(['melon Linux', 'fake windows', pexpect.TIMEOUT], timeout=300)
+    menu = p.before + (p.after if isinstance(p.after, str) else '')
+    ok &= i == 0; step('firmware boot menu: ' + ('started melon\'s GRUB' if i == 0 else 'DID NOT START MELON'))
+    try: p.expect('Windows', timeout=5); win_menu = True
+    except pexpect.TIMEOUT: win_menu = 'Windows' in menu
+    p.expect('login:', timeout=900); p.sendline('root'); p.expect('assword:'); p.sendline('melonroot'); p.expect(PROMPT, timeout=120)
+    sh('stty cols 160 rows 50; export TERM=vt100')
+    out = sh("echo WIN=$(grep -c \"menuentry 'Windows'\" /boot/grub/grub.cfg) EFIMNT=$(awk '$2==\"/boot/efi\"{print $2}' /proc/mounts) "
+             "NVRAM=$(efibootmgr | grep -c -i melon); ls /boot/efi/EFI | xargs echo ESP:")
+    v = dict(_re.findall(r'(WIN|EFIMNT|NVRAM)=(\S*)', out))
+    good = v.get('WIN') == '1' and v.get('EFIMNT') == '/boot/efi' and v.get('NVRAM', '0') != '0'; ok &= good
+    step(f"installed system: Windows in GRUB {v.get('WIN')} (menu showed it: {win_menu}), EFI partition at {v.get('EFIMNT')}, "
+         f"firmware entries for melon {v.get('NVRAM')}")
+    print(sh('ls /boot/efi/EFI; efibootmgr'))
+    p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)
+    after = windows_state()
+    same = after == before; ok &= same
+    step('Windows untouched: ' + ('partition table entries, MSR, NTFS and its EFI files identical' if same else
+         f'CHANGED: {[k for k in before if before[k] != after.get(k)]}'))
+    step('dual boot test: ' + ('OK' if ok else 'FAILED'))
     sys.exit(0 if ok else 1)
 
 if mode == 'live':

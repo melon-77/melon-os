@@ -1,6 +1,6 @@
 pkgname=nethack
 pkgver=5.0.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Explore the Dungeons of Doom and bring back the Amulet of Yendor (terminal roguelike)"
 license=NGPL
 url=https://www.nethack.org

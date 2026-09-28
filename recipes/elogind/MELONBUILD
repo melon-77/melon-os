@@ -1,6 +1,6 @@
 pkgname=elogind
 pkgver=255.24
-pkgrel=3
+pkgrel=4
 pkgdesc="Session, seat and power management (logind without systemd)"
 license="LGPL-2.1-or-later"
 url=https://github.com/elogind/elogind
@@ -19,7 +19,7 @@ build(){ meson_setup --libexecdir=/usr/libexec/elogind -Ddbuspolicydir=/usr/shar
     -Dbashcompletiondir=no -Dzshcompletiondir=no build; ninja -C build; }
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc
   mkdir -p $pkgdir/etc/sv/elogind
-  printf '#!/bin/sh\nexec 2>&1\nsv check dbus || exit 1\nexec /usr/libexec/elogind/elogind\n' > $pkgdir/etc/sv/elogind/run
+  printf '#!/bin/sh\nexec 2>&1\nsv check dbus >/dev/null || exit 1\nexec /usr/libexec/elogind/elogind\n' > $pkgdir/etc/sv/elogind/run
   # 'sv check elogind' (SDDM's run script) means ready: elogind is on the bus and has set up seat0
   printf '#!/bin/sh\n[ -e /run/systemd/seats/seat0 ]\n' > $pkgdir/etc/sv/elogind/check
   chmod 755 $pkgdir/etc/sv/elogind/run $pkgdir/etc/sv/elogind/check

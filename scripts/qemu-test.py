@@ -12,6 +12,7 @@
   --vmware VMware-style virtual hardware: PVSCSI disk, VMXNET3 network, VMware SVGA
 """
 import sys, time, pexpect, os
+import re as _re
 M = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 mode = sys.argv[1]
@@ -102,6 +103,9 @@ if mode == 'desktop':
             if 'SVC-READY' in out: break
             time.sleep(2)
         up = 'SVC-READY' in out; ok &= up; step(f'service {svc}: ' + ('ready' if up else 'NOT READY'))
+    flapping = sh('sleep 5; doas sv status /var/service/* 2>&1 | grep "want up" | cut -d: -f2 | xargs echo FLAP=')
+    flap = _re.search(r'FLAP=([^\r\n]*)', flapping); flap = flap.group(1).strip() if flap else '?'
+    ok &= flap == ''; step('services: ' + ('none restarting in a loop' if flap == '' else f'RESTARTING: {flap}'))
     found = False
     for _ in range(40):                            # KWin and plasmashell after SDDM's autologin
         out = sh('ps -o comm | grep -qx kwin_wayland && ps -o comm | grep -qx plasmashell && echo PLASMA-UP || echo waiting')
@@ -153,14 +157,22 @@ if mode == 'desktop':
     # virtual radios: wlan1 is a WPA2 access point run by a separate wpa_supplicant, NetworkManager joins it with wlan0
     ap = ("printf '%s\\n' 'network={' 'ssid=\"melontest\"' 'mode=2' 'frequency=2437' 'key_mgmt=WPA-PSK' 'proto=RSN' "
           "'pairwise=CCMP' 'psk=\"melonwifi\"' '}' > /tmp/ap.conf")
-    out = sh('modprobe mac80211_hwsim radios=2 && sleep 3 && nmcli -c no device set wlan1 managed no && ' + ap + ' && '
+    # The radios appear while udevd is stopped, like a real card whose interface registers after its firmware loads,
+    # in the gap between stage 1's udevd and the udevd service: nothing processes them and NetworkManager leaves them
+    # unmanaged. Starting udevd must replay those events (recipes/eudev/udevd.run).
+    out = sh('sv down /var/service/udevd; modprobe mac80211_hwsim radios=2; sleep 3; '
+             'nmcli -c no -t -f DEVICE,STATE device | grep "^wlan0:" | sed "s/^/GAP=/"; sv up /var/service/udevd', timeout=60)
+    gap = _re.search(r'GAP=wlan0:(\S+)', out); gap = gap.group(1) if gap else '?'
+    out = sh('for i in $(seq 20); do nmcli -c no -t -f DEVICE,STATE device | grep -q "^wlan1:unmanaged" || break; sleep 1; done; '
+             'nmcli -c no device set wlan1 managed no && ' + ap + ' && '
              'wpa_supplicant -B -i wlan1 -c /tmp/ap.conf >/tmp/ap.log 2>&1 && sleep 3 && '
              'nmcli -c no connection add type wifi ifname wlan0 con-name melontest ssid melontest wifi-sec.key-mgmt wpa-psk '
              'wifi-sec.psk melonwifi ipv4.method disabled ipv6.method link-local >/dev/null && '
              'nmcli -c no --wait 60 connection up melontest >/dev/null 2>&1; '
              'nmcli -c no -t -f GENERAL.STATE device show wlan0 | sed "s/^GENERAL.STATE:/WIFI=/"', timeout=180)
     wifi = 'WIFI=100' in out; ok &= wifi
-    step('Wi-Fi: ' + ('NetworkManager joined a WPA2 network on a virtual radio' if wifi else 'FAILED'))
+    step(f'Wi-Fi: radios found while udevd was down were {gap}; ' +
+         ('after the replay NetworkManager joined a WPA2 network on one' if wifi else 'FAILED'))
     if not wifi: print(out[-1500:]); print(sh('cat /tmp/ap.log; nmcli -c no device; tail -20 /var/log/NetworkManager/current'))
     m = socket.socket(socket.AF_UNIX); m.connect('/tmp/melon-qmon.sock'); time.sleep(0.5)
     m.sendall(f'screendump {M}/logs/qemu-desktop.ppm\n'.encode()); time.sleep(3); m.close()
@@ -214,6 +226,7 @@ if mode == 'desktop-install':
     for ch in 'melonuser':
         mon(f'sendkey {ch}'); time.sleep(0.15)
     mon('sendkey ret'); step('typed the password into the greeter')
+    time.sleep(3); mon(f'screendump {M}/logs/qemu-desktop-splash.ppm')   # Plasma's loading screen
     shell = "ps -o user,comm | awk '$1==\"jcole\" && $2==\"plasmashell\"' | wc -l"
     for _ in range(60):
         if count(shell): break
@@ -223,13 +236,17 @@ if mode == 'desktop-install':
     up = count(shell) == 1 and sess == 1; ok &= up
     step(f'Plasma for jcole after 20 s: plasmashell={count(shell)} active sessions={sess}')
     mime = count('[ -s /usr/share/mime/mime.cache ] && echo 1 || echo 0') == 1; ok &= mime
+    # a service runit keeps restarting shows as "down: 1s, normally up, want up" (polkitd did, raced by D-Bus activation)
+    flapping = sh('sv status /var/service/* 2>&1 | grep "want up" | cut -d: -f2 | xargs echo FLAP=')
+    flap = _re.search(r'FLAP=([^\r\n]*)', flapping); flap = flap.group(1).strip() if flap else '?'
+    ok &= flap == ''; step('services: ' + ('none restarting in a loop' if flap == '' else f'RESTARTING: {flap}'))
     step('MIME cache: ' + ('present' if mime else 'MISSING'))
     # the desktop profile's services, and the user may manage printers
     svcs = count('n=0; for s in avahi-daemon cupsd; do sv check /var/service/$s >/dev/null 2>&1 && n=$((n+1)); done; echo $n')
     lpadm = count('id -Gn jcole | tr " " "\\n" | grep -cx lpadmin')
     ok &= svcs == 2 and lpadm == 1; step(f'printing on the installed system: {svcs}/2 services up, jcole in lpadmin: {lpadm == 1}')
     mon(f'screendump {M}/logs/qemu-desktop-installed.ppm'); time.sleep(3)
-    step('screenshots: logs/qemu-desktop-greeter.ppm, logs/qemu-desktop-installed.ppm')
+    step('screenshots: logs/qemu-desktop-greeter.ppm, -splash.ppm, -installed.ppm')
     p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)
     step('installed desktop test: ' + ('OK' if ok else 'FAILED'))
     sys.exit(0 if ok else 1)

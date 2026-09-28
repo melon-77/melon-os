@@ -1,5 +1,6 @@
 pkgname=polkit
 pkgver=127
+pkgrel=1
 pkgdesc="Authorization framework for privileged actions (polkit, duktape JS engine)"
 license=LGPL-2.0-or-later
 url=https://github.com/polkit-org/polkit
@@ -19,5 +20,11 @@ package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/nonexistent $p
 polkit.addAdminRule(function(action, subject) { return ["unix-group:wheel"]; });
 RULES
   mkdir -p $pkgdir/etc/sv/polkitd
-  printf '#!/bin/sh\nexec 2>&1\nsv check dbus || exit 1\nexec /usr/lib/polkit-1/polkitd --no-debug\n' > $pkgdir/etc/sv/polkitd/run; chmod 755 $pkgdir/etc/sv/polkitd/run; }
+  printf '#!/bin/sh\nexec 2>&1\nsv check dbus >/dev/null || exit 1\nexec /usr/lib/polkit-1/polkitd --no-debug\n' > $pkgdir/etc/sv/polkitd/run
+  # 'sv check polkitd' means ready: polkitd owns its bus name
+  printf '#!/bin/sh\ndbus-send --system --print-reply --dest=org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.NameHasOwner string:org.freedesktop.PolicyKit1 2>/dev/null | grep -q "boolean true"\n' > $pkgdir/etc/sv/polkitd/check
+  chmod 755 $pkgdir/etc/sv/polkitd/run $pkgdir/etc/sv/polkitd/check
+  # runit is the only thing that starts polkitd: when a daemon asked for polkit first, D-Bus activation started a
+  # second copy, and the supervised one then exited and was restarted every second (the name was taken)
+  sed -i 's|^Exec=.*|Exec=/bin/false|' $pkgdir/usr/share/dbus-1/system-services/org.freedesktop.PolicyKit1.service; }
 pkg_libs(){ amove 'usr/lib/libpolkit-*.so.*'; }

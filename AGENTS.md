@@ -184,8 +184,10 @@ Rebuilding the kernel takes about an hour on 2 cores.
     `depends=` or list them in `scripts/desktop-packages.txt`.
 34. **runit readiness:** `sv` defaults to `/service`, so `SVDIR=/var/service` is set in stage 2 and `/etc/profile`.
     `sv check <svc>` only means "the process exists" unless the service has a `./check` script; services others
-    wait for ship one (dbus: bus socket exists; elogind: seat0 is set up). Only runit starts elogind (its D-Bus
-    activation file runs /bin/false).
+    wait for ship one (dbus: bus socket exists; elogind: seat0 is set up; polkitd: owns its bus name). Only runit
+    starts elogind and polkitd (their D-Bus activation files run /bin/false): otherwise the first daemon to ask for
+    them gets a D-Bus-activated copy, and the supervised one exits and restarts every second because the name is
+    taken (polkitd did that on installed systems). Services that need them at startup wait with `sv check`.
 35. **Image assembly installs BusyBox, then melon-base, then everything else** (`mkiso.sh`): install scripts need
     /bin/sh and adduser, and the users they add (messagebus, polkitd, sddm) must not be overwritten by melon-base's
     `/etc/passwd` arriving later.
@@ -217,6 +219,11 @@ Rebuilding the kernel takes about an hour on 2 cores.
     Kconfig files and add them. The built config ships as `/boot/config-melon`; check it, not the fragment. For a
     real machine, `sudo melon-hwreport` lists every PCI/USB/ACPI/I2C device with the driver it got, plus the kernel's
     firmware messages; map IDs to modules with `modprobe -R <modalias>` against the built kernel.
+44. **Device events between stage 1's udevd and the udevd service are lost.** Stage 1 runs a udevd for the boot
+    coldplug and stops it; the runit service starts a new one a moment later. A Wi-Fi card's interface appears only
+    after its firmware loads (MT7921, iwlwifi, ath11k), often in that gap: udev never processed it, so it kept the
+    kernel name `wlan0` and NetworkManager left it "unmanaged" (the ProBook's MT7921). The service replays the "add"
+    events for net, ieee80211, rfkill and bluetooth devices once it runs (`recipes/eudev/udevd.run`).
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.

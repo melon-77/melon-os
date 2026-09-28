@@ -1,5 +1,6 @@
 pkgname=eudev
 pkgver=3.2.14
+pkgrel=1
 pkgdesc="Device manager (udev without systemd)"
 license=GPL-2.0-only
 url=https://github.com/eudev-project/eudev
@@ -14,5 +15,5 @@ build(){ ./configure $conf_flags --disable-manpages --enable-kmod --enable-hwdb 
 package(){ make DESTDIR=$pkgdir sharepkgconfigdir=/usr/lib/pkgconfig install
   rm -rf $pkgdir/usr/share/man
   mkdir -p $pkgdir/etc/sv/udevd
-  printf '#!/bin/sh\nexec 2>&1\nexec udevd\n' > $pkgdir/etc/sv/udevd/run; chmod 755 $pkgdir/etc/sv/udevd/run; }
+  install -m755 $startdir/udevd.run $pkgdir/etc/sv/udevd/run; }
 pkg_libs(){ amove 'usr/lib/libudev.so.*'; }

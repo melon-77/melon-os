@@ -16,14 +16,16 @@ source by our own scripts and shipped as a signed apk v3 package.
 | shell | bash 5.3 (login shell), BusyBox ash is `/bin/sh` | |
 | privileges | doas (OpenDoas 6.8.2) with a `sudo` command on top | members of `wheel` |
 | init | runit 2.3 | stages in `/etc/runit/{1,2,3}`, services in `/etc/sv`, enabled = symlink in `/var/service` |
-| devices | BusyBox mdev (`mdev -d` service) | no udev yet, stage 2 will need one |
+| devices | eudev 3.2 on the desktop profile (`udevd` service), BusyBox mdev (`mdevd` service) on the console profile | the desktop profile swaps `mdevd` for `udevd`; see rule 44 |
 | packages | apk-tools 3.0.8 | repo index `Packages.adb`, signed with `keys/melon-signing.rsa` |
 | kernel | Linux 7.0, `linux-melon` (generic) | config = `x86_64_defconfig` + `recipes/linux-melon/config-melon` |
 | boot | GRUB 2.14, both `i386-pc` and `x86_64-efi` | ISO and installs boot on BIOS **and** UEFI |
-| disks | GPT: 1 MiB BIOS boot, 1 GiB FAT32 `/boot` (also the ESP), XFS `/` | kernel boots with `root=PARTUUID=...`, no initramfs on installed systems |
+| disks | GPT: 1 MiB BIOS boot, 1 GiB FAT32 `/boot` (also the ESP), XFS `/` | kernel boots with `root=PARTUUID=...`; only encrypted (LUKS) installs have an initramfs (rule 28); dual boot next to Windows on UEFI (see Installers) |
 | filesystem | merged `/usr`: `/bin`, `/sbin`, `/usr/sbin` -> `usr/bin`, `/lib` -> `usr/lib` | packages must only ship files under `/usr`, `/etc`, `/var`, `/boot` |
-| desktop | KDE Plasma on Wayland (stage 2, not built yet) | |
-| gaming | Flatpak + Flathub Steam (stage 3, not built yet) | Steam is glibc-only, so it can't run natively on musl |
+| desktop | KDE Plasma 6.6 on Wayland (KWin, Xwayland), Qt 6.10, SDDM | desktop ISO and desktop profile; list in `scripts/desktop-packages.txt` |
+| desktop plumbing | D-Bus, elogind, polkit, PipeWire + WirePlumber, NetworkManager, BlueZ, CUPS, UDisks2 | console profile keeps `dhcp` + wpa_supplicant |
+| graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe | |
+| gaming | Flatpak 1.16 + Flathub, GameMode | Steam is glibc-only, so it can't run natively on musl: `melon-first-boot` offers Steam (and Firefox, VLC, Prism Launcher) from Flathub on first login |
 
 Owner's config (`CONFIG_*` answers) lives in `docs/config.txt`. Don't change those choices without the owner's approval.
 
@@ -403,16 +405,21 @@ the tarballs are identical.
 
 ## Roadmap
 
-- **Stage 1 (base):** toolchain, base packages, live ISO, installers. In progress. See the task list in the PR/issue.
-- **Stage 2 (desktop):** udev replacement (eudev or libudev-zero), dbus, elogind or seatd, Mesa with LLVM
-  (radeonsi for the Ryzen iGPU), Qt 6, KDE Frameworks 6, Plasma, KWin (Wayland), SDDM, PipeWire,
-  NetworkManager, Calamares with melon branding and the gauntlet, and the desktop profile for both installers.
+- **Stage 1 (base): done.** Toolchain, base packages, the console ISO and the quick console installer, BIOS and
+  UEFI, LUKS encryption, dual boot next to Windows, VM guest tools.
+- **Stage 2 (desktop): done.** eudev, D-Bus, elogind, polkit, Mesa with LLVM, Qt 6, KDE Frameworks 6, Plasma and
+  KWin on Wayland, SDDM, PipeWire, NetworkManager, Bluetooth, printing, Calamares with the gauntlet, the desktop ISO
+  and the desktop profile for both installers (`qemu-test.py desktop` and `desktop-install`). Open hardware work
+  is tracked in GitHub issues: Intel SOF audio, newer linux-firmware, Broadcom Wi-Fi.
 - **32-bit (i686) console edition: paused by the owner** (resume later). Everything is arch-aware
   (`MELON_ARCH=x86`), but the i686 toolchain doesn't finish yet: GCC's final build fails in libatomic's
   configure because `--enable-default-ssp` on i386 needs `__stack_chk_fail_local`, which comes from a
   `libssp_nonshared.a` (Alpine builds one in its musl package). Add that to the musl build (or drop
   default SSP for i686), then run `scripts/queue-2.sh`'s 32-bit part.
-- **Stage 3 (gaming):** Flatpak and dependencies, Flathub remote, Steam through Flatpak, gamepad udev rules.
+- **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (`melon-flathub`), Steam, Firefox, VLC and
+  Prism Launcher offered from Flathub on first login, GameMode. Still to do: gamepad and controller udev rules,
+  MangoHud (`docs/stage2-plan.md`).
+- **Later:** a native Firefox build (needs Rust, clang and Node for melon; Firefox comes from Flathub until then).
 
 ## Git conventions
 

@@ -179,6 +179,10 @@ normalise(){ local d=$1
   fi
   has_opt keepdirs || find "$d" -depth -type d -empty -delete 2>/dev/null || true
   mkdir -p "$d"
+  # files copied with cp -a from the checkout (a recipe's files/) keep the builder's own account; apk records its
+  # name, and a system without that account gets them as nobody (rule 45). Root owns them; system accounts a recipe
+  # chose on purpose (uid/gid below 1000: cups' lp, dbus' messagebus) stay.
+  find "$d" \( -uid +999 -o -gid +999 \) -exec chown -h 0:0 {} +
 }
 
 # ---------- package metadata + creation ----------

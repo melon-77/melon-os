@@ -1,6 +1,6 @@
 pkgname=avahi
 pkgver=0.8
-pkgrel=0
+pkgrel=1
 pkgdesc="Avahi: mDNS/DNS-SD service discovery (finds network printers for CUPS)"
 license=LGPL-2.1-or-later
 url=https://avahi.org/

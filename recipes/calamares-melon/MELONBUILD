@@ -1,6 +1,6 @@
 pkgname=calamares-melon
 pkgver=0.1
-pkgrel=0
+pkgrel=1
 pkgdesc="melon's Calamares setup: the gauntlet module, branding, job configs and finishing scripts (live ISO only)"
 license=GPL-3.0-or-later
 makedepends=(calamares-dev extra-cmake-modules qt6-qtbase-dev qt6-qtdeclarative-dev kf6-kcoreaddons-dev yaml-cpp-dev)
@@ -15,5 +15,5 @@ package(){
   cp -a $startdir/files/. $pkgdir/
   mkdir -p $pkgdir/usr/share/calamares/branding $pkgdir/usr/share/melon/rewards
   cp -a $startdir/branding/melon $pkgdir/usr/share/calamares/branding/
-  cp -a $startdir/rewards/melon-survivor $pkgdir/usr/share/melon/rewards/
+  cp -a $startdir/rewards/melon-survivor $startdir/rewards/grub $pkgdir/usr/share/melon/rewards/
   chmod 755 $pkgdir/usr/bin/* $pkgdir/usr/libexec/melon/cal-* $pkgdir/usr/libexec/melon/cal-shims/*; }

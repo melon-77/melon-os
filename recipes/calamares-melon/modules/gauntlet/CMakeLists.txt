@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.16)
 project(calamares-melon-gauntlet LANGUAGES CXX)
 find_package(ECM REQUIRED NO_MODULE)
 list(APPEND CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+# Calamares' exported target links KF6::CoreAddons, so that has to be known first
+find_package(KF6 REQUIRED COMPONENTS CoreAddons)
 find_package(Calamares 3.3 REQUIRED)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

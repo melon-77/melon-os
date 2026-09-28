@@ -100,6 +100,10 @@ say "gauntlet rewards"
 mkdir -p "$ROOT/etc/melon" "$ROOT/usr/share/wallpapers"
 cp -a /usr/share/melon/rewards/melon-survivor "$ROOT/usr/share/wallpapers/"
 date +%Y-%m-%d > "$ROOT/etc/melon/gauntlet-survivor"
+# survivors boot through the other side: their own GRUB background (melon-update-grub picks it by the badge)
+mkdir -p "$ROOT/usr/share/melon/grub"
+cp /usr/share/melon/rewards/grub/background-survivor.png "$ROOT/usr/share/melon/grub/"
+MELON_ROOT_DEV="$rootdev" MELON_BOOT_DEV="$bootdev" chroot "$ROOT" melon-update-grub
 if [ -n "$NEWUSER" ] && [ -d "$ROOT/home/$NEWUSER" ]; then
   uid=$(awk -F: -v u="$NEWUSER" '$1==u{print $3":"$4}' "$ROOT/etc/passwd")
   mkdir -p "$ROOT/home/$NEWUSER/Pictures" "$ROOT/home/$NEWUSER/.config/autostart"

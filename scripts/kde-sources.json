@@ -269,6 +269,11 @@
 "ver": "6.24.0",
 "top": "ksvg-6.24.0"
 },
+"kf6-ktexteditor": {
+"file": "kf6-ktexteditor_6.24.0.orig.tar.xz",
+"ver": "6.24.0",
+"top": "ktexteditor-6.24.0"
+},
 "kf6-ktextwidgets": {
 "file": "kf6-ktextwidgets_6.24.0.orig.tar.xz",
 "ver": "6.24.0",
@@ -314,6 +319,11 @@
 "ver": "6.24.0",
 "top": "prison-6.24.0"
 },
+"kf6-purpose": {
+"file": "kf6-purpose_6.24.0.orig.tar.xz",
+"ver": "6.24.0",
+"top": "purpose-6.24.0"
+},
 "kf6-qqc2-desktop-style": {
 "file": "kf6-qqc2-desktop-style_6.24.0.orig.tar.xz",
 "ver": "6.24.0",
@@ -328,6 +338,11 @@
 "file": "kf6-sonnet_6.24.0.orig.tar.xz",
 "ver": "6.24.0",
 "top": "sonnet-6.24.0"
+},
+"kf6-syntax-highlighting": {
+"file": "kf6-syntax-highlighting_6.24.0.orig.tar.xz",
+"ver": "6.24.0",
+"top": "syntax-highlighting-6.24.0"
 },
 "kf6-threadweaver": {
 "file": "kf6-threadweaver_6.24.0.orig.tar.xz",
@@ -363,6 +378,11 @@
 "file": "kpipewire_6.6.4.orig.tar.xz",
 "ver": "6.6.4",
 "top": "kpipewire-6.6.4"
+},
+"kquickimageeditor": {
+"file": "kquickimageeditor_0.6.0.orig.tar.xz",
+"ver": "0.6.0",
+"top": "kquickimageeditor-0.6.0"
 },
 "kscreen": {
 "file": "kscreen_6.6.4.orig.tar.xz",
@@ -558,6 +578,11 @@
 "file": "qt6-shadertools_6.10.2.orig.tar.xz",
 "ver": "6.10.2",
 "top": "qtshadertools-everywhere-src-6.10.2"
+},
+"qt6-speech": {
+"file": "qt6-speech_6.10.2.orig.tar.xz",
+"ver": "6.10.2",
+"top": "qtspeech-everywhere-src-6.10.2"
 },
 "qt6-svg": {
 "file": "qt6-svg_6.10.2.orig.tar.xz",

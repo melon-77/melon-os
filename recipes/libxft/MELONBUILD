@@ -1,0 +1,11 @@
+pkgname=libxft
+pkgver=2.3.6
+pkgrel=0
+pkgdesc="libxft (graphics stack)"
+license=custom
+source=(libxft-2.3.6.tar.gz)
+builddir=$srcdir/libXft-2.3.6
+makedepends=(libxrender-dev freetype-dev fontconfig-dev)
+subpackages=(libxft-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

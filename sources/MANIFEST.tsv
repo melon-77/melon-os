@@ -102,6 +102,7 @@ deb/kf6-krunner_6.24.0.orig.tar.xz	5775d7292a31c0ca339b385c18f3716fda5486317423c
 deb/kf6-kservice_6.24.0.orig.tar.xz	f7b3e5fab52949d16c0fce96afc5aaeb1cc94b47536e024d580750ffb1739723	apt	kf6-kservice=6.24.0-0ubuntu1
 deb/kf6-kstatusnotifieritem_6.24.0.orig.tar.xz	f76c77dcc27a60007330329a6d6c60298c11ddddba82f710a90715ec81f886ff	apt	kf6-kstatusnotifieritem=6.24.0-0ubuntu1
 deb/kf6-ksvg_6.24.0.orig.tar.xz	c4d61f6bb4c61452e83de0427f444cdec296d87333f6c7676fb7dae09480f4d2	apt	kf6-ksvg=6.24.0-0ubuntu1
+deb/kf6-ktexteditor_6.24.0.orig.tar.xz	fd703c777712ad0e20a849f837c3ad7880eb82c1beb50196608cb326373f78e3	apt	kf6-ktexteditor=6.24.0-0ubuntu1
 deb/kf6-ktextwidgets_6.24.0.orig.tar.xz	ba8f7d21014aabcdfa13e0cc1ff5a1db6c04761e080670caa76b7e4163086d15	apt	kf6-ktextwidgets=6.24.0-0ubuntu1
 deb/kf6-kunitconversion_6.24.0.orig.tar.xz	a0cd582e48c302d56b5ebcea560b5590f94b8615dbd54bc67bcd165714979fa6	apt	kf6-kunitconversion=6.24.0-0ubuntu1
 deb/kf6-kwallet_6.24.0.orig.tar.xz	094a26ec24a2fc9ae73096c47da2d963799668ef9e0e4004162a0082e54f9520	apt	kf6-kwallet=6.24.0-0ubuntu1
@@ -111,9 +112,11 @@ deb/kf6-kxmlgui_6.24.0.orig.tar.xz	f87f887323675d8b36ae9d157ce29848ac0eb1731ffd0
 deb/kf6-modemmanager-qt_6.23.0.orig.tar.xz	2ac9b52efbce07ae055e25b7fb996c94e521218d83351c33f0060090ab98b63c	apt	kf6-modemmanager-qt=6.23.0-0ubuntu1
 deb/kf6-networkmanager-qt_6.24.0.orig.tar.xz	b9d44f80e054353f87b4274481b320676d95bd3835ffbbfdf19ef4f2a2ef0fff	apt	kf6-networkmanager-qt=6.24.0-0ubuntu1
 deb/kf6-prison_6.24.0.orig.tar.xz	39ea2b51fd0e405b964c1f22d64ad0111c79895894590d68b29712d7dde4cd34	apt	kf6-prison=6.24.0-0ubuntu1
+deb/kf6-purpose_6.24.0.orig.tar.xz	e95dba236f79bf1655a0581e9f1c3ce64d342750135fde700d463dd205bebc47	apt	kf6-purpose=6.24.0-0ubuntu1
 deb/kf6-qqc2-desktop-style_6.24.0.orig.tar.xz	45967a1b596f1dfd21371948275a330ab3ede6fd94fdfd22f6ae5eb0b122de64	apt	kf6-qqc2-desktop-style=6.24.0-0ubuntu1
 deb/kf6-solid_6.24.0.orig.tar.xz	2f506908ff32ffcdd9918879070b666c9384b079493c25f80735553e332a53fd	apt	kf6-solid=6.24.0-0ubuntu1
 deb/kf6-sonnet_6.24.0.orig.tar.xz	f5f107bd4d154c93bbacc717ec3411bcebce3513df103945e202ffa1f0ee9ae7	apt	kf6-sonnet=6.24.0-0ubuntu1
+deb/kf6-syntax-highlighting_6.24.0.orig.tar.xz	061c5946dc6170ecfa91b9c7d4faa5ec81eb53bb5f86eda861c2ce748a65486d	apt	kf6-syntax-highlighting=6.24.0-0ubuntu1
 deb/kf6-threadweaver_6.24.0.orig.tar.xz	aa7608961397e7cdbdc8362ae9d1eaba6c5ba9dae3a84c11830fce155e5ed46f	apt	kf6-threadweaver=6.24.0-0ubuntu1
 deb/kglobalacceld_6.6.4.orig.tar.xz	c0a7ebc420c11206ffc0bea1cc4b51654fc2d235b07ccb3c5f0ae9713049d12c	apt	kglobalacceld=6.6.4-0ubuntu1
 deb/kinfocenter_6.6.4.orig.tar.xz	247f58dd25d08fa968ab83b42cb8dc76710acec54969dff31313a75566226a82	apt	kinfocenter=4:6.6.4-0ubuntu1
@@ -123,6 +126,7 @@ deb/knighttime_6.6.4.orig.tar.xz	96d43cedad1f1d4819a7c7418a4eb8ed26cc20b47a17ada
 deb/konsole_25.12.3.orig.tar.xz	c3e13be55cbe553ebd6ba5f04f9194c79a4ba15d1ed8f3d151ac7afae016f232	apt	konsole=4:25.12.3-0ubuntu1
 deb/kpipewire_6.6.4.orig.tar.xz	1b9ef2890be00ee96ca439770a3f7842f54ac901c6a47edd3d68aff85c1a3a8f	apt	kpipewire=6.6.4-0ubuntu1
 deb/kpmcore_25.12.3.orig.tar.xz	2e6ff446448b6640e7290784519e19ad326d56f93f8e83cacd11d033197f3e62	apt	kpmcore=25.12.3-0ubuntu1
+deb/kquickimageeditor_0.6.0.orig.tar.xz	11ed4ce1c164a8b6d50bbc1548b5849ab75d5fb837619b90f2cea51ed122547a	apt	kquickimageeditor=0.6.0-2ubuntu0.1
 deb/kscreen_6.6.4.orig.tar.xz	2f123691ac25da7f5166894ebaddda9615ddbaf949ebbb6c9829196b0615c250	apt	kscreen=4:6.6.4-0ubuntu1
 deb/kscreenlocker_6.6.4.orig.tar.xz	c549524a20b697968cbb74b7a5eb3d4ebd8e1a23f29673e55a25b5b685b092b0	apt	kscreenlocker=6.6.4-0ubuntu2
 deb/ksystemstats_6.6.4.orig.tar.xz	31bdf29e6ba0bc5d790d1a04cb0fa9f92bb7fdf9dd8e146fe06eebb2664a7b44	apt	ksystemstats=6.6.4-0ubuntu1
@@ -147,6 +151,7 @@ deb/libgcrypt20_1.12.0.orig.tar.bz2	0311454e678189bad62a7e9402a9dd793025efff6e74
 deb/libglvnd_1.7.0.orig.tar.gz	073e7292788d4d3eeb45ea6c7bdcce9bfdb3b3eef8d7dbd47f2f30dce046ef98	apt	libglvnd=1.7.0-3
 deb/libgpg-error_1.58.orig.tar.bz2	f943aea9a830a8bd938e5124b579efaece24a3225ff4c3d27611a80ce1260c27	apt	libgpg-error=1.58-2
 deb/libgudev_238.orig.tar.xz	61266ab1afc9d73dbc60a8b2af73e99d2fdff47d99544d085760e4fa667b5dd1	apt	libgudev=238-7build1
+deb/libice_1.1.1.orig.tar.gz	04fbd34a11ba08b9df2e3cdb2055c2e3c1c51b3257f683d7fcf42dabcf8e1210	apt	libice=2:1.1.1-1build1
 deb/libinih_61.orig.tar.gz	7caf26a2202a4ca689df3fe4175dfa74e0faa18fcca07331bba934fd0ecb8f12	apt	libinih=61-1ubuntu1
 deb/libinput_1.31.1.orig.tar.gz	72c7d62a117f89a0e611d76b0a28ba8bf08fc24083d2678060aee8de88c87953	apt	libinput=1.31.1-1ubuntu1.2
 deb/libjpeg-turbo_2.1.5.orig.tar.gz	254f3642b04e309fee775123133c6464181addc150499561020312ec61c1bf7c	apt	libjpeg-turbo=2.1.5-4ubuntu4
@@ -162,6 +167,7 @@ deb/libpng1.6_1.6.57.orig.tar.gz	4cbb7b0746edc1683c9581b373365e955133b7f1243f171
 deb/libpsl_0.21.2.orig.tar.xz	11e34380f2c81d6e72c710464aae3b680df4ddcc1007826c630fb03c7ca6aa54	apt	libpsl=0.21.2-1.1build2
 deb/libpwquality_1.4.5.orig.tar.bz2	6fcf18b75d305d99d04d2e42982ed5b787a081af2842220ed63287a2d6a10988	apt	libpwquality=1.4.5-5build1
 deb/libseccomp_2.6.0.orig.tar.gz	83b6085232d1588c379dc9b9cae47bb37407cf262e6e74993c61ba72d2a784dc	apt	libseccomp=2.6.0-2ubuntu5
+deb/libsm_1.2.6.orig.tar.gz	166b4b50d606cdd83f1ddc61b5b9162600034f848b3e32ccbb0e63536b7d6cdd	apt	libsm=2:1.2.6-1build1
 deb/libsndfile_1.2.2.orig.tar.gz	ffe12ef8add3eaca876f04087734e6e8e029350082f3251f565fa9da55b52121	apt	libsndfile=1.2.2-4
 deb/libsoup3_3.6.6.orig.tar.xz	51ed0ae06f9d5a40f401ff459e2e5f652f9a510b7730e1359ee66d14d4872740	apt	libsoup3=3.6.6-1
 deb/libtirpc_1.3.7.orig.tar.bz2	b47d3ac19d3549e54a05d0019a6c400674da716123858cfdb6d3bdd70a66c702	apt	libtirpc=1.3.7-0.1
@@ -217,6 +223,7 @@ deb/network-manager_1.54.3.orig.tar.bz2	e38d55611af8127e1a2b1a7b4952bded1f61917c
 deb/nghttp2_1.68.0.orig.tar.gz	2c16ffc588ad3f9e2613c3fad72db48ecb5ce15bc362fcc85b342e48daf51013	apt	nghttp2=1.68.0-2ubuntu0.2
 deb/npth_1.8.orig.tar.bz2	8bd24b4f23a3065d6e5b26e98aba9ce783ea4fd781069c1b35d149694e90ca3e	apt	npth=1.8-3build1
 deb/open-vm-tools_13.0.10.orig.tar.xz	90f09355e93b6248cc9a62d70ab5ac7d9c0a696313295c325d3acccfdd75a7bf	apt	open-vm-tools=2:13.0.10-1ubuntu1
+deb/opencv_4.10.0+dfsg.orig.tar.xz	4ca619efbad524c550771ab110332fc81293fb720bd03980fe58bc15f9ca3be8	apt	opencv=4.10.0+dfsg-7ubuntu5
 deb/opendoas_6.8.2.orig.tar.xz	6192dedbbf66d8e9437c982864ce473ab662b7262a9fadf488cced12e830a466	apt	opendoas=6.8.2-1build1
 deb/openssl_3.5.5.orig.tar.gz	b28c91532a8b65a1f983b4c28b7488174e4a01008e29ce8e69bd789f28bc2a89	apt	openssl=3.5.5-1ubuntu3.5
 deb/ostree_2025.7.orig.tar.xz	af8d080b9585e7fd1faba8f022967e1c268ae62e20ecf32ee7b364c1e307570b	apt	ostree=2025.7-3build1
@@ -257,6 +264,7 @@ deb/qt6-multimedia_6.10.2.orig.tar.xz	93f7ef0106fbd731165a2723f3e436c911fc5e6880
 deb/qt6-positioning_6.10.2.orig.tar.xz	7051fa64477c66769840cad396fc3772a01ba5516363c8842a7a513fa0c4cdce	apt	qt6-positioning=6.10.2-1
 deb/qt6-sensors_6.10.2.orig.tar.xz	91e6515b7cebbfae3696861933f5359cc303dfe82f7849cf5a10df378c8ef581	apt	qt6-sensors=6.10.2-1
 deb/qt6-shadertools_6.10.2.orig.tar.xz	18d9dbbc4f7e6e96e6ed89a9965dc032e2b58158b65156c035537826216716c9	apt	qt6-shadertools=6.10.2-1
+deb/qt6-speech_6.10.2.orig.tar.xz	d937f6c715792b0d8f036e94513ebfc8def6b988a65f3ff30a7f4a8cc1263014	apt	qt6-speech=6.10.2-1
 deb/qt6-svg_6.10.2.orig.tar.xz	f07ff80f38caf235187200345392ca7479445ddf49a36c3694cd52a735dad6e1	apt	qt6-svg=6.10.2-2
 deb/qt6-tools_6.10.2.orig.tar.xz	1e3d2c07c1fd76d2425c6eaeeaa62ffaff5f79210c4e1a5bc2a6a9db668d5b24	apt	qt6-tools=6.10.2-1
 deb/qt6-wayland_6.10.2.orig.tar.xz	391998eb432719df26a6a67d8efdc67f8bf2afdd76c1ee3381ebff4fe7527ee2	apt	qt6-wayland=6.10.2-4
@@ -293,6 +301,7 @@ deb/xdg-desktop-portal-kde_6.6.4.orig.tar.xz	d99bdc236abfcae497727d5e48e7bbcc626
 deb/xdg-desktop-portal_1.21.1+ds.orig.tar.xz	21586f1612520a707b3675c50a34350a44566c67b9faeddf7ac15743ff23a457	apt	xdg-desktop-portal=1.21.1+ds-1ubuntu3.1
 deb/xdg-user-dirs_0.19.orig.tar.xz	e92deb929c10d4b29329397af8a2585101247f7e6177ac6f1d28e82130ed8c19	apt	xdg-user-dirs=0.19-1
 deb/xfsprogs_6.18.0.orig.tar.xz	3a6dc7b1245ce9bccd197bab00691f1b190bd3694d3ccc301d21b83afc133199	apt	xfsprogs=6.18.0-3
+deb/xft_2.3.6.orig.tar.gz	b7e59f69e0bbabe9438088775f7e5a7c16a572e58b11f9722519385d38192df5	apt	xft=2.3.6-1build2
 deb/xkeyboard-config_2.46.orig.tar.xz	10c58218fb60d08fb1f7b30304deb3ba47613195aa8a08a81f1972775ccc3640	apt	xkeyboard-config=2.46-2
 deb/xorgproto_2025.1.orig.tar.gz	d6f89f65bafb8c9b735e0515882b8a1511e8e864dde5e9513e191629369f2256	apt	xorgproto=2025.1-1
 deb/xtrans_1.6.0.orig.tar.gz	936b74c60b19c317c3f3cb1b114575032528dbdaf428740483200ea874c2ca0a	apt	xtrans=1.6.0-1build1
@@ -419,6 +428,7 @@ kf6-krunner-6.24.0.tar.xz	-	link	deb/kf6-krunner_6.24.0.orig.tar.xz
 kf6-kservice-6.24.0.tar.xz	-	link	deb/kf6-kservice_6.24.0.orig.tar.xz
 kf6-kstatusnotifieritem-6.24.0.tar.xz	-	link	deb/kf6-kstatusnotifieritem_6.24.0.orig.tar.xz
 kf6-ksvg-6.24.0.tar.xz	-	link	deb/kf6-ksvg_6.24.0.orig.tar.xz
+kf6-ktexteditor-6.24.0.tar.xz	-	link	deb/kf6-ktexteditor_6.24.0.orig.tar.xz
 kf6-ktextwidgets-6.24.0.tar.xz	-	link	deb/kf6-ktextwidgets_6.24.0.orig.tar.xz
 kf6-kunitconversion-6.24.0.tar.xz	-	link	deb/kf6-kunitconversion_6.24.0.orig.tar.xz
 kf6-kwallet-6.24.0.tar.xz	-	link	deb/kf6-kwallet_6.24.0.orig.tar.xz
@@ -428,9 +438,11 @@ kf6-kxmlgui-6.24.0.tar.xz	-	link	deb/kf6-kxmlgui_6.24.0.orig.tar.xz
 kf6-modemmanager-qt-6.23.0.tar.xz	-	link	deb/kf6-modemmanager-qt_6.23.0.orig.tar.xz
 kf6-networkmanager-qt-6.24.0.tar.xz	-	link	deb/kf6-networkmanager-qt_6.24.0.orig.tar.xz
 kf6-prison-6.24.0.tar.xz	-	link	deb/kf6-prison_6.24.0.orig.tar.xz
+kf6-purpose-6.24.0.tar.xz	-	link	deb/kf6-purpose_6.24.0.orig.tar.xz
 kf6-qqc2-desktop-style-6.24.0.tar.xz	-	link	deb/kf6-qqc2-desktop-style_6.24.0.orig.tar.xz
 kf6-solid-6.24.0.tar.xz	-	link	deb/kf6-solid_6.24.0.orig.tar.xz
 kf6-sonnet-6.24.0.tar.xz	-	link	deb/kf6-sonnet_6.24.0.orig.tar.xz
+kf6-syntax-highlighting-6.24.0.tar.xz	-	link	deb/kf6-syntax-highlighting_6.24.0.orig.tar.xz
 kf6-threadweaver-6.24.0.tar.xz	-	link	deb/kf6-threadweaver_6.24.0.orig.tar.xz
 kglobalacceld-6.6.4.tar.xz	-	link	deb/kglobalacceld_6.6.4.orig.tar.xz
 kinfocenter-6.6.4.tar.xz	-	link	deb/kinfocenter_6.6.4.orig.tar.xz
@@ -440,6 +452,7 @@ knighttime-6.6.4.tar.xz	-	link	deb/knighttime_6.6.4.orig.tar.xz
 konsole-25.12.3.tar.xz	-	link	deb/konsole_25.12.3.orig.tar.xz
 kpipewire-6.6.4.tar.xz	-	link	deb/kpipewire_6.6.4.orig.tar.xz
 kpmcore-25.12.3.tar.xz	-	link	deb/kpmcore_25.12.3.orig.tar.xz
+kquickimageeditor-0.6.0.tar.xz	-	link	deb/kquickimageeditor_0.6.0.orig.tar.xz
 kscreen-6.6.4.tar.xz	-	link	deb/kscreen_6.6.4.orig.tar.xz
 kscreenlocker-6.6.4.tar.xz	-	link	deb/kscreenlocker_6.6.4.orig.tar.xz
 ksystemstats-6.6.4.tar.xz	-	link	deb/ksystemstats_6.6.4.orig.tar.xz
@@ -461,6 +474,7 @@ libfyaml-0.9.4.tar.gz	-	link	deb/libfyaml_0.9.4.orig.tar.gz
 libgcrypt-1.12.0.tar.bz2	-	link	deb/libgcrypt20_1.12.0.orig.tar.bz2
 libgpg-error-1.58.tar.bz2	-	link	deb/libgpg-error_1.58.orig.tar.bz2
 libgudev-238.tar.xz	-	link	deb/libgudev_238.orig.tar.xz
+libice-1.1.1.tar.gz	-	link	deb/libice_1.1.1.orig.tar.gz
 libinput-1.31.1.tar.gz	-	link	deb/libinput_1.31.1.orig.tar.gz
 libjpeg-turbo-2.1.5.tar.gz	-	link	deb/libjpeg-turbo_2.1.5.orig.tar.gz
 libksba-1.6.7.tar.bz2	-	link	deb/libksba_1.6.7.orig.tar.bz2
@@ -474,6 +488,7 @@ libplasma-6.6.4.tar.xz	-	link	deb/libplasma_6.6.4.orig.tar.xz
 libpng-1.6.57.tar.gz	-	link	deb/libpng1.6_1.6.57.orig.tar.gz
 libpsl-0.21.2.tar.xz	-	link	deb/libpsl_0.21.2.orig.tar.xz
 libseccomp-2.6.0.tar.gz	-	link	deb/libseccomp_2.6.0.orig.tar.gz
+libsm-1.2.6.tar.gz	-	link	deb/libsm_1.2.6.orig.tar.gz
 libsndfile-1.2.2.tar.gz	-	link	deb/libsndfile_1.2.2.orig.tar.gz
 libtirpc-1.3.7.tar.bz2	-	link	deb/libtirpc_1.3.7.orig.tar.bz2
 libtool-2.5.4.tar.xz	-	link	deb/libtool_2.5.4.orig.tar.xz
@@ -493,6 +508,7 @@ libxdmcp-1.1.5.tar.gz	-	link	deb/libxdmcp_1.1.5.orig.tar.gz
 libxext-1.3.4.tar.gz	-	link	deb/libxext_1.3.4.orig.tar.gz
 libxfixes-6.0.0.tar.gz	-	link	deb/libxfixes_6.0.0.orig.tar.gz
 libxfont2-2.0.6.tar.gz	-	link	deb/libxfont_2.0.6.orig.tar.gz
+libxft-2.3.6.tar.gz	-	link	deb/xft_2.3.6.orig.tar.gz
 libxi-1.8.2.tar.gz	-	link	deb/libxi_1.8.2.orig.tar.gz
 libxinerama-1.1.4.tar.gz	-	link	deb/libxinerama_1.1.4.orig.tar.gz
 libxkbcommon-1.13.1.tar.gz	-	link	deb/libxkbcommon_1.13.1.orig.tar.gz
@@ -534,6 +550,7 @@ networkmanager-1.54.3.tar.bz2	-	link	deb/network-manager_1.54.3.orig.tar.bz2
 nghttp2-1.68.0.tar.gz	-	link	deb/nghttp2_1.68.0.orig.tar.gz
 npth-1.8.tar.bz2	-	link	deb/npth_1.8.orig.tar.bz2
 open-vm-tools-13.0.10.tar.xz	-	link	deb/open-vm-tools_13.0.10.orig.tar.xz
+opencv-4.10.0.tar.xz	-	link	deb/opencv_4.10.0+dfsg.orig.tar.xz
 opendoas-6.8.2.tar.xz	-	link	deb/opendoas_6.8.2.orig.tar.xz
 openssl-3.5.5.tar.gz	-	link	deb/openssl_3.5.5.orig.tar.gz
 ostree-2025.7.tar.xz	-	link	deb/ostree_2025.7.orig.tar.xz
@@ -571,6 +588,7 @@ qt6-qtlocation-6.10.2.tar.xz	-	link	deb/qt6-location_6.10.2.orig.tar.xz
 qt6-qtmultimedia-6.10.2.tar.xz	-	link	deb/qt6-multimedia_6.10.2.orig.tar.xz
 qt6-qtpositioning-6.10.2.tar.xz	-	link	deb/qt6-positioning_6.10.2.orig.tar.xz
 qt6-qtshadertools-6.10.2.tar.xz	-	link	deb/qt6-shadertools_6.10.2.orig.tar.xz
+qt6-qtspeech-6.10.2.tar.xz	-	link	deb/qt6-speech_6.10.2.orig.tar.xz
 qt6-qtsvg-6.10.2.tar.xz	-	link	deb/qt6-svg_6.10.2.orig.tar.xz
 qt6-qttools-6.10.2.tar.xz	-	link	deb/qt6-tools_6.10.2.orig.tar.xz
 qt6-qtwayland-6.10.2.tar.xz	-	link	deb/qt6-wayland_6.10.2.orig.tar.xz
@@ -615,3 +633,5 @@ xz-5.8.3.tar.xz	-	link	deb/xz-utils_5.8.3.orig.tar.xz
 yaml-cpp-0.8.0.tar.xz	-	link	deb/yaml-cpp_0.8.0+dfsg.orig.tar.xz
 zlib-1.3.1.tar.gz	-	link	deb/zlib_1.3.dfsg+really1.3.1.orig.tar.gz
 zstd-1.5.7.tar.xz	-	link	deb/libzstd_1.5.7+dfsg.orig.tar.xz
+deb/zxing-cpp_2.3.0.orig.tar.xz	2fac5e5dd48337d24f41cd23bfaacf619280c245fa40c6c31d31d213ac0e4380	apt	zxing-cpp=2.3.0-5
+zxing-cpp-2.3.0.tar.xz	-	link	deb/zxing-cpp_2.3.0.orig.tar.xz

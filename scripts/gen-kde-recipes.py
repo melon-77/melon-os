@@ -24,7 +24,7 @@ QTBASE = (QT + ' ' + QTDIRS + ' -DQT_BUILD_EXAMPLES=OFF -DQT_BUILD_TESTS=OFF '
   '-DFEATURE_system_png=ON -DFEATURE_system_jpeg=ON -DFEATURE_system_freetype=ON -DFEATURE_system_harfbuzz=ON '
   '-DFEATURE_fontconfig=ON -DFEATURE_openssl_linked=ON -DFEATURE_sql_sqlite=ON -DFEATURE_system_sqlite=ON '
   '-DFEATURE_icu=OFF -DFEATURE_journald=OFF -DFEATURE_zstd=ON -DFEATURE_xkbcommon=ON -DFEATURE_cups=ON '
-  '-DFEATURE_gtk3=OFF -DFEATURE_vulkan=OFF -DFEATURE_libinput=OFF -DFEATURE_tslib=OFF -DFEATURE_mtdev=OFF '
+  '-DFEATURE_gtk3=OFF -DFEATURE_vulkan=ON -DFEATURE_libinput=OFF -DFEATURE_tslib=OFF -DFEATURE_mtdev=OFF '
   '-DFEATURE_linuxfb=OFF -DFEATURE_vnc=OFF -DFEATURE_sql_psql=OFF -DFEATURE_sql_mysql=OFF -DFEATURE_sql_odbc=OFF '
   '-DFEATURE_reduce_relocations=OFF')
 
@@ -39,6 +39,7 @@ ORDER = [
  ('qt6-qtpositioning','qt6-positioning', QT+' '+QTDIRS, 'qt'),
  ('qt6-qtlocation','qt6-location', QT+' '+QTDIRS, 'qt'),   # plasma-workspace needs QtLocation
  ('qt6-qtwebview','qt6-webview', QT+' '+QTDIRS, 'qt'),   # Discover; no QtWebEngine backend (a whole Chromium)
+ ('qt6-qtspeech','qt6-speech', QT+' '+QTDIRS, 'qt'),   # KTextEditor needs the module; no speech engine yet
  ('qt6-qt5compat','qt6-5compat', QT+' '+QTDIRS, 'qt'),
  ('qt6-qttools','qt6-tools', QT+' '+QTDIRS+' -DFEATURE_assistant=OFF -DFEATURE_designer=OFF -DFEATURE_distancefieldgenerator=OFF '
    '-DFEATURE_pixeltool=OFF -DFEATURE_qtdiag=OFF -DFEATURE_clang=OFF -DFEATURE_qdoc=OFF -DFEATURE_linguist=ON', 'qt'),
@@ -46,7 +47,7 @@ ORDER = [
  ('extra-cmake-modules','kf6-extra-cmake-modules', '-DBUILD_DOC=OFF', 'noarch-kde'),
  ('plasma-wayland-protocols','plasma-wayland-protocols', '', 'noarch-kde'),
  ('polkit-qt-1','polkit-qt-1', KDE, 'kde'),
- ('qcoro','qcoro', KDE+' -DQCORO_BUILD_EXAMPLES=OFF -DQCORO_WITH_QTWEBSOCKETS=OFF -DQCORO_WITH_QML=ON', 'kde'),
+ ('qcoro','qcoro', KDE+' -DBUILD_SHARED_LIBS=ON -DQCORO_BUILD_EXAMPLES=OFF -DQCORO_WITH_QTWEBSOCKETS=OFF -DQCORO_WITH_QML=ON', 'kde'),   # shared: plasma-nm links it into a shared library
  ('pulseaudio-qt','pulseaudio-qt', KDE, 'kde'),   # plasma-pa talks to PipeWire through the PulseAudio API
  # QCA (crypto for KWallet's secret service); only the OpenSSL and GnuPG plugins
  ('qca','qca2', KDE+' -DQT6=ON -DBUILD_TESTS=OFF -DBUILD_TOOLS=OFF -DWITH_botan_PLUGIN=no -DWITH_pkcs11_PLUGIN=no -DWITH_cyrus-sasl_PLUGIN=no', 'kde'),
@@ -56,7 +57,8 @@ KF6 = ('kcoreaddons kconfig ki18n kwidgetsaddons kwindowsystem kguiaddons kcodec
        'kservice knotifications kjobwidgets solid sonnet ktextwidgets kxmlgui kbookmarks kpackage kidletime '
        'kstatusnotifieritem kwallet attica kirigami ksvg kdeclarative kded kio kcmutils knewstuff knotifyconfig '
        'kparts kpty kunitconversion krunner kquickcharts qqc2-desktop-style frameworkintegration kdesu '
-       'kfilemetadata threadweaver networkmanager-qt modemmanager-qt bluez-qt kimageformats kholidays prison').split()
+       'kfilemetadata threadweaver networkmanager-qt modemmanager-qt bluez-qt kimageformats kholidays prison '
+       'syntax-highlighting ktexteditor purpose').split()
 for k in KF6:
     extra = KDE
     if k == 'breeze-icons': extra += ' -DWITH_ICON_GENERATION=OFF -DBINARY_ICONS_RESOURCE=OFF'
@@ -64,12 +66,15 @@ for k in KF6:
     if k == 'kfilemetadata': extra += ' -DKFILEMETADATA_USE_TAGLIB=OFF'
     if k == 'kpty': extra += ' -DCMAKE_DISABLE_FIND_PACKAGE_UTEMPTER=ON'   # no utmp logging on musl
     if k == 'ktextwidgets': extra += ' -DWITH_TEXT_TO_SPEECH=OFF'         # no qtspeech in melon yet
+    if k == 'syntax-highlighting': extra += ' -DKATEHIGHLIGHTINGINDEXER_EXECUTABLE=$PWD/host-indexer/bin/katehighlightingindexer'
+    if k == 'prison': extra += ' -DWITH_DMTX=OFF'   # no Data Matrix yet; ZXing reads codes (Spectacle's QR scanning)
     ORDER.append((f'kf6-{k}', f'kf6-{k}', extra, 'kde'))
 PLASMA = [
  ('kdecoration',''), ('kwayland',''), ('layer-shell-qt',''), ('plasma-activities',''), ('plasma-activities-stats',''),
  ('kactivitymanagerd',''), ('kglobalacceld',''), ('libplasma',''), ('plasma5support',''), ('libkscreen',''),
  ('kirigami-addons',''), ('kpipewire',''), ('libksysguard',' -DBUILD_WITH_QTWEBENGINE=OFF'), ('ksystemstats',''),
  ('kscreenlocker',''), ('breeze',' -DBUILD_QT5=OFF'), ('knighttime',''),   # KWin's night light
+ ('kquickimageeditor',''),   # Spectacle's annotation editor
  ('kwin',' -DKWIN_BUILD_ACTIVITIES=ON -DKWIN_BUILD_X11=OFF -DQTWAYLANDSCANNER_KDE_EXECUTABLE=$PWD/host-scanner/qtwaylandscanner_kde'),
  ('plasma-workspace',' -DPLASMA_WAYLAND_DEFAULT_SESSION=ON'), ('plasma-integration',' -DBUILD_QT5=OFF'),
  ('plasma-desktop',''), ('systemsettings',''), ('kscreen',''), ('powerdevil',''), ('plasma-nm',' -DDISABLE_MODEMMANAGER_SUPPORT=ON'),
@@ -86,11 +91,20 @@ for n, extra in PLASMA:
 PKGREL = {n: 1 for n in ('qt6-qtbase kf6-kwindowsystem kf6-kguiaddons kf6-kdbusaddons kf6-kcrash kf6-kglobalaccel '
                          'kf6-kjobwidgets kf6-kidletime kf6-kstatusnotifieritem kf6-kio kf6-qqc2-desktop-style kf6-kdesu '
                          'kglobalacceld').split()}
+PKGREL['kf6-prison'] = 1   # with ZXing: barcode reading and PDF417
+PKGREL['kf6-kitemmodels'] = PKGREL['kf6-bluez-qt'] = 1   # rebuilt with their QML modules (first built before Qt QML existed)
+PKGREL['qcoro'] = 1   # shared libraries instead of static ones
 PKGREL['qca'] = 2   # relocatable CMake export (POST below)
-PKGREL['qt6-qtbase'] = 2   # CUPS print support (xdg-desktop-portal-kde's print dialog)
+PKGREL['qt6-qtbase'] = 3   # 2: CUPS print support (xdg-desktop-portal-kde); 3: Vulkan (kinfocenter; Mesa has RADV/ANV)
 
 # extra build() steps, run before configuring
+HOSTENV = ('unset CC CXX AR AS LD NM RANLIB STRIP OBJCOPY CFLAGS CXXFLAGS CPPFLAGS LDFLAGS PKG_CONFIG_LIBDIR '
+           'PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH CONFIG_SITE; ')
 PRE = {
+    # KSyntaxHighlighting builds its syntax index with katehighlightingindexer: build that for the build host first
+    'kf6-syntax-highlighting': '( ' + HOSTENV + 'cmake -G Ninja -S . -B host-indexer -DKSYNTAXHIGHLIGHTING_USE_GUI=OFF '
+            '-DBUILD_TESTING=OFF -DQT_MAJOR_VERSION=6 -DCMAKE_PREFIX_PATH=$M/hosttools/qt6 -DECM_DIR=$SYSROOT/usr/share/ECM/cmake '
+            '>/dev/null && ninja -C host-indexer katehighlightingindexer >/dev/null ); ',
     # KWin generates Wayland code with its own qtwaylandscanner_kde: build that for the build host first,
     # against the host Qt, with the cross toolchain and sysroot out of sight (rule 2)
     'kwin': '( unset CC CXX AR AS LD NM RANLIB STRIP OBJCOPY CFLAGS CXXFLAGS CPPFLAGS LDFLAGS PKG_CONFIG_LIBDIR '

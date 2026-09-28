@@ -1,0 +1,11 @@
+pkgname=libsm
+pkgver=1.2.6
+pkgrel=0
+pkgdesc="libsm (graphics stack)"
+license=custom
+source=(libsm-1.2.6.tar.gz)
+builddir=$srcdir/libSM-1.2.6
+makedepends=(libice-dev util-linux-dev)
+subpackages=(libsm-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-docs --without-xmlto; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

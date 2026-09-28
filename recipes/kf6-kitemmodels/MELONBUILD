@@ -1,6 +1,6 @@
 pkgname=kf6-kitemmodels
 pkgver=6.24.0
-pkgrel=0
+pkgrel=1
 pkgdesc="kf6-kitemmodels"
 license="LGPL-2.1-or-later OR GPL-2.0-or-later (see sources)"
 source=(kf6-kitemmodels-6.24.0.tar.xz)

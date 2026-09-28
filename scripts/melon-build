@@ -145,7 +145,7 @@ _relocate "$SYSROOT" /
 _relocate "$M/hosttools/qt6/qml" /usr/lib/qt6/qml
 _relocate "$M/hosttools/qt6/plugins" /usr/lib/qt6/plugins
 [ -d "$pkgdir${M%/*}" ] && find "$pkgdir${M%%/${M#/*/}}" -depth -type d -empty -delete 2>/dev/null || true
-grep -rlaE "$SYSROOT/(usr/(share|lib|libexec|bin)|etc)|$M/hosttools" "$pkgdir" 2>/dev/null | sed "s|^$pkgdir||" | while read -r f; do
+grep -rlaE --exclude='*.la' "$SYSROOT/(usr/(share|lib|libexec|bin)|etc)|$M/hosttools" "$pkgdir" 2>/dev/null | sed "s|^$pkgdir||" | while read -r f; do
   msg "LEAK: build-machine path compiled into $f"; done || true
 
 varname(){ printf '%s' "$1" | tr -c 'a-zA-Z0-9' '_'; }
@@ -164,6 +164,10 @@ normalise(){ local d=$1
   for x in bin sbin usr/sbin; do [ -d "$d/$x" ] && [ ! -L "$d/$x" ] && { mkdir -p "$d/usr/bin"; cp -a "$d/$x/." "$d/usr/bin/"; rm -rf "$d/$x"; }; done
   [ -d "$d/lib" ] && [ ! -L "$d/lib" ] && { mkdir -p "$d/usr/lib"; cp -a "$d/lib/." "$d/usr/lib/"; rm -rf "$d/lib"; }
   find "$d" -name '*.la' -delete
+  # absolute library and header links (keyutils: libkeyutils.so -> /usr/lib/...) would point into the build
+  # machine's own /usr from the sysroot: make them relative (-s: resolve by name only, never through host links)
+  find "$d/usr/lib" "$d/usr/include" -type l 2>/dev/null | while read -r l; do
+    t=$(readlink "$l"); case $t in /usr/*) ln -sfn "$(realpath -s -m --relative-to="$(dirname "${l#$d}")" "$t")" "$l";; esac; done || true
   if ! has_opt '!strip'; then
     find "$d" -type f \( -perm -u+x -o -name '*.so*' \) 2>/dev/null | while read -r f; do
       case $(file -b "$f") in *ELF*relocatable*) ;; *ELF*) $STRIP --strip-unneeded "$f" 2>/dev/null || true;; esac; done

@@ -1,0 +1,17 @@
+pkgname=udisks2
+pkgver=2.10.91
+pkgrel=0
+pkgdesc="UDisks2: disk and removable media service (Plasma's Disks & Devices, Dolphin's USB drives)"
+license="GPL-2.0-or-later AND LGPL-2.0-or-later"
+url=https://github.com/storaged-project/udisks
+source=(udisks2-2.10.91.tar.bz2)
+builddir=$srcdir/udisks-2.10.91
+makedepends=(glib-dev polkit-dev libgudev-dev eudev-dev util-linux-dev acl-dev elogind-dev libblockdev-dev)
+subpackages=(udisks2-dev)
+# started on demand over D-Bus (org.freedesktop.UDisks2.service); explicit directories, because pkg-config
+# answers with sysroot paths (rule 32)
+build(){ ./configure $conf_flags --disable-static --disable-man --disable-gtk-doc --disable-introspection --disable-nls \
+           --enable-daemon --enable-acl --enable-smart --disable-lvm2 --disable-iscsi --disable-btrfs --disable-lsm \
+           --with-udevdir=/usr/lib/udev --with-systemdsystemunitdir=no --with-tmpfilesdir=no \
+           --with-modloaddir=/usr/lib/modules-load.d --with-modprobedir=/usr/lib/modprobe.d; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,man,locale,gtk-doc}; }

@@ -1,0 +1,14 @@
+pkgname=acl
+pkgver=2.3.2
+pkgrel=0
+pkgdesc="Access control list tools and library (libacl)"
+license="LGPL-2.1-or-later AND GPL-2.0-or-later"
+url=https://savannah.nongnu.org/projects/acl
+source=(acl-2.3.2.tar.xz)
+makedepends=(attr-dev)
+subpackages=(acl-dev libacl)
+depends=(libacl)
+pkgdesc_libacl="Access control list library"
+build(){ ./configure $conf_flags --disable-static --disable-nls; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,man,locale}; }
+pkg_libacl(){ amove 'usr/lib/libacl.so.*'; }

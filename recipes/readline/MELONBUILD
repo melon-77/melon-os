@@ -1,0 +1,12 @@
+pkgname=readline
+pkgver=8.3
+pkgrel=0
+pkgdesc="GNU readline: line editing and history for interactive programs"
+license=GPL-3.0-or-later
+url=https://tiswww.case.edu/php/chet/readline/rltop.html
+source=(readline-8.3.tar.gz)
+makedepends=(ncurses-dev)
+subpackages=(readline-dev)
+# SHLIB_LIBS: the shared library records its ncurses dependency, so programs can link with -lreadline alone
+build(){ ./configure $conf_flags --disable-static --with-curses; make -j$JOBS SHLIB_LIBS=-lncursesw; }
+package(){ make DESTDIR=$pkgdir SHLIB_LIBS=-lncursesw install; rm -rf $pkgdir/usr/share/{doc,man,info,readline} $pkgdir/usr/bin; }

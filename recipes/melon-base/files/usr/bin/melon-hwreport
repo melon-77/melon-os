@@ -1,66 +1,115 @@
 #!/bin/sh
-# melon-hwreport: which hardware this computer has and which driver and firmware each part got, written to one
-# text file to send along with a problem report ("my touchpad doesn't work"). Needs nothing but sysfs and BusyBox,
-# so it works when little else does. Run it with sudo to include the kernel log.
+# melon-hwreport: which hardware this computer has, which driver and firmware each part got, and the state of
+# graphics, network, sound, Bluetooth, power, the session and the services, written to one text file to send along
+# with a problem report ("my touchpad doesn't work"). Needs nothing but sysfs and BusyBox, so it works when little
+# else does; programs that may be missing (nmcli, wpctl, ...) are skipped. It contains hardware IDs, driver and
+# service state, no personal files. Run it with sudo, or after a recent sudo, to include the kernel log.
 #
 #   melon-hwreport [file]      default: ~/melon-hwreport-<date>.txt
+#   melon-hwreport -           print the report instead (scripts/melon-diag.sh uses this)
 out=${1:-$HOME/melon-hwreport-$(date +%Y%m%d-%H%M).txt}
 drv(){ d=$(readlink "$1/driver" 2>/dev/null) && echo "${d##*/}" || echo -; }
+have(){ command -v "$1" >/dev/null 2>&1; }
+sec(){ printf '\n== %s\n' "$*"; }
+# run CMD: show the command and at most $LINES_MAX lines of what it prints
+run(){ printf '$ %s\n' "$*"; sh -c "$*" 2>&1 </dev/null | head -n "${LINES_MAX:-80}"; }
 
-{
+report(){
 . /etc/os-release 2>/dev/null
 echo "== melon hardware report, $(date)"
-echo "system: ${PRETTY_NAME:-melon}, kernel $(uname -r)"
+echo "system: ${PRETTY_NAME:-melon}, $(uname -a)"
 for f in sys_vendor product_name product_version board_name bios_version; do
   printf '%s: %s\n' "$f" "$(cat /sys/class/dmi/id/$f 2>/dev/null)"
 done
+have melon-detect-virt && echo "virtualisation: $(melon-detect-virt 2>&1)"
+echo "kernel command line: $(cat /proc/cmdline)"
 
-echo; echo "== PCI devices: slot class vendor:device driver"
+sec "PCI devices: slot class vendor:device driver"
 for d in /sys/bus/pci/devices/*; do
+  [ -e "$d" ] || continue
   v=$(cat $d/vendor); p=$(cat $d/device)
   echo "${d##*/} $(cat $d/class) ${v#0x}:${p#0x} $(drv $d)"
 done
 
-echo; echo "== USB devices: port vendor:product name drivers"
+sec "USB devices: port vendor:product manufacturer name [drivers]"
 for d in /sys/bus/usb/devices/*; do
   [ -f $d/idVendor ] || continue
   drivers=$(for i in $d/*:*; do [ -e "$i/driver" ] && drv "$i"; done | sort -u | xargs)
-  echo "${d##*/} $(cat $d/idVendor):$(cat $d/idProduct) $(cat $d/product 2>/dev/null) [${drivers:--}]"
+  echo "${d##*/} $(cat $d/idVendor):$(cat $d/idProduct) $(cat $d/manufacturer 2>/dev/null) $(cat $d/product 2>/dev/null) [${drivers:--}]"
 done
 
-echo; echo "== ACPI devices for I2C, GPIO, touchpads and platform keys: device id status driver"
+sec "devices without a driver (PCI, USB, I2C, HID, platform): device modalias"
+# map a modalias to a module with: modprobe -R <modalias>
+for d in /sys/bus/pci/devices/* /sys/bus/usb/devices/*:* /sys/bus/i2c/devices/* /sys/bus/hid/devices/* \
+         /sys/bus/platform/devices/*; do
+  [ -e "$d/modalias" ] || continue; [ -e "$d/driver" ] && continue
+  echo "${d##*/} $(cat $d/modalias)"
+done 2>/dev/null | head -n 80
+
+sec "ACPI devices for I2C, GPIO, touchpads and platform keys: device id status driver"
 for d in /sys/bus/acpi/devices/*; do
   h=$(cat $d/hid 2>/dev/null) || continue
   case $h in AMDI00*|INT33*|INT34*|INTC1*|PNP0C50|ACPI0C50|SYNA*|ELAN*|MSFT*|HPQ*|PNP0F*) ;; *) continue ;; esac
   echo "${d##*/} $h status=$(cat $d/status 2>/dev/null) $(drv $d/physical_node)"
 done
 
-echo; echo "== I2C devices: device name driver"
+sec "I2C devices: device name driver"
 for d in /sys/bus/i2c/devices/*; do [ -e "$d" ] && echo "${d##*/} $(cat $d/name 2>/dev/null) $(drv $d)"; done
 
-echo; echo "== input devices"
+sec "input devices"
 grep -E '^(N|H):' /proc/bus/input/devices
+LINES_MAX=30 run 'ls -l /dev/input'
 
-echo; echo "== network interfaces"
-ip link 2>&1
+sec "graphics"
+run 'ls -l /dev/dri; cat /sys/class/drm/card*/device/uevent 2>/dev/null | grep -E "DRIVER|PCI_ID"'
+run 'for b in /sys/class/backlight/*; do [ -e "$b" ] && echo "$b $(cat $b/brightness)/$(cat $b/max_brightness)" && ls -l $b/brightness; done'
+echo "session type: ${XDG_SESSION_TYPE:--} WAYLAND_DISPLAY=${WAYLAND_DISPLAY:--}"
 
-echo; echo "== radio switches (rfkill): name type soft-blocked hard-blocked"
+sec "network"
+run 'ip -br link 2>/dev/null || ip link; ip -br addr 2>/dev/null || ip addr'
+run 'for n in /sys/class/net/*; do [ -e "$n/device/driver" ] && echo "${n##*/} $(basename "$(readlink $n/device/driver)")"; done'
+echo "radio switches (rfkill): name type soft-blocked hard-blocked"
 for r in /sys/class/rfkill/rfkill*; do
   [ -e "$r" ] && echo "$(cat $r/name) $(cat $r/type) soft=$(cat $r/soft) hard=$(cat $r/hard)"
 done
+have nmcli && run 'nmcli -c no general; nmcli -c no device'
+run 'cat /etc/resolv.conf'
 
-echo; echo "== NetworkManager"
-nmcli -c no general 2>&1; nmcli -c no device 2>&1
+sec "sound"
+run 'cat /proc/asound/cards; ls /dev/snd'
+have wpctl && LINES_MAX=60 run 'wpctl status'
+run 'ps -eo user,args | grep -E "pipewire|wireplumber|pulse" | grep -v grep'
 
-echo; echo "== loaded modules"
+sec "bluetooth"
+run 'ls /sys/class/bluetooth'
+have bluetoothctl && LINES_MAX=12 run 'bluetoothctl show'
+
+sec "power"
+run 'ls /sys/class/power_supply; cat /sys/class/power_supply/BAT*/capacity 2>/dev/null; cat /sys/power/mem_sleep'
+run 'cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_driver'
+have powerprofilesctl && LINES_MAX=10 run 'powerprofilesctl'
+
+sec "session and permissions"
+run 'id'
+have loginctl && run 'loginctl list-sessions; loginctl show-session "$XDG_SESSION_ID" | grep -E "Type|Seat|Active|Remote"'
+LINES_MAX=20 run 'ls /run/user/$(id -u)'
+
+sec "services"
+run 'for s in /var/service/*; do [ -e "$s" ] && sv status $s; done'
+run 'for f in /var/log/*/current; do [ -e "$f" ] && echo "--- $f" && tail -n 5 $f; done'
+
+sec "loaded modules"
 cut -d' ' -f1 /proc/modules | sort | xargs
 
-echo; echo "== kernel messages about firmware, drivers and errors"
-if dmesg >/dev/null 2>&1; then
-  dmesg | grep -i -E 'firmware|fw|fail|error|i2c|hid|touchpad|elan|synaptics|iwl|rtw|mt79|ath1|brcm|amdgpu|i915|xe |snd|sof' | tail -200
+sec "kernel messages about firmware, drivers and errors"
+pat='firmware|fw|error|fail|warn|timeout|not found|missing|unknown|denied|i2c|hid|touchpad|elan|synaptics|iwl|rtw|mt7|ath|brcm|amdgpu|i915|xe |bluetooth|snd|sof|acp|backlight|hp_wmi'
+if log=$(dmesg 2>/dev/null) || log=$(sudo -n dmesg 2>/dev/null); then
+  printf '%s\n' "$log" | grep -i -E "$pat" | tail -n 200
 else
   echo "(not readable as $(id -un): run sudo melon-hwreport to include the kernel log)"
 fi
-} > "$out" 2>&1
+}
 
+if [ "$out" = - ]; then report 2>&1; exit 0; fi
+report > "$out" 2>&1
 echo "melon-hwreport: wrote $out"

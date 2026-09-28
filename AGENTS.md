@@ -396,7 +396,8 @@ the serial port, so tests don't need a screen. The test also records the sound c
   `options=(rust)`), taking everything that depends on them along. **No safeguards, on purpose**: if the desktop
   needs a Rust package, the desktop goes too. The reward comes first, so it stays whatever the removal takes:
   `melon-rust-free ROOT USER` (melon-desktop, from `/usr/share/melon/.rewards/rust-free`) installs the
-  "farewell, Ferris" wallpaper, sets it on the user's first Plasma login and leaves the badge `/etc/melon/rust-free`.
+  "farewell, Ferris" wallpaper (drawn by `art/ferris.py`, which also writes the lossless master `art/ferris.png`), sets
+  it on the user's first Plasma login and leaves the badge `/etc/melon/rust-free`.
 - **Profiles** live in `/usr/share/melon/profiles/` on the live system: `<name>` is the package list,
   `<name>.services` the runit services (`name` enables one, `-name` drops a base service). `mkiso.sh`
   writes them. The desktop profile swaps `mdevd`/`dhcp` for `udevd` and NetworkManager, and the

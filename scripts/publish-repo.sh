@@ -19,7 +19,9 @@ for d in $REPO/*/; do
   a=$(basename $d); [ -f $d/Packages.adb ] || continue
   big=$(find $d -name '*.apk' -size +99M)
   [ -z "$big" ] || { echo "publish-repo: over GitHub's 100 MB limit: $big" >&2; exit 1; }
-  mkdir -p $a; cp -l $d/*.apk $d/Packages.adb $a/ 2>/dev/null || cp $d/*.apk $d/Packages.adb $a/
+  # hard links save the copy, but the kernel refuses them for files another user owns (protected_hardlinks),
+  # and packages built with sudo belong to root: link or copy each file on its own
+  mkdir -p $a; for f in $d/*.apk $d/Packages.adb; do ln "$f" $a/ 2>/dev/null || cp "$f" $a/; done
   echo "$a: $(ls $a/*.apk | wc -l) packages, $(du -sh $a | cut -f1)"
 done
 cat > README.md <<'EOF'

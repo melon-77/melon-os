@@ -1,0 +1,11 @@
+{
+    "KPlugin": {
+        "Authors": [ { "Name": "melon" } ],
+        "Description": "the gauntlet survivors' Plasma style",
+        "Id": "melon-gold",
+        "License": "LGPL-2.0-or-later",
+        "Name": "melon gold",
+        "Version": "1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

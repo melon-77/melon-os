@@ -1,0 +1,11 @@
+{
+    "KPlugin": {
+        "Authors": [ { "Name": "melon" } ],
+        "Description": "melon's Plasma style",
+        "Id": "melon",
+        "License": "LGPL-2.0-or-later",
+        "Name": "melon",
+        "Version": "1.0"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

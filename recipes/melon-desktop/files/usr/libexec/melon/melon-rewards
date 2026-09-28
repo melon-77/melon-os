@@ -1,14 +1,22 @@
 #!/bin/sh
-# melon-rewards ROOT [USER]: a gauntlet survivor's rewards: the survivor wallpapers, the badge melonfetch shows,
-# the golden GRUB background (melon-update-grub picks it by the badge) and, for USER, the certificate in ~/Pictures
-# and "the other side" as wallpaper on the next Plasma login. Used by the installer and to unlock them for testing.
+# melon-rewards ROOT [USER]: a gauntlet survivor's rewards: the survivor wallpapers, the badge melonfetch shows (and
+# melon-update-grub reads, for the gold boot menu), the gold login screen, the gold colours, Plasma style and Konsole
+# scheme, and, for USER, the certificate in ~/Pictures and the gold look on the next Plasma login
+# (melon-survivor-look). Used by the installer and to unlock them for testing.
 set -eu
 ROOT=${1:-/} U=${2:-}
 R=/usr/share/melon/.rewards
-mkdir -p "$ROOT/usr/share/wallpapers" "$ROOT/etc/melon" "$ROOT/usr/share/melon/grub"
-cp -a $R/wallpapers/. "$ROOT/usr/share/wallpapers/"
+S=$ROOT/usr/share
+mkdir -p "$S/wallpapers" "$ROOT/etc/melon" "$ROOT/etc/sddm.conf.d" "$S/sddm/themes/melon-gold" "$S/color-schemes" \
+  "$S/plasma/desktoptheme" "$S/konsole"
+cp -a $R/wallpapers/. "$S/wallpapers/"
 [ -s "$ROOT/etc/melon/gauntlet-survivor" ] || date +%Y-%m-%d > "$ROOT/etc/melon/gauntlet-survivor"
-cp $R/grub/background-survivor.png "$ROOT/usr/share/melon/grub/"
+# the gold editions: the login screen (melon's own, with the portal and a gold accent), colours, Plasma style, Konsole
+cp -a $R/sddm/melon-gold/. "$S/sddm/themes/melon-gold/"; ln -sfn ../melon/Main.qml "$S/sddm/themes/melon-gold/Main.qml"
+cp -a $R/color-schemes/. "$S/color-schemes/"
+cp -a $R/desktoptheme/. "$S/plasma/desktoptheme/"
+cp -a $R/konsole/. "$S/konsole/"
+printf '# a gauntlet survivor (melon-rewards): the gold login screen\n[Theme]\nCurrent=melon-gold\n' > "$ROOT/etc/sddm.conf.d/20-survivor.conf"
 if [ -n "$U" ] && [ -d "$ROOT/home/$U" ]; then
   ids=$(awk -F: -v u="$U" '$1==u{print $3":"$4}' "$ROOT/etc/passwd")
   mkdir -p "$ROOT/home/$U/Pictures" "$ROOT/home/$U/.config/autostart"
@@ -16,8 +24,8 @@ if [ -n "$U" ] && [ -d "$ROOT/home/$U" ]; then
   cat > "$ROOT/home/$U/.config/autostart/melon-survivor.desktop" <<DESK
 [Desktop Entry]
 Type=Application
-Name=melon survivor wallpaper
-Exec=sh -c 'plasma-apply-wallpaperimage /usr/share/wallpapers/melon-survivor-portal && rm -f ~/.config/autostart/melon-survivor.desktop'
+Name=melon survivor look
+Exec=sh -c '/usr/libexec/melon/melon-survivor-look && rm -f ~/.config/autostart/melon-survivor.desktop'
 X-KDE-autostart-phase=2
 NoDisplay=true
 DESK

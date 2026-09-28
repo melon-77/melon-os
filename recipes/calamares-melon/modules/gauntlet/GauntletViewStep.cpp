@@ -1,3 +1,4 @@
+#include <QDir>
 #include <QFile>
 #include <QTimer>
 #include "GauntletViewStep.h"
@@ -90,6 +91,27 @@ bool
 GauntletViewStep::isNextEnabled() const
 {
     return m_config->passed() || skipped();
+}
+
+void
+GauntletConfig::setTrialPassed( bool t )
+{
+    if ( t == m_trialPassed )
+    {
+        return;
+    }
+    m_trialPassed = t;
+    if ( t )
+    {
+        // cal-finish hands out the survivor rewards only when this file exists
+        QDir().mkpath( QStringLiteral( "/run/melon" ) );
+        QFile f( QStringLiteral( "/run/melon/.trial-passed" ) );
+        if ( f.open( QIODevice::WriteOnly ) )
+        {
+            f.write( QByteArray::number( m_mistakes ) + '\n' );
+        }
+    }
+    emit trialPassedChanged();
 }
 
 bool

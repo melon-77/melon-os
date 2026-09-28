@@ -295,11 +295,31 @@ if mode == 'desktop-install':
     # the gauntlet rewards through the unlock script (called by path; the command that starts it stays unnamed)
     out = sh('/usr/libexec/melon/.gold jcole; echo REW=$([ -s /etc/melon/gauntlet-survivor ] && echo badge)'
              '$(ls -d /usr/share/wallpapers/melon-survivor-* | wc -l)$([ -s /home/jcole/Pictures/melon-gauntlet-certificate.svg ] && echo cert)'
-             '$(grep -q "menu_color_highlight=black/yellow" /boot/grub/grub.cfg && echo gold)')
-    rew = 'REW=badge3certgold' in out; ok &= rew
-    step('gauntlet rewards: ' + ('badge, 3 survivor wallpapers, certificate, golden GRUB menu' if rew else f'MISSING {out[-300:]!r}'))
-    mon(f'screendump {M}/logs/qemu-desktop-installed.ppm'); time.sleep(3)
-    step('screenshots: logs/qemu-desktop-greeter.ppm, -splash.ppm, -installed.ppm')
+             '$(grep -q "set theme=" /boot/grub/grub.cfg && grep -q "survivor edition" /boot/grub/themes/melon/theme.txt && echo gold)'
+             '$(grep -qx "Current=melon-gold" /etc/sddm.conf.d/20-survivor.conf && [ -s /usr/share/sddm/themes/melon-gold/Main.qml ] && echo sddm)')
+    rew = 'REW=badge3certgoldsddm' in out; ok &= rew
+    step('gauntlet rewards: ' + ('badge, 3 survivor wallpapers, certificate, gold boot menu, gold login screen' if rew else f'MISSING {out[-300:]!r}'))
+    # the gold look in jcole's running session (what a survivor's first login runs), read back from jcole's config
+    sh("pid=$(ps -o pid,user,comm | awk '$2==\"jcole\" && $3==\"plasmashell\"{print $1}' | head -1)")
+    sh("e=$(tr '\\0' '\\n' < /proc/$pid/environ | grep -E '^(DBUS_SESSION_BUS_ADDRESS|WAYLAND_DISPLAY|XDG_RUNTIME_DIR)=' | tr '\\n' ' ')")
+    look = sh('su -s /bin/sh jcole -c "env $e /usr/libexec/melon/melon-survivor-look"; echo LOOK=$?; '
+              'su -s /bin/sh jcole -c \'kreadconfig6 --file kdeglobals --group General --key ColorScheme; '
+              'kreadconfig6 --file plasmarc --group Theme --key name; '
+              'kreadconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile; '
+              'kreadconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image --group General --key Image\' '
+              '| tr "\\n" " " | sed "s/^/GOLD=/"')
+    gold = 'LOOK=0' in look and 'GOLD=MelonGold melon-gold MelonGold.profile /usr/share/wallpapers/melon-survivor-gold/' in look
+    ok &= gold; step('gold look in the session: ' + ('colours, Plasma style, Konsole, lock screen, wallpaper' if gold else f'MISSING {look[-300:]!r}'))
+    time.sleep(10); mon(f'screendump {M}/logs/qemu-desktop-installed.ppm'); time.sleep(3)
+    # the gold login screen: back to the greeter (this ends jcole's session)
+    sh('sv restart sddm')
+    for _ in range(60):
+        time.sleep(2); gpid = count(greeter)
+        if gpid and gpid != pid: break
+    time.sleep(15); gup = gpid and count(greeter) == gpid; ok &= bool(gup)
+    step('gold greeter after restarting SDDM: ' + ('running' if gup else 'NOT RUNNING'))
+    mon(f'screendump {M}/logs/qemu-desktop-greeter-gold.ppm'); time.sleep(3)
+    step('screenshots: logs/qemu-desktop-greeter.ppm, -splash.ppm, -installed.ppm, -greeter-gold.ppm')
     p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)
     step('installed desktop test: ' + ('OK' if ok else 'FAILED'))
     sys.exit(0 if ok else 1)

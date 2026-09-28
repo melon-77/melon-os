@@ -164,10 +164,11 @@ menuentry 'melon live (serial console)' {
   initrd /boot/initramfs.img
 }
 CFG
-# desktop edition: the melon GRUB background (black menu backgrounds are transparent over it)
-if [ -f $ROOT/usr/share/melon/grub/background.png ]; then
-  cp $ROOT/usr/share/melon/grub/background.png $ISO/boot/grub/melon-bg.png
-  sed -i 's|^insmod all_video$|insmod all_video\nif loadfont unicode; then set gfxmode=auto; insmod gfxterm; insmod png; terminal_output gfxterm serial; background_image -m stretch /boot/grub/melon-bg.png; fi|' $ISO/boot/grub/grub.cfg
+# desktop edition: the melon boot menu theme (from melon-desktop)
+if [ -f $ROOT/usr/share/melon/grub/themes/melon/theme.txt ]; then
+  mkdir -p $ISO/boot/grub/themes && cp -r $ROOT/usr/share/melon/grub/themes/melon $ISO/boot/grub/themes/
+  fonts=$(cd $ISO/boot/grub/themes/melon && for f in *.pf2; do printf 'loadfont /boot/grub/themes/melon/%s; ' $f; done)
+  sed -i "s|^insmod all_video\$|insmod all_video\nif loadfont unicode; then set gfxmode=auto; insmod gfxterm; insmod png; terminal_output gfxterm serial; ${fonts}set theme=/boot/grub/themes/melon/theme.txt; fi|" $ISO/boot/grub/grub.cfg
 fi
 mkdir -p $M/out
 if [ "$EDITION" = desktop ]; then rm -f $M/out/melon-desktop-*-$ISOARCH.iso; else rm -f $M/out/melon-2*-$ISOARCH.iso; fi

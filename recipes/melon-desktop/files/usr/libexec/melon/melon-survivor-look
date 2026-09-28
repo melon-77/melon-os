@@ -1,0 +1,11 @@
+#!/bin/sh
+# melon-survivor-look: a gauntlet survivor's look in the running Plasma session: the gold colours, Plasma style and
+# Konsole profile, the golden melon on the lock screen, and "the other side" as wallpaper. Run once by the survivor's
+# first login (the autostart from melon-rewards, removed when this succeeds) or right away by the unlock.
+plasma-apply-colorscheme MelonGold >/dev/null 2>&1
+plasma-apply-desktoptheme melon-gold >/dev/null 2>&1
+kwriteconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile MelonGold.profile
+kwriteconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image --group General \
+  --key Image /usr/share/wallpapers/melon-survivor-gold/
+# last, so its result says whether the session was ready (plasmashell up): if not, the autostart tries next login
+plasma-apply-wallpaperimage /usr/share/wallpapers/melon-survivor-portal >/dev/null 2>&1

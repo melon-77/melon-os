@@ -1,0 +1,6 @@
+#!/bin/sh
+# lets the owner through the gauntlet without answering, to look at the rest of the installer (started by a
+# hidden command: /etc/profile.d/zz-melon.sh); a skipped gauntlet earns no rewards
+[ "$(id -u)" = 0 ] || exec doas /usr/libexec/melon/.pass
+mkdir -p /run/melon && : > /run/melon/.gauntlet-skip
+printf '\033[1;33mthe gauntlet lets you through:\033[0m press Next in the installer (no survivor rewards)\n'

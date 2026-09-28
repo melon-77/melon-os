@@ -296,20 +296,34 @@ the serial port, so tests don't need a screen. The test also records the sound c
 
 ## Installers: do not break these product decisions
 
-- **Graphical installer (desktop ISO): Calamares with the gauntlet.** About 200 very easy questions, one
-  per screen. The Next button waits a few seconds. A wrong answer sends you back 10 questions, never out
-  of the installer. Questions are in `recipes/calamares-melon/modules/gauntlet/questions.js`; the page is
-  a small Calamares view module (`GauntletViewStep`, `gauntlet.qml`) that keeps Calamares' Next button
-  locked until the last question. It's deliberately slow, to put off people who are only there for
-  status. Keep it that way. Survivors get three wallpapers ("the other side" portal, set on first login, golden
-  rain and the golden melon), the golden GRUB background, an SVG certificate in `~/Pictures` and a melonfetch badge
-  (`/etc/melon/gauntlet-survivor`). The rewards live hidden in melon-desktop (`/usr/share/melon/.rewards`) and
-  `melon-rewards ROOT USER` hands them out (`cal-finish`, and the unlock command below).
+- **Graphical installer (desktop ISO): Calamares with the gauntlet.** One Calamares view module
+  (`GauntletViewStep`, `gauntlet.qml` in `recipes/calamares-melon/modules/gauntlet/`) in two parts:
+  1. **The install gauntlet:** about 200 very easy questions (`questions.js`), one per screen, shuffled on every run
+     (question order and answer order; attention checks stay after the question they name and show its new number).
+     The Next question button waits a few seconds. A wrong answer sends you back 10 questions, never out of the
+     installer. Calamares' Next button stays locked until the last question.
+  2. **The final trial (optional):** 50 real questions (`trial.js`: the answers are only there as salted md5
+     hashes; the plaintext draft lives outside the repo), shuffled, 90 seconds each. A wrong answer or a timeout
+     sends you back 10; in the last 20 any mistake restarts the finale. Walking away still installs melon.
+  It's deliberately slow, to put off people who are only there for status. Keep it that way. Only passing the trial
+  (the page writes `/run/melon/.trial-passed`) earns the rewards: melon in gold (the `melon-gold` login screen via
+  `/etc/sddm.conf.d/20-survivor.conf`, the MelonGold colours, the `melon-gold` Plasma style, the MelonGold Konsole
+  profile and the golden melon on the lock screen, applied on first login by `melon-survivor-look`, and the gold
+  boot menu, which melon-update-grub picks by the badge), three wallpapers ("the other side" portal, golden rain and
+  the golden melon), an SVG certificate in `~/Pictures` and a melonfetch badge (`/etc/melon/gauntlet-survivor`). The
+  rewards live hidden in melon-desktop (`/usr/share/melon/.rewards`) and `melon-rewards ROOT USER` hands them out
+  (`cal-finish`, and the unlock command below).
+- **melon's look (melon-desktop):** Plasma style `melon`, colours MelonDark, Konsole profile Melon, SDDM theme `melon`
+  (its own QML, `usr/share/sddm/themes/melon`; the gold edition reuses the same `Main.qml` with another
+  `theme.conf`), GRUB theme `usr/share/melon/grub/themes/melon` (the desktop ISO uses it too). The art generators are
+  in `art/` (run from a checkout of the melon-art working directory with its fonts); `art/grubtheme.py` needs
+  `grub-mkfont` (from Ubuntu's grub-common: `apt-get download grub-common` and `dpkg -x` it, no install needed).
 - **Hidden owner commands** work like the console installer: `/etc/profile.d/zz-melon.sh` recognises them by the
   first 16 hex digits of their name's sha256 and nothing else. The same rules apply: never write their names in any
   file, comment, commit or test. `59c1a50f2e93bdc1` unlocks every gauntlet reward (`/usr/libexec/melon/.gold`,
-  desktop only; tests call that path). The gauntlet page lets the owner through when `/run/melon/.gauntlet-skip`
-  exists (the skip command creates it); a skipped gauntlet earns no rewards.
+  desktop only; tests call that path). `721b2b05ebcca53c` skips the gauntlet (`/usr/libexec/melon/.pass`, live desktop
+  only): it creates `/run/melon/.gauntlet-skip`, the page then unlocks Calamares' Next, and a skipped gauntlet earns
+  no rewards.
 - **Calamares runs melon's own jobs** (`cal-prepare`, `cal-finish` in `calamares-melon`): Calamares'
   users job calls shadow's `useradd`/`usermod`/`groupadd`, which melon doesn't have, so `cal-prepare`
   puts BusyBox-backed shims into the target's `/usr/local/bin` and `cal-finish` removes them.

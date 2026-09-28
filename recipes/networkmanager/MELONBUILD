@@ -1,6 +1,6 @@
 pkgname=networkmanager
 pkgver=1.54.3
-pkgrel=0
+pkgrel=1
 pkgdesc="networkmanager (graphics stack)"
 license=custom
 source=(networkmanager-1.54.3.tar.bz2)

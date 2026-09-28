@@ -1,0 +1,12 @@
+pkgname=xkbcomp
+pkgver=1.4.7
+pkgrel=0
+pkgdesc="X keymap compiler (Xwayland runs it to set up the keyboard for X11 apps)"
+license=MIT
+url=https://gitlab.freedesktop.org/xorg/app/xkbcomp
+source=(x11-xkb-utils-7.7+9.tar.xz)
+builddir=$srcdir/x11-xkb-utils-7.7+9build1/xkbcomp
+makedepends=(libxkbfile-dev libx11-dev xorgproto)
+# the Debian source bundles several X keyboard tools; only xkbcomp is needed
+build(){ ./configure $conf_flags; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man; }

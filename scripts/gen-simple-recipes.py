@@ -13,7 +13,7 @@ ROWS = [
  ('wayland','1.24.0','wayland_1.24.0.orig.tar.gz','wayland-1.24.0','meson','libffi-dev expat-dev',"-Ddocumentation=false -Dtests=false -Ddtd_validation=false",''),
  ('wayland-protocols','1.47','wayland-protocols_1.47.orig.tar.xz','wayland-protocols-1.47','meson','wayland-dev',"-Dtests=false",'noarch'),
  ('xkeyboard-config','2.46','xkeyboard-config_2.46.orig.tar.xz','xkeyboard-config-2.46','meson','',"-Dxkb-base=/usr/share/X11/xkb -Dcompat-rules=true -Dxorg-rules-symlinks=true",'noarch'),
- ('libxkbcommon','1.13.1','libxkbcommon_1.13.1.orig.tar.gz','xkbcommon-libxkbcommon-920ea79','meson','libxcb-dev wayland-dev wayland-protocols libxml2-dev xkeyboard-config',"-Denable-docs=false -Denable-x11=true -Denable-wayland=true -Denable-tools=true -Dxkb-config-root=/usr/share/X11/xkb -Denable-bash-completion=false",''),
+ ('libxkbcommon','1.13.1','libxkbcommon_1.13.1.orig.tar.gz','xkbcommon-libxkbcommon-920ea79','meson','libxcb-dev wayland-dev wayland-protocols libxml2-dev xkeyboard-config',"-Denable-docs=false -Denable-x11=true -Denable-wayland=true -Denable-tools=true -Dxkb-config-root=/usr/share/X11/xkb -Dxkb-config-versioned-extensions-path=/usr/share/xkeyboard-config-2.d -Dxkb-config-unversioned-extensions-path=/usr/share/xkeyboard-config.d -Denable-bash-completion=false",''),
  ('libevdev','1.13.6','libevdev_1.13.6+dfsg.orig.tar.xz','libevdev-1.13.6','meson','',"-Dtests=disabled -Ddocumentation=disabled",''),
  ('mtdev','1.1.7','mtdev_1.1.7.orig.tar.gz','mtdev-1.1.7','auto','',"--disable-static",''),
  ('libgudev','238','libgudev_238.orig.tar.xz','libgudev-238','meson','glib-dev eudev-dev',"-Dintrospection=disabled -Dvapi=disabled -Dtests=disabled",''),
@@ -118,7 +118,7 @@ ROWS = [
 ]
 
 # pkgrel for recipes whose build changed without a version change (rule 6 in AGENTS.md)
-PKGREL = {'sqlite': 1, 'npth': 1, 'libjpeg-turbo': 1, 'networkmanager': 0, 'power-profiles-daemon': 0, 'ostree': 1, 'pipewire': 1}
+PKGREL = {'sqlite': 1, 'npth': 1, 'libjpeg-turbo': 1, 'networkmanager': 1, 'power-profiles-daemon': 1, 'libxkbcommon': 1, 'fuse3': 1, 'ostree': 1, 'pipewire': 1}
 
 def recipe(r):
     name, ver, tb, top, system, mdeps, opts, extra = r

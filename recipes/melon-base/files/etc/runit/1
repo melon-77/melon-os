@@ -30,6 +30,8 @@ else
   mdev -s
 fi
 [ -s /etc/modules ] && grep -v '^#' /etc/modules | xargs -r modprobe -a -q
+# drop-ins from other packages (/etc/modules is melon-base's own file)
+cat /etc/modules-load.d/*.conf 2>/dev/null | grep -v -e '^#' -e '^$' | xargs -r modprobe -a -q
 # VMware's own display driver, only on real VMware (see /etc/modprobe.d/melon-vm.conf)
 [ "$(melon-detect-virt 2>/dev/null)" = vmware ] && modprobe -q vmwgfx
 
@@ -40,6 +42,8 @@ msg "Mounting filesystems"
 mount -o remount,rw / 2>/dev/null
 mount -a -t nosysfs,nonfs,noproc 2>/dev/null   # includes the /tmp tmpfs from fstab
 swapon -a 2>/dev/null
+# socket directories for X11 clients under Xwayland (KWin and Qt expect them to exist, world-writable, sticky)
+mkdir -p -m 1777 /tmp/.X11-unix /tmp/.ICE-unix; chmod 1777 /tmp/.X11-unix /tmp/.ICE-unix
 
 hostname -F /etc/hostname 2>/dev/null
 sysctl -q -p /etc/sysctl.conf 2>/dev/null

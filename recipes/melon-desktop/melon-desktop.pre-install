@@ -1,0 +1,6 @@
+#!/bin/sh
+# SDDM's greeter runs as its own user
+addgroup -S sddm 2>/dev/null
+adduser -S -D -H -h /var/lib/sddm -s /sbin/nologin -G sddm -g 'SDDM greeter' sddm 2>/dev/null
+addgroup sddm video 2>/dev/null
+exit 0

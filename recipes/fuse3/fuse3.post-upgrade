@@ -1,0 +1,4 @@
+#!/bin/sh
+# fusermount3 mounts FUSE filesystems for unprivileged users (Flatpak document portal); it must be setuid root
+chmod 4755 /usr/bin/fusermount3 2>/dev/null
+exit 0

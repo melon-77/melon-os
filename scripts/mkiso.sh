@@ -37,10 +37,13 @@ if [ "$EDITION" = desktop ]; then
   _p=; for x in $DESKTOP_PKGS $LIVE_ONLY; do
     if ls $M/repo/$APK_ARCH/$x-[0-9]*.apk >/dev/null 2>&1; then _p="$_p $x"; else echo "warning: $x is not built for $APK_ARCH, left out"; fi
   done; DESKTOP_PKGS=${_p# }
-  apkx --root $ROOT --initdb add $PKGS $DESKTOP_PKGS
-else
-  apkx --root $ROOT --initdb add $PKGS
 fi
+# BusyBox first, then the base layer (melon-base owns /etc/passwd and /etc/group), then the rest: install scripts
+# need /bin/sh and addgroup/adduser (eudev builds its hwdb, ...), and the users they add (dbus's messagebus,
+# polkitd) must not be overwritten by melon-base's passwd arriving later. apk only orders by declared deps.
+apkx --root $ROOT --initdb add busybox
+apkx --root $ROOT add melon-base
+apkx --root $ROOT add $PKGS $DESKTOP_PKGS
 rm -rf $ROOT/var/cache/apk/*
 mkdir -p $ROOT/usr/share/melon/profiles
 printf '%s\n' $PKGS > $ROOT/usr/share/melon/profiles/base
@@ -143,7 +146,7 @@ insmod all_video
 # the kernel starts in the firmware's own mode (VGA text on BIOS, so its first messages and errors
 # stay visible; the GOP framebuffer on UEFI)
 set menu_color_normal=light-gray/black
-set menu_color_highlight=black/light-magenta
+set menu_color_highlight=black/light-green
 menuentry 'melon live' {
   linux /boot/vmlinuz quiet
   initrd /boot/initramfs.img

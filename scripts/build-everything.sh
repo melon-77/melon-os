@@ -25,13 +25,13 @@ PLUMBING="libffi pcre2 glib libcap duktape linux-pam eudev elogind polkit argp-s
   sqlite json-c popt device-mapper cryptsetup dosfstools squashfs-tools e2fsprogs bzip2 hunspell attr lm-sensors libogg libvorbis
   libtool sound-theme-freedesktop libcanberra icu boost-headers python3"
 SIMPLE=$(python3 $M/scripts/gen-simple-recipes.py)
-DESKTOP_LIBS="libsndfile pulseaudio cups modemmanager qrencode zxing-cpp opencv mesa libepoxy xwayland lua5.4 vulkan-loader ffmpeg appstream flatpak xdg-desktop-portal gamemode melon-fonts
+DESKTOP_LIBS="libsndfile pulseaudio cups modemmanager qrencode zxing-cpp opencv llvm mesa libepoxy xkbcomp xwayland lua5.4 vulkan-loader ffmpeg appstream flatpak xdg-desktop-portal gamemode melon-fonts
   qemu-guest-agent open-vm-tools hvtools melon-vm-guest"
 KDE=$(python3 $M/scripts/gen-kde-recipes.py)
 INSTALLERS="kpmcore calamares calamares-melon melon-desktop"
 ALL=$(printf '%s\n' $BASE $PLUMBING $SIMPLE $DESKTOP_LIBS $KDE $INSTALLERS | awk '!seen[$0]++')
-# recipes nobody listed yet go at the end (llvm is left out: Mesa is built without it for now)
-EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL) | grep -vx llvm)
+# recipes nobody listed yet go at the end
+EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))
 ALL="$ALL $EXTRA"
 
 # a few passes: a package that failed because something it needs came later in the list gets another go

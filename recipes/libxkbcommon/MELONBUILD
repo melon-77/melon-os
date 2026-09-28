@@ -1,11 +1,11 @@
 pkgname=libxkbcommon
 pkgver=1.13.1
-pkgrel=0
+pkgrel=1
 pkgdesc="libxkbcommon (graphics stack)"
 license=custom
 source=(libxkbcommon-1.13.1.tar.gz)
 builddir=$srcdir/xkbcommon-libxkbcommon-920ea79
 makedepends=(libxcb-dev wayland-dev wayland-protocols libxml2-dev xkeyboard-config)
 subpackages=(libxkbcommon-dev)
-build(){ meson_setup -Denable-docs=false -Denable-x11=true -Denable-wayland=true -Denable-tools=true -Dxkb-config-root=/usr/share/X11/xkb -Denable-bash-completion=false build; ninja -C build; }
+build(){ meson_setup -Denable-docs=false -Denable-x11=true -Denable-wayland=true -Denable-tools=true -Dxkb-config-root=/usr/share/X11/xkb -Dxkb-config-versioned-extensions-path=/usr/share/xkeyboard-config-2.d -Dxkb-config-unversioned-extensions-path=/usr/share/xkeyboard-config.d -Denable-bash-completion=false build; ninja -C build; }
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

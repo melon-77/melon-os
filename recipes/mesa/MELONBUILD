@@ -1,9 +1,10 @@
 pkgname=mesa
 pkgver=26.0.8
-pkgrel=1
+pkgrel=2
 pkgdesc="OpenGL, EGL, GBM and Vulkan drivers (AMD, Intel, NVIDIA nouveau, virtual, software)"
-# built without LLVM for now: radeonsi uses the ACO compiler. MELON_MESA_LLVM=enabled adds llvmpipe once LLVM exists
-_llvm=${MELON_MESA_LLVM:-disabled}
+# with LLVM: llvmpipe (fast software rendering for VMs and GPUs without a driver) and radeonsi's LLVM paths;
+# MELON_MESA_LLVM=disabled builds without it (radeonsi then uses only ACO)
+_llvm=${MELON_MESA_LLVM:-enabled}
 license=MIT
 url=https://www.mesa3d.org
 source=(mesa-26.0.8.tar.xz)

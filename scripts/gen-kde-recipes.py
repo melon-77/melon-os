@@ -75,7 +75,7 @@ PLASMA = [
  ('kirigami-addons',''), ('kpipewire',''), ('libksysguard',' -DBUILD_WITH_QTWEBENGINE=OFF'), ('ksystemstats',''),
  ('kscreenlocker',''), ('breeze',' -DBUILD_QT5=OFF'), ('knighttime',''),   # KWin's night light
  ('kquickimageeditor',''),   # Spectacle's annotation editor
- ('kwin',' -DKWIN_BUILD_ACTIVITIES=ON -DKWIN_BUILD_X11=OFF -DQTWAYLANDSCANNER_KDE_EXECUTABLE=$PWD/host-scanner/qtwaylandscanner_kde'),
+ ('kwin',' -DKWIN_BUILD_ACTIVITIES=ON -DKWIN_BUILD_X11=ON -DQTWAYLANDSCANNER_KDE_EXECUTABLE=$PWD/host-scanner/qtwaylandscanner_kde'),
  ('plasma-workspace',' -DPLASMA_WAYLAND_DEFAULT_SESSION=ON'), ('plasma-integration',' -DBUILD_QT5=OFF'),
  ('plasma-desktop',' -DBUILD_KCM_MOUSE_X11=OFF -DBUILD_KCM_TOUCHPAD_X11=OFF'), ('systemsettings',''), ('kscreen',''), ('powerdevil',''), ('plasma-nm',' -DDISABLE_MODEMMANAGER_SUPPORT=ON'),
  ('plasma-pa',''), ('bluedevil',''), ('polkit-kde-agent-1',''), ('xdg-desktop-portal-kde',''), ('milou',''),
@@ -93,6 +93,9 @@ PKGREL = {n: 1 for n in ('qt6-qtbase kf6-kwindowsystem kf6-kguiaddons kf6-kdbusa
                          'kglobalacceld').split()}
 PKGREL['kf6-prison'] = 1   # with ZXing: barcode reading and PDF417
 PKGREL['kf6-kitemmodels'] = PKGREL['kf6-bluez-qt'] = 1   # rebuilt with their QML modules (first built before Qt QML existed)
+PKGREL['qt6-qt5compat'] = PKGREL['qt6-qtmultimedia'] = PKGREL['qt6-qtwayland'] = 1   # with their QML modules
+PKGREL['kwin'] = 1   # X11 on: in KWin 6.6 it also switches Xwayland support, which startplasma asks for
+PKGREL['sddm'] = 2   # 1: QML components back from the host Qt's qml dir; 2: PAM services
 PKGREL['qcoro'] = 1   # shared libraries instead of static ones
 PKGREL['qca'] = 2   # relocatable CMake export (POST below)
 PKGREL['qt6-qtbase'] = 3   # 2: CUPS print support (xdg-desktop-portal-kde); 3: Vulkan (kinfocenter; Mesa has RADV/ANV)
@@ -115,6 +118,12 @@ PRE = {
 
 # extra package() steps
 POST = {
+    # SDDM's PAM services in melon's scheme (its own files include Arch's system-login); base-session has
+    # pam_elogind, which registers the login session and creates XDG_RUNTIME_DIR for KWin's Wayland socket
+    'sddm': " install -d $pkgdir/etc/pam.d;"
+            " printf 'auth\\tinclude\\tbase-auth\\naccount\\tinclude\\tbase-account\\npassword\\tinclude\\tbase-password\\nsession\\tinclude\\tbase-session\\n' > $pkgdir/etc/pam.d/sddm;"
+            " printf 'auth\\trequired\\tpam_permit.so\\naccount\\tinclude\\tbase-account\\npassword\\trequired\\tpam_deny.so\\nsession\\tinclude\\tbase-session\\n' > $pkgdir/etc/pam.d/sddm-autologin;"
+            " printf 'auth\\trequired\\tpam_permit.so\\naccount\\trequired\\tpam_permit.so\\npassword\\trequired\\tpam_deny.so\\nsession\\trequired\\tpam_unix.so\\n-session\\toptional\\tpam_elogind.so\\n' > $pkgdir/etc/pam.d/sddm-greeter;",
     # QCA exports absolute /usr paths in its CMake targets; make them relative so they resolve inside the sysroot too
     'qca': " sed -i 's|\"/usr/|\"${_IMPORT_PREFIX}/|g' $pkgdir/usr/lib/cmake/Qca-qt6/Qca-qt6Targets*.cmake;"
            " sed -i 's|^set(_IMPORT_PREFIX \"/usr\")$|get_filename_component(_IMPORT_PREFIX \"${CMAKE_CURRENT_LIST_DIR}/../../..\" ABSOLUTE)|'"

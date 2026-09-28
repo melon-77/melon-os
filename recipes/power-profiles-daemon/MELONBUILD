@@ -1,6 +1,6 @@
 pkgname=power-profiles-daemon
 pkgver=0.30
-pkgrel=0
+pkgrel=1
 pkgdesc="power-profiles-daemon (graphics stack)"
 license=custom
 source=(power-profiles-daemon-0.30.tar.bz2)

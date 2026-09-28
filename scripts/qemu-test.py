@@ -458,6 +458,12 @@ else:
     if i == 1: p.sendline('melonuser'); p.expect('root', timeout=60)
     p.sendline('exit'); p.expect(PROMPT, timeout=60)
     print(sh('melon-svc status; ls /var/log'))
+    # NetHack: setgid games (never root), and the shared scores belong to group games
+    for _ in range(3):                              # (the previous command's output can still be arriving)
+        nh = sh("echo NH=$(stat -c '%a %U:%G' /usr/lib/nethack/nethack /var/games/nethack /var/games/nethack/record | xargs)")
+        if 'NH=' in nh: break
+    nh_ok = 'NH=2755 root:games 775 root:games 664 root:games' in nh
+    step('nethack: ' + ('setgid games, shared scores' if nh_ok else f'WRONG {nh[-200:]!r}'))
     # the host side of the guest agent: ask the VM for its OS info, then shut it down from the host
     import socket, json
     try:
@@ -469,3 +475,4 @@ else:
     except Exception as e:
         step(f'guest agent not answering ({e}), powering off from inside')
         p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300); step('powered off')
+    if not nh_ok: sys.exit(1)

@@ -1,0 +1,17 @@
+pkgname=flite
+pkgver=2.2
+pkgrel=1
+pkgdesc="Flite: small text-to-speech engine (Qt Speech's backend: KDE's Speak Text)"
+license=custom:BSD-style
+url=http://cmuflite.org/
+source=(flite-2.2.tar.gz)
+subpackages=(flite-dev flite-tools)
+pkgdesc_flite_tools="flite command-line tools and the other voices"
+# Qt plays the speech through Qt Multimedia, so no audio output of its own; its old config.sub predates musl
+# targets; the build isn't safe in parallel
+build(){ cp /usr/share/misc/config.sub /usr/share/misc/config.guess .
+  ./configure $conf_flags --enable-shared --disable-static --with-audio=none; make -j1; }
+package(){ make DESTDIR=$pkgdir install; rm -f $pkgdir/usr/lib/*.a; }
+# the engine keeps the two best US voices Qt offers (kal16, slt); the tools link every voice, so they go with the rest
+pkg_tools(){ amove usr/bin 'usr/lib/libflite_cmu_us_kal.so*' 'usr/lib/libflite_cmu_us_awb.so*' 'usr/lib/libflite_cmu_us_rms.so*' \
+               'usr/lib/libflite_cmu_time_awb.so*' 'usr/lib/libflite_cmu_indic*' 'usr/lib/libflite_cmu_grapheme*'; }

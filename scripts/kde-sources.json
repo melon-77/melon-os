@@ -594,6 +594,11 @@
 "ver": "6.10.2",
 "top": "qttools-everywhere-src-6.10.2"
 },
+"qt6-translations": {
+"file": "qt6-translations_6.10.2.orig.tar.xz",
+"ver": "6.10.2",
+"top": "qttranslations-everywhere-src-6.10.2"
+},
 "qt6-wayland": {
 "file": "qt6-wayland_6.10.2.orig.tar.xz",
 "ver": "6.10.2",

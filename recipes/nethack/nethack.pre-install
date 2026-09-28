@@ -1,0 +1,5 @@
+#!/bin/sh
+# the game is setgid games so every user can write the shared high scores and their own saves
+grep -q '^games:' /etc/group && exit 0
+addgroup -S games || { echo "nethack: couldn't add the games group" >&2; exit 1; }
+exit 0

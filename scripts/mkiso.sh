@@ -13,7 +13,7 @@ ROOT=$WORK/liveroot LIVE=$WORK/livelayer ISO=$WORK/iso INITRD=$WORK/initrd
 DATE=$(date +%Y%m%d)
 ISOARCH=$([ $MELON_ARCH = x86 ] && echo i686 || echo x86_64)
 OUTISO=$M/out/melon-$DATE-$ISOARCH.iso
-PKGS=${PKGS:-"melon-base linux-melon linux-firmware wpa_supplicant xfsprogs grub zstd openssl ca-certificates cryptsetup ncurses-terminfo musl-utils alsa-utils mpg123 kmod efibootmgr"}
+PKGS=${PKGS:-"melon-base linux-melon linux-firmware wpa_supplicant xfsprogs grub zstd openssl ca-certificates cryptsetup ncurses-terminfo musl-utils alsa-utils mpg123 kmod efibootmgr nethack"}
 # leave out optional packages that haven't been built for this architecture yet (with a warning)
 _p=; for x in $PKGS; do
   if ls $M/repo/$APK_ARCH/$x-[0-9]*.apk >/dev/null 2>&1; then _p="$_p $x"; else echo "warning: $x is not built for $APK_ARCH, left out"; fi
@@ -164,10 +164,11 @@ menuentry 'melon live (serial console)' {
   initrd /boot/initramfs.img
 }
 CFG
-# desktop edition: the melon GRUB background (black menu backgrounds are transparent over it)
-if [ -f $ROOT/usr/share/melon/grub/background.png ]; then
-  cp $ROOT/usr/share/melon/grub/background.png $ISO/boot/grub/melon-bg.png
-  sed -i 's|^insmod all_video$|insmod all_video\nif loadfont unicode; then set gfxmode=auto; insmod gfxterm; insmod png; terminal_output gfxterm serial; background_image -m stretch /boot/grub/melon-bg.png; fi|' $ISO/boot/grub/grub.cfg
+# desktop edition: the melon boot menu theme (from melon-desktop)
+if [ -f $ROOT/usr/share/melon/grub/themes/melon/theme.txt ]; then
+  mkdir -p $ISO/boot/grub/themes && cp -r $ROOT/usr/share/melon/grub/themes/melon $ISO/boot/grub/themes/
+  fonts=$(cd $ISO/boot/grub/themes/melon && for f in *.pf2; do printf 'loadfont /boot/grub/themes/melon/%s; ' $f; done)
+  sed -i "s|^insmod all_video\$|insmod all_video\nif loadfont unicode; then set gfxmode=auto; insmod gfxterm; insmod png; terminal_output gfxterm serial; ${fonts}set theme=/boot/grub/themes/melon/theme.txt; fi|" $ISO/boot/grub/grub.cfg
 fi
 mkdir -p $M/out
 if [ "$EDITION" = desktop ]; then rm -f $M/out/melon-desktop-*-$ISOARCH.iso; else rm -f $M/out/melon-2*-$ISOARCH.iso; fi

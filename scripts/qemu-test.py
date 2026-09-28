@@ -16,6 +16,12 @@
 """
 import sys, time, pexpect, os
 import re as _re
+import types, pexpect.expect, pexpect.pty_spawn, pexpect.utils
+# pexpect times its timeouts with the wall clock, and WSL's clock jumps (hours at a time after the laptop sleeps,
+# or back and forth while Windows and NTP disagree) would end them at once: give it the monotonic clock
+_mono = types.SimpleNamespace(**{k: getattr(time, k) for k in dir(time) if not k.startswith('_')})
+_mono.time = time.monotonic
+for _m in (pexpect.expect, pexpect.pty_spawn, pexpect.utils): _m.time = _mono
 M = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 mode = sys.argv[1]
@@ -112,8 +118,8 @@ else:
     disk, = args
     cmd += disk_args(disk) + ['-boot', 'c']
 
-t0 = time.time()
-def step(s): print(f'[{time.time()-t0:7.1f}s] {s}', flush=True)
+t0 = time.monotonic()
+def step(s): print(f'[{time.monotonic()-t0:7.1f}s] {s}', flush=True)
 p = pexpect.spawn(cmd[0], cmd[1:], encoding='utf-8', codec_errors='replace', timeout=600)
 p.logfile_read = log
 PROMPT = r'@melon[\w-]*.*[#$] '
@@ -285,6 +291,9 @@ if mode == 'desktop-install':
     flap = _re.search(r'FLAP=([^\r\n]*)', flapping); flap = flap.group(1).strip() if flap else '?'
     ok &= flap == ''; step('services: ' + ('none restarting in a loop' if flap == '' else f'RESTARTING: {flap}'))
     step('MIME cache: ' + ('present' if mime else 'MISSING'))
+    # packaged files owned by the build machine's account arrive as nobody's (rule 45)
+    nob = count('find /usr /etc -xdev \\( -user 65534 -o -group 65534 \\) | wc -l')
+    ok &= nob == 0; step('system files owned by nobody: ' + ('none' if nob == 0 else f'{nob} FOUND'))
     # the desktop profile's services, and the user may manage printers
     svcs = count('n=0; for s in avahi-daemon cupsd; do sv check /var/service/$s >/dev/null 2>&1 && n=$((n+1)); done; echo $n')
     lpadm = count('id -Gn jcole | tr " " "\\n" | grep -cx lpadmin')
@@ -292,11 +301,31 @@ if mode == 'desktop-install':
     # the gauntlet rewards through the unlock script (called by path; the command that starts it stays unnamed)
     out = sh('/usr/libexec/melon/.gold jcole; echo REW=$([ -s /etc/melon/gauntlet-survivor ] && echo badge)'
              '$(ls -d /usr/share/wallpapers/melon-survivor-* | wc -l)$([ -s /home/jcole/Pictures/melon-gauntlet-certificate.svg ] && echo cert)'
-             '$(grep -q "menu_color_highlight=black/yellow" /boot/grub/grub.cfg && echo gold)')
-    rew = 'REW=badge3certgold' in out; ok &= rew
-    step('gauntlet rewards: ' + ('badge, 3 survivor wallpapers, certificate, golden GRUB menu' if rew else f'MISSING {out[-300:]!r}'))
-    mon(f'screendump {M}/logs/qemu-desktop-installed.ppm'); time.sleep(3)
-    step('screenshots: logs/qemu-desktop-greeter.ppm, -splash.ppm, -installed.ppm')
+             '$(grep -q "set theme=" /boot/grub/grub.cfg && grep -q "survivor edition" /boot/grub/themes/melon/theme.txt && echo gold)'
+             '$(grep -qx "Current=melon-gold" /etc/sddm.conf.d/20-survivor.conf && [ -s /usr/share/sddm/themes/melon-gold/Main.qml ] && echo sddm)')
+    rew = 'REW=badge3certgoldsddm' in out; ok &= rew
+    step('gauntlet rewards: ' + ('badge, 3 survivor wallpapers, certificate, gold boot menu, gold login screen' if rew else f'MISSING {out[-300:]!r}'))
+    # the gold look in jcole's running session (what a survivor's first login runs), read back from jcole's config
+    sh("pid=$(ps -o pid,user,comm | awk '$2==\"jcole\" && $3==\"plasmashell\"{print $1}' | head -1)")
+    sh("e=$(tr '\\0' '\\n' < /proc/$pid/environ | grep -E '^(DBUS_SESSION_BUS_ADDRESS|WAYLAND_DISPLAY|XDG_RUNTIME_DIR)=' | tr '\\n' ' ')")
+    look = sh('su -s /bin/sh jcole -c "env $e /usr/libexec/melon/melon-survivor-look"; echo LOOK=$?; '
+              'su -s /bin/sh jcole -c \'kreadconfig6 --file kdeglobals --group General --key ColorScheme; '
+              'kreadconfig6 --file plasmarc --group Theme --key name; '
+              'kreadconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile; '
+              'kreadconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image --group General --key Image\' '
+              '| tr "\\n" " " | sed "s/^/GOLD=/"')
+    gold = 'LOOK=0' in look and 'GOLD=MelonGold melon-gold MelonGold.profile /usr/share/wallpapers/melon-survivor-gold/' in look
+    ok &= gold; step('gold look in the session: ' + ('colours, Plasma style, Konsole, lock screen, wallpaper' if gold else f'MISSING {look[-300:]!r}'))
+    time.sleep(10); mon(f'screendump {M}/logs/qemu-desktop-installed.ppm'); time.sleep(3)
+    # the gold login screen: back to the greeter (this ends jcole's session)
+    sh('sv restart sddm')
+    for _ in range(60):
+        time.sleep(2); gpid = count(greeter)
+        if gpid and gpid != pid: break
+    time.sleep(15); gup = gpid and count(greeter) == gpid; ok &= bool(gup)
+    step('gold greeter after restarting SDDM: ' + ('running' if gup else 'NOT RUNNING'))
+    mon(f'screendump {M}/logs/qemu-desktop-greeter-gold.ppm'); time.sleep(3)
+    step('screenshots: logs/qemu-desktop-greeter.ppm, -splash.ppm, -installed.ppm, -greeter-gold.ppm')
     p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)
     step('installed desktop test: ' + ('OK' if ok else 'FAILED'))
     sys.exit(0 if ok else 1)

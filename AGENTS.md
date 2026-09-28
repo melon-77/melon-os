@@ -16,14 +16,16 @@ source by our own scripts and shipped as a signed apk v3 package.
 | shell | bash 5.3 (login shell), BusyBox ash is `/bin/sh` | |
 | privileges | doas (OpenDoas 6.8.2) with a `sudo` command on top | members of `wheel` |
 | init | runit 2.3 | stages in `/etc/runit/{1,2,3}`, services in `/etc/sv`, enabled = symlink in `/var/service` |
-| devices | BusyBox mdev (`mdev -d` service) | no udev yet, stage 2 will need one |
+| devices | eudev 3.2 on the desktop profile (`udevd` service), BusyBox mdev (`mdevd` service) on the console profile | the desktop profile swaps `mdevd` for `udevd`; see rule 44 |
 | packages | apk-tools 3.0.8 | repo index `Packages.adb`, signed with `keys/melon-signing.rsa` |
 | kernel | Linux 7.0, `linux-melon` (generic) | config = `x86_64_defconfig` + `recipes/linux-melon/config-melon` |
 | boot | GRUB 2.14, both `i386-pc` and `x86_64-efi` | ISO and installs boot on BIOS **and** UEFI |
-| disks | GPT: 1 MiB BIOS boot, 1 GiB FAT32 `/boot` (also the ESP), XFS `/` | kernel boots with `root=PARTUUID=...`, no initramfs on installed systems |
+| disks | GPT: 1 MiB BIOS boot, 1 GiB FAT32 `/boot` (also the ESP), XFS `/` | kernel boots with `root=PARTUUID=...`; only encrypted (LUKS) installs have an initramfs (rule 28); dual boot next to Windows on UEFI (see Installers) |
 | filesystem | merged `/usr`: `/bin`, `/sbin`, `/usr/sbin` -> `usr/bin`, `/lib` -> `usr/lib` | packages must only ship files under `/usr`, `/etc`, `/var`, `/boot` |
-| desktop | KDE Plasma on Wayland (stage 2, not built yet) | |
-| gaming | Flatpak + Flathub Steam (stage 3, not built yet) | Steam is glibc-only, so it can't run natively on musl |
+| desktop | KDE Plasma 6.6 on Wayland (KWin, Xwayland), Qt 6.10, SDDM | desktop ISO and desktop profile; list in `scripts/desktop-packages.txt` |
+| desktop plumbing | D-Bus, elogind, polkit, PipeWire + WirePlumber, NetworkManager, BlueZ, CUPS, UDisks2 | console profile keeps `dhcp` + wpa_supplicant |
+| graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe | |
+| gaming | Flatpak 1.16 + Flathub, GameMode | Steam is glibc-only, so it can't run natively on musl: `melon-first-boot` offers Steam (and Firefox, VLC, Prism Launcher) from Flathub on first login |
 | game library | SDL3 3.4 + SDL3_image + SDL3_ttf (`sdl3`, `sdl3-image`, `sdl3-ttf`) | for melon's own games; SDL dlopen()s its Wayland/X11/audio backends |
 
 Owner's config (`CONFIG_*` answers) lives in `docs/config.txt`. Don't change those choices without the owner's approval.
@@ -219,13 +221,20 @@ Rebuilding the kernel takes about an hour on 2 cores.
     `I2C_DESIGNWARE_PLATFORM` needed `I2C_DESIGNWARE_CORE`; `HP_WMI` needed `X86_PLATFORM_DRIVERS_HP`). The kernel
     recipe now stops when an option from `config-melon` isn't in the final `.config`: look its dependencies up in the
     Kconfig files and add them. The built config ships as `/boot/config-melon`; check it, not the fragment. For a
-    real machine, `sudo melon-hwreport` lists every PCI/USB/ACPI/I2C device with the driver it got, plus the kernel's
-    firmware messages; map IDs to modules with `modprobe -R <modalias>` against the built kernel.
+    real machine, `sudo melon-hwreport` lists every PCI/USB/ACPI/I2C device with the driver it got, the modaliases of
+    devices that got none, graphics, network, sound, Bluetooth, power and service state, and the kernel's firmware
+    messages; map IDs to modules with `modprobe -R <modalias>` against the built kernel. (`scripts/melon-diag.sh`, the
+    old `curl | sh` tool, is now a wrapper that prints the same report.)
 44. **Device events between stage 1's udevd and the udevd service are lost.** Stage 1 runs a udevd for the boot
     coldplug and stops it; the runit service starts a new one a moment later. A Wi-Fi card's interface appears only
     after its firmware loads (MT7921, iwlwifi, ath11k), often in that gap: udev never processed it, so it kept the
     kernel name `wlan0` and NetworkManager left it "unmanaged" (the ProBook's MT7921). The service replays the "add"
     events for net, ieee80211, rfkill and bluetooth devices once it runs (`recipes/eudev/udevd.run`).
+45. **Packaged files must not keep the builder's account.** `cp -a $startdir/files/.` keeps the checkout's owner;
+    apk records that account's name, and on a melon system without it the files become `nobody`'s. Service run
+    scripts, `/etc/profile.d` and the installer's helpers were writable by `nobody`, then run by root. `melon-build`
+    gives root every file owned by an account from 1000 up; system accounts a recipe sets on purpose (below 1000)
+    stay. The desktop-install test fails if anything under `/usr` or `/etc` belongs to `nobody`.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
@@ -305,20 +314,34 @@ the serial port, so tests don't need a screen. The test also records the sound c
 
 ## Installers: do not break these product decisions
 
-- **Graphical installer (desktop ISO): Calamares with the gauntlet.** About 200 very easy questions, one
-  per screen. The Next button waits a few seconds. A wrong answer sends you back 10 questions, never out
-  of the installer. Questions are in `recipes/calamares-melon/modules/gauntlet/questions.js`; the page is
-  a small Calamares view module (`GauntletViewStep`, `gauntlet.qml`) that keeps Calamares' Next button
-  locked until the last question. It's deliberately slow, to put off people who are only there for
-  status. Keep it that way. Survivors get three wallpapers ("the other side" portal, set on first login, golden
-  rain and the golden melon), the golden GRUB background, an SVG certificate in `~/Pictures` and a melonfetch badge
-  (`/etc/melon/gauntlet-survivor`). The rewards live hidden in melon-desktop (`/usr/share/melon/.rewards`) and
-  `melon-rewards ROOT USER` hands them out (`cal-finish`, and the unlock command below).
+- **Graphical installer (desktop ISO): Calamares with the gauntlet.** One Calamares view module
+  (`GauntletViewStep`, `gauntlet.qml` in `recipes/calamares-melon/modules/gauntlet/`) in two parts:
+  1. **The install gauntlet:** about 200 very easy questions (`questions.js`), one per screen, shuffled on every run
+     (question order and answer order; attention checks stay after the question they name and show its new number).
+     The Next question button waits a few seconds. A wrong answer sends you back 10 questions, never out of the
+     installer. Calamares' Next button stays locked until the last question.
+  2. **The final trial (optional):** 50 real questions (`trial.js`: the answers are only there as salted md5
+     hashes; the plaintext draft lives outside the repo), shuffled, 90 seconds each. A wrong answer or a timeout
+     sends you back 10; in the last 20 any mistake restarts the finale. Walking away still installs melon.
+  It's deliberately slow, to put off people who are only there for status. Keep it that way. Only passing the trial
+  (the page writes `/run/melon/.trial-passed`) earns the rewards: melon in gold (the `melon-gold` login screen via
+  `/etc/sddm.conf.d/20-survivor.conf`, the MelonGold colours, the `melon-gold` Plasma style, the MelonGold Konsole
+  profile and the golden melon on the lock screen, applied on first login by `melon-survivor-look`, and the gold
+  boot menu, which melon-update-grub picks by the badge), three wallpapers ("the other side" portal, golden rain and
+  the golden melon), an SVG certificate in `~/Pictures` and a melonfetch badge (`/etc/melon/gauntlet-survivor`). The
+  rewards live hidden in melon-desktop (`/usr/share/melon/.rewards`) and `melon-rewards ROOT USER` hands them out
+  (`cal-finish`, and the unlock command below).
+- **melon's look (melon-desktop):** Plasma style `melon`, colours MelonDark, Konsole profile Melon, SDDM theme `melon`
+  (its own QML, `usr/share/sddm/themes/melon`; the gold edition reuses the same `Main.qml` with another
+  `theme.conf`), GRUB theme `usr/share/melon/grub/themes/melon` (the desktop ISO uses it too). The art generators are
+  in `art/` (run from a checkout of the melon-art working directory with its fonts); `art/grubtheme.py` needs
+  `grub-mkfont` (from Ubuntu's grub-common: `apt-get download grub-common` and `dpkg -x` it, no install needed).
 - **Hidden owner commands** work like the console installer: `/etc/profile.d/zz-melon.sh` recognises them by the
   first 16 hex digits of their name's sha256 and nothing else. The same rules apply: never write their names in any
   file, comment, commit or test. `59c1a50f2e93bdc1` unlocks every gauntlet reward (`/usr/libexec/melon/.gold`,
-  desktop only; tests call that path). The gauntlet page lets the owner through when `/run/melon/.gauntlet-skip`
-  exists (the skip command creates it); a skipped gauntlet earns no rewards.
+  desktop only; tests call that path). `721b2b05ebcca53c` skips the gauntlet (`/usr/libexec/melon/.pass`, live desktop
+  only): it creates `/run/melon/.gauntlet-skip`, the page then unlocks Calamares' Next, and a skipped gauntlet earns
+  no rewards.
 - **Calamares runs melon's own jobs** (`cal-prepare`, `cal-finish` in `calamares-melon`): Calamares'
   users job calls shadow's `useradd`/`usermod`/`groupadd`, which melon doesn't have, so `cal-prepare`
   puts BusyBox-backed shims into the target's `/usr/local/bin` and `cal-finish` removes them.
@@ -394,20 +417,26 @@ Ubuntu archive and public GitHub. Upstream tarballs were therefore taken from th
 archive (`apt-get source --download-only <pkg>`, then the `*.orig.tar.*`, symlinked into `sources/` under
 its upstream name) or from GitHub (apk-tools). Firmware blobs come from Ubuntu's `linux-firmware-*`
 .debs. If you have normal internet access, fetching the same versions from upstream is fine, as long as
-the tarballs are identical.
+the tarballs are identical. A version Ubuntu doesn't have comes straight from its upstream site: list it in
+`URL` in `scripts/make-manifest.py` (method `url` in `MANIFEST.tsv`, checked by sha256 like the others).
 
 ## Roadmap
 
-- **Stage 1 (base):** toolchain, base packages, live ISO, installers. In progress. See the task list in the PR/issue.
-- **Stage 2 (desktop):** udev replacement (eudev or libudev-zero), dbus, elogind or seatd, Mesa with LLVM
-  (radeonsi for the Ryzen iGPU), Qt 6, KDE Frameworks 6, Plasma, KWin (Wayland), SDDM, PipeWire,
-  NetworkManager, Calamares with melon branding and the gauntlet, and the desktop profile for both installers.
+- **Stage 1 (base): done.** Toolchain, base packages, the console ISO and the quick console installer, BIOS and
+  UEFI, LUKS encryption, dual boot next to Windows, VM guest tools.
+- **Stage 2 (desktop): done.** eudev, D-Bus, elogind, polkit, Mesa with LLVM, Qt 6, KDE Frameworks 6, Plasma and
+  KWin on Wayland, SDDM, PipeWire, NetworkManager, Bluetooth, printing, Calamares with the gauntlet, the desktop ISO
+  and the desktop profile for both installers (`qemu-test.py desktop` and `desktop-install`). Open hardware work
+  is tracked in GitHub issues: Intel SOF audio, newer linux-firmware, Broadcom Wi-Fi.
 - **32-bit (i686) console edition: paused by the owner** (resume later). Everything is arch-aware
   (`MELON_ARCH=x86`), but the i686 toolchain doesn't finish yet: GCC's final build fails in libatomic's
   configure because `--enable-default-ssp` on i386 needs `__stack_chk_fail_local`, which comes from a
   `libssp_nonshared.a` (Alpine builds one in its musl package). Add that to the musl build (or drop
   default SSP for i686), then run `scripts/queue-2.sh`'s 32-bit part.
-- **Stage 3 (gaming):** Flatpak and dependencies, Flathub remote, Steam through Flatpak, gamepad udev rules.
+- **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (`melon-flathub`), Steam, Firefox, VLC and
+  Prism Launcher offered from Flathub on first login, GameMode. Still to do: gamepad and controller udev rules,
+  MangoHud (`docs/stage2-plan.md`).
+- **Later:** a native Firefox build (needs Rust, clang and Node for melon; Firefox comes from Flathub until then).
 
 ## Git conventions
 

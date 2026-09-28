@@ -1,0 +1,54 @@
+--- a/sys/unix/hints/linux.500
++++ b/sys/unix/hints/linux.500
+@@ -160,7 +160,9 @@
+ NHCFLAGS+=-DDLB
+ NHCFLAGS+=-DHACKDIR=\"$(HACKDIR)\"
+ NHCFLAGS+=-DDEFAULT_WINDOW_SYS=\"$(WANT_DEFAULT)\"
+-NHCFLAGS+=-DSYSCF -DSYSCF_FILE=\"$(HACKDIR)/sysconf\" -DSECURE
++# melon: system config in /etc, scores and saves in /var (shared by all users, setgid games)
++NHCFLAGS+=-DSYSCF -DSYSCF_FILE=\"/etc/nethack/sysconf\" -DSECURE
++NHCFLAGS+=-DVAR_PLAYGROUND=\"/var/games/nethack\"
+ NHCFLAGS+=-DTIMED_DELAY
+ NHCFLAGS+=-DDUMPLOG
+ NHCFLAGS+=-DCONFIG_ERROR_SECURE=FALSE
+@@ -197,7 +199,8 @@
+ # clang-specific ends
+ else
+ # gcc-specific starts
+-LIBCFLAGS+=-DSIG_RET_TYPE=__sighandler_t
++# melon: __sighandler_t is glibc-only; hack.h's default, void (*)(int), is the same type
++#LIBCFLAGS+=-DSIG_RET_TYPE=__sighandler_t
+ # gcc-specific ends
+ endif
+ 
+@@ -417,17 +420,16 @@
+ CFLAGS+=-DSYSCF -DSYSCF_FILE=\"$(HACKDIR)/sysconf\" -DSECURE
+ MOREALL=$(MAKE) install
+ else #!WANT_SOURCE_INSTALL
+-#PREFIX=/usr
+-PREFIX=$(wildcard ~)/nh/install
+-HACKDIR=$(PREFIX)/games/lib/nethackdir
+-SHELLDIR = $(PREFIX)/games
++PREFIX=/usr
++HACKDIR=$(PREFIX)/lib/nethack
++SHELLDIR = $(PREFIX)/bin
+ VARDIRPERM = 0755
+ VARFILEPERM = 0600
+ GAMEPERM = 0755
+ endif #?WANT_SOURCE_INSTALL
+ 
+ INSTDIR=$(HACKDIR)
+-VARDIR = $(HACKDIR)
++VARDIR = /var/games/nethack
+ 
+ ifdef MAKEFILE_TOP
+ TESTGDBPATH=/usr/bin/gdb
+@@ -466,6 +468,8 @@
+ 
+ # Only needed for GLIBC stack trace:
+ LFLAGS+=-rdynamic
++# melon: the distribution's linker flags (RELRO and BIND_NOW matter: the game is setgid)
++LFLAGS+=$(LDFLAGS)
+ 
+ # if TTY_TILES_ESCCODES
+ #WINSRC += tile.c

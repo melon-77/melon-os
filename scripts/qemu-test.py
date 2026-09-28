@@ -285,6 +285,9 @@ if mode == 'desktop-install':
     flap = _re.search(r'FLAP=([^\r\n]*)', flapping); flap = flap.group(1).strip() if flap else '?'
     ok &= flap == ''; step('services: ' + ('none restarting in a loop' if flap == '' else f'RESTARTING: {flap}'))
     step('MIME cache: ' + ('present' if mime else 'MISSING'))
+    # packaged files owned by the build machine's account arrive as nobody's (rule 45)
+    nob = count('find /usr /etc -xdev \\( -user 65534 -o -group 65534 \\) | wc -l')
+    ok &= nob == 0; step('system files owned by nobody: ' + ('none' if nob == 0 else f'{nob} FOUND'))
     # the desktop profile's services, and the user may manage printers
     svcs = count('n=0; for s in avahi-daemon cupsd; do sv check /var/service/$s >/dev/null 2>&1 && n=$((n+1)); done; echo $n')
     lpadm = count('id -Gn jcole | tr " " "\\n" | grep -cx lpadmin')

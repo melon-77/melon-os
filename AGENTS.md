@@ -224,6 +224,11 @@ Rebuilding the kernel takes about an hour on 2 cores.
     after its firmware loads (MT7921, iwlwifi, ath11k), often in that gap: udev never processed it, so it kept the
     kernel name `wlan0` and NetworkManager left it "unmanaged" (the ProBook's MT7921). The service replays the "add"
     events for net, ieee80211, rfkill and bluetooth devices once it runs (`recipes/eudev/udevd.run`).
+45. **Packaged files must not keep the builder's account.** `cp -a $startdir/files/.` keeps the checkout's owner;
+    apk records that account's name, and on a melon system without it the files become `nobody`'s. Service run
+    scripts, `/etc/profile.d` and the installer's helpers were writable by `nobody`, then run by root. `melon-build`
+    gives root every file owned by an account from 1000 up; system accounts a recipe sets on purpose (below 1000)
+    stay. The desktop-install test fails if anything under `/usr` or `/etc` belongs to `nobody`.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.

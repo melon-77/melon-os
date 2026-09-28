@@ -663,6 +663,7 @@ qt6-qttranslations-6.10.2.tar.xz	-	link	deb/qt6-translations_6.10.2.orig.tar.xz
 qt6-qtwayland-6.10.2.tar.xz	-	link	deb/qt6-wayland_6.10.2.orig.tar.xz
 qt6-qtwebview-6.10.2.tar.xz	-	link	deb/qt6-webview_6.10.2.orig.tar.xz
 readline-8.3.tar.gz	-	link	deb/readline_8.3.orig.tar.gz
+ripgrep-15.2.0.tar.gz	ee2948c93aa14c00eebdf34feb2b4bfade0774c0dcd293eddd462bf056289d1a	git	https://github.com/BurntSushi/ripgrep 15.2.0
 runit-2.3.0.tar.gz	-	link	deb/runit_2.3.0.orig.tar.gz
 rust-std-1.98.1-x86_64-unknown-linux-gnu.tar.xz	fa3ff450172a16c026944030230c5069947af93c728d9179971d44e5e0cfb561	url	https://static.rust-lang.org/dist/rust-std-1.98.1-x86_64-unknown-linux-gnu.tar.xz
 rust-std-1.98.1-x86_64-unknown-linux-musl.tar.xz	bd9f35880de21dab0e387e84009c00001ae7836a4ba565cb16823f13f75f325f	url	https://static.rust-lang.org/dist/rust-std-1.98.1-x86_64-unknown-linux-musl.tar.xz

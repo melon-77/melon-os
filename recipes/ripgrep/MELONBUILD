@@ -1,0 +1,24 @@
+pkgname=ripgrep
+pkgver=15.2.0
+pkgrel=0
+pkgdesc="rg: recursively search directories for a regex pattern, fast"
+license="Unlicense OR MIT"
+url=https://github.com/BurntSushi/ripgrep
+source=(ripgrep-15.2.0.tar.gz)
+makedepends=(pcre2-dev)
+subpackages=(ripgrep-doc)
+
+# PCRE2_SYS_STATIC=0: melon's PCRE2 (pcre2-sys builds its own static copy for musl targets otherwise)
+# GIT_CEILING_DIRECTORIES: build.rs asks git for a commit hash, and the source tree sits inside melon's checkout
+prepare(){ cargo_fetch; }
+build(){ PCRE2_SYS_STATIC=0 GIT_CEILING_DIRECTORIES=$srcdir cargo_build --features pcre2; }
+package(){
+  local rg=$(cargo_out)/rg
+  install -Dm755 $rg $pkgdir/usr/bin/rg
+  # melon's binaries run on the build machine (rule 18), so rg writes its own man page and bash completion
+  mkdir -p $pkgdir/usr/share/man/man1 $pkgdir/usr/share/bash-completion/completions
+  $rg --generate man > $pkgdir/usr/share/man/man1/rg.1
+  $rg --generate complete-bash > $pkgdir/usr/share/bash-completion/completions/rg
+  install -Dm644 LICENSE-MIT $pkgdir/usr/share/licenses/ripgrep/LICENSE-MIT
+  install -Dm644 UNLICENSE $pkgdir/usr/share/licenses/ripgrep/UNLICENSE
+}

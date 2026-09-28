@@ -42,6 +42,7 @@ GIT = {  # tarball name prefix -> repo, tag pattern
     'eudev': ('https://github.com/eudev-project/eudev', 'v{v}'),
     'musl-fts': ('https://github.com/void-linux/musl-fts', 'v{v}'),
     'musl-obstack': ('https://github.com/void-linux/musl-obstack', 'v{v}'),
+    'ripgrep': ('https://github.com/BurntSushi/ripgrep', '{v}'),
     'vulkan-headers': ('https://github.com/KhronosGroup/Vulkan-Headers', 'v{v}')}
 URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA 0.H, Rust 1.93 and its make-dfsg drops make's doc/; host-rust.sh wants 1.98.1)
     'cataclysm-dda-0.9.1.tar.gz': 'https://github.com/CleverRaven/Cataclysm-DDA/archive/refs/tags/0.I-1.tar.gz',

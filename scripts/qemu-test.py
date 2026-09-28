@@ -289,6 +289,12 @@ if mode == 'desktop-install':
     svcs = count('n=0; for s in avahi-daemon cupsd; do sv check /var/service/$s >/dev/null 2>&1 && n=$((n+1)); done; echo $n')
     lpadm = count('id -Gn jcole | tr " " "\\n" | grep -cx lpadmin')
     ok &= svcs == 2 and lpadm == 1; step(f'printing on the installed system: {svcs}/2 services up, jcole in lpadmin: {lpadm == 1}')
+    # the gauntlet rewards through the unlock script (called by path; the command that starts it stays unnamed)
+    out = sh('/usr/libexec/melon/.gold jcole; echo REW=$([ -s /etc/melon/gauntlet-survivor ] && echo badge)'
+             '$(ls -d /usr/share/wallpapers/melon-survivor-* | wc -l)$([ -s /home/jcole/Pictures/melon-gauntlet-certificate.svg ] && echo cert)'
+             '$(grep -q "menu_color_highlight=black/yellow" /boot/grub/grub.cfg && echo gold)')
+    rew = 'REW=badge3certgold' in out; ok &= rew
+    step('gauntlet rewards: ' + ('badge, 3 survivor wallpapers, certificate, golden GRUB menu' if rew else f'MISSING {out[-300:]!r}'))
     mon(f'screendump {M}/logs/qemu-desktop-installed.ppm'); time.sleep(3)
     step('screenshots: logs/qemu-desktop-greeter.ppm, -splash.ppm, -installed.ppm')
     p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)

@@ -296,8 +296,15 @@ the serial port, so tests don't need a screen. The test also records the sound c
   of the installer. Questions are in `recipes/calamares-melon/modules/gauntlet/questions.js`; the page is
   a small Calamares view module (`GauntletViewStep`, `gauntlet.qml`) that keeps Calamares' Next button
   locked until the last question. It's deliberately slow, to put off people who are only there for
-  status. Keep it that way. Survivors get the `melon-survivor` wallpaper (only installed by Calamares),
-  an SVG certificate in `~/Pictures` and a melonfetch badge (`/etc/melon/gauntlet-survivor`).
+  status. Keep it that way. Survivors get three wallpapers ("the other side" portal, set on first login, golden
+  rain and the golden melon), the golden GRUB background, an SVG certificate in `~/Pictures` and a melonfetch badge
+  (`/etc/melon/gauntlet-survivor`). The rewards live hidden in melon-desktop (`/usr/share/melon/.rewards`) and
+  `melon-rewards ROOT USER` hands them out (`cal-finish`, and the unlock command below).
+- **Hidden owner commands** work like the console installer: `/etc/profile.d/zz-melon.sh` recognises them by the
+  first 16 hex digits of their name's sha256 and nothing else. The same rules apply: never write their names in any
+  file, comment, commit or test. `59c1a50f2e93bdc1` unlocks every gauntlet reward (`/usr/libexec/melon/.gold`,
+  desktop only; tests call that path). The gauntlet page lets the owner through when `/run/melon/.gauntlet-skip`
+  exists (the skip command creates it); a skipped gauntlet earns no rewards.
 - **Calamares runs melon's own jobs** (`cal-prepare`, `cal-finish` in `calamares-melon`): Calamares'
   users job calls shadow's `useradd`/`usermod`/`groupadd`, which melon doesn't have, so `cal-prepare`
   puts BusyBox-backed shims into the target's `/usr/local/bin` and `cal-finish` removes them.

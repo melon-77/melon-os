@@ -4,6 +4,11 @@ set -e
 [ -d /boot/grub ] || exit 0
 devof(){ awk -v m="$1" '$2==m{d=$1} END{print d}' /proc/mounts; }
 rootdev=${MELON_ROOT_DEV:-$(devof /)}
+# a root the kernel mounted itself shows as /dev/root, which has no device node: take root= from the command line
+if [ ! -b "$rootdev" ]; then
+  r=$(tr ' ' '\n' < /proc/cmdline | sed -n 's/^root=//p' | tail -1)
+  case $r in PARTUUID=*|UUID=*) rootdev=$(blkid -o device -t "$r" | head -1) ;; /dev/*) rootdev=$r ;; esac
+fi
 bootdev=${MELON_BOOT_DEV:-$(devof /boot)}; [ -n "$bootdev" ] || bootdev=$rootdev
 bootuuid=$(blkid -s UUID -o value "$bootdev")
 # an encrypted root (LUKS, opened by the initramfs from melon-mkinitramfs) or a plain partition

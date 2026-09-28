@@ -1,5 +1,5 @@
 #!/bin/sh
-# cal-certificate NAME: print the gauntlet survivor certificate (SVG) for NAME
+# melon-certificate NAME: print the gauntlet survivor certificate (SVG) for NAME
 name=$(printf '%s' "${1:-melon user}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
 day=$(date '+%B %d, %Y')
 cat <<SVG

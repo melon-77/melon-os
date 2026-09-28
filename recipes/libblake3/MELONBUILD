@@ -1,0 +1,11 @@
+pkgname=libblake3
+pkgver=1.8.7
+pkgrel=0
+pkgdesc="BLAKE3 cryptographic hash function, C library (Nix)"
+license="Apache-2.0 OR CC0-1.0"
+url=https://github.com/BLAKE3-team/BLAKE3
+source=(blake3-1.8.7.tar.gz)
+builddir=$srcdir/blake3-1.8.7/c
+subpackages=(libblake3-dev)
+build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DBLAKE3_USE_TBB=OFF; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

@@ -11,6 +11,7 @@ deb/bluedevil_6.6.4.orig.tar.xz	d74a367c45208daed0c2faf2afeeaa7ce0a67209c82f0538
 deb/bluez_5.85.orig.tar.gz	7516f167f6aaabff9a48eac1515638fd349ecb884d254b558481b02520e7abe8	apt	bluez=5.85-4ubuntu0.2
 deb/boost1.90_1.90.0.orig.tar.xz	72e81363dece294942cf4f0ccb86158b390b723d7b332a59a0f869709f306da6	apt	boost1.90=1.90.0-6ubuntu1
 deb/breeze_6.6.4.orig.tar.xz	15ec98c5bdae5cb762c162a2aae87605531e20cf80a7ebeaa36e8d694018ffda	apt	breeze=4:6.6.4-0ubuntu1
+deb/brotli_1.2.0.orig.tar.gz	eb5f7dadf215d0670665fd81566e1fe2dfdc154d983f09142de7299df4c182e6	apt	brotli=1.2.0-3build1
 deb/bubblewrap_0.11.1.orig.tar.xz	c1b7455a1283b1295879a46d5f001dfd088c0bb0f238abb5e128b3583a246f71	apt	bubblewrap=0.11.1-1ubuntu0.3
 deb/busybox_1.37.0.orig.tar.bz2	3311dff32e746499f4df0d5df04d7eb396382d7e108bb9250e7b519b837043a4	apt	busybox=1:1.37.0-7ubuntu1
 deb/bzip2_1.0.8.orig.tar.gz	ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269	apt	bzip2=1.0.8-6ubuntu0.1
@@ -162,6 +163,7 @@ deb/libffi_3.5.2.orig.tar.gz	dd19253d3007f366319a51d248a40c9e5fcace4498cbea990b5
 deb/libfontenc_1.1.8.orig.tar.gz	b55039f70959a1b2f02f4ec8db071e5170528d2c9180b30575dccf7510d7fb9f	apt	libfontenc=1:1.1.8-1build2
 deb/libfreeaptx_0.2.2.orig.tar.gz	272860781cd055583ddfc520c66a765e676c74c5018c98f8293ea86011aeaad6	apt	libfreeaptx=0.2.2-1build1
 deb/libfyaml_0.9.4.orig.tar.gz	e76b79f0e98dc9a143c57bc4b7dfce27e0155deee4c373a86059d0599cbcc29e	apt	libfyaml=0.9.4-1
+deb/libgc_8.2.12.orig.tar.gz	bfa1a5c5b778ed652031becf1fc1a0bd56309b0da20c9ecdeb4c51bc36169df7	apt	libgc=1:8.2.12-1
 deb/libgcrypt20_1.12.0.orig.tar.bz2	0311454e678189bad62a7e9402a9dd793025efff6e7449898616e2fc75e0f4f5	apt	libgcrypt20=1.12.0-2ubuntu1.1
 deb/libglvnd_1.7.0.orig.tar.gz	073e7292788d4d3eeb45ea6c7bdcce9bfdb3b3eef8d7dbd47f2f30dce046ef98	apt	libglvnd=1.7.0-3
 deb/libgpg-error_1.58.orig.tar.bz2	f943aea9a830a8bd938e5124b579efaece24a3225ff4c3d27611a80ce1260c27	apt	libgpg-error=1.58-2
@@ -308,6 +310,7 @@ deb/sqlite3_3.46.1.orig-www.tar.xz	648df41a8e532882b1905df45919aae4bafaf74c455f6
 deb/sqlite3_3.46.1.orig.tar.xz	d0cdd2ece271b29e7ce18095745d892517ee26d0f270065b3a25c2e9eb11639c	apt	sqlite3=3.46.1-9ubuntu0.3
 deb/squashfs-tools_4.7.5.orig.tar.gz	547b7b7f4d2e44bf91b6fc554664850c69563701deab9fd9cd7e21f694c88ea6	apt	squashfs-tools=1:4.7.5-1
 deb/systemsettings_6.6.4.orig.tar.xz	18d2aab42f3f3ce17c5e636238c2d7a1908152f2203f521d6d8441537d3edf04	apt	systemsettings=4:6.6.4-0ubuntu1
+deb/toml11_4.4.0.orig.tar.gz	815bfe6792aa11a13a133b86e7f0f45edc5d71eb78f5fb6686c49c7f792b9049	apt	toml11=4.4.0-1build1
 deb/udisks2_2.10.91.orig.tar.bz2	2247ef8860a2846339240387ac1da5a7ed3432410d607fd9254a7dbe00335b1b	apt	udisks2=2.10.91-1ubuntu2.1
 deb/upower_1.91.1.orig.tar.bz2	d568638d670a63a1886335b7b136f4888cb38a3b28f3f4bcdeaffcca0b0f6df8	apt	upower=1.91.1-1
 deb/util-linux_2.41.3.orig.tar.xz	3330d873f0fceb5560b89a7dc14e4f3288bbd880e96903ed9b50ec2b5799e58b	apt	util-linux=2.41.3-3ubuntu2.2
@@ -373,8 +376,10 @@ appstream-1.1.2.tar.xz	-	link	deb/appstream_1.1.2.orig.tar.xz
 argp-standalone-1.4.1.tar.gz	879d76374424dce051b812f16f43c6d16de8dbaddd76002f83fd1b6e57d39e0b	git	https://github.com/ericonr/argp-standalone 1.4.1
 bash-5.3.tar.xz	-	link	deb/bash_5.3.orig.tar.xz
 binutils-2.46.tar.xz	-	link	deb/binutils_2.46.orig.tar.xz
+blake3-1.8.7.tar.gz	3377bb1a6ef17c01241981c47f39f4aa36f18b0bf1131b88d2526aa719eea662	git	https://github.com/BLAKE3-team/BLAKE3 1.8.7
 bluedevil-6.6.4.tar.xz	-	link	deb/bluedevil_6.6.4.orig.tar.xz
 bluez-5.85.tar.gz	-	link	deb/bluez_5.85.orig.tar.gz
+brotli-1.2.0.tar.gz	-	link	deb/brotli_1.2.0.orig.tar.gz
 bubblewrap-0.11.1.tar.xz	-	link	deb/bubblewrap_0.11.1.orig.tar.xz
 busybox-1.37.0.tar.bz2	-	link	deb/busybox_1.37.0.orig.tar.bz2
 ca-certificates_20260601~24.04.1_all.deb	-	link	fonts/ca-certificates_20260601~24.04.1_all.deb
@@ -398,6 +403,7 @@ fonts-noto-core_20201225-2_all.deb	-	link	fonts/fonts-noto-core_20201225-2_all.d
 freetype-2.14.2.tar.xz	-	link	deb/freetype_2.14.2+dfsg.orig.tar.xz
 fuse3-3.18.2.tar.gz	-	link	deb/fuse3_3.18.2.orig.tar.gz
 gamemode-1.8.2.tar.gz	-	link	deb/gamemode_1.8.2.orig.tar.gz
+gc-8.2.12.tar.gz	-	link	deb/libgc_8.2.12.orig.tar.gz
 gcc-15.2.0.tar.xz	438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e	inner	deb/gcc-15_15.2.0.orig.tar.gz gcc-15-15.2.0/gcc-15.2.0.tar.xz
 gdk-pixbuf-2.44.5.tar.xz	-	link	deb/gdk-pixbuf_2.44.5+dfsg.orig.tar.xz
 glib-2.88.0.tar.xz	-	link	deb/glib2.0_2.88.0.orig.tar.xz
@@ -517,6 +523,7 @@ libfontenc-1.1.8.tar.gz	-	link	deb/libfontenc_1.1.8.orig.tar.gz
 libfreeaptx-0.2.2.tar.gz	-	link	deb/libfreeaptx_0.2.2.orig.tar.gz
 libfyaml-0.9.4.tar.gz	-	link	deb/libfyaml_0.9.4.orig.tar.gz
 libgcrypt-1.12.0.tar.bz2	-	link	deb/libgcrypt20_1.12.0.orig.tar.bz2
+libgit2-1.9.7.tar.gz	4e3ba18eda9376b2ffc00fb43bed8f1b5072b98c16cf21fcf02f7427743fa934	git	https://github.com/libgit2/libgit2 v1.9.7
 libgpg-error-1.58.tar.bz2	-	link	deb/libgpg-error_1.58.orig.tar.bz2
 libgudev-238.tar.xz	-	link	deb/libgudev_238.orig.tar.xz
 libice-1.1.1.tar.gz	-	link	deb/libice_1.1.1.orig.tar.gz
@@ -538,6 +545,7 @@ libpsl-0.21.2.tar.xz	-	link	deb/libpsl_0.21.2.orig.tar.xz
 libseccomp-2.6.0.tar.gz	-	link	deb/libseccomp_2.6.0.orig.tar.gz
 libsm-1.2.6.tar.gz	-	link	deb/libsm_1.2.6.orig.tar.gz
 libsndfile-1.2.2.tar.gz	-	link	deb/libsndfile_1.2.2.orig.tar.gz
+libsodium-1.0.22.tar.gz	628a838dc891456dfed0b34bb024bf882b56da2859e943a2be5a9ad0b68f5b61	git	https://github.com/jedisct1/libsodium 1.0.22-RELEASE
 libtirpc-1.3.7.tar.bz2	-	link	deb/libtirpc_1.3.7.orig.tar.bz2
 libtool-2.5.4.tar.xz	-	link	deb/libtool_2.5.4.orig.tar.xz
 libusb-1.0.29.tar.bz2	-	link	deb/libusb-1.0_1.0.29.orig.tar.bz2
@@ -599,6 +607,8 @@ ncurses-6.6.tar.gz	-	link	deb/ncurses_6.6+20251231.orig.tar.gz
 nethack-500-src.tgz	2959b7886aac76185b90aea0c9f80d14343f604de0ae96b3dd2a760f7ab3bde9	url	https://www.nethack.org/download/5.0.0/nethack-500-src.tgz
 networkmanager-1.54.3.tar.bz2	-	link	deb/network-manager_1.54.3.orig.tar.bz2
 nghttp2-1.68.0.tar.gz	-	link	deb/nghttp2_1.68.0.orig.tar.gz
+nix-2.35.2.tar.gz	e6ad6fe9455c825c857ce3b25f36062b5a8870521940a9a7cad3d7ae1d5d8ada	git	https://github.com/NixOS/nix 2.35.2
+nlohmann-json-3.12.0.tar.gz	04a5049792a4087468211dae60d793ab8cf2dd7bda632100486de7d95efaf67b	git	https://github.com/nlohmann/json v3.12.0
 npth-1.8.tar.bz2	-	link	deb/npth_1.8.orig.tar.bz2
 ntfs-3g-2022.10.3.tar.gz	-	link	deb/ntfs-3g_2022.10.3.orig.tar.gz
 open-vm-tools-13.0.10.tar.xz	-	link	deb/open-vm-tools_13.0.10.orig.tar.xz
@@ -662,6 +672,7 @@ spirv-tools-2026.1.tar.gz	-	link	deb/spirv-tools_2026.1.orig.tar.gz
 sqlite-3.46.1.tar.xz	-	link	deb/sqlite3_3.46.1.orig.tar.xz
 squashfs-tools-4.7.5.tar.gz	-	link	deb/squashfs-tools_4.7.5.orig.tar.gz
 systemsettings-6.6.4.tar.xz	-	link	deb/systemsettings_6.6.4.orig.tar.xz
+toml11-4.4.0.tar.gz	-	link	deb/toml11_4.4.0.orig.tar.gz
 udisks2-2.10.91.tar.bz2	-	link	deb/udisks2_2.10.91.orig.tar.bz2
 upower-1.91.1.tar.bz2	-	link	deb/upower_1.91.1.orig.tar.bz2
 userspace-rcu-0.15.6.tar.bz2	-	link	deb/liburcu_0.15.6.orig.tar.bz2

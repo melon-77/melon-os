@@ -1,0 +1,10 @@
+pkgname=home-manager
+pkgver=26.05
+pkgrel=0
+pkgdesc="Home Manager: manage your user environment and dotfiles with Nix"
+license=MIT
+url=https://github.com/nix-community/home-manager
+# Home Manager is Nix code that installs and updates itself through Nix, into each user's profile: this package is
+# only the home-manager command that runs its release-26.05 the first time (files/usr/bin/home-manager)
+depends=(nix)
+package(){ cp -a $startdir/files/. $pkgdir/; chmod 755 $pkgdir/usr/bin/home-manager; }

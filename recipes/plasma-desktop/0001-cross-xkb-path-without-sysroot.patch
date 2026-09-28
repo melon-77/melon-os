@@ -1,0 +1,18 @@
+--- a/ConfigureChecks.cmake	2026-09-27 18:03:35.926243005 -0700
++++ b/ConfigureChecks.cmake	2026-09-27 18:04:26.772592153 -0700
+@@ -1,10 +1,14 @@
+ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH} )
+ 
+ pkg_get_variable(XKBDIR xkeyboard-config xkb_base)
++# melon: pkg-config already puts the sysroot in front of variables; keep the target path
++if (CMAKE_SYSROOT)
++    string(REPLACE "${CMAKE_SYSROOT}" "" XKBDIR "${XKBDIR}")
++endif()
+ if (NOT XKBDIR)
+     message(FATAL_ERROR "Couldn't find xkb_base using pkg-config: is xkeyboard-config installed?")
+ elseif (CMAKE_CROSSCOMPILING)
+-    if (NOT EXISTS "${CMAKE_SYSROOT}/${XKBDIR}")
++    if (NOT EXISTS "${CMAKE_SYSROOT}/${XKBDIR}" AND NOT IS_SYMLINK "${CMAKE_SYSROOT}/${XKBDIR}")   # melon: an absolute symlink points into the target, not the build host
+       message(FATAL_ERROR "Couldn't find XKB location in CMAKE_SYSROOT: \"${CMAKE_SYSROOT}/${XKBDIR}\"")
+     endif()
+ elseif(NOT EXISTS "${XKBDIR}")

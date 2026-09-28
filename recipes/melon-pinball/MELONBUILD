@@ -1,6 +1,6 @@
 pkgname=melon-pinball
 pkgver=1.0
-pkgrel=2
+pkgrel=3
 pkgdesc="melon pinball: a table on the melon planet with real ball physics, missions, and Harvest runs"
 license=MIT
 url=https://github.com/melon-77/melon-pinball

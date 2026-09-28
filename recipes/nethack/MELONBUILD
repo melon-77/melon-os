@@ -1,0 +1,43 @@
+pkgname=nethack
+pkgver=5.0.0
+pkgrel=2
+pkgdesc="Explore the Dungeons of Doom and bring back the Amulet of Yendor (terminal roguelike)"
+license=NGPL
+url=https://www.nethack.org
+# NetHack embeds its own static Lua and expects the tarball of exactly the version it names (LUA_VERSION in
+# sys/unix/Makefile.top) in lib/: 5.4.8, the same one lua5.4 is built from
+source=(nethack-500-src.tgz lua-5.4.8.tar.gz)
+builddir=$srcdir/NetHack-5.0.0
+makedepends=(ncurses-dev)
+subpackages=(nethack-doc)
+
+# A plain Linux build with the cross compiler: makedefs and dlb are built for melon and run on the build machine
+# (AGENTS.md rule 18), so NetHack's own cross-compiling mode isn't needed.
+#   MUSL=1        upstream's musl switch (no crash reporter: it needs glibc's backtrace())
+#   NO_NHUUID=1   the libuuid probe asks the build machine's ldconfig and /usr/include
+#   GIT_*=        the source tree sits inside melon's git checkout: don't compile melon's commit into the game
+_nhmake(){
+  make MUSL=1 WANT_WIN_TTY=1 WANT_WIN_CURSES=1 WANT_DEFAULT=tty NO_NHUUID=1 GIT_HASH= GIT_BRANCH= GIT_PREFIX= \
+    CCFLAGS="$CFLAGS" "$@"
+}
+prepare(){
+  mkdir -p lib; mv $srcdir/lua-5.4.8 lib/
+  sh sys/unix/setup.sh sys/unix/hints/linux.500 >/dev/null
+}
+build(){ _nhmake all; }
+package(){
+  # compiled-in paths (patch): game in /usr/lib/nethack, sysconf in /etc/nethack, scores and saves in /var/games/nethack
+  _nhmake INSTDIR=$pkgdir/usr/lib/nethack VARDIR=$pkgdir/var/games/nethack SHELLDIR=$pkgdir/usr/bin install
+  # the score files and save directory belong to the system, not the package: an upgrade must not reset them,
+  # so the post-install script creates them
+  rm -rf $pkgdir/var
+  # make install leaves sysconf 0600, but the game reads it as the player
+  install -Dm644 $pkgdir/usr/lib/nethack/sysconf $pkgdir/etc/nethack/sysconf; rm $pkgdir/usr/lib/nethack/sysconf
+  # no gdb on melon, and musl has no backtrace(): switch the panic traces off instead of leaving broken paths
+  sed -i -e 's/^GDBPATH=/#GDBPATH=/' -e 's/^PANICTRACE_GDB=1/PANICTRACE_GDB=0/' -e 's/^PANICTRACE_LIBC=/#PANICTRACE_LIBC=/' \
+    -e 's|^GREPPATH=/bin/grep|GREPPATH=/usr/bin/grep|' $pkgdir/etc/nethack/sysconf
+  install -Dm644 doc/nethack.6 $pkgdir/usr/share/man/man6/nethack.6
+  install -Dm644 doc/recover.6 $pkgdir/usr/share/man/man6/recover.6
+  install -Dm644 doc/Guidebook.txt $pkgdir/usr/share/doc/nethack/Guidebook.txt
+  install -Dm644 doc/config.nh $pkgdir/usr/share/doc/nethack/nethackrc.example
+}

@@ -380,9 +380,9 @@ the serial port, so tests don't need a screen. The test also records the sound c
 
 ## Package repository (online)
 
-`scripts/publish-repo.sh` puts `repo/<arch>/` on the `packages` branch of github.com/xbfj/melon-os (one
+`scripts/publish-repo.sh` puts `repo/<arch>/` on the `packages` branch of github.com/melon-77/melon-os (one
 commit, force-pushed each time), served as
-`https://raw.githubusercontent.com/xbfj/melon-os/packages/<arch>/Packages.adb`. The base URL is in
+`https://raw.githubusercontent.com/melon-77/melon-os/packages/<arch>/Packages.adb`. The base URL is in
 `/usr/share/melon/repo-url` (melon-base); the installers write it into `/etc/apk/repositories` before the
 offline copy from the ISO, and the live ISO uses it too. Everything is signed with the melon key, so the
 host doesn't need to be trusted. GitHub rejects files over 100 MB: split big packages (Intel Bluetooth

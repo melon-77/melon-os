@@ -458,6 +458,13 @@ else:
     if i == 1: p.sendline('melonuser'); p.expect('root', timeout=60)
     p.sendline('exit'); p.expect(PROMPT, timeout=60)
     print(sh('melon-svc status; ls /var/log'))
+    # NetHack: setgid games (never root), and the shared scores belong to group games
+    # (waits for the answer itself: after the su session above, output and prompts can arrive one command late)
+    p.sendline("echo NH=$(stat -c '%a %U:%G' /usr/lib/nethack/nethack /var/games/nethack /var/games/nethack/record | xargs)")
+    try: p.expect(r'NH=(\d+ \S+ \d+ \S+ \d+ \S+)\r', timeout=60); nh = p.match.group(1)
+    except pexpect.TIMEOUT: nh = 'no answer'
+    nh_ok = nh == '2755 root:games 775 root:games 664 root:games'
+    step('nethack: ' + ('setgid games, shared scores' if nh_ok else f'WRONG {nh[-200:]!r}'))
     # the host side of the guest agent: ask the VM for its OS info, then shut it down from the host
     import socket, json
     try:
@@ -469,3 +476,4 @@ else:
     except Exception as e:
         step(f'guest agent not answering ({e}), powering off from inside')
         p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300); step('powered off')
+    if not nh_ok: sys.exit(1)

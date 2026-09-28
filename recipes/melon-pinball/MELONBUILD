@@ -1,0 +1,22 @@
+pkgname=melon-pinball
+pkgver=1.0
+pkgrel=0
+pkgdesc="melon pinball: a table on the melon planet with real ball physics, missions and a wire ramp"
+license=MIT
+url=https://github.com/xbfj/melon-os
+makedepends=(sdl3-dev sdl3-image-dev sdl3-ttf-dev)
+# the fonts are opened by path (Noto Sans for text; without them the game falls back to its dot-matrix font)
+depends=(font-noto)
+builddir=$srcdir
+build(){
+  cmake_setup -S $startdir/src -B build -DPINBALL_TESTS=ON
+  ninja -C build -j$JOBS
+  # the physics checks run on the build machine (melon binaries run there, rule 18)
+  build/melon-pinball-physics-test
+}
+package(){
+  DESTDIR=$pkgdir ninja -C build install
+  cp -a $startdir/files/. $pkgdir/
+  install -Dm644 $M/branding/melon-installer-512.png $pkgdir/usr/share/melon-pinball/mascot.png
+  install -Dm644 $startdir/files/usr/share/icons/hicolor/scalable/apps/melon-pinball.svg $pkgdir/usr/share/melon-pinball/icon.svg
+}

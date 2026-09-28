@@ -50,6 +50,7 @@ recipes/<name>/<pkg>.post-install etc.   apk scripts for (sub)package <pkg>
 iso-files/init          live initramfs /init
 branding/               logo (transparent PNGs)
 recipes/calamares-melon/    graphical installer branding + gauntlet (stage 2)
+recipes/melon-pinball/      melon's own pinball game (C++/SDL3): src/, tests/physics_test.cpp, files/ (desktop entry, icon)
 ```
 
 Not in git (see `.gitignore`): `sources/`, `work/`, `tools/`, `sysroot/`, `hosttools/`, `repo/`, `out/`,
@@ -263,6 +264,13 @@ qemu-img create -f raw /tmp/desk.img 16G
 scripts/qemu-test.py desktop-install out/melon-desktop-*-x86_64.iso /tmp/desk.img   # install, SDDM greeter stays up,
                                                                           # log in through it, Plasma runs; LOOK at both screenshots
 ```
+
+**melon pinball** (`recipes/melon-pinball`): its build runs `melon-pinball-physics-test` (launches, flipper shots,
+cradles, the ramp, 450 random balls that must never leave the cabinet), so a physics change that breaks the table
+fails the package. To look at the table without a screen: `SDL_VIDEO_DRIVER=offscreen SDL_RENDER_DRIVER=software
+melon-pinball --screenshot out.png --seconds 30 --play` (the demo plays a real game; `--golden` shows the survivor
+look). The table's geometry lives in `table.cpp` and drives both the physics and the painted art; after moving
+anything, check the test's "at rest mid-table" count (a ball that can come to rest off the flippers is a trap).
 
 Logs go to `logs/qemu-*.log`. The tests use KVM when `/dev/kvm` is usable (WSL2 has it); without it QEMU runs in
 software emulation and everything is slow. Use generous timeouts. The ISO's GRUB and the installed system both use

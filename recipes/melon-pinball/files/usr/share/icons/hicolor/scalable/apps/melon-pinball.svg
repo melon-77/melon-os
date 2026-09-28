@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <clipPath id="ball"><circle cx="64" cy="54" r="34"/></clipPath>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="24" fill="#10201a"/>
+  <circle cx="64" cy="54" r="44" fill="#1c3a26" opacity="0.7"/>
+  <g fill="#ece2b4" opacity="0.8">
+    <ellipse cx="22" cy="22" rx="1.6" ry="2.6" transform="rotate(30 22 22)"/>
+    <ellipse cx="104" cy="30" rx="1.4" ry="2.2" transform="rotate(-20 104 30)"/>
+    <ellipse cx="18" cy="72" rx="1.2" ry="2" transform="rotate(60 18 72)"/>
+    <ellipse cx="110" cy="80" rx="1.5" ry="2.4" transform="rotate(10 110 80)"/>
+  </g>
+  <circle cx="64" cy="54" r="38" fill="#6fbf4a" opacity="0.18"/>
+  <circle cx="64" cy="54" r="34" fill="#2c5a2c"/>
+  <circle cx="58" cy="48" r="26" fill="#4f8a3c"/>
+  <circle cx="54" cy="44" r="17" fill="#6fae4c"/>
+  <circle cx="51" cy="41" r="9" fill="#96cf6c"/>
+  <g clip-path="url(#ball)" fill="none" stroke="#d4f0a8" stroke-width="1.6" stroke-linejoin="round" opacity="0.75">
+    <path d="M30 40 L44 36 L52 44 L46 56 L34 56 Z"/>
+    <path d="M44 36 L56 26 L70 28 L72 40 L60 46 L52 44"/>
+    <path d="M70 28 L84 24 L94 36 L86 46 L72 40"/>
+    <path d="M46 56 L60 46 L72 52 L70 66 L56 70 Z"/>
+    <path d="M72 52 L86 46 L98 54 L94 68 L80 70 L70 66"/>
+    <path d="M34 56 L46 56 L56 70 L50 82 L36 76 Z"/>
+    <path d="M56 70 L70 66 L80 70 L78 84 L64 88 L50 82"/>
+    <path d="M80 70 L94 68 L96 82 L78 84"/>
+  </g>
+  <ellipse cx="52" cy="40" rx="9" ry="6" fill="#ffffff" opacity="0.35" transform="rotate(-30 52 40)"/>
+  <circle cx="64" cy="54" r="34" fill="none" stroke="#0c1a0e" stroke-width="2"/>
+  <g transform="rotate(-18 30 104)">
+    <path d="M24 98 A8 8 0 0 0 24 114 L78 108 A4.5 4.5 0 0 0 78 99 Z" fill="#2f6e2c"/>
+    <path d="M25 100.5 A5.5 5.5 0 0 0 25 111.5 L77 106 A2.2 2.2 0 0 0 77 101.5 Z" fill="#f0a35e"/>
+    <circle cx="25" cy="106" r="2.6" fill="#e8f0e8"/>
+  </g>
+  <rect x="4" y="4" width="120" height="120" rx="24" fill="none" stroke="#3a682e" stroke-width="3"/>
+</svg>

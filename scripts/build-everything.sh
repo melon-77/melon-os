@@ -28,7 +28,7 @@ PLUMBING="libffi pcre2 glib libcap duktape linux-pam eudev elogind polkit argp-s
 SIMPLE=$(python3 $M/scripts/gen-simple-recipes.py)
 DESKTOP_LIBS="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio libdaemon avahi cups qpdf poppler libcupsfilters libppd
   cups-filters modemmanager qrencode zxing-cpp opencv llvm mesa libepoxy xkbcomp xwayland vulkan-loader libvpx x264 libwebp libdmtx ffmpeg gamemode melon-fonts
-  sdl3 sdl3-image sdl3-ttf
+  sdl3 sdl3-image sdl3-ttf melon-pinball
   qemu-guest-agent open-vm-tools hvtools melon-vm-guest"
 # AppStream has Qt bindings (Discover), and Flatpak and the portal build against AppStream: right after Qt
 KDE=$(python3 $M/scripts/gen-kde-recipes.py | sed "s/\bqt6-qtbase\b/qt6-qtbase appstream flatpak xdg-desktop-portal/")

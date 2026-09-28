@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=melon pinball
+GenericName=Pinball
+Comment=Pinball on the melon planet: missions, a wire ramp and real ball physics
+Exec=melon-pinball
+Icon=melon-pinball
+Terminal=false
+Categories=Game;ArcadeGame;
+Keywords=pinball;arcade;flipper;melon;game;

@@ -24,6 +24,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | filesystem | merged `/usr`: `/bin`, `/sbin`, `/usr/sbin` -> `usr/bin`, `/lib` -> `usr/lib` | packages must only ship files under `/usr`, `/etc`, `/var`, `/boot` |
 | desktop | KDE Plasma on Wayland (stage 2, not built yet) | |
 | gaming | Flatpak + Flathub Steam (stage 3, not built yet) | Steam is glibc-only, so it can't run natively on musl |
+| game library | SDL3 3.4 + SDL3_image + SDL3_ttf (`sdl3`, `sdl3-image`, `sdl3-ttf`) | for melon's own games; SDL dlopen()s its Wayland/X11/audio backends |
 
 Owner's config (`CONFIG_*` answers) lives in `docs/config.txt`. Don't change those choices without the owner's approval.
 

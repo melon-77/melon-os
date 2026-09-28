@@ -184,6 +184,9 @@ deb/libpng1.6_1.6.57.orig.tar.gz	4cbb7b0746edc1683c9581b373365e955133b7f1243f171
 deb/libppd_2.1.1.orig.tar.xz	3fa341cc03964046d2bf6b161d80c1b4b2e20609f38d860bcaa11cb70c1285e4	apt	libppd=2:2.1.1-0ubuntu2
 deb/libpsl_0.21.2.orig.tar.xz	11e34380f2c81d6e72c710464aae3b680df4ddcc1007826c630fb03c7ca6aa54	apt	libpsl=0.21.2-1.1build2
 deb/libpwquality_1.4.5.orig.tar.bz2	6fcf18b75d305d99d04d2e42982ed5b787a081af2842220ed63287a2d6a10988	apt	libpwquality=1.4.5-5build1
+deb/libsdl3-image_3.4.0+ds.orig.tar.xz	fdb9ccec3ec87094a5113d6bed033a130e060b02c29596dd762862c329b4446f	apt	libsdl3-image=3.4.0+ds-1
+deb/libsdl3-ttf_3.2.2+ds.orig.tar.xz	b10a1a0796955f48b766a87195a24523324b8dbf8c88d8626cfbfd050f8acfdf	apt	libsdl3-ttf=3.2.2+ds-1build1
+deb/libsdl3_3.4.2+ds.orig.tar.xz	f105b4826e55d85527617bc7bb52bf68ba4e21b680b02ab43d9dffcf46b6e7fd	apt	libsdl3=3.4.2+ds-1ubuntu1
 deb/libseccomp_2.6.0.orig.tar.gz	83b6085232d1588c379dc9b9cae47bb37407cf262e6e74993c61ba72d2a784dc	apt	libseccomp=2.6.0-2ubuntu5
 deb/libsm_1.2.6.orig.tar.gz	166b4b50d606cdd83f1ddc61b5b9162600034f848b3e32ccbb0e63536b7d6cdd	apt	libsm=2:1.2.6-1build1
 deb/libsndfile_1.2.2.orig.tar.gz	ffe12ef8add3eaca876f04087734e6e8e029350082f3251f565fa9da55b52121	apt	libsndfile=1.2.2-4
@@ -654,6 +657,9 @@ runit-2.3.0.tar.gz	-	link	deb/runit_2.3.0.orig.tar.gz
 sbc-2.1.tar.gz	-	link	deb/sbc_2.1.orig.tar.gz
 sddm-0.21.0+git20250502.4fe234b.tar.gz	-	link	deb/sddm_0.21.0+git20250502.4fe234b.orig.tar.gz
 sddm-kcm-6.6.4.tar.xz	-	link	deb/sddm-kcm_6.6.4.orig.tar.xz
+sdl3-3.4.2.tar.xz	-	link	deb/libsdl3_3.4.2+ds.orig.tar.xz
+sdl3-image-3.4.0.tar.xz	-	link	deb/libsdl3-image_3.4.0+ds.orig.tar.xz
+sdl3-ttf-3.2.2.tar.xz	-	link	deb/libsdl3-ttf_3.2.2+ds.orig.tar.xz
 shared-mime-info-2.4.tar.bz2	-	link	deb/shared-mime-info_2.4.orig.tar.bz2
 sound-theme-freedesktop-0.8.tar.bz2	-	link	deb/sound-theme-freedesktop_0.8.orig.tar.bz2
 spirv-headers-1.4.341.0.tar.gz	-	link	deb/spirv-headers_1.6.1+1.4.341.0.orig.tar.gz

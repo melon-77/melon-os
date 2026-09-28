@@ -237,6 +237,16 @@ Rebuilding the kernel takes about an hour on 2 cores.
     scripts, `/etc/profile.d` and the installer's helpers were writable by `nobody`, then run by root. `melon-build`
     gives root every file owned by an account from 1000 up; system accounts a recipe sets on purpose (below 1000)
     stay. The desktop-install test fails if anything under `/usr` or `/etc` belongs to `nobody`.
+46. **Rust recipes cross-compile with the build machine's Rust** (`scripts/host-rust.sh` puts upstream's release
+    binaries in `hosttools/rust`, with the standard library for `$RUST_TARGET`). melon-build points cargo at
+    `x86_64-unknown-linux-musl`, links with melon's gcc and adds `-C target-feature=-crt-static`: Rust's musl targets
+    link statically by default, and melon's programs share its libc. Build scripts and proc-macros run on the build
+    machine; their C parts get the build machine's gcc from the triple-named variables (`CC_x86_64_unknown_linux_gnu`,
+    ...), never `HOST_CC`, which other build systems read too. `cargo_fetch` (in `prepare()`) downloads crates from
+    crates.io into `sources/cargo`, pinned by the checksums in the project's `Cargo.lock`; `cargo_build` then builds
+    offline with `--locked`, and `cargo_out` names the output directory. A build script that asks git for a commit
+    hash finds melon's checkout: set `GIT_CEILING_DIRECTORIES=$srcdir`. `-sys` crates build their own static copy of
+    a C library for musl targets unless told otherwise (`PCRE2_SYS_STATIC=0` in ripgrep): link melon's.
 
 47. **Flatpak must be built with X11 authorization (`-Dxauth=enabled`, libXau).** Without it, sandboxed X11 apps get
     the host's `DISPLAY` and a path to an Xauthority file that doesn't exist inside the sandbox. Xwayland refuses them
@@ -450,7 +460,12 @@ the tarballs are identical. A version Ubuntu doesn't have comes straight from it
   considered). A variant would need services for both inits, so keep run scripts simple and self-contained.
 - **Smaller desktop ISO (decided):** the ISO's offline package repo stops carrying a second copy of the desktop
   (about 460 MB, copied onto every install too); installers must be tested with no network.
-- **Later:** a native Firefox build (needs Rust, clang and Node for melon; Firefox comes from Flathub until then).
+- **Rust:** recipes can be written in Rust (rule 46; ripgrep is the first). A `rust` package *on* melon (rustc and
+  cargo for users) needs a native gcc and binutils first, since rustc links through the system's C compiler: melon
+  has only `gcc-runtime` today. Notes for it: Rust 1.98 needs LLVM 21 or newer (melon's will do), build it with
+  build = host = target = musl on the build machine (rule 18) from upstream's musl-hosted rustc, and set musl's
+  `crt_static_default` to false as Alpine and Void do (upstream's own FIXME, compiler-team#422).
+- **Later:** a native Firefox build (needs clang and Node for melon as well as Rust; Firefox comes from Flathub until then).
 
 ## Contributing: workflow and the owner's rules
 

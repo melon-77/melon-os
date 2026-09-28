@@ -11,6 +11,8 @@ kde-cli-tools plasma-systemmonitor kinfocenter kf6-breeze-icons kf6-qqc2-desktop
 sddm sddm-kcm
 # apps
 dolphin konsole kde-spectacle plasma-discover nano
+# melon's own games
+melon-pinball
 # services
 pipewire wireplumber networkmanager bluez upower power-profiles-daemon
 # runtime pieces nothing links against (loaded by name, QML imports, data files)

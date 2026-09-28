@@ -1,3 +1,5 @@
+#include <QFile>
+#include <QTimer>
 #include "GauntletViewStep.h"
 
 #include "GlobalStorage.h"
@@ -63,6 +65,17 @@ GauntletViewStep::GauntletViewStep( QObject* parent )
     , m_config( new GauntletConfig( this ) )
 {
     connect( m_config, &GauntletConfig::passedChanged, this, &GauntletViewStep::nextStatusChanged );
+    // a hidden command can let the owner through without answering (to look at the rest of the installer):
+    // it leaves this file behind, and Next unlocks as soon as it appears. No rewards then (see cal-finish).
+    auto* skipCheck = new QTimer( this );
+    connect( skipCheck, &QTimer::timeout, this, [this]() { if ( skipped() ) emit nextStatusChanged( true ); } );
+    skipCheck->start( 1000 );
+}
+
+bool
+GauntletViewStep::skipped() const
+{
+    return QFile::exists( QStringLiteral( "/run/melon/.gauntlet-skip" ) );
 }
 
 GauntletViewStep::~GauntletViewStep() {}
@@ -70,13 +83,13 @@ GauntletViewStep::~GauntletViewStep() {}
 QString
 GauntletViewStep::prettyName() const
 {
-    return tr( "The gauntlet" );
+    return tr( "Gauntlet" );
 }
 
 bool
 GauntletViewStep::isNextEnabled() const
 {
-    return m_config->passed();
+    return m_config->passed() || skipped();
 }
 
 bool

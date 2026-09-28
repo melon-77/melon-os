@@ -1,0 +1,26 @@
+#!/bin/sh
+# melon-rewards ROOT [USER]: a gauntlet survivor's rewards: the survivor wallpapers, the badge melonfetch shows,
+# the golden GRUB background (melon-update-grub picks it by the badge) and, for USER, the certificate in ~/Pictures
+# and "the other side" as wallpaper on the next Plasma login. Used by the installer and to unlock them for testing.
+set -eu
+ROOT=${1:-/} U=${2:-}
+R=/usr/share/melon/.rewards
+mkdir -p "$ROOT/usr/share/wallpapers" "$ROOT/etc/melon" "$ROOT/usr/share/melon/grub"
+cp -a $R/wallpapers/. "$ROOT/usr/share/wallpapers/"
+[ -s "$ROOT/etc/melon/gauntlet-survivor" ] || date +%Y-%m-%d > "$ROOT/etc/melon/gauntlet-survivor"
+cp $R/grub/background-survivor.png "$ROOT/usr/share/melon/grub/"
+if [ -n "$U" ] && [ -d "$ROOT/home/$U" ]; then
+  ids=$(awk -F: -v u="$U" '$1==u{print $3":"$4}' "$ROOT/etc/passwd")
+  mkdir -p "$ROOT/home/$U/Pictures" "$ROOT/home/$U/.config/autostart"
+  /usr/libexec/melon/melon-certificate "$U" > "$ROOT/home/$U/Pictures/melon-gauntlet-certificate.svg"
+  cat > "$ROOT/home/$U/.config/autostart/melon-survivor.desktop" <<DESK
+[Desktop Entry]
+Type=Application
+Name=melon survivor wallpaper
+Exec=sh -c 'plasma-apply-wallpaperimage /usr/share/wallpapers/melon-survivor-portal && rm -f ~/.config/autostart/melon-survivor.desktop'
+X-KDE-autostart-phase=2
+NoDisplay=true
+DESK
+  chown "$ids" "$ROOT/home/$U/Pictures" "$ROOT/home/$U/Pictures/melon-gauntlet-certificate.svg" "$ROOT/home/$U/.config" \
+    "$ROOT/home/$U/.config/autostart" "$ROOT/home/$U/.config/autostart/melon-survivor.desktop"
+fi

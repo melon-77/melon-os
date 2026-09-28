@@ -63,6 +63,7 @@ public:
     ~GauntletViewStep() override;
 
     QString prettyName() const override;
+    bool skipped() const;
     bool isNextEnabled() const override;
     bool isBackEnabled() const override;
     void setConfigurationMap( const QVariantMap& configurationMap ) override;

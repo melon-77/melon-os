@@ -60,7 +60,7 @@ Rectangle {
         RowLayout {
             Layout.fillWidth: true
             Label {
-                text: "The gauntlet"
+                text: "Gauntlet"
                 color: "#f0a35e"; font.pixelSize: 26; font.bold: true
             }
             Item { Layout.fillWidth: true }

@@ -1,0 +1,11 @@
+pkgname=libice
+pkgver=1.1.1
+pkgrel=0
+pkgdesc="libice (graphics stack)"
+license=custom
+source=(libice-1.1.1.tar.gz)
+builddir=$srcdir/libICE-1.1.1
+makedepends=(xorgproto xtrans)
+subpackages=(libice-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static --disable-docs --disable-specs --without-xmlto; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/info; }

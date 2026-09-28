@@ -48,6 +48,10 @@ ROWS = [
  ('libxdamage','1.1.7','libxdamage_1.1.7.orig.tar.xz','libXdamage-1.1.7','auto','libxfixes-dev',"--disable-static",''),
  ('libxcomposite','0.4.6','libxcomposite_0.4.6.orig.tar.gz','libXcomposite-0.4.6','auto','libxfixes-dev',"--disable-static",''),
  ('libxcursor','1.2.3','libxcursor_1.2.3.orig.tar.gz','libXcursor-1.2.3','auto','libxrender-dev libxfixes-dev',"--disable-static",''),
+ # session management and client-side fonts for X11 apps under Xwayland (plasma-workspace's X11 integration)
+ ('libice','1.1.1','libice_1.1.1.orig.tar.gz','libICE-1.1.1','auto','xorgproto xtrans',"--disable-static --disable-docs --disable-specs --without-xmlto",''),
+ ('libsm','1.2.6','libsm_1.2.6.orig.tar.gz','libSM-1.2.6','auto','libice-dev util-linux-dev',"--disable-static --disable-docs --without-xmlto",''),
+ ('libxft','2.3.6','xft_2.3.6.orig.tar.gz','libXft-2.3.6','auto','libxrender-dev freetype-dev fontconfig-dev',"--disable-static",''),
  ('libxinerama','1.1.4','libxinerama_1.1.4.orig.tar.gz','libXinerama-1.1.4','auto','libxext-dev',"--disable-static --enable-malloc0returnsnull=no",''),
  ('libxml2','2.15.2','libxml2_2.15.2+dfsg.orig.tar.xz','libxml2-2.15.2','meson','zlib-dev',"-Dpython=disabled -Dicu=disabled -Dlzma=disabled -Dzlib=enabled -Dhistory=disabled -Dreadline=disabled -Ddocs=disabled",''),
  ('spirv-headers','1.4.341.0','spirv-headers_1.6.1+1.4.341.0.orig.tar.gz','spirv-headers-1.6.1+1.4.341.0','cmake','',"",'noarch'),

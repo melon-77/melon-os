@@ -25,7 +25,7 @@ PLUMBING="libffi pcre2 glib libcap duktape linux-pam eudev elogind polkit argp-s
   sqlite json-c popt device-mapper cryptsetup dosfstools squashfs-tools e2fsprogs bzip2 hunspell attr lm-sensors libogg libvorbis
   libtool sound-theme-freedesktop libcanberra icu boost-headers python3"
 SIMPLE=$(python3 $M/scripts/gen-simple-recipes.py)
-DESKTOP_LIBS="libsndfile pulseaudio cups modemmanager qrencode mesa libepoxy xwayland lua5.4 vulkan-loader ffmpeg appstream flatpak xdg-desktop-portal gamemode melon-fonts
+DESKTOP_LIBS="libsndfile pulseaudio cups modemmanager qrencode zxing-cpp opencv mesa libepoxy xwayland lua5.4 vulkan-loader ffmpeg appstream flatpak xdg-desktop-portal gamemode melon-fonts
   qemu-guest-agent open-vm-tools hvtools melon-vm-guest"
 KDE=$(python3 $M/scripts/gen-kde-recipes.py)
 INSTALLERS="kpmcore calamares calamares-melon melon-desktop"

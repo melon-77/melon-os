@@ -1,6 +1,6 @@
 pkgname=appstream
 pkgver=1.1.2
-pkgrel=1
+pkgrel=2
 pkgdesc="Software metadata library (app store data for Discover and Flatpak)"
 license=LGPL-2.1-or-later
 url=https://www.freedesktop.org/wiki/Distributions/AppStream
@@ -11,5 +11,8 @@ subpackages=(appstream-dev appstream-qt)
 pkgdesc_appstream_qt="AppStream Qt 6 interface"
 build(){ meson_setup -Dqt=true -Dqt-versions=6 -Dstemming=false -Dsystemd=false -Dapidocs=false -Dinstall-docs=false \
     -Dvapi=false -Dgir=false -Dcompose=false -Dzstd-support=true -Dsvg-support=false -Ddocs=false -Dman=false -Dbash-completion=false build; ninja -C build; }
-package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }
+# its CMake config assumes a multiarch libdir (lib/<triplet>/cmake/...), four levels deep; melon's is three
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man
+  sed -i 's|"${CMAKE_CURRENT_LIST_DIR}/../../../../"|"${CMAKE_CURRENT_LIST_DIR}/../../../"|' $pkgdir/usr/lib/cmake/AppStreamQt/AppStreamQtConfig.cmake
+  grep -q 'LIST_DIR}/../../../"' $pkgdir/usr/lib/cmake/AppStreamQt/AppStreamQtConfig.cmake; }
 pkg_qt(){ amove 'usr/lib/libAppStreamQt*.so.*'; }

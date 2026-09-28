@@ -1,0 +1,11 @@
+pkgname=zxing-cpp
+pkgver=2.3.0
+pkgrel=0
+pkgdesc="Barcode and QR code reading library (KDE Prison's scanner; Spectacle reads QR codes in screenshots)"
+license=Apache-2.0
+url=https://github.com/zxing-cpp/zxing-cpp
+source=(zxing-cpp-2.3.0.tar.xz)
+subpackages=(zxing-cpp-dev)
+build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DZXING_EXAMPLES=OFF -DZXING_BLACKBOX_TESTS=OFF -DZXING_UNIT_TESTS=OFF \
+  -DZXING_PYTHON_MODULE=OFF -DZXING_C_API=OFF -DZXING_READERS=ON -DZXING_WRITERS=ON; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

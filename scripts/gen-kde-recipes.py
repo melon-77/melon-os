@@ -78,7 +78,7 @@ PLASMA = [
  ('kwin',' -DKWIN_BUILD_ACTIVITIES=ON -DKWIN_BUILD_X11=ON -DQTWAYLANDSCANNER_KDE_EXECUTABLE=$PWD/host-scanner/qtwaylandscanner_kde'),
  ('plasma-workspace',' -DPLASMA_WAYLAND_DEFAULT_SESSION=ON'), ('plasma-integration',' -DBUILD_QT5=OFF'),
  ('plasma-desktop',' -DBUILD_KCM_MOUSE_X11=OFF -DBUILD_KCM_TOUCHPAD_X11=OFF'), ('systemsettings',''), ('kscreen',''), ('powerdevil',''), ('plasma-nm',' -DDISABLE_MODEMMANAGER_SUPPORT=ON'),
- ('plasma-pa',''), ('bluedevil',''), ('polkit-kde-agent-1',''), ('xdg-desktop-portal-kde',''), ('milou',''),
+ ('plasma-pa',''), ('print-manager',''), ('bluedevil',''), ('polkit-kde-agent-1',''), ('xdg-desktop-portal-kde',''), ('milou',''),
  ('kde-cli-tools',''), ('plasma-systemmonitor',''), ('kinfocenter',''), ('sddm-kcm',''),
  ('sddm',' -DENABLE_PAM=ON -DNO_SYSTEMD=ON -DUSE_ELOGIND=ON -DSDDM_INITIAL_VT=7 -DBUILD_MAN_PAGES=OFF -DRUNTIME_DIR=/run/sddm -DUID_MIN=1000 -DDBUS_CONFIG_DIR=/usr/share/dbus-1/system.d'),
  ('dolphin',''), ('konsole',''), ('kde-spectacle',''), ('plasma-discover',' -DBUILD_PackageKitBackend=OFF -DBUILD_SnapBackend=OFF -DBUILD_FwupdBackend=OFF'),

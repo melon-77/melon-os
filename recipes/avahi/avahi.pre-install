@@ -1,0 +1,5 @@
+#!/bin/sh
+# avahi-daemon drops to its own user
+addgroup -S avahi 2>/dev/null
+adduser -S -D -H -h /var/empty -s /sbin/nologin -G avahi -g 'Avahi mDNS daemon' avahi 2>/dev/null
+exit 0

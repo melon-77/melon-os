@@ -23,16 +23,22 @@ BASE="melon-layout linux-headers musl gcc-runtime zlib zstd xz openssl apk-tools
   opendoas ca-certificates linux-firmware melon-base melon-sounds linux-melon"
 PLUMBING="libffi pcre2 glib libcap duktape linux-pam eudev elogind polkit argp-standalone musl-fts musl-obstack elfutils
   sqlite json-c popt device-mapper cryptsetup dosfstools squashfs-tools e2fsprogs bzip2 hunspell attr acl lm-sensors libogg libvorbis
-  libtool sound-theme-freedesktop libcanberra icu boost-headers python3 readline keyutils gmp mpfr"
+  libtool sound-theme-freedesktop libcanberra icu boost-headers python3 readline keyutils gmp mpfr
+  opus flac liblc3 libfreeaptx libsndfile flite lua5.4"
 SIMPLE=$(python3 $M/scripts/gen-simple-recipes.py)
-DESKTOP_LIBS="libbytesize libnvme libatasmart libblockdev udisks2 libsndfile pulseaudio cups modemmanager qrencode zxing-cpp opencv llvm mesa libepoxy xkbcomp xwayland lua5.4 vulkan-loader ffmpeg appstream flatpak xdg-desktop-portal gamemode melon-fonts
+DESKTOP_LIBS="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio libdaemon avahi cups qpdf poppler libcupsfilters libppd
+  cups-filters modemmanager qrencode zxing-cpp opencv llvm mesa libepoxy xkbcomp xwayland vulkan-loader libvpx x264 libwebp libdmtx ffmpeg gamemode melon-fonts
   qemu-guest-agent open-vm-tools hvtools melon-vm-guest"
-KDE=$(python3 $M/scripts/gen-kde-recipes.py)
+# AppStream has Qt bindings (Discover), and Flatpak and the portal build against AppStream: right after Qt
+KDE=$(python3 $M/scripts/gen-kde-recipes.py | sed "s/\bqt6-qtbase\b/qt6-qtbase appstream flatpak xdg-desktop-portal/")
 INSTALLERS="kpmcore calamares calamares-melon melon-desktop"
 ALL=$(printf '%s\n' $BASE $PLUMBING $SIMPLE $DESKTOP_LIBS $KDE $INSTALLERS | awk '!seen[$0]++')
 # recipes nobody listed yet go at the end
 EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))
 ALL="$ALL $EXTRA"
+
+step "build order"
+$M/scripts/check-order.sh || { echo "   reorder the lists above first"; exit 1; }
 
 # a few passes: a package that failed because something it needs came later in the list gets another go
 for pass in 1 2 3; do

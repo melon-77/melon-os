@@ -1,0 +1,5 @@
+#!/bin/sh
+# cupsd runs filters and backends as lp; lpadmin members manage printers
+adduser -S -D -H -h /var/spool/cups -s /sbin/nologin -G lp -g 'CUPS print system' lp 2>/dev/null
+addgroup -S lpadmin 2>/dev/null
+exit 0

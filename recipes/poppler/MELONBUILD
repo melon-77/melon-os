@@ -1,0 +1,16 @@
+pkgname=poppler
+pkgver=26.01.0
+pkgrel=0
+pkgdesc="Poppler: PDF rendering library (C++ API) and the pdftops/pdftoppm tools, for printing"
+license=GPL-2.0-or-later
+url=https://poppler.freedesktop.org/
+source=(poppler-26.01.0.tar.xz)
+makedepends=(freetype-dev fontconfig-dev libjpeg-turbo-dev libpng-dev lcms2-dev zlib-dev)
+subpackages=(poppler-dev)
+# what cups-filters needs: the core, the C++ wrapper and the utilities (no Qt: it is built before Qt)
+build(){ cmake_setup -B build -DENABLE_UNSTABLE_API_ABI_HEADERS=OFF -DBUILD_GTK_TESTS=OFF -DBUILD_QT5_TESTS=OFF -DBUILD_QT6_TESTS=OFF \
+           -DBUILD_CPP_TESTS=OFF -DBUILD_MANUAL_TESTS=OFF -DENABLE_BOOST=OFF -DENABLE_UTILS=ON -DENABLE_CPP=ON -DENABLE_GLIB=OFF \
+           -DENABLE_GOBJECT_INTROSPECTION=OFF -DENABLE_QT5=OFF -DENABLE_QT6=OFF -DENABLE_LIBCURL=OFF -DENABLE_LIBTIFF=OFF -DENABLE_NSS3=OFF \
+           -DENABLE_GPGME=OFF -DENABLE_LIBOPENJPEG=none -DENABLE_LCMS=ON -DENABLE_DCTDECODER=libjpeg -DRUN_GPERF_IF_PRESENT=OFF \
+           -DCMAKE_DISABLE_FIND_PACKAGE_Cairo=ON; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/man; }

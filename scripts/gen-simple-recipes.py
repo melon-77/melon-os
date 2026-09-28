@@ -13,7 +13,6 @@ ROWS = [
  ('wayland','1.24.0','wayland_1.24.0.orig.tar.gz','wayland-1.24.0','meson','libffi-dev expat-dev',"-Ddocumentation=false -Dtests=false -Ddtd_validation=false",''),
  ('wayland-protocols','1.47','wayland-protocols_1.47.orig.tar.xz','wayland-protocols-1.47','meson','wayland-dev',"-Dtests=false",'noarch'),
  ('xkeyboard-config','2.46','xkeyboard-config_2.46.orig.tar.xz','xkeyboard-config-2.46','meson','',"-Dxkb-base=/usr/share/X11/xkb -Dcompat-rules=true -Dxorg-rules-symlinks=true",'noarch'),
- ('libxkbcommon','1.13.1','libxkbcommon_1.13.1.orig.tar.gz','xkbcommon-libxkbcommon-920ea79','meson','libxcb-dev wayland-dev wayland-protocols libxml2-dev xkeyboard-config',"-Denable-docs=false -Denable-x11=true -Denable-wayland=true -Denable-tools=true -Dxkb-config-root=/usr/share/X11/xkb -Dxkb-config-versioned-extensions-path=/usr/share/xkeyboard-config-2.d -Dxkb-config-unversioned-extensions-path=/usr/share/xkeyboard-config.d -Denable-bash-completion=false",''),
  ('libevdev','1.13.6','libevdev_1.13.6+dfsg.orig.tar.xz','libevdev-1.13.6','meson','',"-Dtests=disabled -Ddocumentation=disabled",''),
  ('mtdev','1.1.7','mtdev_1.1.7.orig.tar.gz','mtdev-1.1.7','auto','',"--disable-static",''),
  ('libgudev','238','libgudev_238.orig.tar.xz','libgudev-238','meson','glib-dev eudev-dev',"-Dintrospection=disabled -Dvapi=disabled -Dtests=disabled",''),
@@ -54,6 +53,8 @@ ROWS = [
  ('libxft','2.3.6','xft_2.3.6.orig.tar.gz','libXft-2.3.6','auto','libxrender-dev freetype-dev fontconfig-dev',"--disable-static",''),
  ('libxinerama','1.1.4','libxinerama_1.1.4.orig.tar.gz','libXinerama-1.1.4','auto','libxext-dev',"--disable-static --enable-malloc0returnsnull=no",''),
  ('libxml2','2.15.2','libxml2_2.15.2+dfsg.orig.tar.xz','libxml2-2.15.2','meson','zlib-dev',"-Dpython=disabled -Dicu=disabled -Dlzma=disabled -Dzlib=enabled -Dhistory=disabled -Dreadline=disabled -Ddocs=disabled",''),
+ # after libxcb and libxml2: built before them it quietly leaves out X11 support and xkbregistry
+ ('libxkbcommon','1.13.1','libxkbcommon_1.13.1.orig.tar.gz','xkbcommon-libxkbcommon-920ea79','meson','libxcb-dev wayland-dev wayland-protocols libxml2-dev xkeyboard-config',"-Denable-docs=false -Denable-x11=true -Denable-wayland=true -Denable-tools=true -Dxkb-config-root=/usr/share/X11/xkb -Dxkb-config-versioned-extensions-path=/usr/share/xkeyboard-config-2.d -Dxkb-config-unversioned-extensions-path=/usr/share/xkeyboard-config.d -Denable-bash-completion=false",''),
  ('spirv-headers','1.4.341.0','spirv-headers_1.6.1+1.4.341.0.orig.tar.gz','spirv-headers-1.6.1+1.4.341.0','cmake','',"",'noarch'),
  ('spirv-tools','2026.1','spirv-tools_2026.1.orig.tar.gz','KhronosGroup-SPIRV-Tools-fbe4f3a','cmake','spirv-headers',"-DSPIRV-Headers_SOURCE_DIR=$SYSROOT/usr -DSPIRV_SKIP_TESTS=ON -DSPIRV_SKIP_EXECUTABLES=OFF -DSPIRV_WERROR=OFF -DSPIRV_TOOLS_BUILD_STATIC=OFF -DBUILD_SHARED_LIBS=ON",''),
  ('glslang','16.2.0','glslang_16.2.0.orig.tar.gz','glslang-16.2.0','cmake','spirv-tools-dev',"-DALLOW_EXTERNAL_SPIRV_TOOLS=ON -DGLSLANG_TESTS=OFF -DENABLE_OPT=ON -DBUILD_SHARED_LIBS=ON",''),
@@ -156,4 +157,6 @@ def recipe(r):
     return name
 
 names = [recipe(r) for r in ROWS]
-print(' '.join(names))
+# generated here, but built later in build-everything's list: libepoxy needs Mesa's headers
+LATER = {'libepoxy'}
+print(' '.join(n for n in names if n not in LATER))

@@ -1,0 +1,21 @@
+pkgname=avahi
+pkgver=0.8
+pkgrel=0
+pkgdesc="Avahi: mDNS/DNS-SD service discovery (finds network printers for CUPS)"
+license=LGPL-2.1-or-later
+url=https://avahi.org/
+source=(avahi-0.8.tar.gz)
+makedepends=(libdaemon-dev expat-dev dbus-dev)
+subpackages=(avahi-dev avahi-libs)
+pkgdesc_avahi_libs="Avahi client libraries"
+build(){ ./configure $conf_flags --disable-static --disable-nls --disable-glib --disable-gobject --disable-introspection \
+  --disable-libevent --disable-qt3 --disable-qt4 --disable-qt5 --disable-gtk --disable-gtk3 --disable-gdbm --disable-dbm \
+  --disable-python --disable-pygobject --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd \
+  --disable-doxygen-doc --disable-manpages --disable-xmltoman --enable-libdaemon --with-distro=none --with-xml=expat \
+  --with-avahi-user=avahi --with-avahi-group=avahi --with-avahi-priv-access-group=netdev --with-systemdsystemunitdir=no \
+  --with-dbus-sys=/usr/share/dbus-1/system.d --with-dbus-system-address=unix:path=/run/dbus/system_bus_socket
+  make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,man,locale} $pkgdir/etc/avahi/services/*.service
+  cp -a $startdir/files/. $pkgdir/; chmod 755 $pkgdir/etc/sv/avahi-daemon/run $pkgdir/etc/sv/avahi-daemon/log/run
+  mkdir -p $pkgdir/var/log/avahi-daemon; }
+pkg_libs(){ amove 'usr/lib/libavahi-*.so.*'; }

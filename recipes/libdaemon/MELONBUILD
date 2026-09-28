@@ -1,0 +1,12 @@
+pkgname=libdaemon
+pkgver=0.14
+pkgrel=0
+pkgdesc="Library for writing UNIX daemons (used by avahi-daemon)"
+license=LGPL-2.1-or-later
+url=https://0pointer.de/lennart/projects/libdaemon/
+source=(libdaemon-0.14.tar.gz)
+subpackages=(libdaemon-dev)
+# its 2010 config.sub predates musl targets; setpgrp's signature is a run test a cross build can't do
+build(){ cp /usr/share/misc/config.sub /usr/share/misc/config.guess .
+  ./configure $conf_flags --disable-static --disable-lynx --disable-examples ac_cv_func_setpgrp_void=yes; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc; }

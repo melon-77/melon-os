@@ -39,6 +39,7 @@ scripts/toolchain.sh    cross toolchain, part 1 (binutils, headers, gcc stage 1)
 scripts/toolchain-finish.sh  part 2 (musl, full gcc)
 scripts/melon-build     build ONE recipe -> signed .apk(s) in repo/x86_64, reindex, install into sysroot
 scripts/build-all.sh    build a list of recipes in order, logs to logs/pkg-<name>.log
+scripts/check-order.sh  every makedepends is built before the recipe that needs it (build-everything.sh runs it first)
 scripts/mkiso.sh        live/installer ISO: rootfs.sqfs (pristine apk-installed system, copied to disk by the
                         installers) + live.sqfs (small live-session layer) + a repo of extra packages
 scripts/qemu-test.py    headless boot + install + reboot test over the serial console
@@ -207,6 +208,9 @@ Rebuilding the kernel takes about an hour on 2 cores.
 41. **Absolute symlinks in `usr/lib` and `usr/include`** (`libfoo.so -> /usr/lib/libfoo.so.1`) point into the
     build machine's own `/usr` from the sysroot, so the linker can't find the library. melon-build makes them
     relative when packaging; a package built before that needs a pkgrel bump to reach the sysroot (rule 31).
+42. **`.pc` files and `*-config` scripts copy pkg-config's sysroot answers** (`Libs.private: -L<sysroot>/usr/lib`).
+    melon-build turns sysroot paths in `.pc` files into plain `/usr` paths; a `*-config` script needs its recipe to
+    do the same (`recipes/cups`). The `LEAK:` lines name what is left.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
@@ -219,7 +223,9 @@ After an unclean shutdown (WSL restart, power loss), files written in the last m
 truncated. Before resuming: look for empty packages (`find repo -name '*.apk' -size 0`; the builder skips
 nothing that is empty, but a truncated `.apk` still blocks reindexing), delete `work/pkg/<name>/.prepared`
 of the package that was compiling so it unpacks fresh, and check `git fsck` (empty objects in `.git/objects`
-can be restored with `git fetch` once they are moved aside). `apk verify` needs an absolute `--keys-dir`:
+can be restored with `git fetch` once they are moved aside). A package that fails to install into the sysroot
+(a file conflict) stays in the sysroot's world file and breaks every later `apk add` there: remove it with the
+builder's apk command and `del <pkg>` (see `sysroot_add` in melon-build) before rebuilding. `apk verify` needs an absolute `--keys-dir`:
 a relative one is resolved against `/` and reports every package as UNTRUSTED.
 
 ## Testing (required before you commit a change that affects boot or install)
@@ -234,7 +240,8 @@ scripts/qemu-test.py live out/melon-*-x86_64.iso /tmp/disk.img --luks     # inst
 scripts/qemu-test.py disk /tmp/disk.img --luks                            # boot it, typing the passphrase
 MELON_EDITION=desktop scripts/mkiso.sh                                    # the Plasma live ISO (desktop edition)
 scripts/qemu-test.py desktop out/melon-desktop-*-x86_64.iso              # services ready, Plasma running, a USB stick mounts through
-                                                                          # UDisks2, screen-recording encoders work, nmcli online;
+                                                                          # UDisks2, screen-recording encoders work, a text file prints
+                                                                          # to a virtual IPP Everywhere printer, nmcli online;
                                                                           # LOOK at logs/qemu-desktop.ppm
 qemu-img create -f raw /tmp/desk.img 16G
 scripts/qemu-test.py desktop-install out/melon-desktop-*-x86_64.iso /tmp/desk.img   # install, SDDM greeter stays up,

@@ -22,6 +22,9 @@ enum Elem {
   E_SHOOTER,                                 // ball left the shooter lane
   E_RAMP_ENTER, E_RAMP_EXIT,                 // kernel ramp
   E_RUBBER,                                  // any plain rubber (small score)
+  E_SPINNER,                                 // the spinner in the rind loop's mouth
+  E_KICKBACK,                                // left outlane kickback switch
+  E_MAGNET,                                  // the magnet in front of the portal
   E_COUNT
 };
 
@@ -47,6 +50,7 @@ enum LampId {
   LA_MULT2, LA_MULT3, LA_MULT4, LA_MULT5,
   LA_SHOOT_AGAIN, LA_INLANE_L, LA_INLANE_R, LA_OUTLANE_L, LA_OUTLANE_R,
   LA_SKILL,
+  LA_KICKBACK, LA_MAGNET,
   LA_COUNT
 };
 
@@ -59,8 +63,13 @@ struct Table {
   V2 ballStart;             // in the shooter lane, on the plunger
   int bumperCircle[3];      // indices into world.circles
   int dropSeg[3];           // indices into world.segs
-  int flipperL = 0, flipperR = 1;
+  int flipperL = 0, flipperR = 1, flipperMini = 2;
   V2 portal;
+  V2 spinnerA, spinnerB;    // the spinner's axle, across the loop's mouth
+  V2 kicker;                // the kickback's plunger at the bottom of the left outlane
+  V2 magnet;
+  int magnetHole = -1;      // index into world.holes
+  V2 melonA, melonN;        // ends of the M-E-L-O-N bank (for the art)
 
   void build();
   void resetTargets();

@@ -106,22 +106,40 @@ void Table::build() {
     g.kind = K_GATE;
     w.segs.push_back(g);
     w.sensors.push_back({M(4, 625), M(50, 625), E_ORBIT_ENTER});
+    spinnerA = M(4, 650);
+    spinnerB = M(50, 650);
+    w.sensors.push_back({spinnerA, spinnerB, E_SPINNER});
     w.sensors.push_back({M(402, 106), M(433, 75), E_ORBIT_TOP});
   }
 
-  // ---- M-E-L-O-N standup targets on the loop's inner wall
-  const char *mel[] = {"M", "E", "L", "O", "N"};
-  for (int i = 0; i < 5; i++) {
-    double y0 = 360 + 32 * i;
-    Seg s;
-    s.a = M(56, y0);
-    s.b = M(56, y0 + 26);
-    s.mat = MAT_TARGET;
-    s.kind = K_STANDUP;
-    s.id = E_TARGET_M + i;
-    s.r = 0.0015;
-    w.segs.push_back(s);
-    lamp(*this, LA_M + i, mel[i], M(76, y0 + 13), 0.0085, 0, L_ROUND, 0x6fbf4a, mel[i]);
+  // ---- M-E-L-O-N: five standups on an angled bank facing the right flipper (and the mini flipper),
+  // on an island that fills the corner between the bank and the loop's wall
+  {
+    V2 A = M(58, 530), B = M(158, 397);              // lower-left end, upper-right end
+    V2 d = norm(B - A), n = perp(d);                 // n: the targets' face normal
+    if (n.x < 0) n = n * -1;                         // facing right and down, towards the flippers
+    melonA = A;
+    melonN = B;
+    const char *mel[] = {"M", "E", "L", "O", "N"};
+    const double tl = 0.030, gap = 0.004;
+    for (int i = 0; i < 5; i++) {
+      // M at the top, N at the bottom
+      V2 s0 = B - d * (i * (tl + gap)), s1 = s0 - d * tl;
+      Seg s;
+      s.a = s0;
+      s.b = s1;
+      s.mat = MAT_TARGET;
+      s.kind = K_STANDUP;
+      s.id = E_TARGET_M + i;
+      s.r = 0.0015;
+      w.segs.push_back(s);
+      lamp(*this, LA_M + i, mel[i], (s0 + s1) * 0.5 + n * 0.024, 0.0085, 0, L_ROUND, 0x6fbf4a, mel[i]);
+    }
+    // the island behind the bank: its top slopes down to the right so nothing rests against the loop wall
+    V2 back = n * -0.003;
+    std::vector<V2> island = {M(53, 330), B + back + d * 0.002, A + back - d * 0.002, M(53, 540)};
+    chain(w, island, true, MAT_WALL);
+    wallChains.push_back(island);
   }
 
   // ---- top lanes A-P-K
@@ -229,7 +247,34 @@ void Table::build() {
   fr.rest = kPi - fl.rest;
   fr.up = kPi - fl.up;
   fr.angle = fr.rest;
-  w.flippers = {fl, fr};
+  // the mini flipper on the right wall under the seed bank: shoots up-left at M-E-L-O-N and the portal
+  Flipper fm = fl;
+  fm.pivot = M(453, 560);
+  fm.length = 0.050;
+  fm.r0 = 0.0090;
+  fm.r1 = 0.0055;
+  fm.rest = kPi - 30 * kPi / 180;
+  fm.up = kPi + 22 * kPi / 180;
+  fm.angle = fm.rest;
+  fm.accelUp = 2600;
+  fm.omegaUp = 34;
+  w.flippers = {fl, fr, fm};
+
+  // kickback: a switch near the bottom of the left outlane, the plunger below it
+  kicker = M(20, 985);
+  w.sensors.push_back({M(4, 930), M(36, 930), E_KICKBACK});
+  // magnet under the playfield in front of the portal (off unless a run turns it on)
+  magnet = M(240, 575);
+  magnetHole = (int)w.holes.size();
+  Hole mg;
+  mg.c = magnet;
+  mg.r = 0.045;
+  mg.id = E_MAGNET;
+  mg.enabled = false;
+  mg.pull = 9.0;
+  mg.damping = 7.0;
+  mg.catchSpeed = 0.35;
+  w.holes.push_back(mg);
 
   w.sensors.push_back({M(4, 780), M(36, 780), E_OUTLANE_L});
   w.sensors.push_back({M(44, 780), M(75, 780), E_INLANE_L});
@@ -276,7 +321,7 @@ void Table::build() {
   lamp(*this, LA_PORTAL, "portal", portal, 0.034, 0, L_ROUND, 0xffd24a);
   lamp(*this, LA_EXTRA_BALL, "extra ball", M(240, 548), 0.0100, 0, L_ROUND, 0xf0a35e, "EB");
   lamp(*this, LA_JACKPOT, "jackpot", M(240, 380), 0.012, 0, L_RECT, 0xffd24a, "JACKPOT");
-  lamp(*this, LA_ORBIT_ARROW, "rind loop", M(27, 660), 0.016, -90, L_ARROW, 0x9be07a, "LOOP");
+  lamp(*this, LA_ORBIT_ARROW, "rind loop", M(27, 612), 0.014, -90, L_ARROW, 0x9be07a, "LOOP");
   lamp(*this, LA_RAMP_ARROW, "kernel ramp", M(328, 670), 0.016, -74.7, L_ARROW, 0xf0a35e, "KERNEL");
   lamp(*this, LA_DROP_ARROW, "seed bank", M(368, 520), 0.014, -57, L_ARROW, 0xf07a5e, "SEEDS");
   lamp(*this, LA_PORTAL_ARROW, "portal", M(240, 612), 0.016, -90, L_ARROW, 0xffd24a, "PORTAL");
@@ -289,6 +334,8 @@ void Table::build() {
   lamp(*this, LA_INLANE_R, "inlane", M(410, 830), 0.0065, 0, L_ROUND, 0x6fbf4a);
   lamp(*this, LA_OUTLANE_R, "outlane", M(450, 830), 0.0065, 0, L_ROUND, 0xf07a5e);
   lamp(*this, LA_SKILL, "skill", M(487, 600), 0.0090, -90, L_ARROW, 0xffd24a);
+  lamp(*this, LA_KICKBACK, "kickback", M(20, 890), 0.013, -90, L_ARROW, 0xf0a35e, "KICK");
+  lamp(*this, LA_MAGNET, "magnet", magnet, 0.012, 0, L_ROUND, 0x9ab8ff);
 }
 
 void Table::resetTargets() {

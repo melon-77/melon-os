@@ -89,6 +89,44 @@ int main() {
     }
     CHECK(best < 0.3, "a flipper shot reaches the upper playfield (best min y %.3f m, flip after %.2f s)", best, bestT);
   }
+  // 4b. the mini flipper: a ball rolling onto it from the seed bank can be shot up-left across the table
+  {
+    double best = 9;
+    bool hitMelon = false;
+    for (int k = 0; k < 60; k++) {
+      t.build();
+      t.world.addBall(V2(0.450, 0.50), V2(-0.08, 0.25));   // falling off the seed bank
+      run(t, 0.05 + k * 0.015);
+      t.world.flippers[2].pressed = true;
+      for (int i = 0; i < 4000; i++) {
+        t.world.step();
+        best = std::min(best, t.world.balls[0].p.x);
+        for (auto &e : t.world.events)
+          if (e.type == EV_HIT && e.id >= E_TARGET_M && e.id <= E_TARGET_N) hitMelon = true;
+      }
+    }
+    CHECK(best < 0.25 && hitMelon, "the mini flipper shoots across the table (min x %.3f m) and can hit M-E-L-O-N", best);
+  }
+  // 4c. a shot from the right flipper reaches M-E-L-O-N
+  {
+    bool hit = false;
+    for (int k = 0; k < 40 && !hit; k++) {
+      t.build();
+      t.world.flippers[1].pressed = true;
+      run(t, 0.1);
+      t.world.addBall(V2(0.410, 0.80));              // down the right inlane
+      run(t, 3);
+      t.world.flippers[1].pressed = false;
+      run(t, 0.02 + k * 0.01);
+      t.world.flippers[1].pressed = true;
+      for (int i = 0; i < 3000; i++) {
+        t.world.step();
+        for (auto &e : t.world.events)
+          if (e.type == EV_HIT && e.id >= E_TARGET_M && e.id <= E_TARGET_N) hit = true;
+      }
+    }
+    CHECK(hit, "a drop-catch-flip from the right flipper hits M-E-L-O-N");
+  }
   // 5. the ramp: a fast ball rides it to the left inlane, a slow one rolls back
   {
     t.build();
@@ -128,7 +166,7 @@ int main() {
       for (int i = 0; i < 40000; i++) {
         if (i % 400 == 0) {
           t.world.flippers[0].pressed = u01(rng) < 0.5;
-          t.world.flippers[1].pressed = u01(rng) < 0.5;
+          t.world.flippers[1].pressed = t.world.flippers[2].pressed = u01(rng) < 0.5;
         }
         t.world.step();
         for (size_t bi = 0; bi < t.world.balls.size(); bi++) {

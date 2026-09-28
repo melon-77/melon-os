@@ -29,17 +29,21 @@ namespace {
 
 const char *kHelp =
     "#How to play\n"
-    "Left flipper: Z, Left Shift or Left arrow\n"
-    "Right flipper: /, Right Shift or Right arrow\n"
-    "Plunger: hold Space, Down or Enter, then let go\n"
-    "Nudge: X (left), . (right), Up arrow (up). Too much and it tilts.\n"
+    "Flippers: Z / Left Shift / Left arrow and / / Right Shift / Right arrow (right also works the mini flipper)\n"
+    "Plunger: hold Space, Down or Enter, then let go.   Nudge: X, . and Up (too much tilts)\n"
     "Gamepad: shoulders or triggers flip, A plunges, the D-pad nudges\n"
     "\n"
     "#The table\n"
-    "Hit M-E-L-O-N to light the portal, then sink the portal to start a mission.\n"
-    "Five missions: kernel ramp, A-P-K lanes, seed bank, rind loop, the gauntlet.\n"
-    "Each one raises your rank. Finish all five for the Seed Storm multiball.\n"
-    "A-P-K lanes raise the bonus multiplier; the flippers move the lit lanes.\n"
+    "Spell M-E-L-O-N on the angled bank (the right and mini flippers aim at it); every A-P-K lane\n"
+    "lights a letter too. M-E-L-O-N lights the portal, and the portal starts the next mission.\n"
+    "The spinner lights the kickback in the left outlane. Five missions raise your rank;\n"
+    "finish them all for the Seed Storm multiball.\n"
+    "\n"
+    "#Harvest (F2)\n"
+    "Each field has a score target and two balls. Reach it to harvest the field and earn seeds.\n"
+    "Spend seeds in the Seed Market on melons, which change the scoring and the machine,\n"
+    "and grafts, which help on the next field. The third field of every season has a pest.\n"
+    "Eight seasons make a harvest. Unlock more melons and seed packs as you play.\n"
     "\n"
     "Esc or click to close";
 
@@ -87,7 +91,10 @@ bool fileExists(const char *p) {
   return SDL_GetPathInfo(p, &info) && info.type == SDL_PATHTYPE_FILE;
 }
 
-enum Cmd { CMD_NONE, CMD_NEW, CMD_PAUSE, CMD_SCORES, CMD_QUIT, CMD_FULLSCREEN, CMD_SOUND, CMD_HELP, CMD_ABOUT };
+enum Cmd {
+  CMD_NONE, CMD_NEW, CMD_CLASSIC, CMD_PAUSE, CMD_COLLECTION, CMD_SCORES, CMD_QUIT, CMD_FULLSCREEN, CMD_SOUND, CMD_HELP,
+  CMD_ABOUT
+};
 
 struct App {
   SDL_Window *win = nullptr;
@@ -100,6 +107,7 @@ struct App {
   bool audioOk = false;
   Options opt;
   MenuState menu;
+  UiState ui;
   std::vector<std::vector<Cmd>> menuCmds;
   bool paused = false, running = true;
   std::string overlay;
@@ -110,11 +118,13 @@ struct App {
   void buildMenu() {
     menu.titles = {"Game", "Options", "Help"};
     menu.items = {
-        {{"New Game", "F2"}, {"Pause / Resume", "F3"}, {"", "", false, true}, {"High Scores", ""}, {"", "", false, true},
-         {"Quit", "Ctrl+Q"}},
+        {{"New Harvest Run", "F2"}, {"Classic Game", "F5"}, {"Pause / Resume", "F3"}, {"", "", false, true},
+         {"Melon Collection", "F6"}, {"High Scores", ""}, {"", "", false, true}, {"Quit", "Ctrl+Q"}},
         {{"Full Screen", "F4", opt.fullscreen}, {"Sound", "M", opt.sound}},
         {{"How to Play", "F1"}, {"About melon pinball", ""}}};
-    menuCmds = {{CMD_NEW, CMD_PAUSE, CMD_NONE, CMD_SCORES, CMD_NONE, CMD_QUIT}, {CMD_FULLSCREEN, CMD_SOUND}, {CMD_HELP, CMD_ABOUT}};
+    menuCmds = {{CMD_NEW, CMD_CLASSIC, CMD_PAUSE, CMD_NONE, CMD_COLLECTION, CMD_SCORES, CMD_NONE, CMD_QUIT},
+                {CMD_FULLSCREEN, CMD_SOUND},
+                {CMD_HELP, CMD_ABOUT}};
     float x = 4;
     for (size_t i = 0; i < menu.titles.size(); i++) {
       float w = 24 + 9.5f * (float)menu.titles[i].size();
@@ -133,15 +143,84 @@ struct App {
     }
   }
 
+  // the Harvest screens: shop, seed packs, collection
+  bool screen() const { return ui.collection || game.mode == MODE_SHOP || game.mode == MODE_PACK_SELECT; }
+  std::vector<UiItem> items() {
+    if (ui.collection) return view.collectionItems();
+    if (game.mode == MODE_SHOP) return view.shopItems(game);
+    if (game.mode == MODE_PACK_SELECT) return view.packItems(game);
+    return {};
+  }
+
+  void activate(const UiItem &it) {
+    switch (it.act) {
+      case UA_BUY_MELON: game.buyMelon(it.index); ui.sellArmed = -1; break;
+      case UA_BUY_GRAFT: game.buyGraft(); ui.sellArmed = -1; break;
+      case UA_SELL:
+        if (ui.sellArmed == it.index) {
+          game.sellMelon(it.index);
+          ui.sellArmed = -1;
+          int n = (int)items().size();
+          ui.focus = std::min(ui.focus, n - 1);
+        } else {
+          ui.sellArmed = it.index;
+        }
+        break;
+      case UA_REROLL: game.reroll(); ui.sellArmed = -1; break;
+      case UA_NEXT: game.nextField(); ui.sellArmed = -1; ui.focus = 0; break;
+      case UA_PACK:
+        if (game.unlocks.hasPack(it.index)) game.startRun(it.index);
+        break;
+      case UA_MELON_INFO: ui.collFocus = it.index; break;
+      default: break;
+    }
+  }
+
+  // move the focus to the nearest item in a direction
+  void moveFocus(int dx, int dy) {
+    auto v = items();
+    if (v.empty()) return;
+    int &f = ui.collection ? ui.collFocus : ui.focus;
+    f = std::clamp(f, 0, (int)v.size() - 1);
+    float cx = v[f].r.x + v[f].r.w / 2, cy = v[f].r.y + v[f].r.h / 2;
+    int best = -1;
+    float bestD = 1e9f;
+    for (size_t i = 0; i < v.size(); i++) {
+      if ((int)i == f) continue;
+      float x = v[i].r.x + v[i].r.w / 2 - cx, y = v[i].r.y + v[i].r.h / 2 - cy;
+      float along = x * dx + y * dy, across = std::fabs(x * dy) + std::fabs(y * dx);
+      if (along <= 1) continue;
+      float d = along + across * 2.5f;
+      if (d < bestD) { bestD = d; best = (int)i; }
+    }
+    if (best >= 0) f = best;
+    ui.sellArmed = -1;
+  }
+
+  void activateFocused() {
+    auto v = items();
+    int f = ui.collection ? ui.collFocus : ui.focus;
+    if (f >= 0 && f < (int)v.size()) activate(v[f]);
+  }
+
   void run(Cmd c) {
     switch (c) {
-      case CMD_NEW: overlay.clear(); paused = false; game.newGame(); break;
+      case CMD_NEW:
+        overlay.clear(); paused = false; ui = UiState();
+        game.newRun();
+        break;
+      case CMD_CLASSIC: overlay.clear(); paused = false; ui = UiState(); game.newGame(); break;
       case CMD_PAUSE: if (overlay.empty()) paused = !paused; break;
+      case CMD_COLLECTION:
+        ui.collection = !ui.collection;
+        paused = ui.collection || !overlay.empty();
+        break;
       case CMD_SCORES: {
-        overlay = "#High scores\n";
+        overlay = "#High scores (classic)\n";
         if (game.hiscores.empty()) overlay += "Nobody yet. Be the first!\n";
         int n = 1;
         for (auto &h : game.hiscores) overlay += std::to_string(n++) + ".  " + h.name + "   " + std::to_string(h.score) + "\n";
+        overlay += "\nBest harvest: season " + std::to_string(game.unlocks.bestSeason) + "\n";
         overlay += "\nEsc or click to close";
         paused = true;
         break;
@@ -166,6 +245,7 @@ struct App {
   }
 
   void closeOverlay() {
+    if (ui.collection) { ui.collection = false; paused = !overlay.empty(); return; }
     if (!overlay.empty()) {
       overlay.clear();
       paused = false;
@@ -175,19 +255,44 @@ struct App {
   void flipInput() {
     bool l = keyL[0] || keyL[1] || keyL[2] || padTrigL > 0.35f, r = keyR[0] || keyR[1] || keyR[2] || padTrigR > 0.35f;
     bool p = keyP[0] || keyP[1] || keyP[2];
-    if (paused) return;
+    if (paused || screen()) return;
     game.flipper(0, l);
     game.flipper(1, r);
     game.plunger(p);
   }
 
-  void key(SDL_Keycode k, bool down, bool repeat) {
-    if (repeat) return;
+  // keys on the Harvest screens; true when used
+  bool screenKey(SDL_Keycode k) {
+    if (!screen()) return false;
     switch (k) {
-      case SDLK_Z: case SDLK_LSHIFT: case SDLK_LEFT: keyL[k == SDLK_Z ? 0 : (k == SDLK_LSHIFT ? 1 : 2)] = down; break;
-      case SDLK_SLASH: case SDLK_RSHIFT: case SDLK_RIGHT: keyR[k == SDLK_SLASH ? 0 : (k == SDLK_RSHIFT ? 1 : 2)] = down; break;
-      case SDLK_SPACE: case SDLK_DOWN: case SDLK_RETURN: keyP[k == SDLK_SPACE ? 0 : (k == SDLK_DOWN ? 1 : 2)] = down; break;
-      default: break;
+      case SDLK_LEFT: case SDLK_A: moveFocus(-1, 0); return true;
+      case SDLK_RIGHT: case SDLK_D: moveFocus(1, 0); return true;
+      case SDLK_UP: case SDLK_W: moveFocus(0, -1); return true;
+      case SDLK_DOWN: case SDLK_S: moveFocus(0, 1); return true;
+      case SDLK_RETURN: case SDLK_SPACE: case SDLK_KP_ENTER: activateFocused(); return true;
+      case SDLK_R: if (game.mode == MODE_SHOP && !ui.collection) game.reroll(); return true;
+      case SDLK_N: if (game.mode == MODE_SHOP && !ui.collection) { game.nextField(); ui.focus = 0; } return true;
+      case SDLK_ESCAPE:
+        if (ui.collection) closeOverlay();
+        else if (game.mode == MODE_PACK_SELECT) game.toAttract();
+        else return false;
+        return true;
+      default: return false;
+    }
+  }
+
+  void key(SDL_Keycode k, bool down, bool repeat) {
+    if (down && menu.open < 0 && screenKey(k)) return;
+    if (repeat) return;
+    if (!screen()) {
+      switch (k) {
+        case SDLK_Z: case SDLK_LSHIFT: case SDLK_LEFT: keyL[k == SDLK_Z ? 0 : (k == SDLK_LSHIFT ? 1 : 2)] = down; break;
+        case SDLK_SLASH: case SDLK_RSHIFT: case SDLK_RIGHT: keyR[k == SDLK_SLASH ? 0 : (k == SDLK_RSHIFT ? 1 : 2)] = down; break;
+        case SDLK_SPACE: case SDLK_DOWN: case SDLK_RETURN: keyP[k == SDLK_SPACE ? 0 : (k == SDLK_DOWN ? 1 : 2)] = down; break;
+        default: break;
+      }
+    } else {
+      for (int i = 0; i < 3; i++) keyL[i] = keyR[i] = keyP[i] = false;
     }
     if (down) {
       switch (k) {
@@ -196,12 +301,17 @@ struct App {
         case SDLK_UP: if (!paused) game.nudge(V2(0, -1)); break;
         case SDLK_F1: run(CMD_HELP); break;
         case SDLK_F2: run(CMD_NEW); break;
+        case SDLK_F5: run(CMD_CLASSIC); break;
+        case SDLK_F6: run(CMD_COLLECTION); break;
         case SDLK_F3: run(CMD_PAUSE); break;
         case SDLK_F4: case SDLK_F11: run(CMD_FULLSCREEN); break;
         case SDLK_M: run(CMD_SOUND); break;
+        case SDLK_RETURN:
+          if (game.mode == MODE_RUN_OVER) run(CMD_NEW);
+          break;
         case SDLK_ESCAPE:
           if (menu.open >= 0) menu.open = -1;
-          else if (!overlay.empty()) closeOverlay();
+          else if (!overlay.empty() || ui.collection) closeOverlay();
           else { menu.open = 0; menu.hover = -1; layoutItems(); if (game.mode == MODE_PLAY) paused = true; }
           break;
         default: break;
@@ -211,6 +321,21 @@ struct App {
   }
 
   void padButton(Uint8 b, bool down) {
+    if (screen()) {
+      if (!down) return;
+      switch (b) {
+        case SDL_GAMEPAD_BUTTON_DPAD_LEFT: moveFocus(-1, 0); break;
+        case SDL_GAMEPAD_BUTTON_DPAD_RIGHT: moveFocus(1, 0); break;
+        case SDL_GAMEPAD_BUTTON_DPAD_UP: moveFocus(0, -1); break;
+        case SDL_GAMEPAD_BUTTON_DPAD_DOWN: moveFocus(0, 1); break;
+        case SDL_GAMEPAD_BUTTON_SOUTH: activateFocused(); break;
+        case SDL_GAMEPAD_BUTTON_NORTH: if (game.mode == MODE_SHOP) game.reroll(); break;
+        case SDL_GAMEPAD_BUTTON_START: if (game.mode == MODE_SHOP) { game.nextField(); ui.focus = 0; } break;
+        case SDL_GAMEPAD_BUTTON_EAST: screenKey(SDLK_ESCAPE); break;
+        default: break;
+      }
+      return;
+    }
     switch (b) {
       case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER: keyL[2] = down; break;
       case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER: keyR[2] = down; break;
@@ -255,11 +380,26 @@ struct App {
         menu.open = -1;
         if (h >= 0 && !menu.items[m][h].separator) {
           Cmd c = menuCmds[m][h];
-          if (c != CMD_PAUSE && overlay.empty() && game.mode == MODE_PLAY && c != CMD_SCORES && c != CMD_HELP && c != CMD_ABOUT)
+          if (c != CMD_PAUSE && overlay.empty() && game.mode == MODE_PLAY && c != CMD_SCORES && c != CMD_HELP &&
+              c != CMD_ABOUT && c != CMD_COLLECTION)
             paused = false;
           run(c);
-        } else if (overlay.empty()) {
+        } else if (overlay.empty() && !ui.collection) {
           paused = false;
+        }
+      }
+      return;
+    }
+    if (screen()) {                                  // hover focuses, click activates
+      auto v = items();
+      for (size_t i = 0; i < v.size(); i++) {
+        auto &r = v[i].r;
+        if (x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h) {
+          int &f = ui.collection ? ui.collFocus : ui.focus;
+          if (f != (int)i && !ui.collection) ui.sellArmed = -1;
+          f = ui.collection ? v[i].index : (int)i;
+          if (click) activate(v[i]);
+          return;
         }
       }
       return;
@@ -274,17 +414,24 @@ int main(int argc, char **argv) {
   const char *shot = nullptr;
   double shotSecs = 6;
   bool forceGold = false, noGold = false, play = false, fullscreenArg = false;
+  bool harvest = false, shopShot = false, packShot = false, collShot = false, lazy = false;
   for (int i = 1; i < argc; i++) {
     if (!std::strcmp(argv[i], "--screenshot") && i + 1 < argc) shot = argv[++i];
     else if (!std::strcmp(argv[i], "--seconds") && i + 1 < argc) shotSecs = std::atof(argv[++i]);
     else if (!std::strcmp(argv[i], "--golden")) forceGold = true;
     else if (!std::strcmp(argv[i], "--no-golden")) noGold = true;
     else if (!std::strcmp(argv[i], "--play")) play = true;
+    else if (!std::strcmp(argv[i], "--harvest")) harvest = true;
+    else if (!std::strcmp(argv[i], "--lazy")) lazy = true;           // the demo never flips (reach the end fast)
+    else if (!std::strcmp(argv[i], "--shop")) shopShot = true;
+    else if (!std::strcmp(argv[i], "--packs")) packShot = true;
+    else if (!std::strcmp(argv[i], "--collection")) collShot = true;
     else if (!std::strcmp(argv[i], "--fullscreen")) fullscreenArg = true;
     else if (!std::strcmp(argv[i], "--version")) { std::printf("melon-pinball %s\n", PINBALL_VERSION); return 0; }
     else {
       std::printf("usage: melon-pinball [--fullscreen] [--golden]\n"
-                  "       melon-pinball --screenshot FILE.png [--seconds N] [--play]   (render one frame and exit)\n");
+                  "       melon-pinball --screenshot FILE.png [--seconds N] [--play [--harvest]] [--shop] [--packs]\n"
+                  "                     [--collection]   (render one frame and exit)\n");
       return std::strcmp(argv[i], "--help") ? 1 : 0;
     }
   }
@@ -341,10 +488,18 @@ int main(int argc, char **argv) {
 
   if (shot) {
     // render the attract mode (or a game played by the demo) for a while, save one frame
-    if (play) app.game.newGame();
+    if (play && harvest) app.game.startRun(PK_CANTALOUPE);
+    else if (play) app.game.newGame();
+    if (shopShot) {                                  // straight to the Seed Market after a won field
+      app.game.startRun(PK_CANTALOUPE);
+      app.game.run.fieldScore = app.game.run.target;
+    }
+    if (packShot) app.game.newRun();
+    if (collShot) app.ui.collection = true;
     double t = 0;
     while (t < shotSecs) {
       app.game.update(1.0 / 60);
+      if (play && (app.game.mode == MODE_SHOP)) app.game.nextField();   // the demo buys nothing
       if (play) {                                    // let the demo's flipper logic play the real game
         static double pull = -1, cool = 0;
         auto &pl = app.game.table.world.plunger;
@@ -352,19 +507,22 @@ int main(int argc, char **argv) {
         if (pull < 0 && cool <= 0 && app.game.plungerReady() && !pl.pulling && pl.pos == 0) { app.game.plunger(true); pull = 0.45; }
         if (pull >= 0 && (pull -= 1.0 / 60) < 0) { app.game.plunger(false); cool = 1.5; }
         for (int s = 0; s < 2; s++) {
-          auto &f = app.game.table.world.flippers[s];
           bool want = false;
-          for (auto &b : app.game.table.world.balls) {
-            if (!b.alive || b.layer) continue;
-            V2 d = b.p - f.pivot, ax(std::cos(f.rest), std::sin(f.rest));
-            if (dot(d, ax) > 0.02 && dot(d, ax) < 0.085 && std::fabs(cross(ax, d)) < 0.03) want = true;
+          for (int k : s == 0 ? std::vector<int>{0} : std::vector<int>{1, 2}) {
+            auto &f = app.game.table.world.flippers[k];
+            for (auto &b : app.game.table.world.balls) {
+              if (!b.alive || b.layer) continue;
+              V2 d = b.p - f.pivot, ax(std::cos(f.rest), std::sin(f.rest));
+              if (dot(d, ax) > 0.02 && dot(d, ax) < f.length + 0.01 && std::fabs(cross(ax, d)) < 0.03) want = true;
+            }
           }
-          app.game.flipper(s, want);
+          app.game.flipper(s, want && !lazy);
         }
       }
       t += 1.0 / 60;
     }
-    app.view.draw(app.game, app.menu, false, "");
+    if (shopShot) app.ui.focus = 1;
+    app.view.draw(app.game, app.menu, false, "", app.ui);
     SDL_Surface *s = SDL_RenderReadPixels(app.ren, nullptr);
     std::string sp = shot;
     bool png = sp.size() > 4 && sp.substr(sp.size() - 4) == ".png";
@@ -372,7 +530,9 @@ int main(int argc, char **argv) {
       std::fprintf(stderr, "melon-pinball: screenshot failed: %s\n", SDL_GetError());
       return 1;
     }
-    std::printf("score %lld, ball %d, popups %zu\n", app.game.score, app.game.ball, app.game.popups.size());
+    std::printf("mode %d, score %lld, ball %d, season %d field %d (%lld of %lld), seeds %d\n", (int)app.game.mode,
+                app.game.score, app.game.ball, app.game.run.season, app.game.run.field, app.game.run.fieldScore,
+                app.game.run.target, app.game.run.seeds);
     SDL_DestroySurface(s);
     return 0;
   }
@@ -424,7 +584,7 @@ int main(int argc, char **argv) {
     for (auto &b : app.game.table.world.balls)
       if (b.alive && b.captured < 0 && b.layer == 0) roll = std::max(roll, (float)len(b.v));
     app.audio.setRolling(app.paused || app.game.mode == MODE_ATTRACT ? 0 : roll);
-    app.view.draw(app.game, app.menu, app.paused, app.overlay);
+    app.view.draw(app.game, app.menu, app.paused, app.overlay, app.ui);
     SDL_RenderPresent(app.ren);
   }
   app.audio.shutdown();

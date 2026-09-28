@@ -6,6 +6,7 @@
 #include <string>
 
 #include "raster.hpp"
+#include "run.hpp"
 
 namespace pb {
 
@@ -361,10 +362,12 @@ static void drawRaised(const Painter &p, const Table &t, bool golden) {
   // one-way gates: a wire
   for (auto &s : w.segs)
     if (s.oneway) extrudeCapsule(p, s.a, s.b, 0.0011, 0.012, hex(0x303a32), chrome(p, s.a, s.b, 0.0011, 0.012));
-  // M-E-L-O-N standups
+  // M-E-L-O-N standups: yellow faces on the bank
   for (auto &s : w.segs) {
     if (s.kind != K_STANDUP) continue;
-    std::vector<V2> r = {s.a + V2(-0.003, 0), s.b + V2(-0.003, 0), s.b + V2(0.0015, 0), s.a + V2(0.0015, 0)};
+    V2 n = perp(norm(s.b - s.a));
+    if (n.x < 0) n = n * -1;
+    std::vector<V2> r = {s.a - n * 0.004, s.b - n * 0.004, s.b + n * 0.0015, s.a + n * 0.0015};
     extrudePoly(p, r, 0.026, hex(0x6e4a18), [](float, float) { return hex(0xf2c45a); });
   }
   // pop bumpers
@@ -433,19 +436,40 @@ static void drawPortalCup(const Painter &p, const Table &t) {
   p.cv.fillCapsule(p.P(c + V2(-0.004, 0.008)), p.P(c + V2(0.004, 0.008)), p.L(0.0017), hex(0x1a1408));
 }
 
+// the magnet under the playfield: copper windings seen through a clear window
+static void drawMagnet(const Painter &p, const Table &t) {
+  V2 c = t.magnet;
+  p.cv.fillCircle(p.P(c), p.L(0.030), [&](float x, float y) {
+    double d = len(p.toM(x, y) - c) / 0.030;
+    float ring = (float)(0.5 + 0.5 * std::sin(d * 38));
+    RGBA cu = mixc(hex(0x5a2e12), hex(0xd88a4a), ring * (float)(1 - d * 0.5));
+    return mixc(cu, hex(0x0a0e0c), (float)std::pow(d, 4));
+  });
+  p.cv.ring(p.P(c), p.L(0.0295), p.L(0.0325), hex(0x3a463e));
+  p.cv.fillCircle(p.P(c), p.L(0.008), hex(0x2a2a30));
+}
+
+// the kickback: a plunger housing at the bottom of the left outlane
+static void drawKickerBase(const Painter &p, const Table &t) {
+  V2 c = t.kicker;
+  std::vector<V2> slot = {c + V2(-0.010, -0.004), c + V2(0.010, -0.004), c + V2(0.010, 0.030), c + V2(-0.010, 0.030)};
+  p.cv.fillPoly(mapPts(p, slot, 0), hex(0x050706));
+}
+
 static void drawDecals(Canvas &cv, Text &tx, const Painter &p, const Table &t, bool golden) {
   RGBA cream(kCream.r, kCream.g, kCream.b, 0.55f);
   text(cv, tx, p, "melon", V2(0.235, 0.80), 0.050, 0, RGBA(kGreen.r, kGreen.g, kGreen.b, 0.20f), FONT_SANS_ITALIC);
   text(cv, tx, p, "melon", V2(0.2335, 0.7985), 0.050, 0, RGBA(kGreen.r, kGreen.g, kGreen.b, 0.55f), FONT_SANS_ITALIC);
   text(cv, tx, p, "P I N B A L L", V2(0.235, 0.838), 0.011, 0, RGBA(kOrange.r, kOrange.g, kOrange.b, 0.6f));
-  text(cv, tx, p, "RIND LOOP", V2(0.027, 0.465), 0.0105, -kPi / 2, cream);
+  text(cv, tx, p, "RIND LOOP", V2(0.027, 0.440), 0.0105, -kPi / 2, cream);
+  text(cv, tx, p, "M-E-L-O-N", t.melonA + V2(0.036, 0.024), 0.0085, 0, RGBA(kGreen.r, kGreen.g, kGreen.b, 0.65f));
   text(cv, tx, p, "apk upgrade", V2(0.250, 0.170), 0.009, 0, RGBA(kOrange.r, kOrange.g, kOrange.b, 0.55f));
   text(cv, tx, p, "SEED BANK", V2(0.382, 0.450), 0.0095, std::atan2(0.090, 0.030), cream);
   text(cv, tx, p, "this is the other side", V2(0.240, 0.522), 0.0072, 0,
        RGBA(kGold.r, kGold.g, kGold.b, golden ? 0.8f : 0.45f), FONT_SANS_ITALIC);
   text(cv, tx, p, "KERNEL", V2(0.314, 0.718), 0.0085, -74.7 * kPi / 180, RGBA(kOrange.r, kOrange.g, kOrange.b, 0.6f));
   text(cv, tx, p, "PORTAL", V2(0.240, 0.652), 0.0085, 0, RGBA(kGold.r, kGold.g, kGold.b, 0.6f));
-  text(cv, tx, p, "LOOP", V2(0.027, 0.705), 0.0085, -kPi / 2, cream);
+  text(cv, tx, p, "LOOP", V2(0.027, 0.575), 0.0075, -kPi / 2, cream);
   text(cv, tx, p, "SEEDS", V2(0.350, 0.548), 0.0080, -57 * kPi / 180 + kPi / 2 - kPi / 2, cream);
   text(cv, tx, p, "BONUS", V2(0.240, 0.740), 0.0075, 0, cream);
   if (golden) text(cv, tx, p, "GAUNTLET SURVIVOR", V2(0.235, 0.862), 0.0075, 0, RGBA(kGold.r, kGold.g, kGold.b, 0.8f));
@@ -548,9 +572,111 @@ static SDL_Surface *glowSurface() {
   return cv.toSurface();
 }
 
+// ---------------------------------------------------------------- the Seed Market's cards
+static SDL_Surface *melonIcon(const MelonDef &m) {
+  const int N = 192;                                 // drawn at 2x
+  Canvas cv(N, N);
+  RGBA rind = hex(m.rind), flesh = hex(m.flesh);
+  V2 C(N * 0.5, N * 0.56);
+  double R = N * 0.36;
+  // shadow
+  cv.fillCircle(C + V2(6, 10), R, RGBA(0, 0, 0, 0.35f));
+  cv.fillCircle(C, R, [&](float x, float y) {
+    double nx = (x - C.x) / R, ny = (y - C.y) / R;
+    double nz = std::sqrt(std::max(0.0, 1 - nx * nx - ny * ny));
+    float light = clamp01((float)(0.45 - 0.5 * nx - 0.55 * ny + 0.5 * nz));
+    double lon = std::atan2(nx, nz + 1e-6), lat = std::asin(std::clamp(ny, -1.0, 1.0));
+    RGBA c = mixc(scale(rind, 0.35f), mixc(rind, RGBA(1, 1, 1), 0.25f), light);
+    switch (m.style) {
+      case 0: case 1: {                              // netted
+        float n = melonNet((float)(lon * 3.2), (float)(lat * 3.2), 0.09f, (float)m.price);
+        c = mixc(c, mixc(scale(flesh, 0.5f), mixc(flesh, RGBA(1, 1, 1), 0.4f), light), n * 0.85f);
+        break;
+      }
+      case 2: break;                                 // smooth, like a honeydew
+      case 3: {                                      // stripes
+        float st = (float)(0.5 + 0.5 * std::sin(lon * 9 + std::sin(lat * 5) * 0.6));
+        c = mixc(c, scale(c, 0.45f), smooth(0.45f, 0.6f, st));
+        break;
+      }
+      case 4: {                                      // glass
+        c = mixc(RGBA(rind.r, rind.g, rind.b), RGBA(1, 1, 1), (float)std::pow(1 - nz, 3) * 0.8f);
+        float crack = melonNet((float)(lon * 1.6), (float)(lat * 1.6), 0.03f, 4.0f);
+        c = mixc(c, RGBA(1, 1, 1), crack * 0.6f);
+        c.a = 0.85f;
+        break;
+      }
+      case 5: {                                      // gold
+        float n = melonNet((float)(lon * 3.2), (float)(lat * 3.2), 0.09f, 2.0f);
+        c = mixc(mixc(hex(0x6a4a10), hex(0xffe28a), light), hex(0xfff6d0), n * 0.7f);
+        break;
+      }
+    }
+    double sp = std::pow(std::max(0.0, -0.45 * nx - 0.55 * ny + 0.7 * nz), 26);
+    return mixc(c, RGBA(1, 1, 1, c.a), (float)sp * 0.75f);
+  });
+  if (m.style == 1) {                                // a slice cut out, the flesh showing (as in melonfetch)
+    std::vector<V2> wedge = {C};
+    for (int i = 0; i <= 12; i++) {
+      double a = -0.75 + 1.15 * i / 12.0;
+      wedge.push_back(C + V2(std::cos(a), std::sin(a)) * (R + 1));
+    }
+    cv.fillPoly(wedge, [&](float x, float y) {
+      double d = len(V2(x, y) - C) / R;
+      if (d > 0.9) return mixc(rind, hex(0xc8dd8a), 0.5f);
+      RGBA f = mixc(mixc(flesh, RGBA(1, 1, 0.9f), 0.35f), flesh, (float)d);
+      if (d < 0.45 && std::fmod(x * 0.37 + y * 0.61, 5.0) < 0.9) f = hex(0x6e4623);
+      return f;
+    });
+  }
+  // stalk and leaf
+  cv.fillCapsule(C + V2(0, -R + 2), C + V2(4, -R - 16), 4, hex(0x6e4623));
+  std::vector<V2> leaf;
+  for (int i = 0; i <= 16; i++) {
+    double t = i / 16.0 * kPi;
+    leaf.push_back(C + V2(8 + 30 * (1 - std::cos(t)) * 0.5, -R - 12 - 12 * std::sin(t)));
+  }
+  for (int i = 16; i >= 0; i--) {
+    double t = i / 16.0 * kPi;
+    leaf.push_back(C + V2(8 + 30 * (1 - std::cos(t)) * 0.5, -R - 12 + 6 * std::sin(t)));
+  }
+  cv.fillPoly(leaf, [&](float, float y) { return mixc(hex(0x9be07a), hex(0x3a682e), clamp01((float)((y - (C.y - R - 24)) / 20))); });
+  return cv.downsample2().toSurface();
+}
+
+static SDL_Surface *graftIcon(const GraftDef &g) {
+  const int N = 192;
+  Canvas cv(N, N);
+  RGBA col = hex(g.color);
+  // a mound of soil with a seedling in it
+  cv.fillCircle(V2(N * 0.5, N * 0.98), N * 0.42, [&](float x, float y) {
+    float n = noise2(x * 0.15f, y * 0.15f);
+    return mixc(hex(0x3a2614), hex(0x6e4623), n);
+  });
+  cv.fillCapsule(V2(N * 0.5, N * 0.6), V2(N * 0.5, N * 0.32), 5, hex(0x4f8a3c));
+  for (int side = -1; side <= 1; side += 2) {
+    std::vector<V2> leaf;
+    for (int i = 0; i <= 16; i++) {
+      double t = i / 16.0 * kPi;
+      leaf.push_back(V2(N * 0.5 + side * 44 * (1 - std::cos(t)) * 0.5, N * 0.36 - 18 * std::sin(t) - side * 0));
+    }
+    for (int i = 16; i >= 0; i--) {
+      double t = i / 16.0 * kPi;
+      leaf.push_back(V2(N * 0.5 + side * 44 * (1 - std::cos(t)) * 0.5, N * 0.36 + 8 * std::sin(t)));
+    }
+    cv.fillPoly(leaf, [&](float, float y) { return mixc(mixc(col, RGBA(1, 1, 1), 0.3f), scale(col, 0.6f), clamp01((y - N * 0.2f) / (N * 0.25f))); });
+  }
+  cv.glow(V2(N * 0.5, N * 0.36), N * 0.35, RGBA(col.r, col.g, col.b, 0.25f));
+  return cv.downsample2().toSurface();
+}
+
 void Art::free() {
   auto f = [](SDL_Surface *&s) { if (s) SDL_DestroySurface(s); s = nullptr; };
   f(base); f(overlay); f(ball); f(glow); f(logo);
+  for (auto &i : melonIcons) f(i);
+  for (auto &i : graftIcons) f(i);
+  melonIcons.clear();
+  graftIcons.clear();
   for (auto &l : lamps) f(l.surf);
   for (auto &b : bumperLit) f(b.surf);
   lamps.clear();
@@ -574,6 +700,8 @@ bool buildArt(Art &art, const Table &t, Text &tx, bool golden, const char *dataD
       }
     drawDecals(cv, tx, p, t, golden);
     drawPortalCup(p, t);
+    drawMagnet(p, t);
+    drawKickerBase(p, t);
     for (int i = 0; i < LA_COUNT; i++) drawLamp(p, tx, t.lamps[i], i, false);
     drawRollovers(p, t);
     castShadows(cv, p, t);
@@ -621,6 +749,8 @@ bool buildArt(Art &art, const Table &t, Text &tx, bool golden, const char *dataD
   art.ball = ballSurface(golden);
   art.glow = glowSurface();
   art.logo = buildLogo(tx, 424, 256, golden, dataDir);
+  for (int m = 0; m < ML_COUNT; m++) art.melonIcons.push_back(melonIcon(kMelons[m]));
+  for (int g = 0; g < GR_COUNT; g++) art.graftIcons.push_back(graftIcon(kGrafts[g]));
   return art.base && art.overlay && art.ball;
 }
 

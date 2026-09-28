@@ -6,6 +6,7 @@
 
 #include "dotfont.hpp"
 #include "raster.hpp"
+#include "run.hpp"
 
 namespace pb {
 
@@ -32,6 +33,8 @@ bool View::init(SDL_Renderer *r, Art &art, Text &text) {
   logo_ = tex(art.logo);
   for (auto &l : art.lamps) lamps_.push_back(tex(l.surf));
   for (int i = 0; i < 3; i++) bumperLit_[i] = tex(art.bumperLit[i].surf);
+  for (auto *i : art.melonIcons) melonIcons_.push_back(tex(i));
+  for (auto *i : art.graftIcons) graftIcons_.push_back(tex(i));
   target_ = SDL_CreateTexture(r_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, art.w, art.h);
   if (!base_ || !target_) return false;
   SDL_SetTextureBlendMode(target_, SDL_BLENDMODE_BLEND);
@@ -67,6 +70,8 @@ void View::shutdown() {
   d(base_); d(overlay_); d(target_); d(ball_); d(glow_); d(logo_); d(dot_);
   for (auto &t : lamps_) d(t);
   for (auto &t : bumperLit_) d(t);
+  for (auto &t : melonIcons_) d(t);
+  for (auto &t : graftIcons_) d(t);
   for (auto &kv : textCache_) SDL_DestroyTexture(kv.second);
   textCache_.clear();
 }
@@ -301,6 +306,7 @@ void View::drawTableTexture(const Game &g) {
   }
   SDL_SetTextureColorMod(glow_, 255, 255, 255);
   for (auto &f : g.table.world.flippers) drawFlipper(f, g.golden);
+  drawSpinnerKicker(g);
   drawPlunger(g.table.world.plunger);
   SDL_SetRenderTarget(r_, nullptr);
 }
@@ -517,6 +523,7 @@ void View::drawPanel(const Game &g) {
     SDL_SetRenderDrawColor(r_, 200, 60, 40, 255);
     SDL_RenderRect(r_, &nb);
     std::string bn = g.mode == MODE_PLAY || g.mode == MODE_BALL_END ? std::to_string(std::min(g.ball, 9)) : "-";
+    if (g.harvest && g.mode == MODE_SHOP) bn = "-";
     dotText(bn, nb.x + 10, nb.y + 6, 3.8f, accent);
   }
   // score
@@ -529,9 +536,20 @@ void View::drawPanel(const Game &g) {
     const float pitch = 4.6f;
     int cols = (int)((sbox.w - 16) / pitch);
     dotBox({sbox.x + 8, sbox.y + 14, 0, 0}, cols, 7, pitch, accent);
-    std::string sc = commas(g.mode == MODE_ATTRACT ? g.lastScore : g.score);
+    bool field = g.harvest && (g.mode == MODE_PLAY || g.mode == MODE_BALL_END || g.mode == MODE_FIELD_WON);
+    std::string sc = commas(field ? g.run.fieldScore : (g.mode == MODE_ATTRACT ? g.lastScore : g.score));
     int pad = cols - (int)sc.size() * 6 + 1;
     dotText(sc, sbox.x + 8 + std::max(0, pad) * pitch, sbox.y + 14, pitch, accent);
+    if (field) {                                     // progress towards the field's target
+      float f = (float)std::min(1.0, (double)g.run.fieldScore / std::max(1LL, g.run.target));
+      SDL_FRect bar = {sbox.x + 8, sbox.y + sbox.h - 12, sbox.w - 16, 5};
+      SDL_SetRenderDrawColor(r_, 20, 30, 22, 255);
+      SDL_RenderFillRect(r_, &bar);
+      bar.w *= f;
+      SDL_Color c = f >= 1 ? gold : orange;
+      SDL_SetRenderDrawColor(r_, c.r, c.g, c.b, 255);
+      SDL_RenderFillRect(r_, &bar);
+    }
   }
   // message boxes
   auto msgBox = [&](float y, const std::string *lines, SDL_Color col) {
@@ -545,6 +563,23 @@ void View::drawPanel(const Game &g) {
   };
   msgBox(sy + 76, g.msg, orange);
   msgBox(sy + 204, g.info, g.golden ? gold : cream);
+  // Harvest: your melons and seeds
+  if (g.harvest && g.mode != MODE_ATTRACT) {
+    SDL_FRect mb = {X + 12, sy + 332, W - 24, 84};
+    bevel(mb, true, well);
+    drawText("MELONS", mb.x + 12, mb.y + 6, 13, c8(0x8aa08e));
+    drawText(std::to_string(g.run.seeds) + " SEEDS", mb.x + mb.w - 12, mb.y + 6, 13, orange, 1);
+    for (int i = 0; i < g.run.slots; i++) {
+      SDL_FRect rc = {mb.x + 14 + i * 56.f, mb.y + 26, 50, 50};
+      if (i < g.run.count()) {
+        SDL_RenderTexture(r_, melonIcons_[g.run.melons[i].id], nullptr, &rc);
+      } else {
+        SDL_SetRenderDrawColor(r_, 30, 42, 33, 255);
+        SDL_FRect in = {rc.x + 12, rc.y + 12, 26, 26};
+        SDL_RenderRect(r_, &in);
+      }
+    }
+  } else
   // missions: lit when done, blinking while active
   {
     SDL_FRect mb = {X + 12, sy + 332, W - 24, 84};
@@ -568,7 +603,7 @@ void View::drawPanel(const Game &g) {
     }
   }
   // keys
-  drawText("F2 new game   F3 pause   F4 full screen   Esc menu", X + W / 2, Y + H - 26, 13, c8(0x8aa08e), 0);
+  drawText("F2 harvest   F5 classic   F3 pause   F4 full screen   Esc menu", X + W / 2, Y + H - 26, 13, c8(0x8aa08e), 0);
 }
 
 void View::drawMenu(const MenuState &m) {
@@ -610,7 +645,7 @@ void View::drawMenu(const MenuState &m) {
   }
 }
 
-void View::draw(const Game &g, const MenuState &menu, bool paused, const std::string &overlay) {
+void View::draw(const Game &g, const MenuState &menu, bool paused, const std::string &overlay, const UiState &ui) {
   drawTableTexture(g);
   double fx = fitX_, fy = fitY_;
   if (g.shake > 0) {                                 // a nudge moves the cabinet
@@ -631,7 +666,11 @@ void View::draw(const Game &g, const MenuState &menu, bool paused, const std::st
     buildMesh();
   }
   drawPanel(g);
-  if (paused || !overlay.empty()) {
+  if (g.mode == MODE_SHOP) drawShop(g, ui);
+  if (g.mode == MODE_PACK_SELECT) drawPacks(g, ui);
+  if (g.mode == MODE_RUN_OVER) drawRunOver(g);
+  if (ui.collection) drawCollection(g, ui);
+  if (!ui.collection && (paused || !overlay.empty())) {
     SDL_FRect dim = {0, (float)kMenuH, 800, (float)(kLogicalH - kMenuH)};
     SDL_SetRenderDrawBlendMode(r_, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(r_, 0, 0, 0, overlay.empty() ? 150 : 195);
@@ -656,6 +695,318 @@ void View::draw(const Game &g, const MenuState &menu, bool paused, const std::st
     }
   }
   drawMenu(menu);
+}
+
+// ---------------------------------------------------------------- spinner and kickback (in the table texture)
+void View::drawSpinnerKicker(const Game &g) {
+  const double S = kArtScale;
+  const Table &t = g.table;
+  // the spinner: a plate hanging from an axle 30 mm up, turning about it
+  double a = g.spinnerAngle, z0 = 0.030, r = 0.011;
+  double x0 = t.spinnerA.x + 0.004, x1 = t.spinnerB.x - 0.004, y = t.spinnerA.y;
+  V2 e1(0, r * std::cos(a)), e2(0, -r * std::cos(a));
+  double z1 = z0 - r * std::sin(a), z2 = z0 + r * std::sin(a);
+  auto P = [&](double x, double yy, double z) { return V2(x * S, (yy - z * kHeightK) * S); };
+  float shade = (float)(0.45 + 0.55 * std::fabs(std::cos(a)));
+  std::vector<V2> plate = {P(x0, y + e1.y, z1), P(x1, y + e1.y, z1), P(x1, y + e2.y, z2), P(x0, y + e2.y, z2)};
+  poly(plate, {0.85f * shade, 0.88f * shade, 0.85f * shade, 1});
+  // a melon stripe painted on the plate
+  std::vector<V2> stripe = {P(x0, y + e1.y * 0.3, z0 - (z0 - z1) * 0.3), P(x1, y + e1.y * 0.3, z0 - (z0 - z1) * 0.3),
+                            P(x1, y + e2.y * 0.3, z0 + (z2 - z0) * 0.3), P(x0, y + e2.y * 0.3, z0 + (z2 - z0) * 0.3)};
+  poly(stripe, {0.94f * shade, 0.64f * shade, 0.37f * shade, 1});
+  // the brackets
+  SDL_SetRenderDrawColor(r_, 160, 170, 160, 255);
+  for (double x : {t.spinnerA.x + 0.002, t.spinnerB.x - 0.002}) {
+    V2 f = P(x, y, 0), top = P(x, y, z0 + 0.004);
+    SDL_RenderLine(r_, (float)f.x, (float)f.y, (float)top.x, (float)top.y);
+    SDL_RenderLine(r_, (float)f.x + 1, (float)f.y, (float)top.x + 1, (float)top.y);
+  }
+  // the kickback's plunger: jumps up when it fires
+  V2 k = t.kicker;
+  double up = g.kickFire > 0 ? 0.012 * (g.kickFire / 0.25) : 0;
+  const double H = 0.010;
+  for (int i = 0; i <= 6; i++) {
+    double z = H * i / 6;
+    float tt = (float)i / 6;
+    std::vector<V2> q = {P(k.x - 0.008, k.y - up, z), P(k.x + 0.008, k.y - up, z), P(k.x + 0.008, k.y - up + 0.010, z),
+                         P(k.x - 0.008, k.y - up + 0.010, z)};
+    SDL_FColor c = g.kickbackLit ? SDL_FColor{0.55f + 0.39f * tt, 0.3f + 0.34f * tt, 0.1f + 0.27f * tt, 1}
+                                 : SDL_FColor{0.2f + 0.2f * tt, 0.22f + 0.2f * tt, 0.2f + 0.2f * tt, 1};
+    poly(q, c);
+  }
+}
+
+// ---------------------------------------------------------------- Harvest screens
+static SDL_Color c8b(unsigned h, Uint8 a = 255) { return {(Uint8)(h >> 16), (Uint8)(h >> 8), (Uint8)h, a}; }
+static unsigned rarityColor(int r) { return r == R_RARE ? 0xffd24a : (r == R_UNCOMMON ? 0x7ab0e0 : 0x6fbf4a); }
+static const char *rarityName(int r) { return r == R_RARE ? "RARE" : (r == R_UNCOMMON ? "UNCOMMON" : "COMMON"); }
+
+float View::textWidth(const std::string &s, float px, FontFace face) {
+  int w = 0, h = 1;
+  if (!text_->size(s, px, face, w, h)) return s.size() * px * 0.55f;
+  return w * (px / std::max(1, h) * 1.25f);
+}
+
+// word-wrapped text; returns the height used
+float View::wrapText(const std::string &s, float x, float y, float w, float px, SDL_Color c, int align, bool draw) {
+  std::vector<std::string> lines;
+  std::string line, word;
+  auto flush = [&]() { if (!line.empty()) lines.push_back(line); line.clear(); };
+  for (size_t i = 0; i <= s.size(); i++) {
+    if (i == s.size() || s[i] == ' ') {
+      std::string cand = line.empty() ? word : line + " " + word;
+      if (!line.empty() && textWidth(cand, px) > w) { flush(); line = word; }
+      else line = cand;
+      word.clear();
+    } else {
+      word += s[i];
+    }
+  }
+  flush();
+  float lh = px * 1.45f;
+  if (draw)
+    for (size_t i = 0; i < lines.size(); i++)
+      drawText(lines[i], align == 0 ? x + w / 2 : x, y + i * lh, px, c, align);
+  return lines.size() * lh;
+}
+
+void View::dim(float alpha) {
+  SDL_FRect d = {0, (float)kMenuH, 804, (float)(kLogicalH - kMenuH)};
+  SDL_SetRenderDrawBlendMode(r_, SDL_BLENDMODE_BLEND);
+  SDL_SetRenderDrawColor(r_, 4, 8, 6, (Uint8)(alpha * 255));
+  SDL_RenderFillRect(r_, &d);
+}
+
+void View::button(const SDL_FRect &r, const std::string &label, bool focused, bool enabled, unsigned color) {
+  bevel(r, false, focused ? SDL_Color{40, 70, 44, 255} : SDL_Color{26, 36, 29, 255});
+  if (focused) {
+    SDL_SetRenderDrawColor(r_, (color >> 16) & 255, (color >> 8) & 255, color & 255, 255);
+    SDL_FRect o = {r.x - 2, r.y - 2, r.w + 4, r.h + 4};
+    SDL_RenderRect(r_, &o);
+  }
+  drawText(label, r.x + r.w / 2, r.y + r.h / 2 - 11, 17, enabled ? c8b(color) : c8b(0x5a6a5e), 0);
+}
+
+void View::drawCard(const SDL_FRect &r0, SDL_Texture *icon, const std::string &title, const std::string &desc,
+                    const std::string &tag, unsigned border, bool focused, bool dimmed) {
+  SDL_FRect r = r0;
+  if (focused) r.y -= 6;
+  bevel(r, false, {22, 30, 25, 255});
+  SDL_SetRenderDrawColor(r_, (border >> 16) & 255, (border >> 8) & 255, border & 255, dimmed ? 90 : 255);
+  for (int i = 0; i < (focused ? 3 : 1); i++) {
+    SDL_FRect o = {r.x - i, r.y - i, r.w + 2 * i, r.h + 2 * i};
+    SDL_RenderRect(r_, &o);
+  }
+  float isz = std::min(r.w - 30, 96.f);
+  if (icon) {
+    SDL_FRect ir = {r.x + (r.w - isz) / 2, r.y + 8, isz, isz};
+    SDL_SetTextureAlphaModFloat(icon, dimmed ? 0.35f : 1.f);
+    SDL_RenderTexture(r_, icon, nullptr, &ir);
+    SDL_SetTextureAlphaModFloat(icon, 1.f);
+  }
+  float y = r.y + isz + 12;
+  y += wrapText(title, r.x + 6, y, r.w - 12, r.w < 120 ? 11.f : 15.f, dimmed ? c8b(0x6a7a6e) : c8b(0xe8f0e8), 0);
+  if (!desc.empty()) wrapText(desc, r.x + 8, y + 2, r.w - 16, 11.5f, dimmed ? c8b(0x5a6a5e) : c8b(0xb8c8bc), 0);
+  if (!tag.empty()) drawText(tag, r.x + r.w / 2, r.y + r.h - 24, 13, dimmed ? c8b(0x6a5a4a) : c8b(0xf0a35e), 0);
+}
+
+std::vector<UiItem> View::shopItems(const Game &g) const {
+  std::vector<UiItem> v;
+  const float cw = 160, ch = 250, gap = 22, x0 = 407 - (4 * cw + 3 * gap) / 2, y0 = 132;
+  for (int i = 0; i < 3; i++) v.push_back({{x0 + i * (cw + gap), y0, cw, ch}, UA_BUY_MELON, i});
+  v.push_back({{x0 + 3 * (cw + gap), y0, cw, ch}, UA_BUY_GRAFT, 0});
+  const float mw = 92, mh = 128, mg = 10, mx0 = 407 - (7 * mw + 6 * mg) / 2, my0 = 438;
+  for (int i = 0; i < g.run.count(); i++) v.push_back({{mx0 + i * (mw + mg), my0, mw, mh}, UA_SELL, i});
+  v.push_back({{190, 712, 190, 50}, UA_REROLL, 0});
+  v.push_back({{430, 712, 200, 50}, UA_NEXT, 0});
+  return v;
+}
+
+void View::drawShop(const Game &g, const UiState &ui) {
+  dim(0.82f);
+  const Run &run = g.run;
+  drawText("SEED MARKET", 407, 44, 34, c8b(0x6fbf4a), 0, FONT_SANS_ITALIC);
+  std::string next = run.won ? "the harvest is in" :
+      std::string("next: season ") + std::to_string(run.season) + ", " + fieldName(run.field) + ", target " +
+      commas(fieldTarget(run.season, run.field, run.pack));
+  drawText(next, 407, 92, 14, c8b(0x9ab09e), 0);
+  drawText(std::to_string(run.seeds) + " seeds", 780, 50, 22, c8b(0xf0a35e), 1);
+  auto items = shopItems(g);
+  const UiItem *focusItem = ui.focus >= 0 && ui.focus < (int)items.size() ? &items[ui.focus] : nullptr;
+  drawText("FOR SALE", 40, 110, 13, c8b(0x8aa08e));
+  drawText("YOUR MELONS " + std::to_string(run.count()) + "/" + std::to_string(run.slots), 40, 416, 13, c8b(0x8aa08e));
+  // empty slots
+  {
+    const float mw = 92, mh = 128, mg = 10, mx0 = 407 - (7 * mw + 6 * mg) / 2, my0 = 438;
+    for (int i = run.count(); i < run.slots; i++) {
+      SDL_FRect r = {mx0 + i * (mw + mg), my0, mw, mh};
+      bevel(r, true, {10, 14, 12, 255});
+      drawText("empty", r.x + r.w / 2, r.y + r.h / 2 - 8, 12, c8b(0x3a4a3e), 0);
+    }
+  }
+  std::string detailTitle, detailDesc;
+  for (size_t k = 0; k < items.size(); k++) {
+    const UiItem &it = items[k];
+    bool foc = (int)k == ui.focus;
+    switch (it.act) {
+      case UA_BUY_MELON: {
+        int m = run.shopMelons.size() > (size_t)it.index ? run.shopMelons[it.index] : -1;
+        if (m < 0) { drawCard(it.r, nullptr, "sold", "", "", 0x3a4a3e, foc, true); break; }
+        bool afford = run.seeds >= run.price(m) && run.count() < run.slots;
+        drawCard(it.r, melonIcons_[m], kMelons[m].name, kMelons[m].desc, std::to_string(run.price(m)) + " seeds",
+                 rarityColor(kMelons[m].rarity), foc, !afford);
+        if (foc) { detailTitle = std::string(kMelons[m].name) + "  (" + rarityName(kMelons[m].rarity) + " melon)"; detailDesc = kMelons[m].desc; }
+        break;
+      }
+      case UA_BUY_GRAFT: {
+        int gr = run.shopGraft;
+        if (gr < 0) { drawCard(it.r, nullptr, "sold", "", "", 0x3a4a3e, foc, true); break; }
+        int price = kGrafts[gr].price + run.priceBump;
+        drawCard(it.r, graftIcons_[gr], kGrafts[gr].name, kGrafts[gr].desc, std::to_string(price) + " seeds",
+                 0xc8a0e0, foc, run.seeds < price);
+        if (foc) { detailTitle = std::string(kGrafts[gr].name) + "  (graft: works on the next field)"; detailDesc = kGrafts[gr].desc; }
+        break;
+      }
+      case UA_SELL: {
+        int m = run.melons[it.index].id;
+        bool armed = ui.sellArmed == it.index;
+        drawCard(it.r, melonIcons_[m], kMelons[m].name, "", armed ? "SELL?" : "sell " + std::to_string(run.sellValue(it.index)),
+                 armed ? 0xff7a5a : rarityColor(kMelons[m].rarity), foc, false);
+        if (foc) {
+          detailTitle = kMelons[m].name;
+          detailDesc = kMelons[m].desc;
+          if (m == ML_BALLER) detailDesc += "  (now +" + std::to_string((int)(run.melons[it.index].counter * 10) / 10.0).substr(0, 3) + "x)";
+          detailDesc += armed ? "  Press again to sell it." : "  Select it to sell it for " + std::to_string(run.sellValue(it.index)) + ".";
+        }
+        break;
+      }
+      case UA_REROLL:
+        button(it.r, "REROLL  " + std::to_string(run.rerollCost), foc, run.seeds >= run.rerollCost, 0xf0a35e);
+        if (foc) { detailTitle = "Reroll"; detailDesc = "New melons and a new graft. Each reroll costs one more seed."; }
+        break;
+      case UA_NEXT:
+        button(it.r, run.won ? "FINISH" : "NEXT FIELD", foc, true, 0x9be07a);
+        if (foc) { detailTitle = "Next field"; detailDesc = run.pest >= 0 || run.field == 2 ? "The last field of each season has a pest." : "Plant and play."; }
+        break;
+      default: break;
+    }
+  }
+  (void)focusItem;
+  // grafts waiting for the next field
+  if (!run.grafts.empty()) {
+    std::string gs = "grafted for the next field:";
+    for (int gr : run.grafts) gs += std::string(" ") + kGrafts[gr].name;
+    drawText(gs, 407, 580, 13, c8b(0xc8a0e0), 0);
+  }
+  SDL_FRect det = {40, 604, 734, 96};
+  bevel(det, true, {6, 9, 7, 255});
+  if (!detailTitle.empty()) {
+    drawText(detailTitle, det.x + 14, det.y + 10, 17, c8b(0xe8f0e8));
+    wrapText(detailDesc, det.x + 14, det.y + 40, det.w - 28, 14, c8b(0xb8c8bc));
+  }
+  drawText("arrows: choose   Enter: buy / sell   R: reroll   N: next field", 407, 770, 12, c8b(0x6a7a6e), 0);
+}
+
+std::vector<UiItem> View::packItems(const Game &g) const {
+  (void)g;
+  std::vector<UiItem> v;
+  const float cw = 210, ch = 250, gap = 26, x0 = 407 - (3 * cw + 2 * gap) / 2, y0 = 120;
+  for (int p = 0; p < PK_COUNT; p++) v.push_back({{x0 + (p % 3) * (cw + gap), y0 + (p / 3) * (ch + 24), cw, ch}, UA_PACK, p});
+  return v;
+}
+
+static int packIcon(int p) {
+  static const int icon[PK_COUNT] = {ML_CANTALOUPE, ML_HONEY_TRAP, ML_KICKBACK_VINE, ML_BITTER, ML_ECHO_BUMPER, ML_SURVIVOR};
+  return icon[p];
+}
+
+void View::drawPacks(const Game &g, const UiState &ui) {
+  dim(0.82f);
+  drawText("CHOOSE A SEED PACK", 407, 50, 30, c8b(0x6fbf4a), 0, FONT_SANS_ITALIC);
+  auto items = packItems(g);
+  for (size_t k = 0; k < items.size(); k++) {
+    int p = items[k].index;
+    bool have = g.unlocks.hasPack(p);
+    drawCard(items[k].r, melonIcons_[packIcon(p)], have ? kPacks[p].name : "Locked",
+             have ? kPacks[p].desc : kPacks[p].unlock, have ? "" : "locked", have ? 0x6fbf4a : 0x3a4a3e,
+             (int)k == ui.focus, !have);
+  }
+  drawText("arrows: choose   Enter: plant   Esc: back", 407, 770, 13, c8b(0x6a7a6e), 0);
+}
+
+void View::drawRunOver(const Game &g) {
+  dim(0.78f);
+  const Run &run = g.run;
+  drawText(run.won ? "HARVEST COMPLETE" : "THE HARVEST FAILED", 407, 110, 38, run.won ? c8b(0xffd24a) : c8b(0xf07a5e), 0,
+           FONT_SANS_ITALIC);
+  float y = 190;
+  auto line = [&](const std::string &s, unsigned c = 0xdde6dd, float px = 18) {
+    drawText(s, 407, y, px, c8b(c), 0);
+    y += px * 1.7f;
+  };
+  line(run.won ? "All eight seasons brought in." :
+       "Season " + std::to_string(run.season) + ", " + fieldName(run.field) + ": " + commas(run.fieldScore) + " of " +
+       commas(run.target));
+  line("Score " + commas(g.score));
+  line("Best harvest: season " + std::to_string(g.unlocks.bestSeason), 0x9ab09e, 16);
+  if (!run.melons.empty()) {
+    y += 10;
+    line("Your melons", 0x8aa08e, 14);
+    float w = run.count() * 70.f, x = 407 - w / 2;
+    for (int i = 0; i < run.count(); i++) {
+      SDL_FRect r = {x + i * 70.f + 5, y, 60, 60};
+      SDL_RenderTexture(r_, melonIcons_[run.melons[i].id], nullptr, &r);
+    }
+    y += 76;
+  }
+  if (!run.unlockedThisRun.empty()) {
+    y += 8;
+    line("Unlocked this run", 0x9ab8ff, 16);
+    for (auto &u : run.unlockedThisRun) line(u, 0xc8d8ff, 16);
+  }
+  drawText("F2 new harvest     F5 classic game", 407, 730, 16, c8b(0x9be07a), 0);
+}
+
+std::vector<UiItem> View::collectionItems() const {
+  std::vector<UiItem> v;
+  const float cw = 98, ch = 104, gap = 8, x0 = 407 - (7 * cw + 6 * gap) / 2, y0 = 96;
+  for (int m = 0; m < ML_COUNT; m++) v.push_back({{x0 + (m % 7) * (cw + gap), y0 + (m / 7) * (ch + gap), cw, ch}, UA_MELON_INFO, m});
+  return v;
+}
+
+void View::drawCollection(const Game &g, const UiState &ui) {
+  dim(0.9f);
+  int have = 0;
+  for (int m = 0; m < ML_COUNT; m++) have += g.unlocks.hasMelon(m);
+  drawText("MELON COLLECTION", 407, 40, 28, c8b(0x6fbf4a), 0, FONT_SANS_ITALIC);
+  drawText(std::to_string(have) + " of " + std::to_string(ML_COUNT) + " unlocked", 407, 72, 13, c8b(0x9ab09e), 0);
+  auto items = collectionItems();
+  for (auto &it : items) {
+    int m = it.index;
+    bool open = g.unlocks.hasMelon(m), foc = m == ui.collFocus;
+    SDL_FRect r = it.r;
+    bevel(r, false, foc ? SDL_Color{40, 60, 44, 255} : SDL_Color{20, 28, 23, 255});
+    unsigned b = open ? rarityColor(kMelons[m].rarity) : 0x3a4a3e;
+    SDL_SetRenderDrawColor(r_, (b >> 16) & 255, (b >> 8) & 255, b & 255, 255);
+    SDL_RenderRect(r_, &r);
+    SDL_FRect ir = {r.x + (r.w - 64) / 2, r.y + 6, 64, 64};
+    if (open) SDL_SetTextureColorMod(melonIcons_[m], 255, 255, 255);
+    else SDL_SetTextureColorMod(melonIcons_[m], 0, 0, 0);
+    SDL_RenderTexture(r_, melonIcons_[m], nullptr, &ir);
+    SDL_SetTextureColorMod(melonIcons_[m], 255, 255, 255);
+    wrapText(open ? kMelons[m].name : "???", r.x + 4, r.y + 74, r.w - 8, 11, open ? c8b(0xdde6dd) : c8b(0x5a6a5e), 0);
+  }
+  int m = std::clamp(ui.collFocus, 0, ML_COUNT - 1);
+  SDL_FRect det = {40, 552, 734, 150};
+  bevel(det, true, {6, 9, 7, 255});
+  bool open = g.unlocks.hasMelon(m);
+  drawText(open ? std::string(kMelons[m].name) + "  (" + rarityName(kMelons[m].rarity) + ", " + std::to_string(kMelons[m].price) + " seeds)"
+                : std::string("A melon you haven't found"), det.x + 14, det.y + 10, 18, c8b(0xe8f0e8));
+  if (open) wrapText(kMelons[m].desc, det.x + 14, det.y + 44, det.w - 28, 15, c8b(0xb8c8bc));
+  if (kMelons[m].unlock)
+    drawText(std::string(open ? "Unlocked: " : "To unlock: ") + kMelons[m].unlock, det.x + 14, det.y + 110, 14,
+             open ? c8b(0x9ab8ff) : c8b(0xf0a35e));
+  drawText("arrows: look around   Esc: close", 407, 770, 13, c8b(0x6a7a6e), 0);
 }
 
 }  // namespace pb

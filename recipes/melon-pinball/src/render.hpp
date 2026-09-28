@@ -28,11 +28,29 @@ struct MenuState {
   SDL_FRect itemRect[16];
 };
 
+// clickable things on the Harvest screens
+enum UiAction { UA_NONE, UA_BUY_MELON, UA_BUY_GRAFT, UA_SELL, UA_REROLL, UA_NEXT, UA_PACK, UA_MELON_INFO };
+struct UiItem {
+  SDL_FRect r;
+  UiAction act;
+  int index;
+};
+struct UiState {
+  int focus = 0;            // index into the current screen's items
+  int sellArmed = -1;       // an owned melon waiting for a second press to be sold
+  bool collection = false;  // the melon collection overlay
+  int collFocus = 0;
+};
+
 class View {
 public:
   bool init(SDL_Renderer *r, Art &art, Text &text);
   void shutdown();
-  void draw(const Game &g, const MenuState &menu, bool paused, const std::string &overlay);
+  void draw(const Game &g, const MenuState &menu, bool paused, const std::string &overlay, const UiState &ui);
+  // the Seed Market / seed pack / collection layouts (the app uses them for the mouse and the arrow keys)
+  std::vector<UiItem> shopItems(const Game &g) const;
+  std::vector<UiItem> packItems(const Game &g) const;
+  std::vector<UiItem> collectionItems() const;
   // screen position of a table point (m) at height z (m), and pixels per metre there
   V2 project(double x, double y, double z = 0) const;
   double pxPerM(double x, double y) const;
@@ -64,6 +82,18 @@ private:
   void drawPanel(const Game &g);
   void drawMenu(const MenuState &m);
   void drawCabinet();
+  void drawSpinnerKicker(const Game &g);
+  void drawShop(const Game &g, const UiState &ui);
+  void drawPacks(const Game &g, const UiState &ui);
+  void drawRunOver(const Game &g);
+  void drawCollection(const Game &g, const UiState &ui);
+  void drawCard(const SDL_FRect &r, SDL_Texture *icon, const std::string &title, const std::string &desc,
+                const std::string &tag, unsigned border, bool focused, bool dim);
+  float textWidth(const std::string &s, float px, FontFace face = FONT_SANS);
+  float wrapText(const std::string &s, float x, float y, float w, float px, SDL_Color c, int align = -1, bool draw = true);
+  void button(const SDL_FRect &r, const std::string &label, bool focused, bool enabled, unsigned color);
+  void dim(float alpha);
+  std::vector<SDL_Texture *> melonIcons_, graftIcons_;
   void dotText(const std::string &s, float x, float y, float pitch, SDL_Color on, int cols = 0, bool center = false);
   void dotBox(const SDL_FRect &rc, int cols, int rows, float pitch, SDL_Color on);
   SDL_Texture *textTex(const std::string &s, float px, FontFace face = FONT_SANS);

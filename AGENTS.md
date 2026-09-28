@@ -265,12 +265,17 @@ scripts/qemu-test.py desktop-install out/melon-desktop-*-x86_64.iso /tmp/desk.im
                                                                           # log in through it, Plasma runs; LOOK at both screenshots
 ```
 
-**melon pinball** (`recipes/melon-pinball`): its build runs `melon-pinball-physics-test` (launches, flipper shots,
-cradles, the ramp, 450 random balls that must never leave the cabinet), so a physics change that breaks the table
-fails the package. To look at the table without a screen: `SDL_VIDEO_DRIVER=offscreen SDL_RENDER_DRIVER=software
-melon-pinball --screenshot out.png --seconds 30 --play` (the demo plays a real game; `--golden` shows the survivor
-look). The table's geometry lives in `table.cpp` and drives both the physics and the painted art; after moving
-anything, check the test's "at rest mid-table" count (a ball that can come to rest off the flippers is a trap).
+**melon pinball** (`recipes/melon-pinball`): its build runs `melon-pinball-physics-test` (launches, flipper and mini
+flipper shots, cradles, the ramp, 450 random balls that must never leave the cabinet) and `melon-pinball-game-test`
+(a Harvest run through the Seed Market, melons and pests acting on the machine, kickback, spinner, magnet, a lost run),
+so a change that breaks the table or the rules fails the package. To look at it without a screen:
+`SDL_VIDEO_DRIVER=offscreen SDL_RENDER_DRIVER=software melon-pinball --screenshot out.png --seconds 30 --play`
+(the demo plays a classic game; add `--harvest` for a run, `--lazy` to lose it quickly; `--shop`, `--packs` and
+`--collection` show those screens; `--golden` the survivor look). The table's geometry lives in `table.cpp` and drives
+both the physics and the painted art; after moving anything, check the test's "at rest mid-table" count (a ball that
+can come to rest off the flippers is a trap). Harvest's melons, grafts, pests and seed packs are data in `run.cpp`;
+their effects are in `game.cpp` (`applyMachine` for the physics, `add` and `currentMult` for the scoring). Unlocks
+are variety only (no permanent power) and live in the player's `~/.local/share/melon/pinball/unlocks.txt`.
 
 Logs go to `logs/qemu-*.log`. The tests use KVM when `/dev/kvm` is usable (WSL2 has it); without it QEMU runs in
 software emulation and everything is slow. Use generous timeouts. The ISO's GRUB and the installed system both use

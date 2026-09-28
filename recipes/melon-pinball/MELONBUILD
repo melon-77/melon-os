@@ -1,7 +1,7 @@
 pkgname=melon-pinball
 pkgver=1.0
-pkgrel=0
-pkgdesc="melon pinball: a table on the melon planet with real ball physics, missions and a wire ramp"
+pkgrel=1
+pkgdesc="melon pinball: a table on the melon planet with real ball physics, missions, and Harvest runs"
 license=MIT
 url=https://github.com/xbfj/melon-os
 makedepends=(sdl3-dev sdl3-image-dev sdl3-ttf-dev)
@@ -11,8 +11,9 @@ builddir=$srcdir
 build(){
   cmake_setup -S $startdir/src -B build -DPINBALL_TESTS=ON
   ninja -C build -j$JOBS
-  # the physics checks run on the build machine (melon binaries run there, rule 18)
+  # the physics and rules checks run on the build machine (melon binaries run there, rule 18)
   build/melon-pinball-physics-test
+  build/melon-pinball-game-test
 }
 package(){
   DESTDIR=$pkgdir ninja -C build install

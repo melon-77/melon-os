@@ -93,8 +93,8 @@ void World::moveFlippers() {
   for (auto &f : flippers) {
     double dir = f.up > f.rest ? 1 : -1;            // direction of the up stroke
     if (f.pressed) {
-      f.omega += dir * f.accelUp * kStep;
-      if (std::fabs(f.omega) > f.omegaUp) f.omega = dir * f.omegaUp;
+      f.omega += dir * f.accelUp * f.power * kStep;
+      if (std::fabs(f.omega) > f.omegaUp * f.power) f.omega = dir * f.omegaUp * f.power;
     } else {
       f.omega -= dir * f.accelDown * kStep;
       if (std::fabs(f.omega) > f.omegaDown) f.omega = -dir * f.omegaDown;
@@ -197,7 +197,7 @@ void World::collide(int bi) {
     if (s.kind == K_SLING) {
       // the slingshot's switch closes when the rubber is pushed in hard enough
       double vn = -dot(b.v, n);
-      if (vn > 0.18) kick = 1.55;
+      if (vn > 0.18) kick = slingKick;
     }
     if (s.kind == K_DROP) {
       double vn = -dot(b.v, n);
@@ -216,7 +216,7 @@ void World::collide(int bi) {
     V2 n = dist > 1e-9 ? d / dist : V2(0, -1);
     double kick = 0;
     if (c.kind == K_BUMPER && c.cooldown <= 0) {
-      kick = 1.9;                                   // a pop bumper's ring pulls down and flings the ball
+      kick = bumperKick;                            // a pop bumper's ring pulls down and flings the ball
       c.cooldown = 0.12;
     }
     contact(b, bi, n, rr - dist, {}, c.mat, c.kind, kick > 0 || c.kind != K_BUMPER ? c.id : -1, kick);
@@ -285,8 +285,8 @@ void World::step() {
     if (b.captured >= 0) { b.v = {}; continue; }
     if (b.layer == 1) { rideRamp((int)i); continue; }
     V2 prev = b.p;
-    b.v.y += g * kStep;
-    b.v += nudge * kStep;
+    b.v.y += g * gravityScale * kStep;
+    b.v += (nudge + wind) * kStep;
     double sp = len(b.v);
     if (sp > 1e-9) {
       double dv = std::min(sp, rr * kStep);
@@ -302,8 +302,9 @@ void World::step() {
       V2 d = h.c - b.p;
       double dist = len(d);
       if (dist < h.r) {
-        b.v += d / std::max(dist, 1e-6) * (6.0 * kStep);  // the cup's slope
-        if (dist < 0.006 && len(b.v) < 0.9) {
+        b.v += d / std::max(dist, 1e-6) * (h.pull * kStep);  // the cup's slope, or the magnet's pull
+        if (h.damping > 0) b.v = b.v * (1 - h.damping * kStep);
+        if (dist < 0.006 && len(b.v) < h.catchSpeed) {
           b.captured = h.id;
           b.p = h.c;
           b.v = {};

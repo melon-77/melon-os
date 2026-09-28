@@ -17,8 +17,11 @@ public:
   // white text with alpha; the caller tints it. `px` is the cap-to-descender size in pixels.
   SDL_Surface *render(const std::string &s, float px, FontFace face = FONT_SANS);
   bool haveTrueType() const { return !paths_[FONT_SANS].empty(); }
+  // width and height of `s` as rendered at `px` (unscaled surface pixels)
+  bool size(const std::string &s, float px, FontFace face, int &w, int &h);
 
 private:
+  TTF_Font *font(float px, FontFace face);
   std::string paths_[3];
   std::map<std::pair<int, int>, TTF_Font *> cache_;
   bool ttf_ = false;

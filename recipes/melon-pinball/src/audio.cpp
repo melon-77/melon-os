@@ -143,12 +143,29 @@ void Audio::synth() {
   b[SFX_NUDGE].hiss(0, 0.05, 100, 800, 0.4f, 0.02);
   b[SFX_WARNING].tone(0, 0.15, 880, 880, 0.3f, 0.2, 1);
   b[SFX_WARNING].tone(0.2, 0.15, 880, 880, 0.3f, 0.2, 1);
+  b[SFX_SPINNER].hiss(0, 0.025, 2000, 9000, 0.6f, 0.004);
+  b[SFX_SPINNER].tone(0, 0.03, 1400, 1300, 0.2f, 0.008);
+  b[SFX_KICKBACK].tone(0, 0.2, 130, 60, 0.9f, 0.05);
+  b[SFX_KICKBACK].hiss(0, 0.08, 400, 6000, 0.8f, 0.012);
+  b[SFX_MAGNET].tone(0, 0.7, 60, 60, 0.5f, 0.4, 1);
+  b[SFX_MAGNET].tone(0, 0.7, 120, 118, 0.2f, 0.3);
+  b[SFX_COIN].tone(0, 0.12, note(19), note(19), 0.3f, 0.05, 2);
+  b[SFX_COIN].tone(0.07, 0.3, note(26), note(26), 0.3f, 0.12, 2);
+  b[SFX_BUY].tone(0, 0.1, note(10), note(10), 0.3f, 0.05, 2);
+  b[SFX_BUY].tone(0.06, 0.1, note(14), note(14), 0.3f, 0.05, 2);
+  b[SFX_BUY].tone(0.12, 0.3, note(17), note(17), 0.3f, 0.12, 2);
+  b[SFX_SHATTER].hiss(0, 0.5, 2500, 12000, 0.9f, 0.12);
+  for (int i = 0; i < 8; i++) b[SFX_SHATTER].tone(i * 0.03, 0.2, 3000 + i * 377, 2800 + i * 300, 0.1f, 0.05);
+  {
+    int up[] = {7, 11, 14, 19, 23};
+    for (int i = 0; i < 5; i++) b[SFX_UNLOCK].tone(i * 0.06, 0.5, note(up[i]), note(up[i]), 0.2f, 0.2);
+  }
   // even out the levels: loud mechanical hits, quieter small noises, tunes in between
   for (int i = 0; i < SFX_COUNT; i++) {
     float target = 0.7f;
     switch (i) {
       case SFX_FLIP_UP: case SFX_BUMPER: case SFX_SLING: case SFX_PORTAL_OUT: target = 0.85f; break;
-      case SFX_PULL: case SFX_FLIP_DOWN: target = 0.35f; break;
+      case SFX_PULL: case SFX_FLIP_DOWN: case SFX_SPINNER: target = 0.35f; break;
       case SFX_RUBBER: case SFX_WALL: target = 0.45f; break;
       case SFX_ROLLOVER: case SFX_TARGET: case SFX_WARNING: target = 0.55f; break;
       default: break;

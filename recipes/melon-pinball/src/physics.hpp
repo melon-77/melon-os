@@ -72,11 +72,14 @@ struct Sensor {             // rollover switch: the ball's centre crossing segme
   int layer = 0;
 };
 
-struct Hole {               // saucer / kickout hole: a shallow cup that captures slow balls
+struct Hole {               // saucer / kickout hole: a shallow cup that captures slow balls; also the magnet
   V2 c;
-  double r;                 // cup radius (the ball feels its slope inside this)
+  double r;                 // radius of the pull (the cup's slope, or the magnet's field)
   int id;
   bool enabled = true;
+  double pull = 6.0;        // m/s^2 towards the centre at the rim
+  double damping = 0;       // 1/s: a magnet also brakes the ball
+  double catchSpeed = 0.9;  // slower than this near the centre: held
 };
 
 struct Flipper {
@@ -87,6 +90,7 @@ struct Flipper {
   bool pressed = false;
   // Solenoid: a 50-60 degree stroke in about 30 ms; the return spring is weaker.
   double accelUp = 3200, omegaUp = 38, accelDown = 900, omegaDown = 22;
+  double power = 1;         // solenoid strength (run modifiers: overclocked, frozen)
   V2 tip() const { return pivot + V2(std::cos(angle), std::sin(angle)) * length; }
 };
 
@@ -148,6 +152,10 @@ public:
   double drainY = 1.10;     // balls below this are gone
   double width = 0.508, length = 1.066;
   V2 nudge;                 // table acceleration from a nudge this step (m/s^2)
+  V2 wind;                  // a steady push (a boss twist), m/s^2
+  double gravityScale = 1;  // heavier or lighter balls (run modifiers)
+  double bumperKick = 1.9;  // pop bumper throw, m/s
+  double slingKick = 1.55;  // slingshot throw, m/s (0: dead slings)
   std::vector<Event> events;
   double time = 0;
 

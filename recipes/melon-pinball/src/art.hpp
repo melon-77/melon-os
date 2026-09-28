@@ -27,6 +27,7 @@ struct Art {
   SDL_Surface *ball = nullptr;       // chrome ball, 128 px
   SDL_Surface *glow = nullptr;       // white radial glow for lit lamps
   SDL_Surface *logo = nullptr;       // the panel's title box
+  std::vector<SDL_Surface *> melonIcons, graftIcons;   // the Seed Market's cards (96 px)
   void free();
 };
 

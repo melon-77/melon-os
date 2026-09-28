@@ -1,0 +1,12 @@
+pkgname=keyutils
+pkgver=1.6.3
+pkgrel=1
+pkgdesc="Linux key management: keyctl and libkeyutils"
+license="GPL-2.0-or-later AND LGPL-2.1-or-later"
+url=https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/keyutils.git
+source=(keyutils-1.6.3.tar.gz)
+subpackages=(keyutils-dev)
+_mk(){ make CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" NO_ARLIB=1 LIBDIR=/usr/lib USRLIBDIR=/usr/lib BINDIR=/usr/bin SBINDIR=/usr/bin \
+         SHAREDIR=/usr/share/keyutils INCLUDEDIR=/usr/include "$@"; }
+build(){ _mk -j$JOBS; }
+package(){ _mk DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man; }

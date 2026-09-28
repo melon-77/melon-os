@@ -1,4 +1,5 @@
 # path	sha256	method	argument   (see scripts/make-manifest.py)
+deb/acl_2.3.2.orig.tar.xz	97203a72cae99ab89a067fe2210c1cbf052bc492b479eca7d226d9830883b0bd	apt	acl=2.3.2-2
 deb/alsa-lib_1.2.15.3.orig.tar.bz2	7b079d614d582cade7ab8db2364e65271d0877a37df8757ac4ac0c8970be861e	apt	alsa-lib=1.2.15.3-1ubuntu1.1
 deb/alsa-utils_1.2.15.2.orig.tar.bz2	7aaaafbfb01942113ec0c31e51f705910e81079205088ca2f8f137a3869e1a3a	apt	alsa-utils=1.2.15.2-1ubuntu1
 deb/appstream_1.1.2.orig.tar.xz	46b4257100e25a6468ceed7b3ab82441f47b119da3398d30aea6d7b91174b586	apt	appstream=1.1.2-1
@@ -58,6 +59,7 @@ deb/kactivitymanagerd_6.6.4.orig.tar.xz	b405af0c48ad47ee4f2c70fd2a2aef9eee521120
 deb/kde-cli-tools_6.6.4.orig.tar.xz	0d7cdd7875a970768f0a173748d6e301157adcac2ec7b6b6233f792277497704	apt	kde-cli-tools=4:6.6.4-0ubuntu1
 deb/kde-spectacle_6.6.4.orig.tar.xz	1e6d66f3a4731c635f6abd144f1bb002271b12626ccb38e86f04e79c7e1ad2e6	apt	kde-spectacle=4:6.6.4-0ubuntu1
 deb/kdecoration_6.6.4.orig.tar.xz	20d9424a018fabbf62987bc138741068ae2384f3128a61f23d906ff4f42a5505	apt	kdecoration=4:6.6.4-0ubuntu1
+deb/keyutils_1.6.3.orig.tar.gz	a61d5706136ae4c05bd48f86186bcfdbd88dd8bd5107e3e195c924cfc1b39bb4	apt	keyutils=1.6.3-6ubuntu3
 deb/kf6-attica_6.24.0.orig.tar.xz	67ea77148fba093bfdbd9104e3f09b995aefc34b0b6c34bc31a96e63b110abcb	apt	kf6-attica=6.24.0-0ubuntu1
 deb/kf6-bluez-qt_6.24.0.orig.tar.xz	907cf77ca2bf0417dad49ac3ebfe51300102029b93520dce5cfa5c35e25e5ab3	apt	kf6-bluez-qt=6.24.0-0ubuntu1
 deb/kf6-breeze-icons_6.24.0.orig.tar.xz	63d67d834b28f95f45d53ee4594b1b39de4802429570f0e3b5e63ab509abde8b	apt	kf6-breeze-icons=6.24.0-0ubuntu1
@@ -136,6 +138,9 @@ deb/layer-shell-qt_6.6.4.orig.tar.xz	731af7a222bc1a1e87fd993060ed8fa515b4b38cbc2
 deb/lcms2_2.17.orig.tar.gz	d11af569e42a1baa1650d20ad61d12e41af4fead4aa7964a01f93b08b53ab074	apt	lcms2=2.17-1ubuntu0.2
 deb/libarchive_3.8.5.orig.tar.xz	d68068e74beee3a0ec0dd04aee9037d5757fcc651591a6dcf1b6d542fb15a703	apt	libarchive=3.8.5-1ubuntu2.2
 deb/libassuan_3.0.2.orig.tar.bz2	d2931cdad266e633510f9970e1a2f346055e351bb19f9b78912475b8074c36f6	apt	libassuan=3.0.2-2build1
+deb/libatasmart_0.19.orig.tar.xz	61f0ea345f63d28ab2ff0dc352c22271661b66bf09642db3a4049ac9dbdb0f8d	apt	libatasmart=0.19-6
+deb/libblockdev_3.4.0.orig.tar.gz	7cb0b4018600ab82d1d1f00e46c1b1d7a0cdab8f4682952dd9dba1ce7f6ebed4	apt	libblockdev=3.4.0-1
+deb/libbytesize_2.12.orig.tar.gz	e8b39afc6580f5777c9b1c8488e21fcbb60a3effdac7399eef0236185639bc41	apt	libbytesize=2.12-1
 deb/libcanberra_0.30.orig.tar.xz	c2b671e67e0c288a69fc33dc1b6f1b534d07882c2aceed37004bf48c601afa72	apt	libcanberra=0.30-18ubuntu3
 deb/libcap2_2.75.orig.tar.xz	de4e7e064c9ba451d5234dd46e897d7c71c96a9ebf9a0c445bc04f4742d83632	apt	libcap2=1:2.75-10ubuntu2
 deb/libdisplay-info_0.3.0.orig.tar.bz2	915cc6713b7b2e173a90f9db248fb8994f9668171fecc1e9fded5e36bb34d890	apt	libdisplay-info=0.3.0-1
@@ -160,6 +165,7 @@ deb/libkscreen_6.6.4.orig.tar.xz	18f8cf65fcc788a7188d72a17d6e0f107e044e07623d5c0
 deb/libksysguard_6.6.4.orig.tar.xz	9dd0a5a8d3f12d65351fab8c132365dd65f0f9976d6831598ce30ebbfa291a89	apt	libksysguard=4:6.6.4-0ubuntu1
 deb/libndp_1.9.orig.tar.gz	e564f5914a6b1b799c3afa64c258824a801c1b79a29e2fe6525b682249c65261	apt	libndp=1.9-1build1
 deb/libnl3_3.12.0.orig.tar.gz	fc51ca7196f1a3f5fdf6ffd3864b50f4f9c02333be28be4eeca057e103c0dd18	apt	libnl3=3.12.0-2
+deb/libnvme_1.16.1.orig.tar.xz	39570e89807296ade6985e08922f874d3799ce89ac1bcb05849a454cdc965710	apt	libnvme=1.16.1-4
 deb/libogg_1.3.6.orig.tar.xz	5c8253428e181840cd20d41f3ca16557a9cc04bad4a3d04cce84808677fa1061	apt	libogg=1.3.6-2
 deb/libpciaccess_0.18.1.orig.tar.gz	f31889dfb54c1b0ba114ce0eebc360bdbe14392b209ca94cb019c2bb736a6b9a	apt	libpciaccess=0.18.1-1ubuntu4.1
 deb/libplasma_6.6.4.orig.tar.xz	cc7dfd90b4caba4b2b4da1eb5d6c7aaa20b72b9770f511cbc433eadcc5b8e483	apt	libplasma=6.6.4-0ubuntu1
@@ -269,6 +275,7 @@ deb/qt6-svg_6.10.2.orig.tar.xz	f07ff80f38caf235187200345392ca7479445ddf49a36c369
 deb/qt6-tools_6.10.2.orig.tar.xz	1e3d2c07c1fd76d2425c6eaeeaa62ffaff5f79210c4e1a5bc2a6a9db668d5b24	apt	qt6-tools=6.10.2-1
 deb/qt6-wayland_6.10.2.orig.tar.xz	391998eb432719df26a6a67d8efdc67f8bf2afdd76c1ee3381ebff4fe7527ee2	apt	qt6-wayland=6.10.2-4
 deb/qt6-webview_6.10.2.orig.tar.xz	7ec406ff0998900ccef0ff8e4e5b1fbf15e4e18f3b43eb72e8b2aeda0dd0eab4	apt	qt6-webview=6.10.2-1
+deb/readline_8.3.orig.tar.gz	fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc	apt	readline=8.3-4
 deb/runit_2.3.0.orig.tar.gz	190e11c1f8072b543bb6bd53850555c458d6e306d53df3fc1232d300c3e21b51	apt	runit=2.3.0-1ubuntu1
 deb/sbc_2.1.orig.tar.gz	8cf661b5463ff9b5a10986ba127cc90146d7b7a06aec6483247332d59d3e5cdd	apt	sbc=2.1-1build1
 deb/sddm-kcm_6.6.4.orig.tar.xz	b38c60186c4a810893df554e94acbb5a1cbc6c4f8ba57aacd42190dc77b577c9	apt	sddm-kcm=4:6.6.4-0ubuntu1
@@ -281,6 +288,7 @@ deb/sqlite3_3.46.1.orig-www.tar.xz	648df41a8e532882b1905df45919aae4bafaf74c455f6
 deb/sqlite3_3.46.1.orig.tar.xz	d0cdd2ece271b29e7ce18095745d892517ee26d0f270065b3a25c2e9eb11639c	apt	sqlite3=3.46.1-9ubuntu0.3
 deb/squashfs-tools_4.7.5.orig.tar.gz	547b7b7f4d2e44bf91b6fc554664850c69563701deab9fd9cd7e21f694c88ea6	apt	squashfs-tools=1:4.7.5-1
 deb/systemsettings_6.6.4.orig.tar.xz	18d2aab42f3f3ce17c5e636238c2d7a1908152f2203f521d6d8441537d3edf04	apt	systemsettings=4:6.6.4-0ubuntu1
+deb/udisks2_2.10.91.orig.tar.bz2	2247ef8860a2846339240387ac1da5a7ed3432410d607fd9254a7dbe00335b1b	apt	udisks2=2.10.91-1ubuntu2.1
 deb/upower_1.91.1.orig.tar.bz2	d568638d670a63a1886335b7b136f4888cb38a3b28f3f4bcdeaffcca0b0f6df8	apt	upower=1.91.1-1
 deb/util-linux_2.41.3.orig.tar.xz	3330d873f0fceb5560b89a7dc14e4f3288bbd880e96903ed9b50ec2b5799e58b	apt	util-linux=2.41.3-3ubuntu2.2
 deb/vulkan-loader_1.4.341.0.orig.tar.xz	a022ed880ae99c91ed6aca34c2e6551a163617666034f0eeb9b9efdd54a272a6	apt	vulkan-loader=1.4.341.0-1
@@ -310,6 +318,7 @@ deb/xwayland_24.1.10.orig.tar.xz	459762be8ea046c94386687d77a87add6073868bee14f02
 deb/xz-utils_5.8.3.orig.tar.xz	fff1ffcf2b0da84d308a14de513a1aa23d4e9aa3464d17e64b9714bfdd0bbfb6	apt	xz-utils=5.8.3-1
 deb/yaml-cpp_0.8.0+dfsg.orig.tar.xz	32c85a5f36633a9005b20261b35fccb0d8ec69e9ef16c67de7d5d007944e3709	apt	yaml-cpp=0.8.0+dfsg-9
 deb/zlib_1.3.dfsg+really1.3.1.orig.tar.gz	60dd315c07f616887caa029408308a018ace66e3d142726a97db164b3b8f69fb	apt	zlib=1:1.3.dfsg+really1.3.1-1ubuntu3.1
+acl-2.3.2.tar.xz	-	link	deb/acl_2.3.2.orig.tar.xz
 attr-2.5.2.tar.xz	-	link	deb/attr_2.5.2.orig.tar.xz
 boost-1.90.0.tar.xz	-	link	deb/boost1.90_1.90.0.orig.tar.xz
 breeze-6.6.4.tar.xz	-	link	deb/breeze_6.6.4.orig.tar.xz
@@ -386,6 +395,7 @@ kactivitymanagerd-6.6.4.tar.xz	-	link	deb/kactivitymanagerd_6.6.4.orig.tar.xz
 kde-cli-tools-6.6.4.tar.xz	-	link	deb/kde-cli-tools_6.6.4.orig.tar.xz
 kde-spectacle-6.6.4.tar.xz	-	link	deb/kde-spectacle_6.6.4.orig.tar.xz
 kdecoration-6.6.4.tar.xz	-	link	deb/kdecoration_6.6.4.orig.tar.xz
+keyutils-1.6.3.tar.gz	-	link	deb/keyutils_1.6.3.orig.tar.gz
 kf6-attica-6.24.0.tar.xz	-	link	deb/kf6-attica_6.24.0.orig.tar.xz
 kf6-bluez-qt-6.24.0.tar.xz	-	link	deb/kf6-bluez-qt_6.24.0.orig.tar.xz
 kf6-breeze-icons-6.24.0.tar.xz	-	link	deb/kf6-breeze-icons_6.24.0.orig.tar.xz
@@ -463,6 +473,9 @@ layer-shell-qt-6.6.4.tar.xz	-	link	deb/layer-shell-qt_6.6.4.orig.tar.xz
 lcms2-2.17.tar.gz	-	link	deb/lcms2_2.17.orig.tar.gz
 libarchive-3.8.5.tar.xz	-	link	deb/libarchive_3.8.5.orig.tar.xz
 libassuan-3.0.2.tar.bz2	-	link	deb/libassuan_3.0.2.orig.tar.bz2
+libatasmart-0.19.tar.xz	-	link	deb/libatasmart_0.19.orig.tar.xz
+libblockdev-3.4.0.tar.gz	-	link	deb/libblockdev_3.4.0.orig.tar.gz
+libbytesize-2.12.tar.gz	-	link	deb/libbytesize_2.12.orig.tar.gz
 libcanberra-0.30.tar.xz	-	link	deb/libcanberra_0.30.orig.tar.xz
 libcap-2.75.tar.xz	-	link	deb/libcap2_2.75.orig.tar.xz
 libdisplay-info-0.3.0.tar.bz2	-	link	deb/libdisplay-info_0.3.0.orig.tar.bz2
@@ -483,6 +496,7 @@ libkscreen-6.6.4.tar.xz	-	link	deb/libkscreen_6.6.4.orig.tar.xz
 libksysguard-6.6.4.tar.xz	-	link	deb/libksysguard_6.6.4.orig.tar.xz
 libndp-1.9.tar.gz	-	link	deb/libndp_1.9.orig.tar.gz
 libnl-3.12.0.tar.gz	-	link	deb/libnl3_3.12.0.orig.tar.gz
+libnvme-1.16.1.tar.xz	-	link	deb/libnvme_1.16.1.orig.tar.xz
 libogg-1.3.6.tar.xz	-	link	deb/libogg_1.3.6.orig.tar.xz
 libpciaccess-0.18.1.tar.gz	-	link	deb/libpciaccess_0.18.1.orig.tar.gz
 libplasma-6.6.4.tar.xz	-	link	deb/libplasma_6.6.4.orig.tar.xz
@@ -594,6 +608,7 @@ qt6-qtsvg-6.10.2.tar.xz	-	link	deb/qt6-svg_6.10.2.orig.tar.xz
 qt6-qttools-6.10.2.tar.xz	-	link	deb/qt6-tools_6.10.2.orig.tar.xz
 qt6-qtwayland-6.10.2.tar.xz	-	link	deb/qt6-wayland_6.10.2.orig.tar.xz
 qt6-qtwebview-6.10.2.tar.xz	-	link	deb/qt6-webview_6.10.2.orig.tar.xz
+readline-8.3.tar.gz	-	link	deb/readline_8.3.orig.tar.gz
 runit-2.3.0.tar.gz	-	link	deb/runit_2.3.0.orig.tar.gz
 sbc-2.1.tar.gz	-	link	deb/sbc_2.1.orig.tar.gz
 sddm-0.21.0+git20250502.4fe234b.tar.gz	-	link	deb/sddm_0.21.0+git20250502.4fe234b.orig.tar.gz
@@ -605,6 +620,7 @@ spirv-tools-2026.1.tar.gz	-	link	deb/spirv-tools_2026.1.orig.tar.gz
 sqlite-3.46.1.tar.xz	-	link	deb/sqlite3_3.46.1.orig.tar.xz
 squashfs-tools-4.7.5.tar.gz	-	link	deb/squashfs-tools_4.7.5.orig.tar.gz
 systemsettings-6.6.4.tar.xz	-	link	deb/systemsettings_6.6.4.orig.tar.xz
+udisks2-2.10.91.tar.bz2	-	link	deb/udisks2_2.10.91.orig.tar.bz2
 upower-1.91.1.tar.bz2	-	link	deb/upower_1.91.1.orig.tar.bz2
 userspace-rcu-0.15.6.tar.bz2	-	link	deb/liburcu_0.15.6.orig.tar.bz2
 util-linux-2.41.3.tar.xz	-	link	deb/util-linux_2.41.3.orig.tar.xz

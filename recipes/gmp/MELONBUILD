@@ -1,0 +1,14 @@
+pkgname=gmp
+pkgver=6.3.0
+pkgrel=0
+pkgdesc="GNU multiple precision arithmetic library"
+license="LGPL-3.0-or-later OR GPL-2.0-or-later"
+url=https://gmplib.org/
+source=(gmp-6.3.0.tar.xz)
+builddir=$srcdir/gmp-6.3.0+dfsg
+subpackages=(gmp-dev)
+# the Debian tarball leaves out doc/ (the manual is GFDL), which configure and the top Makefile still list
+prepare(){ sed -i 's| doc/Makefile | |' configure; sed -i 's/^SUBDIRS = \(.*\) doc$/SUBDIRS = \1/' Makefile.in; }
+# its configure tests call "void g()" with arguments, which C23 (GCC 15's default) rejects
+build(){ ./configure $conf_flags --disable-static --disable-cxx CFLAGS="$CFLAGS -std=gnu17"; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/info; }

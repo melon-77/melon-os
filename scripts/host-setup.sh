@@ -26,7 +26,7 @@ apt-get install -y -q build-essential bison flex texinfo bc gawk gperf m4 python
   libexpat1-dev libffi-dev libsqlite3-dev libncurses-dev libreadline-dev libbz2-dev liblzma-dev uuid-dev \
   libgl-dev libegl-dev libxkbcommon-dev libwayland-dev wayland-protocols libfontconfig-dev libfreetype-dev \
   libdbus-1-dev libglib2.0-dev libpng-dev libdrm-dev libx11-dev libxext-dev libxcb1-dev libxrender-dev \
-  python3-mako python3-yaml python3-pexpect python3-pil libxml2-utils appstream libappstream-dev itstool nasm bubblewrap
+  python3-mako python3-yaml python3-pexpect python3-pil libxml2-utils appstream libappstream-dev itstool nasm bubblewrap autoconf-archive
 # newer meson than Ubuntu's (Mesa 26 needs it), plus Python modules some builds import
 pip install -q --break-system-packages meson==1.12.1 mako pyyaml shtab pycotap==1.3.1 packaging pexpect pillow
 

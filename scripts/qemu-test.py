@@ -5,7 +5,7 @@
   qemu-test.py disk  <disk.img> [--uefi]         boot the installed disk and check the system
   qemu-test.py toram <iso> <disk.img>            boot with "copy to RAM", eject the CD, then use and install
   qemu-test.py desktop <desktop-iso>             boot the desktop ISO with graphics: services up, Plasma running,
-                                                 screenshot in logs/qemu-desktop.png
+                                                 a USB stick mounts through UDisks2, screenshot in logs/qemu-desktop.png
   qemu-test.py desktop-install <desktop-iso> <disk.img>   install the desktop profile, boot the installed disk
                                                  with graphics, log in through SDDM: greeter stays up, Plasma starts
   --luks   install with an encrypted root (and type the passphrase when the installed disk boots)
@@ -44,9 +44,18 @@ def disk_args(img):
     return ['-drive', f'file={img},if=virtio,format=raw']
 if mode == 'desktop':
     iso, = args
+    # a USB stick like a real one: MBR partition table, one FAT32 partition labelled MELONUSB with a file on it
+    import subprocess
+    usb = '/tmp/melon-usb.img'
+    open(usb, 'wb').truncate(64 << 20)
+    subprocess.run(['sfdisk', '-q', usb], input=b'label: dos\nstart=2048, type=c\n', check=True)
+    subprocess.run(['mkfs.vfat', '-F', '32', '-n', 'MELONUSB', '--offset', '2048', usb, str((64 << 20) // 1024 - 1024)],
+                   check=True, stdout=subprocess.DEVNULL)
+    subprocess.run(['mcopy', '-i', f'{usb}@@1M', '-', '::hello.txt'], input=b'hello from the stick\n', check=True)
     # a real graphics card for KWin; the serial port stays the test's console
     cmd = [c for c in cmd if c != '-nographic'] + ['-display', 'none', '-serial', 'stdio', '-device', 'virtio-vga', '-m', '4096',
-                                                 '-cdrom', iso, '-boot', 'd']
+                                                 '-cdrom', iso, '-boot', 'd', '-device', 'qemu-xhci,id=xhci',
+                                                 '-drive', f'if=none,id=stick,format=raw,file={usb}', '-device', 'usb-storage,bus=xhci.0,drive=stick']
 elif mode == 'desktop-install':
     iso, disk = args
     base = cmd + ['-m', '4096']
@@ -97,6 +106,19 @@ if mode == 'desktop':
     v = dict(_re.findall(r'(SESSIONS|KWIN|SHELL)=(\d+)', out))
     stable = found and all(int(v.get(k, '0')) > 0 for k in ('SESSIONS', 'KWIN', 'SHELL')); ok &= stable
     step(f"Plasma after 20 s: sessions={v.get('SESSIONS')} kwin={v.get('KWIN')} plasmashell={v.get('SHELL')}")
+    # Plasma's device list asks UDisks2 over D-Bus, which starts udisksd; then mount the stick the same way Dolphin does
+    out = sh('echo UDISKSD=$(ps -o comm | grep -cx udisksd)')
+    started = 'UDISKSD=1' in out; ok &= started; step('udisksd started by D-Bus activation: ' + ('yes' if started else 'NO'))
+    out = sh('dev=$(doas blkid -L MELONUSB); echo "stick: $dev"; doas udisksctl mount -b $dev && '
+             'cat /run/media/root/MELONUSB/hello.txt && doas udisksctl unmount -b $dev', timeout=120)
+    mounted = 'hello from the stick' in out and 'Mounted' in out; ok &= mounted
+    step('USB stick through UDisks2: ' + ('mounted, file read, unmounted' if mounted else 'FAILED'))
+    if not mounted: print(out[-2000:])
+    # nmcli: the text-mode way to reach the network when the desktop won't start
+    out = sh('nmcli -c no -t -f STATE general; nmcli -c no -t -f DEVICE,STATE device')
+    online = _re.search(r'(^|[\r\n])connected', out) is not None; ok &= online   # (bash's bracketed-paste codes end in \r)
+    step('nmcli: ' + ('NetworkManager connected' if online else 'NOT CONNECTED'))
+    if not online: print(repr(out[-600:]))
     m = socket.socket(socket.AF_UNIX); m.connect('/tmp/melon-qmon.sock'); time.sleep(0.5)
     m.sendall(f'screendump {M}/logs/qemu-desktop.ppm\n'.encode()); time.sleep(3); m.close()
     step('screenshot: logs/qemu-desktop.ppm')

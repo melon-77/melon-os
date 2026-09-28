@@ -199,6 +199,14 @@ Rebuilding the kernel takes about an hour on 2 cores.
     (`qemu-test.py desktop-install`).
 39. **`set -e` and `VAR=$(cmd)`: a failing `cmd` ends the script.** An assignment's exit status is its last command
     substitution. Probes that may find nothing (no sound card, no network) need `|| true` inside the `$( )`.
+40. **GCC 15 compiles C23 by default**, where `void f()` means "no arguments". Old code and old configure tests
+    that call such functions with arguments fail ("too many arguments to function"): build them with
+    `CFLAGS="$CFLAGS -std=gnu17"` (gmp). Old `config.sub` files don't know `*-linux-musl`: copy the build host's
+    (`/usr/share/misc/config.sub`, `config.guess`) as libcanberra and libatasmart do. Tools a build runs on the
+    build machine come from `CC_FOR_BUILD=gcc` when the project supports it.
+41. **Absolute symlinks in `usr/lib` and `usr/include`** (`libfoo.so -> /usr/lib/libfoo.so.1`) point into the
+    build machine's own `/usr` from the sysroot, so the linker can't find the library. melon-build makes them
+    relative when packaging; a package built before that needs a pkgrel bump to reach the sysroot (rule 31).
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
@@ -225,7 +233,8 @@ scripts/qemu-test.py disk /tmp/disk.img --uefi                            # UEFI
 scripts/qemu-test.py live out/melon-*-x86_64.iso /tmp/disk.img --luks     # install with an encrypted root
 scripts/qemu-test.py disk /tmp/disk.img --luks                            # boot it, typing the passphrase
 MELON_EDITION=desktop scripts/mkiso.sh                                    # the Plasma live ISO (desktop edition)
-scripts/qemu-test.py desktop out/melon-desktop-*-x86_64.iso              # services ready, Plasma running; LOOK at logs/qemu-desktop.ppm
+scripts/qemu-test.py desktop out/melon-desktop-*-x86_64.iso              # services ready, Plasma running, a USB stick mounts through
+                                                                          # UDisks2, nmcli online; LOOK at logs/qemu-desktop.ppm
 qemu-img create -f raw /tmp/desk.img 16G
 scripts/qemu-test.py desktop-install out/melon-desktop-*-x86_64.iso /tmp/desk.img   # install, SDDM greeter stays up,
                                                                           # log in through it, Plasma runs; LOOK at both screenshots

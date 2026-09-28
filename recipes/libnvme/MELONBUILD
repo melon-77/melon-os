@@ -1,0 +1,12 @@
+pkgname=libnvme
+pkgver=1.16.1
+pkgrel=0
+pkgdesc="NVMe management library (used by libblockdev and UDisks2)"
+license=LGPL-2.1-or-later
+url=https://github.com/linux-nvme/libnvme
+source=(libnvme-1.16.1.tar.xz)
+makedepends=(json-c-dev keyutils-dev)
+subpackages=(libnvme-dev)
+build(){ meson_setup -Ddocs=false -Dtests=false -Dexamples=false -Dpython=disabled -Dopenssl=disabled -Dlibdbus=disabled \
+           -Djson-c=enabled -Dkeyutils=enabled -Dliburing=disabled build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc; }

@@ -1,0 +1,28 @@
+#!/bin/sh
+# Scores and saves live in /var/games/nethack, outside the package (an upgrade must not reset them). The game writes
+# them as group games, so that directory is writable by group games, and this script (run as root) never touches
+# anything inside it once it exists: chown and chmod follow symbolic links, and anyone who got group games (a NetHack
+# bug) could swap record or save for a link to /etc/shadow or /etc for the next upgrade to hand over. The directory
+# is built on first install in a private place, while only root can write to it, and moved into place in one step.
+# The setgid bit goes on only once the binary really belongs to games: setgid on a root-owned binary would give
+# every player group root (and /etc/shadow is readable by group root). Anything unexpected leaves the game
+# without setgid and fails loudly.
+bin=/usr/lib/nethack/nethack d=/var/games/nethack
+fail(){ chmod 0755 $bin; echo "nethack: $*; the game stays without setgid (no shared scores)" >&2; exit 1; }
+grep -q '^games:' /etc/group || fail "the games group doesn't exist"
+if [ -L $d ]; then
+  fail "$d is a symbolic link"
+elif [ ! -e $d ]; then
+  mkdir -p /var/games || fail "couldn't create /var/games"
+  [ ! -L /var/games ] && [ "$(stat -c %U /var/games)" = root ] || fail "/var/games isn't a directory owned by root"
+  new=$(mktemp -d /var/games/.nethack.XXXXXX) || fail "couldn't create a directory in /var/games"
+  # everything inside is finished before the directory becomes writable by group games
+  mkdir $new/save && touch $new/perm $new/record $new/logfile $new/xlogfile $new/livelog &&
+    chown root:games $new/save $new/perm $new/record $new/logfile $new/xlogfile $new/livelog &&
+    chmod 0775 $new/save && chmod 0664 $new/perm $new/record $new/logfile $new/xlogfile $new/livelog &&
+    chown root:games $new && chmod 0775 $new && mv $new $d ||
+    { rm -rf $new; fail "couldn't set up $d"; }
+fi
+chown root:games $bin && [ "$(stat -c %U:%G $bin)" = root:games ] || fail "couldn't hand $bin to group games"
+chmod 2755 $bin || fail "couldn't make $bin setgid"
+exit 0

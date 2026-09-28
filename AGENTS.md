@@ -404,7 +404,8 @@ Ubuntu archive and public GitHub. Upstream tarballs were therefore taken from th
 archive (`apt-get source --download-only <pkg>`, then the `*.orig.tar.*`, symlinked into `sources/` under
 its upstream name) or from GitHub (apk-tools). Firmware blobs come from Ubuntu's `linux-firmware-*`
 .debs. If you have normal internet access, fetching the same versions from upstream is fine, as long as
-the tarballs are identical.
+the tarballs are identical. A version Ubuntu doesn't have comes straight from its upstream site: list it in
+`URL` in `scripts/make-manifest.py` (method `url` in `MANIFEST.tsv`, checked by sha256 like the others).
 
 ## Roadmap
 

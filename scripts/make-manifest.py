@@ -5,6 +5,7 @@ so another build machine can download exactly the same files (scripts/fetch-sour
 Columns: path (relative to sources/), sha256, method, argument
   apt    <srcpkg>=<version>     from `apt-get source --download-only` (Ubuntu source archive)
   pool   <url>                  a .deb from the Ubuntu archive pool
+  url    <url>                  a tarball from the upstream site (versions Ubuntu doesn't have)
   git    <repo-url> <tag>       `git archive` of a tag (gzip output can differ, so only the tree is checked)
   inner  <archive> <member>     a file inside another archive (the upstream GCC tarball in Debian's gcc orig)
   link   <target>               a symlink to another entry
@@ -47,6 +48,8 @@ GIT = {  # tarball name prefix -> repo, tag pattern
     'nix': ('https://github.com/NixOS/nix', '{v}'),
     'nlohmann-json': ('https://github.com/nlohmann/json', 'v{v}'),
     'vulkan-headers': ('https://github.com/KhronosGroup/Vulkan-Headers', 'v{v}')}
+URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7)
+    'nethack-500-src.tgz': 'https://www.nethack.org/download/5.0.0/nethack-500-src.tgz'}
 
 rows, missing = [], []
 def add(path, method, arg):
@@ -77,7 +80,9 @@ for f in sorted(os.listdir(S)):
         if t.startswith(S + '/'): t = t[len(S) + 1:]
         rows.append((f, '-', 'link', t)); continue
     m = re.match(r'(.+?)-(\d[\w.]*)\.tar\.(gz|xz|bz2)$', f)
-    if f.startswith('gcc-') and f.endswith('.tar.xz'):
+    if f in URL:
+        add(f, 'url', URL[f])
+    elif f.startswith('gcc-') and f.endswith('.tar.xz'):
         add(f, 'inner', f'deb/gcc-15_15.2.0.orig.tar.gz gcc-15-15.2.0/{f}')
     elif m and m.group(1) in GIT:
         repo, tag = GIT[m.group(1)]

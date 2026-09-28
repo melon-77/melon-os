@@ -75,7 +75,15 @@ PROMPT = r'@melon[\w-]*.*[#$] '
 
 def sh(c, timeout=300, expect=PROMPT):
     p.sendline(c)
-    p.expect(expect, timeout=timeout)
+    try:
+        p.expect(expect, timeout=timeout)
+    except pexpect.TIMEOUT:
+        # a busy guest can drop characters typed at the serial console; a lost quote leaves bash waiting for more
+        # input. Short commands get one more go (never long ones like the installer: they would run twice)
+        if timeout > 300 or expect is not PROMPT: raise
+        step(f'no prompt after {c[:50]!r}: interrupting and typing it again')
+        p.sendcontrol('c'); p.expect(PROMPT, timeout=30)
+        p.sendline(c); p.expect(expect, timeout=timeout)
     # without the terminal's echo of the command line, which contains every marker the command would print
     return p.before.split('\n', 1)[-1]
 
@@ -88,7 +96,7 @@ if mode == 'desktop':
     p.send('\r')
     p.expect(PROMPT, timeout=900); step('logged in on the serial console')
     ok = True
-    for svc in ['dbus', 'elogind', 'polkitd', 'udevd', 'NetworkManager', 'sddm']:
+    for svc in ['dbus', 'elogind', 'polkitd', 'udevd', 'NetworkManager', 'sddm', 'avahi-daemon', 'cupsd']:
         for _ in range(30):                        # services settle in the first seconds after boot
             out = sh(f'doas sv check /var/service/{svc} >/dev/null && echo SVC-READY || echo SVC-WAIT')
             if 'SVC-READY' in out: break
@@ -126,6 +134,16 @@ if mode == 'desktop':
                       'codec-bluez5-sbc', 'codec-bluez5-opus', 'codec-bluez5-aptx', 'codec-bluez5-lc3'} - have); ok &= not missing
     step('codecs: ' + ('VP9, H.264, WebP and Opus encode; Bluetooth codecs present' if not missing else f'MISSING {missing}'))
     if missing: print(out[-2000:])
+    # printing: CUPS' virtual IPP Everywhere printer that only takes PWG raster, a driverless queue for it, and a text
+    # file through the whole filter chain (texttopdf, pdftopdf with QPDF, pdftoraster with Poppler, the ipp backend)
+    out = sh('rm -rf /tmp/ippspool; mkdir -p /tmp/ippspool; (ippeveprinter -r off -p 8631 -f image/pwg-raster -k -d /tmp/ippspool '
+             'MelonTest >/tmp/ippeve.log 2>&1 &); sleep 3; lpadmin -p melontest -E -v ipp://localhost:8631/ipp/print -m everywhere '
+             '&& lp -d melontest /etc/os-release; for i in $(seq 60); do [ -z "$(lpstat -o melontest)" ] && break; sleep 1; done; '
+             'lpstat -W completed -o melontest | wc -l | sed "s/^/COMPLETED=/"; ls /tmp/ippspool | grep -c "pwg$" | sed "s/^/RASTER=/"', timeout=180)
+    v = dict(_re.findall(r'(COMPLETED|RASTER)=(\d+)', out))
+    printed = int(v.get('COMPLETED', '0')) >= 1 and int(v.get('RASTER', '0')) >= 1; ok &= printed
+    step('printing: ' + ('a text file reached the IPP Everywhere printer as PWG raster' if printed else f'FAILED {v}'))
+    if not printed: print(out[-1500:]); print(sh('tail -20 /var/log/cups/error_log; tail -5 /tmp/ippeve.log'))
     # nmcli: the text-mode way to reach the network when the desktop won't start
     out = sh('nmcli -c no -t -f STATE general; nmcli -c no -t -f DEVICE,STATE device')
     online = _re.search(r'(^|[\r\n])connected', out) is not None; ok &= online   # (bash's bracketed-paste codes end in \r)
@@ -167,6 +185,7 @@ if mode == 'desktop-install':
     p.logfile_read = log
     p.expect('login:', timeout=900); p.sendline('root'); p.expect('assword:'); p.sendline('melonroot')
     p.expect(PROMPT, timeout=120); step('logged in on the installed desktop (serial console)')
+    time.sleep(15)                                  # SDDM and KWin are starting: typing now can lose characters
     sh('stty cols 160 rows 50; export TERM=vt100')
     # (comm is cut to 15 characters: sddm-greeter-qt6 shows as sddm-greeter-qt)
     greeter = "ps -o pid,comm | awk '$2 ~ /^sddm-greeter/{print $1}' | head -1"
@@ -192,6 +211,10 @@ if mode == 'desktop-install':
     step(f'Plasma for jcole after 20 s: plasmashell={count(shell)} active sessions={sess}')
     mime = count('[ -s /usr/share/mime/mime.cache ] && echo 1 || echo 0') == 1; ok &= mime
     step('MIME cache: ' + ('present' if mime else 'MISSING'))
+    # the desktop profile's services, and the user may manage printers
+    svcs = count('n=0; for s in avahi-daemon cupsd; do sv check /var/service/$s >/dev/null 2>&1 && n=$((n+1)); done; echo $n')
+    lpadm = count('id -Gn jcole | tr " " "\\n" | grep -cx lpadmin')
+    ok &= svcs == 2 and lpadm == 1; step(f'printing on the installed system: {svcs}/2 services up, jcole in lpadmin: {lpadm == 1}')
     mon(f'screendump {M}/logs/qemu-desktop-installed.ppm'); time.sleep(3)
     step('screenshots: logs/qemu-desktop-greeter.ppm, logs/qemu-desktop-installed.ppm')
     p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)

@@ -136,6 +136,11 @@ cd "$builddir" 2>/dev/null || cd "$srcdir"
 msg build; build
 cd "$builddir" 2>/dev/null || cd "$srcdir"
 msg package; package
+# pkg-config answers carry the sysroot (-L$SYSROOT/usr/lib), and build systems copy them into their own .pc files
+# (Libs.private): on the target those are plain /usr paths
+for f in "$pkgdir"/usr/lib/pkgconfig/*.pc "$pkgdir"/usr/share/pkgconfig/*.pc; do
+  [ -f "$f" ] && grep -q "$SYSROOT" "$f" && sed -i -e "s| -L$SYSROOT/usr/lib\b||g; s| -I$SYSROOT/usr/include\b||g; s|$SYSROOT/|/|g" "$f"
+done
 # cross-build safety net: some builds install under build-machine paths (pkg-config puts the sysroot in front of
 # path variables; the host Qt reports its own qml/plugins dirs). Move such files to where they belong, and report
 # files that have a build-machine path compiled in (those need a fix in the recipe).

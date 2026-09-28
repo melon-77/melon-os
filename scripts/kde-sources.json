@@ -519,6 +519,11 @@
 "ver": "6.6.4",
 "top": "powerdevil-6.6.4"
 },
+"print-manager": {
+"file": "print-manager_6.6.4.orig.tar.xz",
+"ver": "6.6.4",
+"top": "print-manager-6.6.4"
+},
 "pulseaudio-qt": {
 "file": "pulseaudio-qt_1.7.0.orig.tar.xz",
 "ver": "1.7.0",

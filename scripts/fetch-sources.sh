@@ -21,7 +21,9 @@ while IFS=$'\t' read -r path sum method arg; do
       src=${arg%%=*} ver=${arg#*=}
       ( cd $S/deb && apt-get source --download-only -q "$arg" >/dev/null 2>&1 )
       if ! ok "$path" "$sum"; then   # an older version the archive no longer lists: Launchpad keeps every file
-        curl -fsSL -o "$S/$path" "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/$src/${ver#*:}/$file" || true
+        # (the file store's path keeps the version's epoch, e.g. print-manager/6:6.6.4-0ubuntu1; older uploads took it without)
+        curl -fsSL -o "$S/$path" "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/$src/$ver/$file" ||
+          curl -fsSL -o "$S/$path" "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/$src/${ver#*:}/$file" || true
       fi ;;
     pool)  curl -fsSL -o "$S/$path" "$arg" || true ;;
     inner) set -- $arg; tar -xOf "$S/$1" "$2" > "$S/$path" 2>/dev/null || true ;;

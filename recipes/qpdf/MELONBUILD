@@ -1,0 +1,12 @@
+pkgname=qpdf
+pkgver=12.3.2
+pkgrel=0
+pkgdesc="QPDF: PDF transformation library and tool (cups-filters' pdftopdf)"
+license=Apache-2.0
+url=https://qpdf.sourceforge.io/
+source=(qpdf-12.3.2.tar.gz)
+makedepends=(zlib-dev libjpeg-turbo-dev openssl-dev)
+subpackages=(qpdf-dev)
+build(){ cmake_setup -B build -DBUILD_STATIC_LIBS=OFF -DBUILD_DOC=OFF -DINSTALL_EXAMPLES=OFF -DREQUIRE_CRYPTO_OPENSSL=ON \
+           -DUSE_IMPLICIT_CRYPTO=OFF -DDEFAULT_CRYPTO=openssl; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/{doc,man}; }

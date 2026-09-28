@@ -184,7 +184,7 @@ echo "root:$MELON_ROOTPW" | chroot $TARGET chpasswd -c sha512
 if [ -n "$MELON_USER" ]; then
   # -g: the login screen shows the full-name field, and BusyBox's default for it is "Linux User"
   chroot $TARGET adduser -D -s /bin/bash -G users -g "$MELON_USER" "$MELON_USER"
-  for g in wheel audio video input render plugdev netdev kvm cdrom; do chroot $TARGET addgroup "$MELON_USER" $g 2>/dev/null || true; done
+  for g in wheel audio video input render plugdev netdev kvm cdrom lpadmin; do chroot $TARGET addgroup "$MELON_USER" $g 2>/dev/null || true; done
   echo "$MELON_USER:$MELON_USERPW" | chroot $TARGET chpasswd -c sha512
 fi
 SVCS="getty-tty1 getty-tty2 getty-tty3 mdevd syslogd klogd crond ntpd dhcp"

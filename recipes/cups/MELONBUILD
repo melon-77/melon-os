@@ -1,16 +1,24 @@
 pkgname=cups
 pkgver=2.4.16
-pkgrel=0
-pkgdesc="CUPS printing: the client library (libcups) for Qt's print dialogs; the print server comes later"
+pkgrel=3
+pkgdesc="CUPS: the print server (cupsd), its backends and tools, and libcups"
 license=Apache-2.0
 url=https://openprinting.github.io/cups/
 source=(cups-2.4.16.tar.gz)
-makedepends=(openssl-dev zlib-dev)
+makedepends=(openssl-dev zlib-dev linux-pam-dev dbus-dev avahi-dev libusb-dev)
 subpackages=(cups-dev libcups)
 depends=(libcups)
 pkgdesc_libcups="CUPS client library"
-build(){ ./configure $conf_flags --with-components=libcups --with-tls=openssl --disable-static --disable-gssapi \
-  --disable-pam --disable-dbus --disable-avahi --disable-systemd --without-rcdir --with-docdir=/usr/share/doc/cups
+# printer discovery through Avahi, USB printers through libusb; filters run as lp; members of lpadmin and
+# wheel may manage printers (Plasma's print manager, http://localhost:631)
+build(){ ./configure $conf_flags --with-tls=openssl --disable-static --disable-gssapi --enable-pam --enable-dbus \
+  --with-dbusdir=/usr/share/dbus-1 --with-dnssd=avahi --enable-libusb --enable-webif --without-systemd --with-ondemand=no \
+  --without-rcdir --with-docdir=/usr/share/cups/doc --with-logdir=/var/log/cups --with-rundir=/run/cups \
+  --with-cups-user=lp --with-cups-group=lp --with-system-groups="lpadmin wheel root"
   make -j$JOBS; }
-package(){ make BUILDROOT=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,man,locale}; }
+# cups-config's static LIBS carries the sysroot -L paths pkg-config gave for Avahi and OpenSSL (rule 32)
+package(){ make BUILDROOT=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,man,locale}; sed -i "s| -L$SYSROOT/usr/lib||g" $pkgdir/usr/bin/cups-config
+  # IdleExitTimeout only means something to an on-demand (systemd/launchd) cupsd; ours logs it as an error
+  sed -i "/^IdleExitTimeout/d" $pkgdir/etc/cups/cupsd.conf $pkgdir/etc/cups/cupsd.conf.default
+  cp -a $startdir/files/. $pkgdir/; chmod 755 $pkgdir/etc/sv/cupsd/run $pkgdir/etc/sv/cupsd/log/run; mkdir -p $pkgdir/var/log/cupsd; }
 pkg_libcups(){ amove 'usr/lib/libcups*.so.*'; }

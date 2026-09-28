@@ -18,6 +18,8 @@ xkeyboard-config qt6-qtwayland qt6-qt5compat qt6-qtimageformats qt6-qtlocation q
 plasma5support ksystemstats kf6-kquickcharts kf6-kunitconversion kf6-threadweaver hwdata qt6-qttranslations
 # started over D-Bus when Plasma or Dolphin asks for drives (USB sticks, SD cards)
 udisks2
+# printing: the CUPS server, its filters, printer discovery, and Plasma's printer settings
+cups cups-filters avahi print-manager
 # everyday tools the installer and users expect
 e2fsprogs xz bzip2 ffmpeg
 # fonts

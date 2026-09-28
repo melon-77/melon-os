@@ -1,0 +1,13 @@
+pkgname=libcupsfilters
+pkgver=2.1.1
+pkgrel=1
+pkgdesc="OpenPrinting filter library: the document conversions behind CUPS' filters"
+license=Apache-2.0
+url=https://github.com/OpenPrinting/libcupsfilters
+source=(libcupsfilters-2.1.1.tar.xz)
+makedepends=(cups-dev qpdf-dev poppler-dev libjpeg-turbo-dev libpng-dev lcms2-dev fontconfig-dev freetype-dev)
+subpackages=(libcupsfilters-dev)
+# PDF rendering through Poppler (no Ghostscript, no MuPDF); CUPS' own cups-config from the sysroot
+build(){ ./configure $conf_flags --disable-static --disable-nls --enable-poppler --disable-ghostscript --disable-mutool --disable-exif \
+           --without-tiff --disable-dbus --with-cups-config=$SYSROOT/usr/bin/cups-config; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc; }

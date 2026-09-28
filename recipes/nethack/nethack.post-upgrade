@@ -1,11 +1,15 @@
 #!/bin/sh
-# scores and saves live outside the package (an upgrade must not reset them); the game writes them as group games
-d=/var/games/nethack
-mkdir -p $d/save
+# Scores and saves live outside the package (an upgrade must not reset them); the game writes them as group games.
+# The setgid bit goes on only once the binary really belongs to games: setgid on a root-owned binary would give
+# every player group root (and /etc/shadow is readable by group root). Anything unexpected leaves the game
+# without setgid and fails loudly.
+bin=/usr/lib/nethack/nethack d=/var/games/nethack
+fail(){ chmod 0755 $bin; echo "nethack: $*; the game stays without setgid (no shared scores)" >&2; exit 1; }
+grep -q '^games:' /etc/group || fail "the games group doesn't exist"
+mkdir -p $d/save || fail "couldn't create $d"
 for f in perm record logfile xlogfile livelog; do [ -e $d/$f ] || : > $d/$f; done
-chown root:games $d $d/save $d/perm $d/record $d/logfile $d/xlogfile $d/livelog
-chmod 0775 $d $d/save
-chmod 0664 $d/perm $d/record $d/logfile $d/xlogfile $d/livelog
-chown root:games /usr/lib/nethack/nethack
-chmod 2755 /usr/lib/nethack/nethack
+chown root:games $d $d/save $d/perm $d/record $d/logfile $d/xlogfile $d/livelog || fail "couldn't hand $d to group games"
+chmod 0775 $d $d/save && chmod 0664 $d/perm $d/record $d/logfile $d/xlogfile $d/livelog || fail "couldn't set permissions in $d"
+chown root:games $bin && [ "$(stat -c %U:%G $bin)" = root:games ] || fail "couldn't hand $bin to group games"
+chmod 2755 $bin || fail "couldn't make $bin setgid"
 exit 0

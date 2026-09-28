@@ -1,0 +1,12 @@
+pkgname=efibootmgr
+pkgver=18
+pkgrel=0
+pkgdesc="Manage the UEFI boot menu (GRUB registers melon next to Windows with it)"
+license=GPL-2.0-or-later
+url=https://github.com/rhboot/efibootmgr
+source=(efibootmgr-18.tar.bz2)
+makedepends=(efivar-dev popt-dev)
+_mk(){ make CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" ERRORS= EFIDIR=melon PREFIX=/usr LIBDIR=/usr/lib BINDIR=/usr/bin \
+         SBINDIR=/usr/bin "$@"; }
+build(){ _mk -j$JOBS; }
+package(){ _mk DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man; }

@@ -251,6 +251,7 @@ scripts/qemu-test.py disk /tmp/disk.img                                   # BIOS
 scripts/qemu-test.py disk /tmp/disk.img --uefi                            # UEFI: same disk
 scripts/qemu-test.py live out/melon-*-x86_64.iso /tmp/disk.img --luks     # install with an encrypted root
 scripts/qemu-test.py disk /tmp/disk.img --luks                            # boot it, typing the passphrase
+scripts/qemu-test.py dualboot out/melon-*-x86_64.iso /tmp/dual.img        # install next to a fake Windows (UEFI), Windows untouched
 MELON_EDITION=desktop scripts/mkiso.sh                                    # the Plasma live ISO (desktop edition)
 scripts/qemu-test.py desktop out/melon-desktop-*-x86_64.iso              # services ready, Plasma running, a USB stick mounts through
                                                                           # UDisks2, screen-recording encoders work, a text file prints
@@ -312,9 +313,19 @@ the serial port, so tests don't need a screen. The test also records the sound c
   - if you need to run it in a test, call `/usr/libexec/melon/.cold` directly.
   It asks base or desktop and installs exactly what the desktop ISO installs. It plays
   `/usr/share/melon/.ice` (from the `melon-sounds` package, live ISO only) at 30% volume while it runs.
+- **Dual boot.** On UEFI, when the chosen disk already has an EFI system partition and at least 20 GiB unallocated
+  (Windows' Disk Management "Shrink Volume" makes that), the console installer offers `alongside` (the default
+  then; `MELON_MODE=alongside|erase`): a 1 GiB FAT32 `/boot` (extended boot loader type) and `/` go into the free
+  space, the existing EFI partition becomes `/boot/efi`, GRUB goes into `EFI/melon` with a firmware boot entry
+  (efibootmgr), and nothing of the other system is touched: no BIOS boot code, and `EFI/BOOT` stays theirs.
+  Calamares offers "Install alongside" (it shrinks NTFS with ntfs-3g's ntfsresize), "Replace a partition" and manual
+  partitioning; nothing is preselected, and `cal-finish` only writes `EFI/BOOT` on an EFI partition that is
+  melon's alone. `melon-update-grub` adds a Windows entry for Windows Boot Manager on any EFI partition (UEFI) or
+  `bootmgr` on an NTFS partition (BIOS). Test: `qemu-test.py dualboot` (a fake Windows disk, persistent UEFI boot
+  menu, checksums of everything Windows owns before and after).
 - Unattended install variables: `MELON_DISK MELON_HOSTNAME MELON_ROOTPW MELON_USER MELON_USERPW
   MELON_PROFILE MELON_YES=1 MELON_SERIAL=1 MELON_WIFI_SSID MELON_WIFI_PSK MELON_ALPINE=y
-  MELON_ENCRYPT=y MELON_LUKSPW`. With `MELON_YES=1`, questions that have a default take it.
+  MELON_ENCRYPT=y MELON_LUKSPW MELON_MODE=alongside`. With `MELON_YES=1`, questions that have a default take it.
 - **Profiles** live in `/usr/share/melon/profiles/` on the live system: `<name>` is the package list,
   `<name>.services` the runit services (`name` enables one, `-name` drops a base service). `mkiso.sh`
   writes them. The desktop profile swaps `mdevd`/`dhcp` for `udevd` and NetworkManager, and the

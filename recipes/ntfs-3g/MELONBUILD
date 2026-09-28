@@ -1,0 +1,15 @@
+pkgname=ntfs-3g
+pkgver=2022.10.3
+pkgrel=0
+pkgdesc="NTFS driver and tools (ntfsresize lets the installer shrink Windows for a dual boot)"
+license=GPL-2.0-or-later
+url=https://github.com/tuxera/ntfs-3g
+source=(ntfs-3g-2022.10.3.tar.gz)
+builddir=$srcdir/ntfs-3g-2022.10.3
+subpackages=(ntfs-3g-dev)
+# the libgcrypt m4 macro comes from the sysroot (crypto support is off, the macro only has to exist)
+prepare(){ ACLOCAL_PATH=$SYSROOT/usr/share/aclocal autoreconf -fi; }
+# its own built-in FUSE 2 (melon only has FUSE 3); no ldconfig on musl
+build(){ ./configure $conf_flags --disable-static --with-fuse=internal --enable-ntfsprogs --disable-crypto --disable-ldconfig \
+           --exec-prefix=/usr --with-rootsbindir=/usr/bin --with-rootlibdir=/usr/lib; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,man}; }

@@ -219,8 +219,10 @@ Rebuilding the kernel takes about an hour on 2 cores.
     `I2C_DESIGNWARE_PLATFORM` needed `I2C_DESIGNWARE_CORE`; `HP_WMI` needed `X86_PLATFORM_DRIVERS_HP`). The kernel
     recipe now stops when an option from `config-melon` isn't in the final `.config`: look its dependencies up in the
     Kconfig files and add them. The built config ships as `/boot/config-melon`; check it, not the fragment. For a
-    real machine, `sudo melon-hwreport` lists every PCI/USB/ACPI/I2C device with the driver it got, plus the kernel's
-    firmware messages; map IDs to modules with `modprobe -R <modalias>` against the built kernel.
+    real machine, `sudo melon-hwreport` lists every PCI/USB/ACPI/I2C device with the driver it got, the modaliases of
+    devices that got none, graphics, network, sound, Bluetooth, power and service state, and the kernel's firmware
+    messages; map IDs to modules with `modprobe -R <modalias>` against the built kernel. (`scripts/melon-diag.sh`, the
+    old `curl | sh` tool, is now a wrapper that prints the same report.)
 44. **Device events between stage 1's udevd and the udevd service are lost.** Stage 1 runs a udevd for the boot
     coldplug and stops it; the runit service starts a new one a moment later. A Wi-Fi card's interface appears only
     after its firmware loads (MT7921, iwlwifi, ath11k), often in that gap: udev never processed it, so it kept the

@@ -17,10 +17,10 @@ strings:
     versionedName:       melon Linux (rolling)
     shortVersionedName:  melon
     bootloaderEntryName: melon
-    productUrl:          https://github.com/xbfj/melon-os
-    supportUrl:          https://github.com/xbfj/melon-os/issues
-    knownIssuesUrl:      https://github.com/xbfj/melon-os/issues
-    releaseNotesUrl:     https://github.com/xbfj/melon-os
+    productUrl:          https://github.com/melon-77/melon-os
+    supportUrl:          https://github.com/melon-77/melon-os/issues
+    knownIssuesUrl:      https://github.com/melon-77/melon-os/issues
+    releaseNotesUrl:     https://github.com/melon-77/melon-os
 
 images:
     productLogo:         "logo.png"

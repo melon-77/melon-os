@@ -1,0 +1,8 @@
+#!/bin/sh
+# melon moved from github.com/xbfj to github.com/melon-77: point installed systems at the new package address.
+# GitHub redirects the old one only as long as nobody reuses that name.
+r=/etc/apk/repositories
+if [ -f $r ] && grep -q 'raw.githubusercontent.com/xbfj/melon-os/' $r; then
+  sed -i 's|raw.githubusercontent.com/xbfj/melon-os/|raw.githubusercontent.com/melon-77/melon-os/|' $r
+fi
+exit 0

@@ -26,7 +26,7 @@ takes roughly 8–12 hours; on 2 cores it takes days.
 
 ## Steps (Ubuntu 24.04 or WSL2)
 
-    git clone https://github.com/xbfj/melon-os ~/melon
+    git clone https://github.com/melon-77/melon-os ~/melon
     cd ~/melon
     sudo scripts/host-setup.sh        # build tools, sources (~2 GB), host tools; about an hour
     # put the signing key in place (below)

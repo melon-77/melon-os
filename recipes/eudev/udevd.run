@@ -1,0 +1,13 @@
+#!/bin/sh
+exec 2>&1
+# Stage 1 runs a udevd of its own for the boot coldplug and stops it before this service starts. Devices that
+# register in between send their events to nobody: a Wi-Fi card's interface only appears once its firmware has
+# loaded (MT7921, iwlwifi, ath11k), so udev never named it and NetworkManager left it "unmanaged". Once this udevd
+# runs, replay the events of the device kinds that register late.
+(
+  for i in $(seq 100); do pidof udevd >/dev/null && break; sleep 0.1; done
+  sleep 1
+  udevadm trigger --action=add --subsystem-match=net --subsystem-match=ieee80211 --subsystem-match=rfkill \
+    --subsystem-match=bluetooth
+) &
+exec udevd

@@ -1,4 +1,6 @@
 #!/bin/sh
 exec 2>&1
 sv check dbus >/dev/null || exit 1
+# it asks polkit for its authority at startup, and only runit starts polkitd
+sv check polkitd >/dev/null || exit 1
 exec /usr/libexec/power-profiles-daemon

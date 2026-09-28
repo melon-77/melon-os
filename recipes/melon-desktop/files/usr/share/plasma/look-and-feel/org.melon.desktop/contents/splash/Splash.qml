@@ -1,45 +1,54 @@
 import QtQuick
 
+// melon's loading screen: the planet from the default wallpaper eases up into place while Plasma starts,
+// so the desktop takes over from the same picture; a thin progress bar follows KSplash's stages (1-6)
 Rectangle {
     id: root
-    color: "#101512"
+    color: "#0a0e0c"
     property int stage
 
-    onStageChanged: {
-        if (stage == 2) { introAnimation.running = true }
-        else if (stage == 5) { introAnimation.target = busyIndicator; introAnimation.from = 1; introAnimation.to = 0; introAnimation.running = true }
+    Image {
+        id: planet
+        anchors.fill: parent
+        source: "images/splash.jpg"
+        fillMode: Image.PreserveAspectCrop
+        opacity: 0
+        scale: 1.08
+        transformOrigin: Item.BottomRight
+        Component.onCompleted: rise.start()
+        ParallelAnimation {
+            id: rise
+            OpacityAnimator { target: planet; from: 0; to: 1; duration: 900; easing.type: Easing.OutQuad }
+            ScaleAnimator { target: planet; from: 1.08; to: 1.0; duration: 3200; easing.type: Easing.OutCubic }
+        }
     }
 
-    Item {
-        id: content
-        anchors.fill: parent
+    Column {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: parent.height * 0.1
+        spacing: 16
         opacity: 0
-        Image {
-            id: logo
-            source: "images/logo.png"
-            anchors.centerIn: parent
-            anchors.verticalCenterOffset: -height * 0.1
-            sourceSize.width: 220; sourceSize.height: 220
-        }
+        OpacityAnimator on opacity { from: 0; to: 1; duration: 1200; easing.type: Easing.InOutQuad }
+
         Text {
-            anchors.top: logo.bottom; anchors.topMargin: 24
+            readonly property int px: Math.round(root.height * 0.022)
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "melon"; color: "#e9f5e1"; font.pointSize: 22; font.bold: true
+            text: "melon"
+            color: "#d6ecc8"
+            opacity: 0.85
+            font.pixelSize: px
+            font.letterSpacing: px * 0.45
+            font.weight: Font.Light
         }
         Rectangle {
-            id: busyIndicator
-            anchors.bottom: parent.bottom; anchors.bottomMargin: parent.height / 8
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: 180; height: 4; radius: 2; color: "#1e2a22"
+            width: Math.round(root.width * 0.14); height: 3; radius: 1.5
+            color: "#33ffffff"
             Rectangle {
-                width: parent.width * Math.min(1, root.stage / 6); height: parent.height; radius: 2
-                color: "#f0a35e"
-                Behavior on width { NumberAnimation { duration: 300 } }
+                width: parent.width * Math.min(1, root.stage / 6); height: parent.height; radius: 1.5
+                color: "#8fd46a"
+                Behavior on width { NumberAnimation { duration: 450; easing.type: Easing.OutCubic } }
             }
         }
-    }
-    OpacityAnimator {
-        id: introAnimation
-        running: false; target: content; from: 0; to: 1; duration: 600; easing.type: Easing.InOutQuad
     }
 }

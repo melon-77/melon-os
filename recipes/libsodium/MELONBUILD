@@ -1,0 +1,11 @@
+pkgname=libsodium
+pkgver=1.0.22
+pkgrel=0
+pkgdesc="Modern and easy-to-use crypto library (Nix's signed binary caches)"
+license=ISC
+url=https://libsodium.org
+# Ubuntu 26.04 has 1.0.18 with its fixes in Ubuntu's patches, which melon doesn't apply: upstream's release tag instead
+source=(libsodium-1.0.22.tar.gz)
+subpackages=(libsodium-dev)
+build(){ [ -x configure ] || autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; }

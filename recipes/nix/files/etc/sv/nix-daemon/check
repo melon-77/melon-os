@@ -1,0 +1,3 @@
+#!/bin/sh
+# ready once clients can reach it
+[ -S /nix/var/nix/daemon-socket/socket ]

@@ -1,0 +1,26 @@
+pkgname=boost-libs
+pkgver=1.90.0
+pkgrel=0
+pkgdesc="Compiled Boost libraries: context, coroutine, iostreams, url, container (Nix)"
+license=BSL-1.0
+url=https://www.boost.org
+# the same tarball as boost-headers, which provides the headers these are used with. boost-context-forced-unwind.patch
+# is Nix's (packaging/patches, applied to the Boost it builds with): unwound fibers must still count as unwinding
+source=(boost-1.90.0.tar.xz)
+builddir=$srcdir/boost_1.90
+makedepends=(boost-headers zlib-dev bzip2-dev)
+subpackages=(boost-libs-dev)
+_libs=context,coroutine,iostreams,url,container
+build(){
+  # b2 runs on the build machine: built with the host compiler, nothing from the sysroot (rule 2)
+  env -u CC -u CXX -u CFLAGS -u CXXFLAGS -u LDFLAGS -u PKG_CONFIG_SYSROOT_DIR -u PKG_CONFIG_LIBDIR \
+    ./bootstrap.sh --with-toolset=gcc --with-libraries=$_libs >/dev/null
+  echo "using gcc : melon : $CXX : <archiver>$AR <ranlib>$RANLIB ;" > user-config.jam
+  ./b2 -j$JOBS --user-config=user-config.jam toolset=gcc-melon target-os=linux architecture=x86 \
+    address-model=$([ "$MELON_ARCH" = x86 ] && echo 32 || echo 64) abi=sysv binary-format=elf \
+    variant=release link=shared runtime-link=shared threading=multi --layout=system \
+    cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" -sNO_LZMA=1 -sNO_ZSTD=1 stage
+}
+# only the libraries: the headers come from boost-headers (b2's CMake configs need Boost's own, so they're left out)
+package(){ install -d $pkgdir/usr/lib; cp -a stage/lib/libboost_*.so* $pkgdir/usr/lib/
+  for l in context coroutine iostreams url container; do [ -e $pkgdir/usr/lib/libboost_$l.so ]; done; }

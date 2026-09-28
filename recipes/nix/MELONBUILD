@@ -1,0 +1,50 @@
+pkgname=nix
+pkgver=2.35.2
+pkgrel=0
+pkgdesc="The Nix package manager, run as a daemon (nix-daemon service)"
+license=LGPL-2.1-or-later
+url=https://nixos.org
+# busybox: a second, static build of melon's BusyBox for Nix's build sandboxes (see _sandbox_shell)
+source=(nix-2.35.2.tar.gz busybox-1.37.0.tar.bz2)
+makedepends=(boost-headers boost-libs-dev libblake3-dev toml11 nlohmann-json gc-dev libgit2-dev libsodium-dev brotli-dev
+  curl-dev libarchive-dev openssl-dev sqlite-dev zstd-dev libseccomp-dev readline-dev)
+depends=(ca-certificates)
+subpackages=(nix-dev)
+
+# Nix bind-mounts a statically linked /bin/sh into every build sandbox, where nothing else from the host exists;
+# melon's BusyBox is dynamic. A minimal static ash, configured like nixpkgs' busybox-sandbox-shell, with melon's
+# BusyBox patches.
+_sandbox_shell(){
+  cd $srcdir/busybox-1.37.0
+  for p in $M/recipes/busybox/*.patch; do patch -p1 -s < $p; done
+  make allnoconfig HOSTCC=gcc >/dev/null
+  set_cfg(){ sed -i "/^\(# \)\?$1[= ]/d" .config; echo "$1=$2" >> .config; }
+  for c in STATIC ASH SH_IS_ASH ASH_OPTIMIZE_FOR_SIZE ASH_ALIAS ASH_BASH_COMPAT ASH_CMDCMD ASH_ECHO ASH_GETOPTS \
+           ASH_INTERNAL_GLOB ASH_JOB_CONTROL ASH_PRINTF ASH_TEST FEATURE_FANCY_ECHO FEATURE_SH_MATH FEATURE_SH_MATH_64; do
+    set_cfg CONFIG_$c y; done
+  set_cfg CONFIG_EXTRA_CFLAGS '""'
+  yes "" 2>/dev/null | make oldconfig CROSS_COMPILE=$TARGET- HOSTCC=gcc >/dev/null || [ -f .config ]
+  for c in STATIC ASH SH_IS_ASH; do grep -qx "CONFIG_$c=y" .config || { echo "sandbox shell: CONFIG_$c didn't stick"; return 1; }; done
+  make -j$JOBS CROSS_COMPILE=$TARGET- CC=$TARGET-gcc HOSTCC=gcc busybox >/dev/null
+  file busybox | grep -q 'statically linked'
+}
+build(){
+  ( _sandbox_shell ) || return 1
+  # Nix's state (profiles, gc roots, the daemon socket) is in /nix/var on every system; Home Manager and nixpkgs
+  # expect it there, so it isn't meson_setup's /var. No docs, tests, markdown help (lowdown), libcpuid or mimalloc.
+  meson_setup --localstatedir=/nix/var -Dunit-tests=false -Dfunctional-tests=false -Ddoc-gen=false -Dbenchmarks=false \
+    -Djson-schema-checks=false -Dlibutil:cpuid=disabled -Dlibstore:seccomp-sandboxing=enabled \
+    -Dlibstore:sandbox-shell=/usr/libexec/nix/busybox -Dlibstore:s3-aws-auth=disabled -Dlibexpr:gc=enabled \
+    -Dlibcmd:markdown=disabled -Dlibcmd:readline-flavor=readline -Dnix:mimalloc=disabled -Dnix:profile-dir=/etc/profile.d build
+  ninja -C build
+}
+package(){
+  DESTDIR=$pkgdir ninja -C build install
+  install -Dm755 $srcdir/busybox-1.37.0/busybox $pkgdir/usr/libexec/nix/busybox
+  # multi-user Nix: /etc/profile sources every script in profile.d, so only the daemon variant stays there
+  rm -f $pkgdir/etc/profile.d/nix.sh $pkgdir/etc/profile.d/nix.fish
+  # no systemd on melon: runit runs the daemon (files/etc/sv/nix-daemon)
+  rm -rf $pkgdir/usr/lib/systemd $pkgdir/usr/lib/tmpfiles.d $pkgdir/usr/lib/sysusers.d
+  cp -a $startdir/files/. $pkgdir/
+  chmod 755 $pkgdir/etc/sv/nix-daemon/run $pkgdir/etc/sv/nix-daemon/check $pkgdir/etc/sv/nix-daemon/log/run
+}

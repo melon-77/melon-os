@@ -37,10 +37,15 @@ POOL = {  # binary .debs: source package, component
 GIT = {  # tarball name prefix -> repo, tag pattern
     'apk-tools': ('https://github.com/alpinelinux/apk-tools', 'v{v}'),
     'argp-standalone': ('https://github.com/ericonr/argp-standalone', '{v}'),
+    'blake3': ('https://github.com/BLAKE3-team/BLAKE3', '{v}'),
     'elogind': ('https://github.com/elogind/elogind', 'v{v}'),
     'eudev': ('https://github.com/eudev-project/eudev', 'v{v}'),
+    'libgit2': ('https://github.com/libgit2/libgit2', 'v{v}'),
+    'libsodium': ('https://github.com/jedisct1/libsodium', '{v}-RELEASE'),
     'musl-fts': ('https://github.com/void-linux/musl-fts', 'v{v}'),
     'musl-obstack': ('https://github.com/void-linux/musl-obstack', 'v{v}'),
+    'nix': ('https://github.com/NixOS/nix', '{v}'),
+    'nlohmann-json': ('https://github.com/nlohmann/json', 'v{v}'),
     'vulkan-headers': ('https://github.com/KhronosGroup/Vulkan-Headers', 'v{v}')}
 
 rows, missing = [], []

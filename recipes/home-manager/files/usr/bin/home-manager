@@ -1,0 +1,18 @@
+#!/bin/sh
+# home-manager: Home Manager on melon. Home Manager installs and updates itself through Nix, into your Nix profile;
+# this command gets you there the first time and afterwards hands over to the installed one. To start:
+#   home-manager init --switch        writes ~/.config/home-manager (flake.nix, home.nix) and activates it
+# Home Manager's manual: https://nix-community.github.io/home-manager/
+release=release-26.05                 # matches nixpkgs 26.05
+for hm in "${XDG_STATE_HOME:-$HOME/.local/state}/nix/profile/bin/home-manager" "$HOME/.nix-profile/bin/home-manager"; do
+  [ -x "$hm" ] && exec "$hm" "$@"
+done
+if ! command -v nix >/dev/null 2>&1; then
+  echo "home-manager: Nix isn't installed (apk add nix, then: doas melon-svc enable nix-daemon)" >&2; exit 1
+fi
+[ -S /nix/var/nix/daemon-socket/socket ] || [ "$(id -u)" = 0 ] ||
+  { echo "home-manager: the nix-daemon service isn't running (doas melon-svc enable nix-daemon)" >&2; exit 1; }
+# not installed yet: run Home Manager's release straight from its flake. "init --switch" installs it into your
+# profile, and from then on the installed one runs.
+echo "home-manager: not installed in your Nix profile yet, running $release from GitHub" >&2
+exec nix run "github:nix-community/home-manager/$release" -- "$@"

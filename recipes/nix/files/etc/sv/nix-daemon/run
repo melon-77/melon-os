@@ -1,0 +1,5 @@
+#!/bin/sh
+exec 2>&1
+# the daemon downloads from binary caches and fetches sources for builds
+export NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+exec /usr/bin/nix-daemon

@@ -1,9 +1,10 @@
 pkgname=boost-headers
 pkgver=1.90.0
-pkgrel=0
-pkgdesc="Boost C++ headers (header-only use; kactivitymanagerd needs them)"
+pkgrel=1
+pkgdesc="Boost C++ headers (kactivitymanagerd; Nix with boost-libs)"
 license=BSL-1.0
 url=https://www.boost.org
+# boost-context-forced-unwind.patch: from Nix (packaging/patches), which builds its Boost with it
 source=(boost-1.90.0.tar.xz)
 builddir=$srcdir/boost_1.90
 options=('!strip')

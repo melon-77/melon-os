@@ -1,0 +1,11 @@
+pkgname=brotli
+pkgver=1.2.0
+pkgrel=0
+pkgdesc="Generic lossless compressor (Nix's binary cache downloads)"
+license=MIT
+url=https://github.com/google/brotli
+source=(brotli-1.2.0.tar.gz)
+builddir=$srcdir/google-brotli-028fb5a
+subpackages=(brotli-dev)
+build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

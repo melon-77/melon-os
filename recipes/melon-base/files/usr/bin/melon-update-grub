@@ -21,10 +21,15 @@ rootfs=$(blkid -s TYPE -o value "$rootdev"); [ -n "$rootfs" ] || rootfs=xfs
 cmdline="$rootspec rootfstype=$rootfs rw ${GRUB_CMDLINE_LINUX_DEFAULT:-quiet} ${GRUB_CMDLINE_LINUX}"
 # kernel path relative to the filesystem grub reads it from
 if [ "$bootdev" != "$rootdev" ]; then kpath=""; else kpath="/boot"; fi
-# melon background (from melon-desktop); black menu backgrounds are transparent over it
+# melon background (from melon-desktop); black menu backgrounds are transparent over it.
+# Gauntlet survivors (badge from the graphical installer) get their own background and a gold highlight.
+bg=/usr/share/melon/grub/background.png; hl=light-green
+if [ -f /etc/melon/gauntlet-survivor ] && [ -f /usr/share/melon/grub/background-survivor.png ]; then
+  bg=/usr/share/melon/grub/background-survivor.png; hl=yellow
+fi
 bgline=
-if [ -f /usr/share/melon/grub/background.png ]; then
-  cp /usr/share/melon/grub/background.png /boot/grub/melon-bg.png
+if [ -f "$bg" ]; then
+  cp "$bg" /boot/grub/melon-bg.png
   bgline="; insmod png; background_image -m stretch $kpath/grub/melon-bg.png"
 fi
 cat > /boot/grub/grub.cfg.new <<CFG
@@ -40,7 +45,7 @@ search --no-floppy --fs-uuid --set=root $bootuuid
 $( [ "${GRUB_SERIAL:-0}" = 1 ] && printf 'serial --unit=0 --speed=115200\nterminal_input console serial\nterminal_output console serial\n' )
 if loadfont unicode; then set gfxmode=auto; insmod all_video; insmod gfxterm; terminal_output gfxterm $( [ "${GRUB_SERIAL:-0}" = 1 ] && echo serial )$bgline; fi
 set menu_color_normal=light-gray/black
-set menu_color_highlight=black/light-magenta
+set menu_color_highlight=black/$hl
 # keep a graphical framebuffer for the kernel (simpledrm), so the console shows even without a GPU driver
 set gfxpayload=keep
 CFG

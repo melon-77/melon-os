@@ -1,6 +1,6 @@
 pkgname=rust
 pkgver=1.98.1
-pkgrel=0
+pkgrel=1
 pkgdesc="The Rust compiler (rustc, rustdoc) and standard library, for building Rust programs on melon"
 license="MIT OR Apache-2.0"
 url=https://www.rust-lang.org
@@ -67,6 +67,7 @@ sysconfdir = "/etc"
 
 [rust]
 channel = "stable"
+codegen-tests = false
 rpath = false
 lld = false
 llvm-tools = false

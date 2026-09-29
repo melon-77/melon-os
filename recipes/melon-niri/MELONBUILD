@@ -1,0 +1,13 @@
+pkgname=melon-niri
+pkgver=0.1
+pkgrel=0
+pkgdesc="melon's niri desktop: the session for SDDM, niri's defaults with Noctalia, autostart, portals"
+license=MIT
+# The rest of the desktop (Konsole, Dolphin, services, SDDM and its theme) comes from the niri profile
+# (scripts/niri-packages.txt) and melon-desktop. dbus-run-session and dbus-update-activation-environment come from dbus.
+depends=(niri noctalia xwayland-satellite dbus pipewire wireplumber xdg-desktop-portal xdg-desktop-portal-kde melon-desktop)
+builddir=$srcdir
+package(){
+  cp -a $startdir/files/. $pkgdir/
+  chmod 755 $pkgdir/usr/libexec/melon/*
+}

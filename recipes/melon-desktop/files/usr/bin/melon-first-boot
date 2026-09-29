@@ -1,5 +1,5 @@
 #!/bin/sh
-# melon-first-boot: the first time someone logs in to Plasma, offer the apps melon gets from Flathub
+# melon-first-boot: the first time someone logs in to Plasma or niri, offer the apps melon gets from Flathub
 # (Firefox, VLC, Steam, Prism Launcher), melon's own developer tools (gcc, make, ...) and, on computers with an
 # NVIDIA card, a driver for it. Runs once per user;
 # "melon-first-boot --again" asks again.

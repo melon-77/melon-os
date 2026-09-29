@@ -27,6 +27,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe | |
 | developer tools | gcc 15.2 + g++, binutils 2.46, make 4.4.1, pkgconf, patch (`gcc`, `g++`, `binutils`, `make`, `pkgconf`, `patch`) | built cross-native with the cross toolchain's settings (PIE, SSP); in the package repository only, not on the ISOs; `melon-first-boot` offers them on first login (default no) |
 | gaming | Flatpak 1.16 + Flathub, GameMode | Steam is glibc-only, so it can't run natively on musl: `melon-first-boot` offers Steam (and Firefox, VLC, Prism Launcher) from Flathub on first login |
+| game library | SDL3 3.4 + SDL3_image + SDL3_ttf (`sdl3`, `sdl3-image`, `sdl3-ttf`) | for melon's own games; SDL dlopen()s its Wayland/X11/audio backends |
 
 Owner's config (`CONFIG_*` answers) lives in `docs/config.txt`. Don't change those choices without the owner's approval.
 
@@ -52,6 +53,7 @@ recipes/<name>/<pkg>.post-install etc.   apk scripts for (sub)package <pkg>
 iso-files/init          live initramfs /init
 branding/               logo (transparent PNGs)
 recipes/calamares-melon/    graphical installer branding + gauntlet (stage 2)
+recipes/melon-pinball/      melon's own pinball game (C++/SDL3); the game is a submodule (game/ = melon-77/melon-pinball)
 ```
 
 Not in git (see `.gitignore`): `sources/`, `work/`, `tools/`, `sysroot/`, `hosttools/`, `repo/`, `out/`,
@@ -272,6 +274,19 @@ qemu-img create -f raw /tmp/desk.img 16G
 scripts/qemu-test.py desktop-install out/melon-desktop-*-x86_64.iso /tmp/desk.img   # install, SDDM greeter stays up,
                                                                           # log in through it, Plasma runs; LOOK at both screenshots
 ```
+
+**melon pinball** (`recipes/melon-pinball`; the game itself is the `game/` submodule, github.com/melon-77/melon-pinball:
+change it there, then commit the new submodule commit here with a `pkgrel` bump): its build runs `melon-pinball-physics-test` (launches, flipper and mini
+flipper shots, cradles, the ramp, 450 random balls that must never leave the cabinet) and `melon-pinball-game-test`
+(a Harvest run through the Seed Market, melons and pests acting on the machine, kickback, spinner, magnet, a lost run),
+so a change that breaks the table or the rules fails the package. To look at it without a screen:
+`SDL_VIDEO_DRIVER=offscreen SDL_RENDER_DRIVER=software melon-pinball --screenshot out.png --seconds 30 --play`
+(the demo plays a classic game; add `--harvest` for a run, `--lazy` to lose it quickly; `--shop`, `--packs` and
+`--collection` show those screens; `--golden` the survivor look). The table's geometry lives in the game's `src/table.cpp` and drives
+both the physics and the painted art; after moving anything, check the test's "at rest mid-table" count (a ball that
+can come to rest off the flippers is a trap). Harvest's melons, grafts, pests and seed packs are data in `run.cpp`;
+their effects are in `game.cpp` (`applyMachine` for the physics, `add` and `currentMult` for the scoring). Unlocks
+are variety only (no permanent power) and live in the player's `~/.local/share/melon/pinball/unlocks.txt`.
 
 Logs go to `logs/qemu-*.log`. The tests use KVM when `/dev/kvm` is usable (WSL2 has it); without it QEMU runs in
 software emulation and everything is slow. Use generous timeouts. The ISO's GRUB and the installed system both use

@@ -1,0 +1,16 @@
+pkgname=sdl3-image
+pkgver=3.4.0
+pkgrel=0
+pkgdesc="SDL3_image: loads PNG, JPEG, WebP, GIF, SVG, QOI and other images into SDL surfaces and textures"
+license=Zlib
+url=https://github.com/libsdl-org/SDL_image
+source=(sdl3-image-3.4.0.tar.xz)
+builddir=$srcdir/SDL3_image-3.4.0
+makedepends=(sdl3-dev libpng-dev libjpeg-turbo-dev libwebp-dev zlib-dev)
+subpackages=(sdl3-image-dev)
+# Linked, not dlopen()ed, so the image libraries become so: dependencies. STRICT stops the build when one is missing.
+# No libavif, libtiff or libjxl in melon yet.
+build(){ cmake_setup -B build -DSDLIMAGE_VENDORED=OFF -DSDLIMAGE_STRICT=ON -DSDLIMAGE_DEPS_SHARED=OFF -DSDLIMAGE_BACKEND_STB=OFF \
+  -DSDLIMAGE_AVIF=OFF -DSDLIMAGE_TIF=OFF -DSDLIMAGE_JXL=OFF -DSDLIMAGE_SAMPLES=OFF -DSDLIMAGE_TESTS=OFF
+  ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

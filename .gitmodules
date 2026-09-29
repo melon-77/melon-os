@@ -1,0 +1,3 @@
+[submodule "recipes/melon-pinball/game"]
+	path = recipes/melon-pinball/game
+	url = https://github.com/melon-77/melon-pinball.git

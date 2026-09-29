@@ -1,0 +1,28 @@
+pkgname=melon-pinball
+pkgver=1.0
+pkgrel=4
+pkgdesc="melon pinball: a table on the melon planet with real ball physics, missions, and Harvest runs"
+license=MIT
+url=https://github.com/melon-77/melon-pinball
+makedepends=(sdl3-dev sdl3-image-dev sdl3-ttf-dev)
+# the fonts are opened by path (Noto Sans for text; without them the game falls back to its dot-matrix font)
+depends=(font-noto)
+builddir=$srcdir
+# the game is its own repository (melon-77/melon-pinball), a git submodule at game/; the recipe is melon's packaging
+build(){
+  local g=$startdir/game
+  [ -f $g/src/CMakeLists.txt ] ||
+    { echo "recipes/melon-pinball/game is empty: run git submodule update --init in the melon checkout"; return 1; }
+  cmake_setup -S $g/src -B build -DPINBALL_TESTS=ON
+  ninja -C build -j$JOBS
+  # the physics and rules checks run on the build machine (melon binaries run there, rule 18)
+  build/melon-pinball-physics-test
+  build/melon-pinball-game-test
+}
+package(){
+  local g=$startdir/game
+  DESTDIR=$pkgdir ninja -C build install
+  cp -a $g/files/. $pkgdir/
+  install -Dm644 $M/branding/melon-installer-512.png $pkgdir/usr/share/melon-pinball/mascot.png
+  install -Dm644 $g/files/usr/share/icons/hicolor/scalable/apps/melon-pinball.svg $pkgdir/usr/share/melon-pinball/icon.svg
+}

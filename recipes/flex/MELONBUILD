@@ -1,0 +1,15 @@
+pkgname=flex
+pkgver=2.6.4
+pkgrel=0
+pkgdesc="flex: generates lexical scanners"
+license=BSD-2-Clause
+url=https://github.com/westes/flex
+source=(flex-2.6.4.tar.gz)
+depends=(m4)
+# old configure tests and code declare functions the pre-C23 way (rule 40)
+build(){
+  CFLAGS="$CFLAGS -std=gnu17" M4=/usr/bin/m4 ac_cv_func_malloc_0_nonnull=yes ac_cv_func_realloc_0_nonnull=yes \
+    ./configure $conf_flags --disable-nls --disable-static
+  make -j$JOBS
+}
+package(){ make DESTDIR=$pkgdir install; ln -s flex $pkgdir/usr/bin/lex; rm -rf $pkgdir/usr/share/{doc,info}; }

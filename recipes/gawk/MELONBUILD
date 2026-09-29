@@ -1,0 +1,10 @@
+pkgname=gawk
+pkgver=5.4.1
+pkgrel=0
+pkgdesc="GNU awk (installs /usr/bin/awk; BusyBox's awk comes back when gawk is removed)"
+license=GPL-3.0-or-later
+url=https://www.gnu.org/software/gawk/
+source=(gawk-5.4.1.tar.xz)
+makedepends=(readline-dev gmp-dev mpfr-dev)
+build(){ ./configure $conf_flags --disable-nls --with-readline; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,info} $pkgdir/usr/include; }

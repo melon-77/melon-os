@@ -1,0 +1,12 @@
+pkgname=texinfo
+pkgver=7.3
+pkgrel=0
+pkgdesc="GNU Texinfo: makeinfo/texi2any and the info reader (GNU packages build their manuals with it)"
+license=GPL-3.0-or-later
+url=https://www.gnu.org/software/texinfo/
+source=(texinfo-7.3.tar.xz)
+makedepends=(ncurses-dev)
+depends=(perl)
+# texi2any's optional XS speedups would have to be built against melon's perl; the pure-Perl code does the same job
+build(){ PERL=/usr/bin/perl ./configure $conf_flags --disable-nls --disable-perl-xs; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/info/dir; }

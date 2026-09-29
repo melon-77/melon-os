@@ -54,7 +54,20 @@ URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA
     'rustc-1.98.1-src.tar.xz': 'https://static.rust-lang.org/dist/rustc-1.98.1-src.tar.xz',
     'rustc-1.98.1-x86_64-unknown-linux-musl.tar.xz': 'https://static.rust-lang.org/dist/rustc-1.98.1-x86_64-unknown-linux-musl.tar.xz',
     'cargo-1.98.1-x86_64-unknown-linux-musl.tar.xz': 'https://static.rust-lang.org/dist/cargo-1.98.1-x86_64-unknown-linux-musl.tar.xz',
-    'make-4.4.1.tar.gz': 'https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz'}
+    'make-4.4.1.tar.gz': 'https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz',
+    # self-hosting build tools (GNU tarballs checked against gnu-keyring.gpg, file against its .asc)
+    'm4-1.4.21.tar.xz': 'https://ftp.gnu.org/gnu/m4/m4-1.4.21.tar.xz',
+    'bison-3.8.2.tar.xz': 'https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.xz',
+    'gawk-5.4.1.tar.xz': 'https://ftp.gnu.org/gnu/gawk/gawk-5.4.1.tar.xz',
+    'gperf-3.3.tar.gz': 'https://ftp.gnu.org/gnu/gperf/gperf-3.3.tar.gz',
+    'bc-1.08.2.tar.gz': 'https://ftp.gnu.org/gnu/bc/bc-1.08.2.tar.gz',
+    'texinfo-7.3.tar.xz': 'https://ftp.gnu.org/gnu/texinfo/texinfo-7.3.tar.xz',
+    'autoconf-2.73.tar.xz': 'https://ftp.gnu.org/gnu/autoconf/autoconf-2.73.tar.xz',
+    'automake-1.19.tar.xz': 'https://ftp.gnu.org/gnu/automake/automake-1.19.tar.xz',
+    'autoconf-archive-2024.10.16.tar.xz': 'https://ftp.gnu.org/gnu/autoconf-archive/autoconf-archive-2024.10.16.tar.xz',
+    'flex-2.6.4.tar.gz': 'https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz',
+    'perl-5.44.0.tar.xz': 'https://www.cpan.org/src/5.0/perl-5.44.0.tar.xz',
+    'file-5.48.tar.gz': 'https://astron.com/pub/file/file-5.48.tar.gz'}
 
 rows, missing = [], []
 def add(path, method, arg):

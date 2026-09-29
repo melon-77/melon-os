@@ -291,6 +291,9 @@ if mode == 'desktop-install':
     flap = _re.search(r'FLAP=([^\r\n]*)', flapping); flap = flap.group(1).strip() if flap else '?'
     ok &= flap == ''; step('services: ' + ('none restarting in a loop' if flap == '' else f'RESTARTING: {flap}'))
     step('MIME cache: ' + ('present' if mime else 'MISSING'))
+    # Flatpak must hand X11 apps (Steam, VLC's interface) an Xauthority cookie, or they never open a window
+    xau = count('ldd /usr/bin/flatpak | grep -c libXau')
+    ok &= xau == 1; step('flatpak: ' + ('X11 authorization for sandboxed apps' if xau == 1 else 'BUILT WITHOUT libXau (X11 apps cannot open windows)'))
     # packaged files owned by the build machine's account arrive as nobody's (rule 45)
     nob = count('find /usr /etc -xdev \\( -user 65534 -o -group 65534 \\) | wc -l')
     ok &= nob == 0; step('system files owned by nobody: ' + ('none' if nob == 0 else f'{nob} FOUND'))

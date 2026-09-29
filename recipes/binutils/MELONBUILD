@@ -1,0 +1,23 @@
+pkgname=binutils
+pkgver=2.46
+pkgrel=0
+pkgdesc="GNU assembler, linker and binary tools (as, ld, ar, objdump, ...) for building on melon"
+license=GPL-3.0-or-later
+url=https://www.gnu.org/software/binutils/
+# the same source and settings as the cross toolchain's binutils (scripts/toolchain.sh), built to run on melon
+source=(binutils-2.46.tar.xz)
+builddir=$srcdir/binutils-with-gold-2.46
+makedepends=(zlib-dev zstd-dev)
+build(){
+  mkdir -p build; cd build
+  ../configure $conf_flags --target=$CHOST --disable-nls --disable-werror --disable-multilib --disable-gprofng \
+    --enable-deterministic-archives --disable-gold --enable-ld=default --enable-plugins --disable-shared \
+    --with-system-zlib --with-zstd
+  make -j$JOBS
+}
+package(){
+  make -C build DESTDIR=$pkgdir install
+  # libbfd/libopcodes and their headers are for building other tools; nobody on melon needs them
+  rm -rf $pkgdir/usr/share/{doc,info} $pkgdir/usr/include $pkgdir/usr/lib/lib{bfd,opcodes,ctf,ctf-nobfd,sframe}* \
+    $pkgdir/usr/$CHOST
+}

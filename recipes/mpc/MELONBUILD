@@ -1,0 +1,11 @@
+pkgname=mpc
+pkgver=1.3.1
+pkgrel=0
+pkgdesc="GNU multiple precision complex arithmetic library (gcc needs it)"
+license=LGPL-3.0-or-later
+url=https://www.multiprecision.org/mpc/
+source=(mpc-1.3.1.tar.gz)
+makedepends=(gmp-dev mpfr-dev)
+subpackages=(mpc-dev)
+build(){ ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,info}; }

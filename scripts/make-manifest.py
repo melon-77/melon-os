@@ -43,8 +43,9 @@ GIT = {  # tarball name prefix -> repo, tag pattern
     'musl-fts': ('https://github.com/void-linux/musl-fts', 'v{v}'),
     'musl-obstack': ('https://github.com/void-linux/musl-obstack', 'v{v}'),
     'vulkan-headers': ('https://github.com/KhronosGroup/Vulkan-Headers', 'v{v}')}
-URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7)
-    'nethack-500-src.tgz': 'https://www.nethack.org/download/5.0.0/nethack-500-src.tgz'}
+URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7; its make-dfsg drops make's doc/)
+    'nethack-500-src.tgz': 'https://www.nethack.org/download/5.0.0/nethack-500-src.tgz',
+    'make-4.4.1.tar.gz': 'https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz'}
 
 rows, missing = [], []
 def add(path, method, arg):

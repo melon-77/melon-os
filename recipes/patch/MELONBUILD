@@ -1,0 +1,9 @@
+pkgname=patch
+pkgver=2.8
+pkgrel=0
+pkgdesc="GNU patch: applies diffs to files"
+license=GPL-3.0-or-later
+url=https://www.gnu.org/software/patch/
+source=(patch-2.8.tar.xz)
+build(){ ./configure $conf_flags --disable-xattr; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,info}; }

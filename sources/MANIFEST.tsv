@@ -250,9 +250,11 @@ deb/openssl_3.5.5.orig.tar.gz	b28c91532a8b65a1f983b4c28b7488174e4a01008e29ce8e69
 deb/opus_1.6.1.orig.tar.xz	001ac615b9f8f8994b229ad2b1a5969ed12ab48b0d154d0af1016a5899cd6ba1	apt	opus=1.6.1-1
 deb/ostree_2025.7.orig.tar.xz	af8d080b9585e7fd1faba8f022967e1c268ae62e20ecf32ee7b364c1e307570b	apt	ostree=2025.7-3build1
 deb/pam_1.7.0.orig.tar.xz	57dcd7a6b966ecd5bbd95e1d11173734691e16b68692fa59661cdae9b13b1697	apt	pam=1.7.0-5ubuntu3.2
+deb/patch_2.8.orig.tar.xz	f87cee69eec2b4fcbf60a396b030ad6aa3415f192aa5f7ee84cad5e11f7f5ae3	apt	patch=2.8-2build1
 deb/pcre2_10.46.orig.tar.gz	8d28d7f2c3b970c3a4bf3776bcbb5adfc923183ce74bc8df1ebaad8c1985bd07	apt	pcre2=10.46-1build1
 deb/pipewire_1.6.2.orig.tar.gz	13eaaf67558ddccf3d61ab7826f202d53538de422b015dd841ec92e1b7f5c0d8	apt	pipewire=1.6.2-1ubuntu1.2
 deb/pixman_0.46.4.orig.tar.gz	d09c44ebc3bd5bee7021c79f922fe8fb2fb57f7320f55e97ff9914d2346a591c	apt	pixman=0.46.4-1
+deb/pkgconf_2.5.1.orig.tar.xz	cd05c9589b9f86ecf044c10a2269822bc9eb001eced2582cfffd658b0a50c243	apt	pkgconf=2.5.1-4
 deb/plasma-activities-stats_6.6.4.orig.tar.xz	8b1a6a93afee6876d5050d874927912f32e52c60ff3c67bcded477f4f7c9cd45	apt	plasma-activities-stats=6.6.4-0ubuntu1
 deb/plasma-activities_6.6.4.orig.tar.xz	a1973821797c703177d51e698f8abfd8294796a9396316440b14dca958bb57e5	apt	plasma-activities=6.6.4-0ubuntu1
 deb/plasma-desktop_6.6.4.orig.tar.xz	e2db899274c52e895f09dcecd5c502374cf24de955b31aeb8c270f171ef81138	apt	plasma-desktop=4:6.6.4-0ubuntu1
@@ -584,6 +586,7 @@ llvm-21.1.8.tar.xz	-	link	deb/llvm-toolchain-21_21.1.8.orig.tar.xz
 lm-sensors-3.6.2.tar.gz	-	link	deb/lm-sensors_3.6.2.orig.tar.gz
 lua-5.4.8.tar.gz	-	link	deb/lua5.4_5.4.8.orig.tar.gz
 lvm2-2.03.31.tar.xz	-	link	deb/lvm2_2.03.31.orig.tar.xz
+make-4.4.1.tar.gz	dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3	url	https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz
 mesa-26.0.8.tar.xz	-	link	deb/mesa_26.0.8.orig.tar.xz
 milou-6.6.4.tar.xz	-	link	deb/milou_6.6.4.orig.tar.xz
 modemmanager-1.25.95.tar.xz	-	link	deb/modemmanager_1.25.95.orig.tar.xz
@@ -607,9 +610,11 @@ opendoas-6.8.2.tar.xz	-	link	deb/opendoas_6.8.2.orig.tar.xz
 openssl-3.5.5.tar.gz	-	link	deb/openssl_3.5.5.orig.tar.gz
 opus-1.6.1.tar.xz	-	link	deb/opus_1.6.1.orig.tar.xz
 ostree-2025.7.tar.xz	-	link	deb/ostree_2025.7.orig.tar.xz
+patch-2.8.tar.xz	-	link	deb/patch_2.8.orig.tar.xz
 pcre2-10.46.tar.gz	-	link	deb/pcre2_10.46.orig.tar.gz
 pipewire-1.6.2.tar.gz	-	link	deb/pipewire_1.6.2.orig.tar.gz
 pixman-0.46.4.tar.gz	-	link	deb/pixman_0.46.4.orig.tar.gz
+pkgconf-2.5.1.tar.xz	-	link	deb/pkgconf_2.5.1.orig.tar.xz
 plasma-activities-6.6.4.tar.xz	-	link	deb/plasma-activities_6.6.4.orig.tar.xz
 plasma-activities-stats-6.6.4.tar.xz	-	link	deb/plasma-activities-stats_6.6.4.orig.tar.xz
 plasma-desktop-6.6.4.tar.xz	-	link	deb/plasma-desktop_6.6.4.orig.tar.xz

@@ -1,0 +1,15 @@
+pkgname=pkgconf
+pkgver=2.5.1
+pkgrel=0
+pkgdesc="pkgconf: finds libraries' compiler and linker flags (also answers to pkg-config)"
+license=ISC
+url=http://pkgconf.org
+source=(pkgconf-2.5.1.tar.xz)
+build(){ ./configure $conf_flags --disable-static --with-pkg-config-dir=/usr/lib/pkgconfig:/usr/share/pkgconfig \
+  --with-system-libdir=/usr/lib --with-system-includedir=/usr/include; make -j$JOBS; }
+package(){
+  make DESTDIR=$pkgdir install
+  ln -s pkgconf $pkgdir/usr/bin/pkg-config
+  # libpkgconf's headers and pkg-config file are for building other tools on it; nobody on melon needs them
+  rm -rf $pkgdir/usr/share/{doc,info} $pkgdir/usr/include $pkgdir/usr/lib/pkgconfig $pkgdir/usr/lib/libpkgconf.so
+}

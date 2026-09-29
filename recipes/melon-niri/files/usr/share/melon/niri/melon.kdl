@@ -36,8 +36,8 @@ debug {
 }
 
 binds {
-    Mod+T hotkey-overlay-title="Open a Terminal: Konsole" { spawn "konsole"; }
-    Mod+E hotkey-overlay-title="Files: Dolphin" { spawn "dolphin"; }
+    Mod+T hotkey-overlay-title="Open a Terminal: foot" { spawn "foot"; }
+    Mod+E hotkey-overlay-title="Files: PCManFM-Qt" { spawn "pcmanfm-qt"; }
     Mod+D hotkey-overlay-title="Run an Application: Noctalia" { spawn-sh "noctalia msg panel-toggle launcher"; }
     Mod+Space hotkey-overlay-title="Run an Application: Noctalia" { spawn-sh "noctalia msg panel-toggle launcher"; }
     Mod+S hotkey-overlay-title="Control Center" { spawn-sh "noctalia msg panel-toggle control-center"; }

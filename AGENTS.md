@@ -23,7 +23,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | disks | GPT: 1 MiB BIOS boot, 1 GiB FAT32 `/boot` (also the ESP), XFS `/` | kernel boots with `root=PARTUUID=...`; only encrypted (LUKS) installs have an initramfs (rule 28); dual boot next to Windows on UEFI (see Installers) |
 | filesystem | merged `/usr`: `/bin`, `/sbin`, `/usr/sbin` -> `usr/bin`, `/lib` -> `usr/lib` | packages must only ship files under `/usr`, `/etc`, `/var`, `/boot` |
 | desktop | KDE Plasma 6.6 on Wayland (KWin, Xwayland), Qt 6.10, SDDM | desktop ISO and desktop profile; list in `scripts/desktop-packages.txt` |
-| second desktop | niri 26.04 + the Noctalia 5.2 shell, xwayland-satellite (`melon-niri`) | online install only (the `niri` profile, `scripts/niri-packages.txt`); see Installers |
+| second desktop | niri 26.04 + the Noctalia 5.2 shell, xwayland-satellite (`melon-niri`); foot and PCManFM-Qt as its apps | online install only (the `niri` profile, `scripts/niri-packages.txt`); see Installers |
 | desktop plumbing | D-Bus, elogind, polkit, PipeWire + WirePlumber, NetworkManager, BlueZ, CUPS, UDisks2 | console profile keeps `dhcp` + wpa_supplicant |
 | graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe; zink (OpenGL on Vulkan) | |
 | developer tools | gcc 15.2 + g++, binutils 2.46, make 4.4.1, pkgconf, patch (`gcc`, `g++`, `binutils`, `make`, `pkgconf`, `patch`) | built cross-native with the cross toolchain's settings (PIE, SSP); in the package repository only, not on the ISOs; `melon-first-boot` offers them on first login (default no) |
@@ -338,7 +338,7 @@ qemu-img create -f raw /tmp/desk.img 16G
 scripts/qemu-test.py desktop-install out/melon-desktop-*-x86_64.iso /tmp/desk.img   # install, SDDM greeter stays up,
                                                                           # log in through it, Plasma runs; LOOK at both screenshots
 scripts/qemu-test.py niri-install out/melon-desktop-*-x86_64.iso /tmp/desk.img      # the niri profile from repo/ served as the
-                                                                          # "online" repo: niri, Noctalia, PipeWire, first-boot Konsole;
+                                                                          # "online" repo: niri, Noctalia, PipeWire, first-boot foot;
                                                                           # --offline: the installer must refuse niri. LOOK at logs/qemu-niri-*.ppm
 # --offline (any mode): the VM keeps its network card but reaches nothing outside; the installers must still work
 ```
@@ -464,8 +464,8 @@ the serial port, so tests don't need a screen. The test also records the sound c
   in the online repository (Calamares: the desktop choice after the gauntlet, `/run/melon/.desktop-niri`; console:
   `MELON_PROFILE=niri`). They install niri's packages first and remove Plasma's shell only after that worked. KWin stays:
   SDDM's greeter runs on it. The session (`/usr/libexec/melon/niri-session`) gives niri a D-Bus session bus and starts
-  PipeWire; `/etc/niri/config.kdl` only includes niri's defaults and `/usr/share/melon/niri/melon.kdl` (Noctalia, Konsole,
-  Dolphin, melon's colours), so users' own configs can include them too. niri doesn't read `/etc/xdg/autostart`:
+  PipeWire; `/etc/niri/config.kdl` only includes niri's defaults and `/usr/share/melon/niri/melon.kdl` (Noctalia, foot,
+  PCManFM-Qt, melon's colours), so users' own configs can include them too. niri doesn't read `/etc/xdg/autostart`:
   `niri-autostart` starts the entries whose `OnlyShowIn` lists `niri` (melon-first-boot). niri, xwayland-satellite and
   librsvg (Noctalia needs it) are Rust: "remove everything built with Rust" leaves a niri install without a desktop.
 - **Other distros' repos are opt-in only.** Both installers offer Alpine as the tagged repo `@alpine`

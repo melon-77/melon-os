@@ -1,4 +1,4 @@
-// melon's niri setup: niri's own defaults, then melon's (Noctalia, Konsole, Dolphin, melon's colours).
+// melon's niri setup: niri's own defaults, then melon's (Noctalia, foot, PCManFM-Qt, melon's colours).
 // niri reads ~/.config/niri/config.kdl instead of this file when you have one. Start yours with the two includes
 // below to keep melon's setup and change only what you want; later settings override earlier ones.
 include "/usr/share/niri/default-config.kdl"

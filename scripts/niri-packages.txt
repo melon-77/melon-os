@@ -1,10 +1,10 @@
 # The niri profile (issue #18): the desktop profile (desktop-packages.txt) without Plasma's shell, plus niri and Noctalia.
 # "name" adds a package, "-name" drops one of desktop-packages.txt. Online install only: niri, Noctalia and their
 # libraries are in the package repository, not on the ISO, so the installers offer this profile only with a network.
-# KWin stays: SDDM's login screen runs on it. Konsole, Dolphin and Discover stay as the desktop's apps (Konsole also
-# shows melon-first-boot's questions). Noctalia replaces Plasma's panels, network/sound/Bluetooth applets, lock screen
-# and polkit agent.
+# KWin stays: SDDM's login screen runs on it. The apps are lighter, non-KDE ones (the owner's choice): foot and
+# PCManFM-Qt instead of Konsole and Dolphin. Discover stays as the app store (KWin already brings KDE Frameworks).
+# Noctalia replaces Plasma's panels, network/sound/Bluetooth applets, lock screen and polkit agent.
 -plasma-workspace -plasma-desktop -systemsettings -kscreen -powerdevil -plasma-nm -plasma-pa -bluedevil -kscreenlocker
 -polkit-kde-agent-1 -milou -plasma-systemmonitor -kinfocenter -sddm-kcm -kde-spectacle -kactivitymanagerd -plasma5support
--ksystemstats -print-manager
-melon-niri
+-ksystemstats -print-manager -konsole -dolphin
+melon-niri foot pcmanfm-qt

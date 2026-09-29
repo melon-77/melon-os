@@ -299,7 +299,7 @@ if mode in ('desktop-install', 'niri-install'):
         mon(f'sendkey {ch}'); time.sleep(0.15)
     mon('sendkey ret'); step('typed the password into the greeter')
     if niri:
-        # the only session left is melon's niri session: niri, Noctalia, PipeWire, and melon-first-boot's Konsole
+        # the only session left is melon's niri session: niri, Noctalia, PipeWire, and melon-first-boot's foot
         # (started by niri-autostart from /etc/xdg/autostart)
         def running(c): return count(f"ps -o user,comm | awk '$1==\"jcole\" && $2==\"{c}\"' | wc -l")
         for _ in range(60):
@@ -307,11 +307,11 @@ if mode in ('desktop-install', 'niri-install'):
             time.sleep(3)
         time.sleep(20)                              # let Noctalia finish drawing
         sess = count("loginctl list-sessions --no-legend | awk '$3==\"jcole\" && $6==\"active\"' | wc -l")
-        procs = {c: running(c) for c in ('niri', 'noctalia', 'pipewire', 'wireplumber', 'konsole')}
+        procs = {c: running(c) for c in ('niri', 'noctalia', 'pipewire', 'wireplumber', 'foot')}
         up = procs['niri'] == 1 and procs['noctalia'] >= 1 and sess == 1; ok &= up
         step(f'niri for jcole after 20 s: {procs} active sessions={sess}')
         ok &= procs['pipewire'] >= 1 and procs['wireplumber'] >= 1
-        ok &= procs['konsole'] >= 1; step('melon-first-boot on niri: ' + ('Konsole open' if procs['konsole'] else 'NOT STARTED'))
+        ok &= procs['foot'] >= 1; step('melon-first-boot on niri: ' + ('foot open' if procs['foot'] else 'NOT STARTED'))
         # Plasma's shell is gone, KWin stays for the login screen, and the niri config niri loaded is melon's
         gone = count('[ ! -e /usr/bin/plasmashell ] && [ -x /usr/bin/kwin_wayland ] && echo 1 || echo 0') == 1; ok &= gone
         step('packages: ' + ('no plasmashell, KWin kept for SDDM' if gone else 'PLASMA STILL THERE OR KWIN MISSING'))

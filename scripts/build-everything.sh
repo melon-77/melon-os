@@ -27,6 +27,8 @@ PLUMBING="libffi pcre2 glib libcap duktape linux-pam eudev elogind polkit argp-s
   opus flac liblc3 libfreeaptx libsndfile flite lua5.4"
 # programs shipped on both ISOs (mkiso.sh PKGS); nethack needs ncurses and the same Lua tarball as lua5.4
 APPS="nethack"
+# in the package repository only: Cataclysm: DDA's game data is too big for the ISOs
+GAMES="cataclysm-dda"
 SIMPLE=$(python3 $M/scripts/gen-simple-recipes.py)
 # GNU gettext (msgfmt, xgettext, ...); it uses the system libxml2 (SIMPLE), so it comes after $SIMPLE
 GETTEXT="gettext"
@@ -39,7 +41,7 @@ KDE=$(python3 $M/scripts/gen-kde-recipes.py | sed "s/\bqt6-qtbase\b/qt6-qtbase a
 INSTALLERS="kpmcore calamares calamares-melon melon-desktop"
 # a compiler and binutils that run on melon (the cross toolchain in tools/ only runs on the build machine)
 DEVTOOLS="mpc binutils gcc make pkgconf patch"
-ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $APPS $SIMPLE $GETTEXT $DESKTOP_LIBS $KDE $INSTALLERS | awk '!seen[$0]++')
+ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $APPS $GAMES $SIMPLE $GETTEXT $DESKTOP_LIBS $KDE $INSTALLERS | awk '!seen[$0]++')
 # recipes nobody listed yet go at the end
 EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))
 ALL="$ALL $EXTRA"

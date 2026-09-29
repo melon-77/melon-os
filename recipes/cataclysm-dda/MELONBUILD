@@ -1,0 +1,36 @@
+# Upstream names its releases with letters: 0.I "Ito", first stable build 0.I-1. apk versions need digits, so
+# 0.I-1 is 0.9.1 here (0.H would be 0.8.x).
+pkgname=cataclysm-dda
+pkgver=0.9.1
+pkgrel=2
+pkgdesc="Cataclysm: Dark Days Ahead, a turn-based survival roguelike (terminal version)"
+license="CC-BY-SA-3.0 AND OFL-1.1 (fonts)"
+url=https://cataclysmdda.org
+source=(cataclysm-dda-0.9.1.tar.gz)
+builddir=$srcdir/Cataclysm-DDA-0.I-1
+makedepends=(ncurses-dev zlib-dev)
+
+# The curses build. The graphical "tiles" build (TILES=1 SOUND=1) needs SDL2, SDL2_image, SDL2_ttf and SDL2_mixer,
+# which melon doesn't have yet.
+# No CROSS=: upstream uses it only for Windows and macOS targets and leaves out the Linux install target then. A
+# plain build picks up melon-build's cross CXX, and ncursesw through its sysroot pkg-config.
+#   LOCALIZE=0     no gettext on melon: English only
+#   BACKTRACE=0    the crash reporter needs glibc's <execinfo.h>
+#   USE_XDG_DIR=1  saves and settings in ~/.local/share and ~/.config instead of the current directory
+#   TESTS, ASTYLE, LINTJSON=0   upstream's test suite and style checks; the style checks build a host tool
+# musl-flatbuffers-strtoll.patch (applied by melon-build): the bundled flatbuffers parses numbers with strtoll_l and
+# friends, which musl doesn't declare. FLATBUFFERS_LOCALE_INDEPENDENT=0 is no way out (Cataclysm #errors on it); on musl
+# strtoll, strtoull, strtod and strtof are already locale-independent, so the patch uses them when __GLIBC__ is missing.
+#   WARNINGS=      upstream builds with -Werror, which a newer compiler than theirs can break for no real reason
+#   AR=, STRIP=    the Makefile sets them to the build machine's ar and strip
+_ddamake(){
+  make RELEASE=1 TILES=0 SOUND=0 LOCALIZE=0 BACKTRACE=0 USE_XDG_DIR=1 TESTS=0 ASTYLE=0 LINTJSON=0 \
+    WARNINGS="-Wall -Wextra" AR="$AR" STRIP="$STRIP" PREFIX=/usr "$@"
+}
+build(){ _ddamake -j$JOBS; }
+package(){
+  _ddamake DESTDIR=$pkgdir install
+  # zzip, upstream's save compression tool, is installed as /usr/bin/zzip, a name too generic for the system
+  mv $pkgdir/usr/bin/zzip $pkgdir/usr/bin/cataclysm-zzip
+  install -Dm644 doc/cataclysm.6 $pkgdir/usr/share/man/man6/cataclysm.6
+}

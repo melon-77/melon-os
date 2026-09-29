@@ -385,6 +385,7 @@ bubblewrap-0.11.1.tar.xz	-	link	deb/bubblewrap_0.11.1.orig.tar.xz
 busybox-1.37.0.tar.bz2	-	link	deb/busybox_1.37.0.orig.tar.bz2
 ca-certificates_20260601~24.04.1_all.deb	-	link	fonts/ca-certificates_20260601~24.04.1_all.deb
 calamares-3.3.14.tar.gz	-	link	deb/calamares_3.3.14.orig.tar.gz
+cataclysm-dda-0.9.1.tar.gz	27e35a0a5181f88f0929bef180ca0465d00e606e569911cb02d97b59b8b5768a	url	https://github.com/CleverRaven/Cataclysm-DDA/archive/refs/tags/0.I-1.tar.gz
 cryptsetup-2.8.4.tar.gz	-	link	deb/cryptsetup_2.8.4.orig.tar.gz
 curl-8.18.0.tar.gz	-	link	deb/curl_8.18.0.orig.tar.gz
 dbus-1.16.2.tar.xz	-	link	deb/dbus_1.16.2.orig.tar.xz

@@ -1,0 +1,14 @@
+pkgname=libical
+pkgver=3.0.20
+pkgrel=0
+pkgdesc="libical: iCalendar (RFC 5545) library (Noctalia's calendar)"
+license="LGPL-2.1-only OR MPL-2.0"
+url=https://libical.github.io/libical/
+source=(libical-3.0.20.tar.gz)
+makedepends=(icu-dev)
+subpackages=(libical-dev)
+# melon has no tzdata package, so libical carries its own time zone data. No libical-glib (nothing on melon uses it yet).
+build(){ cmake_setup -B build -DSHARED_ONLY=ON -DUSE_BUILTIN_TZDATA=ON -DICAL_GLIB=OFF -DICAL_GLIB_VAPI=OFF \
+  -DGOBJECT_INTROSPECTION=OFF -DWITH_CXX_BINDINGS=OFF -DICAL_BUILD_DOCS=OFF -DLIBICAL_BUILD_TESTING=OFF
+  ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

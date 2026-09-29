@@ -1,0 +1,11 @@
+pkgname=md4c
+pkgver=0.5.2
+pkgrel=0
+pkgdesc="MD4C: a Markdown parser library (Noctalia)"
+license=MIT
+url=https://github.com/mity/md4c
+source=(md4c-0.5.2.tar.gz)
+builddir=$srcdir/md4c-release-0.5.2
+subpackages=(md4c-dev)
+build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DBUILD_MD2HTML_EXECUTABLE=OFF; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

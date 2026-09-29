@@ -1,0 +1,17 @@
+pkgname=libqalculate
+pkgver=5.9.0
+pkgrel=0
+pkgdesc="libqalculate: math, units and currency calculator library, and the qalc command (Noctalia's launcher)"
+license=GPL-2.0-or-later
+url=https://qalculate.github.io
+source=(libqalculate-5.9.0.tar.gz)
+makedepends=(gmp-dev mpfr-dev libxml2-dev curl-dev icu-dev readline-dev)
+subpackages=(libqalculate-dev)
+# The tarball has no configure. AM_GNU_GETTEXT(external) only trusts a libc with glibc's internal symbols; the cache
+# answers make it use musl's gettext, as in recipes/gettext.
+build(){
+  autoreconf -fi
+  ./configure $conf_flags gt_cv_func_gnugettext1_libc=yes gt_cv_func_gnugettext2_libc=yes --disable-static
+  make -j$JOBS
+}
+package(){ make DESTDIR=$pkgdir install; }

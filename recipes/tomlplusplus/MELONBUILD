@@ -1,0 +1,11 @@
+pkgname=tomlplusplus
+pkgver=3.4.0
+pkgrel=0
+pkgdesc="toml++: a TOML parser for C++ (header-only; Noctalia's config)"
+license=MIT
+url=https://marzer.github.io/tomlplusplus/
+source=(tomlplusplus-3.4.0.tar.xz)
+builddir=$srcdir/marzer-tomlplusplus-3017243
+options=('!strip')
+build(){ meson_setup -Dbuild_lib=false -Dbuild_tests=false -Dbuild_examples=false build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

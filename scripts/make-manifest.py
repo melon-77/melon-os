@@ -42,11 +42,14 @@ GIT = {  # tarball name prefix -> repo, tag pattern
     'eudev': ('https://github.com/eudev-project/eudev', 'v{v}'),
     'musl-fts': ('https://github.com/void-linux/musl-fts', 'v{v}'),
     'musl-obstack': ('https://github.com/void-linux/musl-obstack', 'v{v}'),
+    'niri': ('https://github.com/YaLTeR/niri', 'v{v}'),
+    'noctalia': ('https://github.com/noctalia-dev/noctalia', 'v{v}'),
     'ripgrep': ('https://github.com/BurntSushi/ripgrep', '{v}'),
     'vulkan-headers': ('https://github.com/KhronosGroup/Vulkan-Headers', 'v{v}'),
     'spirv-llvm-translator': ('https://github.com/KhronosGroup/SPIRV-LLVM-Translator', 'v{v}'),
     'gh': ('https://github.com/cli/cli', 'v{v}'),
-    'libslirp': ('https://gitlab.freedesktop.org/slirp/libslirp', 'v{v}')}
+    'libslirp': ('https://gitlab.freedesktop.org/slirp/libslirp', 'v{v}'),
+    'xwayland-satellite': ('https://github.com/Supreeeme/xwayland-satellite', 'v{v}')}
 URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA 0.H, Rust 1.93 and its make-dfsg drops make's doc/; host-rust.sh wants 1.98.1)
     'cataclysm-dda-0.9.1.tar.gz': 'https://github.com/CleverRaven/Cataclysm-DDA/archive/refs/tags/0.I-1.tar.gz',
     'cargo-1.98.1-x86_64-unknown-linux-gnu.tar.xz': 'https://static.rust-lang.org/dist/cargo-1.98.1-x86_64-unknown-linux-gnu.tar.xz',

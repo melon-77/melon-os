@@ -1,0 +1,29 @@
+pkgname=niri
+pkgver=26.04
+pkgrel=0
+pkgdesc="niri: a scrollable-tiling Wayland compositor (the niri desktop, with Noctalia)"
+license=GPL-3.0-or-later
+url=https://github.com/YaLTeR/niri
+source=(niri-26.04.tar.gz)
+makedepends=(libseat-dev libinput-dev eudev-dev libdisplay-info-dev pango-dev cairo-dev glib-dev mesa-dev libdrm-dev
+  libxkbcommon-dev wayland-dev pixman-dev)
+# X11 apps run through xwayland-satellite, which niri starts by name when it is installed (the niri profile has it)
+# written in Rust: the installers' "remove everything built with Rust" option takes it off
+options=(rust)
+
+# Features: dbus only. "systemd" needs a systemd user session, and "xdp-gnome-screencast" is only useful with
+# xdg-desktop-portal-gnome, which melon doesn't have. Without them niri needs neither bindgen nor PipeWire.
+# NIRI_BUILD_COMMIT: the version string comes from git otherwise, and the source tree sits inside melon's checkout.
+# The session entry, /etc/niri/config.kdl and the portal choice come from melon-niri: upstream's niri-session and
+# niri.desktop only work with systemd or dinit.
+prepare(){ cargo_fetch; }
+build(){ NIRI_BUILD_COMMIT=v$pkgver GIT_CEILING_DIRECTORIES=$srcdir cargo_build -p niri --no-default-features --features dbus; }
+package(){
+  local niri=$(cargo_out)/niri
+  install -Dm755 $niri $pkgdir/usr/bin/niri
+  install -Dm644 resources/default-config.kdl $pkgdir/usr/share/niri/default-config.kdl
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/niri/LICENSE
+  # melon's binaries run on the build machine (rule 18), so niri writes its own completion
+  mkdir -p $pkgdir/usr/share/bash-completion/completions
+  $niri completions bash > $pkgdir/usr/share/bash-completion/completions/niri
+}

@@ -632,7 +632,9 @@ ncurses-6.6.tar.gz	-	link	deb/ncurses_6.6+20251231.orig.tar.gz
 nethack-500-src.tgz	2959b7886aac76185b90aea0c9f80d14343f604de0ae96b3dd2a760f7ab3bde9	url	https://www.nethack.org/download/5.0.0/nethack-500-src.tgz
 networkmanager-1.54.3.tar.bz2	-	link	deb/network-manager_1.54.3.orig.tar.bz2
 nghttp2-1.68.0.tar.gz	-	link	deb/nghttp2_1.68.0.orig.tar.gz
+niri-26.04.tar.gz	414828156e3a938bb17f07ad2a8e1968eca01484a57f205338e295b9e3fa7944	git	https://github.com/YaLTeR/niri v26.04
 nlohmann-json-3.11.3.tar.gz	-	link	deb/nlohmann-json3_3.12.0.really.3.12.0.really.3.11.3.orig.tar.gz
+noctalia-5.2.0.tar.gz	328fc91501a8d4ee48fc7214e0ab0367addc27bad1863edd35dcb4c2fddb5e9b	git	https://github.com/noctalia-dev/noctalia v5.2.0
 npth-1.8.tar.bz2	-	link	deb/npth_1.8.orig.tar.bz2
 ntfs-3g-2022.10.3.tar.gz	-	link	deb/ntfs-3g_2022.10.3.orig.tar.gz
 open-vm-tools-13.0.10.tar.xz	-	link	deb/open-vm-tools_13.0.10.orig.tar.xz
@@ -738,6 +740,7 @@ xkeyboard-config-2.46.tar.xz	-	link	deb/xkeyboard-config_2.46.orig.tar.xz
 xorgproto-2025.1.tar.gz	-	link	deb/xorgproto_2025.1.orig.tar.gz
 xtrans-1.6.0.tar.gz	-	link	deb/xtrans_1.6.0.orig.tar.gz
 xwayland-24.1.10.tar.xz	-	link	deb/xwayland_24.1.10.orig.tar.xz
+xwayland-satellite-0.8.3.tar.gz	7939463bf4a9990afd34c6632272f307d80f597779254432157ee7ed0777d156	git	https://github.com/Supreeeme/xwayland-satellite v0.8.3
 xz-5.8.3.tar.xz	-	link	deb/xz-utils_5.8.3.orig.tar.xz
 yaml-cpp-0.8.0.tar.xz	-	link	deb/yaml-cpp_0.8.0+dfsg.orig.tar.xz
 zlib-1.3.1.tar.gz	-	link	deb/zlib_1.3.dfsg+really1.3.1.orig.tar.gz

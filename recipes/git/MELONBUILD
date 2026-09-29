@@ -1,0 +1,21 @@
+pkgname=git
+pkgver=2.56.0
+pkgrel=0
+pkgdesc="Git: distributed version control"
+license=GPL-2.0-only
+url=https://git-scm.com
+source=(git-2.56.0.tar.xz git-manpages-2.56.0.tar.xz)   # the manual pages come prebuilt from the same release
+subpackages=(git-doc)
+makedepends=(curl-dev expat-dev openssl-dev pcre2-dev zlib-dev)
+# musl: its regex has no REG_STARTEND (git's own regex instead), its iconv writes no BOM.
+# curl-config would be the build machine's, so the curl flags are given directly.
+_make(){ make -j$JOBS prefix=/usr gitexecdir=/usr/libexec/git-core sysconfdir=/etc perllibdir=/usr/share/perl5/vendor_perl \
+  CC="$CC" AR="$AR" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" CURL_LDFLAGS=-lcurl PERL_PATH=/usr/bin/perl SHELL_PATH=/bin/sh \
+  USE_LIBPCRE2=YesPlease NO_REGEX=YesPlease ICONV_OMITS_BOM=Yes NO_GETTEXT=YesPlease NO_TCLTK=YesPlease NO_PYTHON=YesPlease \
+  INSTALL_SYMLINKS=1 V=1 "$@"; }
+build(){ _make all; }
+package(){
+  _make DESTDIR=$pkgdir install
+  install -d $pkgdir/usr/share/man && cp -r $srcdir/man1 $srcdir/man5 $srcdir/man7 $pkgdir/usr/share/man/
+  install -Dm644 contrib/completion/git-completion.bash $pkgdir/usr/share/bash-completion/completions/git
+}

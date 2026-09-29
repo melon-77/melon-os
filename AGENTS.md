@@ -46,7 +46,8 @@ scripts/melon-build     build ONE recipe -> signed .apk(s) in repo/x86_64, reind
 scripts/build-all.sh    build a list of recipes in order, logs to logs/pkg-<name>.log
 scripts/check-order.sh  every makedepends is built before the recipe that needs it (build-everything.sh runs it first)
 scripts/mkiso.sh        live/installer ISO: rootfs.sqfs (pristine apk-installed system, copied to disk by the
-                        installers) + live.sqfs (small live-session layer) + a repo of extra packages
+                        installers) + live.sqfs (small live-session layer) + a small repo of extras (VM guest tools,
+                        a few base packages; never a second copy of what rootfs.sqfs already holds)
 scripts/qemu-test.py    headless boot + install + reboot test over the serial console
 recipes/<name>/MELONBUILD   one directory per recipe (see below)
 recipes/<name>/*.patch      applied automatically with patch -p1, in name order
@@ -237,6 +238,19 @@ Rebuilding the kernel takes about an hour on 2 cores.
     scripts, `/etc/profile.d` and the installer's helpers were writable by `nobody`, then run by root. `melon-build`
     gives root every file owned by an account from 1000 up; system accounts a recipe sets on purpose (below 1000)
     stay. The desktop-install test fails if anything under `/usr` or `/etc` belongs to `nobody`.
+46. **Rust recipes cross-compile with the build machine's Rust** (`scripts/host-rust.sh` puts upstream's release
+    binaries in `hosttools/rust`, with the standard library for `$RUST_TARGET`). melon-build points cargo at
+    `x86_64-unknown-linux-musl`, links with melon's gcc and passes `-C target-feature=-crt-static -C link-self-contained=no` in
+    `RUSTFLAGS` (never `CARGO_TARGET_<triple>_RUSTFLAGS`, which cargo merges with a project's own `.cargo/config.toml`, and
+    ripgrep's turns static linking back on): Rust's musl targets link statically by default, and melon's programs share its libc. Build scripts and proc-macros run on the build
+    machine; their C parts get the build machine's gcc from the triple-named variables (`CC_x86_64_unknown_linux_gnu`,
+    ...), never `HOST_CC`, which other build systems read too. `cargo_fetch` (in `prepare()`) downloads crates from
+    crates.io into `sources/cargo`, pinned by the checksums in the project's `Cargo.lock`; `cargo_build` then builds
+    offline with `--locked`, and `cargo_out` names the output directory. A build script that asks git for a commit
+    hash finds melon's checkout: set `GIT_CEILING_DIRECTORIES=$srcdir`. `-sys` crates build their own static copy of
+    a C library for musl targets unless told otherwise (`PCRE2_SYS_STATIC=0` in ripgrep): link melon's. **Every recipe
+    that puts Rust code into a package says `options=(rust)`**: the installers' "remove everything built with Rust"
+    option finds the packages by it (see Installers).
 
 47. **Flatpak must be built with X11 authorization (`-Dxauth=enabled`, libXau).** Without it, sandboxed X11 apps get
     the host's `DISPLAY` and a path to an Xauthority file that doesn't exist inside the sandbox. Xwayland refuses them
@@ -279,6 +293,7 @@ scripts/qemu-test.py desktop out/melon-desktop-*-x86_64.iso              # servi
 qemu-img create -f raw /tmp/desk.img 16G
 scripts/qemu-test.py desktop-install out/melon-desktop-*-x86_64.iso /tmp/desk.img   # install, SDDM greeter stays up,
                                                                           # log in through it, Plasma runs; LOOK at both screenshots
+# --offline (any mode): the VM keeps its network card but reaches nothing outside; the installers must still work
 ```
 
 **melon pinball** (`recipes/melon-pinball`; the game itself is the `game/` submodule, github.com/melon-77/melon-pinball:
@@ -377,7 +392,15 @@ the serial port, so tests don't need a screen. The test also records the sound c
   menu, checksums of everything Windows owns before and after).
 - Unattended install variables: `MELON_DISK MELON_HOSTNAME MELON_ROOTPW MELON_USER MELON_USERPW
   MELON_PROFILE MELON_YES=1 MELON_SERIAL=1 MELON_WIFI_SSID MELON_WIFI_PSK MELON_ALPINE=y
-  MELON_ENCRYPT=y MELON_LUKSPW MELON_MODE=alongside`. With `MELON_YES=1`, questions that have a default take it.
+  MELON_ENCRYPT=y MELON_LUKSPW MELON_MODE=alongside MELON_NORUST=y`. With `MELON_YES=1`, questions that have a default take it.
+- **"Remove everything built with Rust"** (the owner's decision): a checkbox at the end of the gauntlet (next to the
+  Alpine one) and a question in the console installer (`MELON_NORUST=y`). `melon-remove-rust ROOT` (melon-base) runs
+  `apk del -r` on every installed package from `/usr/share/melon/rust-packages` (mkiso.sh lists the recipes with
+  `options=(rust)`, which includes the `rust` and `cargo` packages), taking everything that depends on them along. **No safeguards, on purpose**: if the desktop
+  needs a Rust package, the desktop goes too. The reward comes first, so it stays whatever the removal takes:
+  `melon-rust-free ROOT USER` (melon-desktop, from `/usr/share/melon/.rewards/rust-free`) installs the
+  "farewell, Ferris" wallpaper (drawn by `art/ferris.py`, which also writes the lossless master `art/ferris.png`), sets
+  it on the user's first Plasma login and leaves the badge `/etc/melon/rust-free`.
 - **Profiles** live in `/usr/share/melon/profiles/` on the live system: `<name>` is the package list,
   `<name>.services` the runit services (`name` enables one, `-name` drops a base service). `mkiso.sh`
   writes them. The desktop profile swaps `mdevd`/`dhcp` for `udevd` and NetworkManager, and the
@@ -444,13 +467,25 @@ the tarballs are identical. A version Ubuntu doesn't have comes straight from it
 - **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (`melon-flathub`), Steam, Firefox, VLC and
   Prism Launcher offered from Flathub on first login, GameMode. Still to do: gamepad and controller udev rules,
   MangoHud (`docs/stage2-plan.md`).
-- **Init: runit stays melon's init (the owner's decision).** dinit may one day become an *optional variant* that the
-  owner builds himself, never a switch forced on the whole OS. Don't start a dinit port. Improve runit instead:
+- **Init: runit stays melon's init (the owner's decision).** dinit may one day become an *optional variant* the owner
+  builds, never a switch forced on the whole OS. Don't start a dinit port. Improve runit instead:
   readiness through `./check` scripts, and a clear start order in run scripts (a small shared helper is being
-  considered). A variant would need services for both inits, so keep run scripts simple and self-contained.
-- **Smaller desktop ISO (decided):** the ISO's offline package repo stops carrying a second copy of the desktop
-  (about 460 MB, copied onto every install too); installers must be tested with no network.
-- **Later:** a native Firefox build (needs Rust, clang and Node for melon; Firefox comes from Flathub until then).
+  considered). A variant would need services for both inits, so keep run scripts simple and self-contained; what a
+  dinit variant would have to cover is listed in `docs/dinit-variant.md`.
+- **Smaller desktop ISO: done.** The ISO's offline repo no longer carries a second copy of the desktop (it did: about
+  460 MB on the ISO and on every install, in `/var/lib/melon/repo`). The installers only need that repo for extras; a
+  desktop app someone removes comes back from the online repo. Tested with `qemu-test.py ... --offline`.
+- **Rust:** recipes can be written in Rust (rule 46; ripgrep is the first), and melon has its own `rust` and `cargo`
+  packages (`recipes/rust`, rustc 1.98.1 built from source, in the package repository only, not on the ISOs). Built
+  and tested on the build machine (29 September 2026): cargo builds and runs a program with a crates.io dependency on
+  melon. `codegen-tests = false` in its `bootstrap.toml`, because melon's llvm ships no FileCheck. It builds cross-native with build = host = target = musl
+  (`x86_64-unknown-linux-musl`), from upstream's musl-hosted stage 0 (manifest entries), against melon's LLVM 21
+  (shared) and its native gcc; `musl-dynamic-by-default.patch` sets musl's `crt_static_default` to false as Alpine
+  and Void do (upstream's own FIXME, compiler-team#422), so `cargo build` on melon links dynamically like melon's
+  own programs. Both packages say `options=(rust)`, so "remove everything built with Rust" takes them off too. Watch
+  for: RAM (rustc wants 2 to 3 GB per job), the size of `librustc_driver` against GitHub's 100 MB file limit
+  (rule in "Package repository"), and `LEAK:` lines.
+- **Later:** a native Firefox build (needs clang and Node for melon as well as Rust; Firefox comes from Flathub until then).
 
 ## Contributing: workflow and the owner's rules
 

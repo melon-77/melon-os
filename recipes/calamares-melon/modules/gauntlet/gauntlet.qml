@@ -237,6 +237,18 @@ Rectangle {
                 verticalAlignment: Text.AlignVCenter
             }
         }
+        CheckBox {
+            Layout.alignment: Qt.AlignHCenter
+            checked: config.noRust
+            onToggled: config.noRust = checked
+            text: "Remove everything built with Rust, and whatever depends on it (no safeguards; earns a wallpaper)"
+            font.pixelSize: 16
+            contentItem: Text {
+                text: parent.text; font: parent.font; color: "#e9f5e1"
+                leftPadding: parent.indicator.width + parent.spacing
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
     }
 
     // ---------------------------------------------------------------- the trial survived

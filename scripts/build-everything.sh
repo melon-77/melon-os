@@ -32,6 +32,10 @@ GAMES="cataclysm-dda"
 SIMPLE=$(python3 $M/scripts/gen-simple-recipes.py)
 # GNU gettext (msgfmt, xgettext, ...); it uses the system libxml2 (SIMPLE), so it comes after $SIMPLE
 GETTEXT="gettext"
+# written in Rust (options=(rust)), cross-compiled with the build machine's Rust from scripts/host-rust.sh
+RUST="ripgrep"
+# rustc and cargo that run on melon (recipes/rust): needs melon's llvm (DESKTOP_LIBS), gcc and binutils (DEVTOOLS)
+RUSTC="rust"
 DESKTOP_LIBS="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio libdaemon avahi cups qpdf poppler libcupsfilters libppd
   cups-filters modemmanager qrencode zxing-cpp opencv llvm mesa libepoxy xkbcomp xwayland vulkan-loader libvpx x264 libwebp libdmtx ffmpeg gamemode melon-fonts
   sdl3 sdl3-image sdl3-ttf melon-pinball
@@ -41,7 +45,7 @@ KDE=$(python3 $M/scripts/gen-kde-recipes.py | sed "s/\bqt6-qtbase\b/qt6-qtbase a
 INSTALLERS="kpmcore calamares calamares-melon melon-desktop"
 # a compiler and binutils that run on melon (the cross toolchain in tools/ only runs on the build machine)
 DEVTOOLS="mpc binutils gcc make pkgconf patch"
-ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $APPS $GAMES $SIMPLE $GETTEXT $DESKTOP_LIBS $KDE $INSTALLERS | awk '!seen[$0]++')
+ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $APPS $GAMES $SIMPLE $GETTEXT $RUST $DESKTOP_LIBS $RUSTC $KDE $INSTALLERS | awk '!seen[$0]++')
 # recipes nobody listed yet go at the end
 EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))
 ALL="$ALL $EXTRA"

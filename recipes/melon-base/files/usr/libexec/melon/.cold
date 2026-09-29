@@ -9,7 +9,8 @@
 # Unattended use (for testing): set MELON_DISK, MELON_HOSTNAME, MELON_ROOTPW, MELON_USER,
 # MELON_USERPW and MELON_YES=1 (and optionally MELON_PROFILE, MELON_WIFI_SSID/MELON_WIFI_PSK,
 # MELON_ALPINE=y to add Alpine's repo as the opt-in tagged repo "@alpine", MELON_ENCRYPT=y with
-# MELON_LUKSPW to encrypt / with LUKS2; /boot stays plain and a small initramfs asks for the passphrase).
+# MELON_LUKSPW to encrypt / with LUKS2; /boot stays plain and a small initramfs asks for the passphrase,
+# MELON_NORUST=y to install without anything built with Rust, and whatever depends on it; that earns a wallpaper).
 #
 # This is the quick installer. The desktop ISO's advertised installer is Calamares
 # (with the melon gauntlet); this one installs the same thing in a handful of prompts.
@@ -100,6 +101,7 @@ if ls -d /sys/class/net/*/wireless >/dev/null 2>&1; then
   [ -n "$MELON_WIFI_SSID" ] && askpw MELON_WIFI_PSK "Wi-Fi password"
 fi
 ask MELON_ALPINE "Also offer Alpine's packages as an opt-in @alpine repo (y/n)" n
+ask MELON_NORUST "Remove everything built with Rust, and whatever depends on it (y/n)" n
 ENCRYPT=n
 if command -v cryptsetup >/dev/null; then
   ask MELON_ENCRYPT "Encrypt the system with a passphrase (LUKS) (y/n)" n
@@ -295,6 +297,14 @@ if [ $ENCRYPT = y ]; then
   chroot $TARGET melon-mkinitramfs
 fi
 MELON_ROOT_DEV="$ROOTDEV" MELON_BOOT_DEV="$BOOTP" chroot $TARGET melon-update-grub
+
+case $MELON_NORUST in y|Y|yes)
+  # the reward first (melon-desktop's, from the new system or else this one), so it stays whatever the removal takes
+  if [ -x $TARGET/usr/libexec/melon/melon-rust-free ]; then chroot $TARGET /usr/libexec/melon/melon-rust-free / "$MELON_USER"
+  elif [ -x /usr/libexec/melon/melon-rust-free ]; then /usr/libexec/melon/melon-rust-free $TARGET "$MELON_USER"; fi
+  say "Removing everything built with Rust"
+  /usr/libexec/melon/melon-remove-rust $TARGET || true ;;
+esac
 
 say "Finishing"
 sync

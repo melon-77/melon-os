@@ -20,6 +20,8 @@ class GauntletConfig : public QObject
     Q_PROPERTY( bool alpine READ alpine WRITE setAlpine NOTIFY alpineChanged )
     Q_PROPERTY( bool noRust READ noRust WRITE setNoRust NOTIFY noRustChanged )
     Q_PROPERTY( bool trialPassed READ trialPassed WRITE setTrialPassed NOTIFY trialPassedChanged )
+    Q_PROPERTY( bool niri READ niri WRITE setNiri NOTIFY niriChanged )
+    Q_PROPERTY( int niriState READ niriState NOTIFY niriStateChanged )
 
 public:
     explicit GauntletConfig( QObject* parent = nullptr ) : QObject( parent ) {}
@@ -32,6 +34,11 @@ public:
     bool alpine() const { return m_alpine; }
     bool noRust() const { return m_noRust; }
     bool trialPassed() const { return m_trialPassed; }
+    bool niri() const { return m_niri; }
+    /// the niri desktop comes from the online repository: 0 checking, 1 available, 2 unreachable, 3 not on this ISO
+    int niriState() const { return m_niriState; }
+    void setNiri( bool n );
+    Q_INVOKABLE void checkNiri();
     void setTrialPassed( bool t );
     void setAlpine( bool a );
     void setNoRust( bool r );
@@ -52,6 +59,8 @@ signals:
     void alpineChanged();
     void noRustChanged();
     void trialPassedChanged();
+    void niriChanged();
+    void niriStateChanged();
 
 private:
     int m_progress = 0;
@@ -62,6 +71,8 @@ private:
     bool m_alpine = false;
     bool m_noRust = false;
     bool m_trialPassed = false;
+    bool m_niri = false;
+    int m_niriState = 0;
 };
 
 class PLUGINDLLEXPORT GauntletViewStep : public Calamares::QmlViewStep

@@ -48,6 +48,24 @@ mkdir -p "$ROOT/var/lib/melon"
 cp -a "$REPO" "$ROOT/var/lib/melon/repo"
 { echo "$(cat /usr/share/melon/repo-url)/$ARCH/Packages.adb"; echo "/var/lib/melon/repo/$ARCH/Packages.adb"; } > "$ROOT/etc/apk/repositories"
 
+# the desktop picked at the end of the gauntlet: Plasma (the system image as it is) or niri + Noctalia, which come from
+# melon's online repository. niri's packages go in first and Plasma's shell comes off only after that worked, so a
+# failed download still leaves a working Plasma install.
+profile=desktop
+if [ -e /run/melon/.desktop-niri ] && [ -f /usr/share/melon/profiles/niri ]; then
+  say "niri desktop, from melon's online repository"
+  apkn="apk --root $ROOT --arch $ARCH --repositories-file /dev/null --repository $(cat /usr/share/melon/repo-url)/$ARCH/Packages.adb --repository $REPO/$ARCH/Packages.adb --no-cache"
+  grep -v '^#' /usr/share/melon/profiles/niri | grep . > /tmp/melon-niri-want
+  add=$(grep -vxF -f "$ROOT/etc/apk/world" /tmp/melon-niri-want | xargs || true)
+  if [ -z "$add" ] || $apkn add $add; then
+    del=$(grep -vxF -f /tmp/melon-niri-want "$ROOT/etc/apk/world" | xargs || true)
+    [ -n "$del" ] && $apkn del $del >/dev/null
+    profile=niri
+  else
+    say "niri could not be installed (network?): installing Plasma instead"
+  fi
+fi
+
 luksdev=
 case $rootdev in
   /dev/mapper/*|/dev/dm-*) luksdev=$(cryptsetup status "$rootdev" | awk '$1=="device:"{print $2}') ;;
@@ -69,7 +87,7 @@ fi
 
 say "services"
 svcs="getty-tty1 getty-tty2 getty-tty3 mdevd syslogd klogd crond ntpd dhcp"
-prof=/usr/share/melon/profiles/desktop.services
+prof=/usr/share/melon/profiles/$profile.services
 [ -f $prof ] || prof=/usr/share/melon/profiles/base.services
 if [ -f $prof ]; then
   for s in $(grep -v '^#' $prof); do

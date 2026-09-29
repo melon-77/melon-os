@@ -1,5 +1,6 @@
 #include <QDir>
 #include <QFile>
+#include <QProcess>
 #include <QTimer>
 #include "GauntletViewStep.h"
 
@@ -77,6 +78,71 @@ GauntletConfig::setNoRust( bool r )
 }
 
 void
+GauntletConfig::setNiri( bool n )
+{
+    if ( n == m_niri )
+    {
+        return;
+    }
+    m_niri = n;
+    // cal-finish installs the niri profile (niri + Noctalia from the online repository) instead of Plasma
+    QDir().mkpath( QStringLiteral( "/run/melon" ) );
+    QFile f( QStringLiteral( "/run/melon/.desktop-niri" ) );
+    if ( n )
+    {
+        f.open( QIODevice::WriteOnly );
+    }
+    else
+    {
+        f.remove();
+    }
+    emit niriChanged();
+}
+
+void
+GauntletConfig::checkNiri()
+{
+    auto setState = [this]( int s )
+    {
+        m_niriState = s;
+        if ( s != 1 )
+        {
+            setNiri( false );
+        }
+        emit niriStateChanged();
+    };
+    if ( !QFile::exists( QStringLiteral( "/usr/share/melon/profiles/niri" ) ) )
+    {
+        setState( 3 );
+        return;
+    }
+    setState( 0 );
+    // melon-profile-online (melon-base): the online repository answers and has every package of the niri profile
+    auto* p = new QProcess( this );
+    connect( p,
+             qOverload< int, QProcess::ExitStatus >( &QProcess::finished ),
+             this,
+             [p, setState]( int code, QProcess::ExitStatus status )
+             {
+                 setState( status == QProcess::NormalExit && code == 0 ? 1 : 2 );
+                 p->deleteLater();
+             } );
+    // a helper that can't start never sends finished()
+    connect( p,
+             &QProcess::errorOccurred,
+             this,
+             [p, setState]( QProcess::ProcessError e )
+             {
+                 if ( e == QProcess::FailedToStart )
+                 {
+                     setState( 2 );
+                     p->deleteLater();
+                 }
+             } );
+    p->start( QStringLiteral( "/usr/libexec/melon/melon-profile-online" ), { QStringLiteral( "niri" ) } );
+}
+
+void
 GauntletConfig::recordMistake()
 {
     ++m_mistakes;
@@ -90,6 +156,7 @@ GauntletViewStep::GauntletViewStep( QObject* parent )
     connect( m_config, &GauntletConfig::passedChanged, this, &GauntletViewStep::nextStatusChanged );
     // a choice from an earlier Calamares run in this live session must not outlive its unticked checkbox
     QFile::remove( QStringLiteral( "/run/melon/.remove-rust" ) );
+    QFile::remove( QStringLiteral( "/run/melon/.desktop-niri" ) );
     // a hidden command can let the owner through without answering (to look at the rest of the installer):
     // it leaves this file behind, and Next unlocks as soon as it appears. No rewards then (see cal-finish).
     auto* skipCheck = new QTimer( this );

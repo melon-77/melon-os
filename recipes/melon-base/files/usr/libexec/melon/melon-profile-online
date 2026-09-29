@@ -1,0 +1,10 @@
+#!/bin/sh
+# melon-profile-online PROFILE: exit 0 when melon's online package repository answers and has every package of the
+# profile (/usr/share/melon/profiles/PROFILE). Both installers offer a profile marked PROFILE.online (niri, whose
+# packages aren't on the ISO) only then.
+p=/usr/share/melon/profiles/$1
+[ -f "$p" ] || exit 2
+repo="$(cat /usr/share/melon/repo-url)/$(apk --print-arch)/Packages.adb"
+want=$(grep -v '^#' "$p" | sort -u | xargs)
+found=$(timeout 60 apk --repositories-file /dev/null --repository "$repo" --no-cache search -x $want 2>/dev/null | wc -l)
+[ "$found" -ge $(echo $want | wc -w) ]

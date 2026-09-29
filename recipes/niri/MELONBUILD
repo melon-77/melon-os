@@ -21,7 +21,10 @@ build(){ NIRI_BUILD_COMMIT=v$pkgver GIT_CEILING_DIRECTORIES=$srcdir cargo_build 
 package(){
   local niri=$(cargo_out)/niri
   install -Dm755 $niri $pkgdir/usr/bin/niri
-  install -Dm644 resources/default-config.kdl $pkgdir/usr/share/niri/default-config.kdl
+  # niri's defaults, included by melon-niri's /etc/niri/config.kdl; without the waybar it starts (melon uses Noctalia)
+  install -d $pkgdir/usr/share/niri
+  sed '/^spawn-at-startup "waybar"$/d' resources/default-config.kdl > $pkgdir/usr/share/niri/default-config.kdl
+  grep -q "^spawn-at-startup \"waybar\"" $pkgdir/usr/share/niri/default-config.kdl && { echo "niri: default-config.kdl still starts waybar" >&2; return 1; }
   install -Dm644 LICENSE $pkgdir/usr/share/licenses/niri/LICENSE
   # melon's binaries run on the build machine (rule 18), so niri writes its own completion
   mkdir -p $pkgdir/usr/share/bash-completion/completions

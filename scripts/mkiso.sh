@@ -57,6 +57,14 @@ if [ -n "$DESKTOP_PKGS" ]; then
   # services for the desktop profile: udev replaces mdev, NetworkManager replaces the dhcp/wpa services
   printf '%s\n' -mdevd -dhcp udevd dbus elogind polkitd NetworkManager bluetoothd power-profiles-daemon zram sddm \
     avahi-daemon cupsd > $ROOT/usr/share/melon/profiles/desktop.services
+  # the niri profile (scripts/niri-packages.txt): the desktop without Plasma's shell, plus niri and Noctalia. Those are
+  # only in the online repository, so <profile>.online tells the installers to offer it only with a network.
+  NIRI_LIST=$(grep -v '^#' $M/scripts/niri-packages.txt | xargs)
+  NIRI_DROP=$(printf '%s\n' $NIRI_LIST | sed -n 's/^-//p'); NIRI_ADD=$(printf '%s\n' $NIRI_LIST | grep -v '^-')
+  grep -vxF -f <(printf '%s\n' $NIRI_DROP) $ROOT/usr/share/melon/profiles/desktop > $ROOT/usr/share/melon/profiles/niri
+  printf '%s\n' $NIRI_ADD >> $ROOT/usr/share/melon/profiles/niri
+  cp $ROOT/usr/share/melon/profiles/desktop.services $ROOT/usr/share/melon/profiles/niri.services
+  echo "niri and Noctalia come from melon's online package repository" > $ROOT/usr/share/melon/profiles/niri.online
 fi
 cp $ROOT/boot/vmlinuz-melon $ISO/boot/vmlinuz
 

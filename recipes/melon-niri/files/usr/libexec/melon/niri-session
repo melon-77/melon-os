@@ -1,0 +1,17 @@
+#!/bin/sh
+# niri-session: melon's niri session, started by SDDM (/usr/share/wayland-sessions/niri.desktop).
+# Upstream's niri-session needs a systemd or dinit user session. On runit, niri gets its own D-Bus session bus and
+# PipeWire runs beside it. They start here and not in niri's config, so they keep working when someone uses their
+# own ~/.config/niri/config.kdl (dotfiles).
+export XDG_CURRENT_DESKTOP=niri XDG_SESSION_DESKTOP=niri XDG_SESSION_TYPE=wayland
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+  exec dbus-run-session -- "$0" "$@"
+fi
+pids=
+for p in pipewire wireplumber pipewire-pulse; do
+  command -v $p >/dev/null && { $p >/dev/null 2>&1 & pids="$pids $!"; }
+done
+# --session: niri hands WAYLAND_DISPLAY and friends to D-Bus activation (dbus-update-activation-environment)
+niri --session; rc=$?
+[ -n "$pids" ] && kill $pids 2>/dev/null
+exit $rc

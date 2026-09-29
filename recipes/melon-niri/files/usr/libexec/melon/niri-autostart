@@ -1,0 +1,22 @@
+#!/bin/sh
+# niri-autostart: start the XDG autostart entries meant for niri (niri itself doesn't read /etc/xdg/autostart).
+# ~/.config/autostart overrides a system entry of the same name. Honours Hidden, OnlyShowIn, NotShowIn and TryExec.
+# melon's niri config starts it; entries for KDE only (PipeWire: niri-session starts that) are skipped.
+desk=${XDG_CURRENT_DESKTOP:-niri}
+seen=
+for dir in "${XDG_CONFIG_HOME:-$HOME/.config}/autostart" /etc/xdg/autostart; do
+  for f in "$dir"/*.desktop; do
+    [ -f "$f" ] || continue
+    name=${f##*/}
+    case " $seen " in *" $name "*) continue ;; esac
+    seen="$seen $name"
+    get(){ sed -n "/^\[Desktop Entry\]/,/^\[/{s/^$1=//p}" "$f" | head -1; }
+    [ "$(get Hidden)" = true ] && continue
+    only=$(get OnlyShowIn); not=$(get NotShowIn)
+    [ -n "$only" ] && case ";$only;" in *";$desk;"*) ;; *) continue ;; esac
+    [ -n "$not" ] && case ";$not;" in *";$desk;"*) continue ;; esac
+    try=$(get TryExec); [ -n "$try" ] && ! command -v "$try" >/dev/null && continue
+    cmd=$(get Exec | sed 's/ %[fFuUdDnNickvm]//g')
+    [ -n "$cmd" ] && sh -c "exec $cmd" >/dev/null 2>&1 &
+  done
+done

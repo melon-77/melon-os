@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=niri
+Comment=Scrollable-tiling Wayland desktop with the Noctalia shell
+Exec=/usr/libexec/melon/niri-session
+Type=Application
+DesktopNames=niri

@@ -39,7 +39,7 @@ RUST="ripgrep"
 NIRI_LIBS="fribidi cairo pango libseat sdbus-c++ libsodium libsecret libqalculate libical md4c nlohmann-json tomlplusplus stb
   librsvg"
 # the niri desktop (issue #18): after DESKTOP_LIBS, since niri and Noctalia need Mesa and xwayland-satellite Xwayland
-NIRI="xwayland-satellite niri noctalia"
+NIRI="xwayland-satellite niri noctalia melon-niri"
 # rustc and cargo that run on melon (recipes/rust): needs melon's llvm (DESKTOP_LIBS), gcc and binutils (DEVTOOLS)
 RUSTC="rust"
 DESKTOP_LIBS="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio libdaemon avahi cups qpdf poppler libcupsfilters libppd

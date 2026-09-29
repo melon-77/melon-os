@@ -1,0 +1,11 @@
+pkgname=xorriso
+pkgver=1.5.8_p2   # upstream 1.5.8.pl02 (apk writes patch levels as _pN)
+pkgrel=0
+pkgdesc="GNU xorriso: makes and edits ISO 9660 images (grub-mkrescue builds melon's ISOs with it)"
+license=GPL-3.0-or-later
+url=https://www.gnu.org/software/xorriso/
+source=(xorriso-1.5.8.pl02.tar.gz)   # GNU's all-in-one release: libburn, libisofs and libisoburn built in
+builddir=$srcdir/xorriso-1.5.8
+makedepends=(zlib-dev bzip2-dev readline-dev)
+build(){ ./configure $conf_flags --disable-libacl --disable-xattr --enable-zlib --disable-launch-frontend-setuid; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/info/dir; }

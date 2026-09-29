@@ -1,0 +1,10 @@
+pkgname=itstool
+pkgver=2.0.7
+pkgrel=0
+pkgdesc="itstool: translates XML documents with ITS rules (AppStream's metainfo)"
+license=GPL-3.0-or-later
+url=https://itstool.org
+source=(itstool-2.0.7.tar.gz)   # the GitHub tag; patches as in Alpine (a segfault fix, Python 3.12)
+depends=(python3 python3-libxml2)
+build(){ autoreconf -fi; PYTHON=/usr/bin/python3 ./configure $conf_flags; make; }
+package(){ make DESTDIR=$pkgdir install; }

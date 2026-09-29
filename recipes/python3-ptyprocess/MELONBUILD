@@ -1,0 +1,10 @@
+pkgname=python3-ptyprocess
+pkgver=0.7.0
+pkgrel=0
+pkgdesc="ptyprocess: run a program in a pseudo-terminal from Python"
+license=ISC
+url=https://github.com/pexpect/ptyprocess
+source=(ptyprocess-0.7.0.tar.gz)
+builddir=$srcdir/ptyprocess-0.7.0
+depends=(python3)
+package(){ py_install ptyprocess ptyprocess; }

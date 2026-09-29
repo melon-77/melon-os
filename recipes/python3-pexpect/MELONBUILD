@@ -1,0 +1,10 @@
+pkgname=python3-pexpect
+pkgver=4.9.0
+pkgrel=0
+pkgdesc="Pexpect: drive interactive programs from Python (melon's QEMU tests use it)"
+license=ISC
+url=https://github.com/pexpect/pexpect
+source=(pexpect-4.9.0.tar.gz)
+builddir=$srcdir/pexpect-4.9.0
+depends=(python3 python3-ptyprocess)
+package(){ py_install pexpect pexpect; }

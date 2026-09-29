@@ -64,6 +64,10 @@ qmltyperegistrar = '$M/hosttools/qt6/libexec/qmltyperegistrar'
 bwrap = '/usr/bin/bwrap'
 # Rust (scripts/host-rust.sh): for melon's musl target, linked by melon's gcc and dynamically against its libc
 rust = ['$M/hosttools/rust/bin/rustc', '--target', '$RUST_TARGET', '-C', 'linker=$TARGET-gcc', '-C', 'target-feature=-crt-static']
+# projects that drive cargo themselves look these up as programs (librsvg: cargo, rustc and cargo-c's cargo-cbuild)
+cargo = '$M/hosttools/rust/bin/cargo'
+rustc = '$M/hosttools/rust/bin/rustc'
+cargo-cbuild = '$M/hosttools/rust/bin/cargo-cbuild'
 [properties]
 needs_exe_wrapper = false
 sys_root = '$SYSROOT'

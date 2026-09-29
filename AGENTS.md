@@ -15,7 +15,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | userland | BusyBox 1.37 | applet symlinks created by its post-install script |
 | shell | bash 5.3 (login shell), BusyBox ash is `/bin/sh` | |
 | privileges | doas (OpenDoas 6.8.2) with a `sudo` command on top | members of `wheel` |
-| init | runit 2.3 | stages in `/etc/runit/{1,2,3}`, services in `/etc/sv`, enabled = symlink in `/var/service`; **a switch to dinit is decided** (see Roadmap) |
+| init | runit 2.3 | stages in `/etc/runit/{1,2,3}`, services in `/etc/sv`, enabled = symlink in `/var/service`; stays melon's init (see Roadmap) |
 | devices | eudev 3.2 on the desktop profile (`udevd` service), BusyBox mdev (`mdevd` service) on the console profile | the desktop profile swaps `mdevd` for `udevd`; see rule 44 |
 | packages | apk-tools 3.0.8 | repo index `Packages.adb`, signed with `keys/melon-signing.rsa` |
 | kernel | Linux 7.0, `linux-melon` (generic) | config = `x86_64_defconfig` + `recipes/linux-melon/config-melon` |
@@ -444,11 +444,10 @@ the tarballs are identical. A version Ubuntu doesn't have comes straight from it
 - **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (`melon-flathub`), Steam, Firefox, VLC and
   Prism Launcher offered from Flathub on first login, GameMode. Still to do: gamepad and controller udev rules,
   MangoHud (`docs/stage2-plan.md`).
-- **Init: switch from runit to dinit (decided; the owner leads it).** Scope: the service directories under `/etc/sv`,
-  the runit stages, `melon-svc`, halt/poweroff/reboot, `melon-wifi`, `melonfetch`, the installers' service lists
-  (`.cold`, `cal-finish`, `mkiso.sh`), the QEMU tests and the docs, plus the runit questions in the gauntlet (the trial's
-  answers are hashed: regenerate them from the draft outside the repo). Chimera Linux (musl + dinit + elogind + Plasma)
-  is the model. Don't start it without the owner; keep new services in runit form until then.
+- **Init: runit stays melon's init (the owner's decision).** dinit may one day become an *optional variant* that the
+  owner builds himself, never a switch forced on the whole OS. Don't start a dinit port. Improve runit instead:
+  readiness through `./check` scripts, and a clear start order in run scripts (a small shared helper is being
+  considered). A variant would need services for both inits, so keep run scripts simple and self-contained.
 - **Smaller desktop ISO (decided):** the ISO's offline package repo stops carrying a second copy of the desktop
   (about 460 MB, copied onto every install too); installers must be tested with no network.
 - **Later:** a native Firefox build (needs Rust, clang and Node for melon; Firefox comes from Flathub until then).

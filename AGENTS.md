@@ -393,7 +393,7 @@ the serial port, so tests don't need a screen. The test also records the sound c
 - **"Remove everything built with Rust"** (the owner's decision): a checkbox at the end of the gauntlet (next to the
   Alpine one) and a question in the console installer (`MELON_NORUST=y`). `melon-remove-rust ROOT` (melon-base) runs
   `apk del -r` on every installed package from `/usr/share/melon/rust-packages` (mkiso.sh lists the recipes with
-  `options=(rust)`), taking everything that depends on them along. **No safeguards, on purpose**: if the desktop
+  `options=(rust)`, which includes the `rust` and `cargo` packages), taking everything that depends on them along. **No safeguards, on purpose**: if the desktop
   needs a Rust package, the desktop goes too. The reward comes first, so it stays whatever the removal takes:
   `melon-rust-free ROOT USER` (melon-desktop, from `/usr/share/melon/.rewards/rust-free`) installs the
   "farewell, Ferris" wallpaper (drawn by `art/ferris.py`, which also writes the lossless master `art/ferris.png`), sets
@@ -470,11 +470,16 @@ the tarballs are identical. A version Ubuntu doesn't have comes straight from it
   considered). A variant would need services for both inits, so keep run scripts simple and self-contained.
 - **Smaller desktop ISO (decided):** the ISO's offline package repo stops carrying a second copy of the desktop
   (about 460 MB, copied onto every install too); installers must be tested with no network.
-- **Rust:** recipes can be written in Rust (rule 46; ripgrep is the first). A `rust` package *on* melon (rustc and
-  cargo for users) can now use the native `gcc` and `binutils` (developer tools), since rustc links through the
-  system's C compiler. Notes for it: Rust 1.98 needs LLVM 21 or newer (melon's will do), build it with
-  build = host = target = musl on the build machine (rule 18) from upstream's musl-hosted rustc, and set musl's
-  `crt_static_default` to false as Alpine and Void do (upstream's own FIXME, compiler-team#422).
+- **Rust:** recipes can be written in Rust (rule 46; ripgrep is the first), and melon has its own `rust` and `cargo`
+  packages (`recipes/rust`, rustc 1.98.1 built from source, in the package repository only, not on the ISOs). **Not
+  built yet**: written against the 1.98.1 sources and bootstrap options, but nobody has run it, so expect the first
+  `scripts/melon-build rust` to need fixes. It builds cross-native with build = host = target = musl
+  (`x86_64-unknown-linux-musl`), from upstream's musl-hosted stage 0 (manifest entries), against melon's LLVM 21
+  (shared) and its native gcc; `musl-dynamic-by-default.patch` sets musl's `crt_static_default` to false as Alpine
+  and Void do (upstream's own FIXME, compiler-team#422), so `cargo build` on melon links dynamically like melon's
+  own programs. Both packages say `options=(rust)`, so "remove everything built with Rust" takes them off too. Watch
+  for: RAM (rustc wants 2 to 3 GB per job), the size of `librustc_driver` against GitHub's 100 MB file limit
+  (rule in "Package repository"), and `LEAK:` lines.
 - **Later:** a native Firefox build (needs clang and Node for melon as well as Rust; Firefox comes from Flathub until then).
 
 ## Contributing: workflow and the owner's rules

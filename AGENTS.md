@@ -471,8 +471,8 @@ the tarballs are identical. A version Ubuntu doesn't have comes straight from it
 - **Smaller desktop ISO (decided):** the ISO's offline package repo stops carrying a second copy of the desktop
   (about 460 MB, copied onto every install too); installers must be tested with no network.
 - **Rust:** recipes can be written in Rust (rule 46; ripgrep is the first). A `rust` package *on* melon (rustc and
-  cargo for users) needs a native gcc and binutils first, since rustc links through the system's C compiler: melon
-  has only `gcc-runtime` today. Notes for it: Rust 1.98 needs LLVM 21 or newer (melon's will do), build it with
+  cargo for users) can now use the native `gcc` and `binutils` (developer tools), since rustc links through the
+  system's C compiler. Notes for it: Rust 1.98 needs LLVM 21 or newer (melon's will do), build it with
   build = host = target = musl on the build machine (rule 18) from upstream's musl-hosted rustc, and set musl's
   `crt_static_default` to false as Alpine and Void do (upstream's own FIXME, compiler-team#422).
 - **Later:** a native Firefox build (needs clang and Node for melon as well as Rust; Firefox comes from Flathub until then).

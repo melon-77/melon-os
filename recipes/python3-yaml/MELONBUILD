@@ -1,0 +1,11 @@
+pkgname=python3-yaml
+pkgver=6.0.3
+pkgrel=0
+pkgdesc="PyYAML: YAML for Python (Mesa's build reads YAML with it)"
+license=MIT
+url=https://pyyaml.org
+source=(pyyaml-6.0.3.tar.gz)
+builddir=$srcdir/pyyaml-6.0.3
+depends=(python3)
+# the pure-Python parser; the optional libyaml binding (_yaml) is left out
+package(){ py_install PyYAML lib/yaml; }

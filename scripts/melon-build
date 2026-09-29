@@ -94,6 +94,14 @@ cmake_setup(){ cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TC" -DCMAKE_INSTALL
 meson_setup(){ local args=(); while IFS= read -r -d '' a; do args+=("$a"); done < <(python3 $M/scripts/meson-filter-opts.py "$@"; printf '\0')
   env -u PKG_CONFIG_LIBDIR -u PKG_CONFIG_SYSROOT_DIR -u PKG_CONFIG_PATH meson setup --cross-file "$MESON_CROSS" --prefix=/usr --libdir=lib --sbindir=bin --libexecdir=libexec --sysconfdir=/etc --localstatedir=/var --buildtype=release -Db_lto=false "${args[@]}"; }
 
+# pure-Python modules (no C parts): copied into python3's site-packages with a small .dist-info (importlib.metadata
+# finds them by it). py_install <distribution name> <package dirs or .py files, relative to the source tree>...
+py_install(){ local name=$1 py site di; shift; py=$(cd $SYSROOT/usr/lib && ls -d python3.* | sort -V | tail -1)
+  site=$pkgdir/usr/lib/$py/site-packages; install -d $site; cp -r "$@" $site/
+  find $site -name __pycache__ -prune -exec rm -rf {} +
+  di=$site/$(printf '%s' "$name" | tr 'A-Z.-' 'a-z__')-$pkgver.dist-info; install -d $di
+  printf 'Metadata-Version: 2.1\nName: %s\nVersion: %s\n' "$name" "$pkgver" > $di/METADATA; echo melon > $di/INSTALLER; }
+
 # Rust (scripts/host-rust.sh, AGENTS.md rule 46). Cargo builds for $RUST_TARGET with melon's gcc as the linker and links
 # dynamically against melon's musl: Rust's musl targets link statically by default (-crt-static turns that off).
 # Build scripts and proc-macros run on the build machine, so the C compiler variables named after the build machine's

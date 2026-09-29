@@ -76,7 +76,20 @@ URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA
     'nasm-3.01.tar.xz': 'https://www.nasm.us/pub/nasm/releasebuilds/3.01/nasm-3.01.tar.xz',
     'tcl8.6.17-src.tar.gz': 'https://prdownloads.sourceforge.net/tcl/tcl8.6.17-src.tar.gz',
     'rsync-3.5.1.tar.gz': 'https://download.samba.org/pub/rsync/src/rsync-3.5.1.tar.gz',
-    'lz4-1.10.0.tar.gz': 'https://github.com/lz4/lz4/releases/download/v1.10.0/lz4-1.10.0.tar.gz'}
+    'lz4-1.10.0.tar.gz': 'https://github.com/lz4/lz4/releases/download/v1.10.0/lz4-1.10.0.tar.gz',
+    'xorriso-1.5.8.pl02.tar.gz': 'https://ftp.gnu.org/gnu/xorriso/xorriso-1.5.8.pl02.tar.gz',
+    'mtools-4.0.49.tar.bz2': 'https://ftp.gnu.org/gnu/mtools/mtools-4.0.49.tar.bz2',
+    'dtc-1.8.1.tar.xz': 'https://www.kernel.org/pub/software/utils/dtc/dtc-1.8.1.tar.xz',
+    'dwarves-1.32.tar.xz': 'https://fedorapeople.org/~acme/dwarves/dwarves-1.32.tar.xz',
+    'scdoc-1.11.5.tar.gz': 'https://git.sr.ht/~sircmpwn/scdoc/archive/1.11.5.tar.gz',
+    'itstool-2.0.7.tar.gz': 'https://github.com/itstool/itstool/archive/2.0.7/itstool-2.0.7.tar.gz',
+    'mako-1.4.3.tar.gz': 'https://files.pythonhosted.org/packages/5a/09/e07c4b5579a79f4b16f8d4f29f6c54514ac787c4ad506b8c4f28a0e6b0bf/mako-1.4.3.tar.gz',
+    'markupsafe-3.0.3.tar.gz': 'https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz',
+    'pyyaml-6.0.3.tar.gz': 'https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz',
+    'packaging-26.3.tar.gz': 'https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz',
+    'pexpect-4.9.0.tar.gz': 'https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz',
+    'ptyprocess-0.7.0.tar.gz': 'https://files.pythonhosted.org/packages/20/e5/16ff212c1e452235a90aeb09066144d0c5a6a8c0834397e03f5224495c4e/ptyprocess-0.7.0.tar.gz',
+    'publicsuffix-20260924.dat': 'https://raw.githubusercontent.com/publicsuffix/list/a179a48c465e818cfd8d626691cb317985da87fb/public_suffix_list.dat'}
 
 rows, missing = [], []
 def add(path, method, arg):

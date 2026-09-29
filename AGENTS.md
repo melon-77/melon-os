@@ -399,6 +399,12 @@ the serial port, so tests don't need a screen. The test also records the sound c
   `theme.conf`), GRUB theme `usr/share/melon/grub/themes/melon` (the desktop ISO uses it too). The art generators are
   in `art/` (run from a checkout of the melon-art working directory with its fonts); `art/grubtheme.py` needs
   `grub-mkfont` (from Ubuntu's grub-common: `apt-get download grub-common` and `dpkg -x` it, no install needed).
+- **Default user settings live system-wide, never in home directories** (melon may ship dotfiles later). A package's
+  defaults go where the program looks when the user has none of their own: `/etc/xdg/...` (Plasma, Konsole: see
+  melon-desktop), `/etc/niri/config.kdl` for niri. Packages and install scripts don't write into `$HOME`; `/etc/skel`
+  is only for files with no system-wide location (`.bashrc`, `.profile`). Then dotfiles (a future melon dotfiles
+  package, or a user's own through Home Manager) override melon's defaults without file conflicts. The first-login
+  scripts that do write into home directories (`melon-survivor-look`, `melon-rust-free`) are where dotfiles could clash.
 - **Hidden owner commands** work like the console installer: `/etc/profile.d/zz-melon.sh` recognises them by the
   first 16 hex digits of their name's sha256 and nothing else. The same rules apply: never write their names in any
   file, comment, commit or test. `59c1a50f2e93bdc1` unlocks every gauntlet reward (`/usr/libexec/melon/.gold`,

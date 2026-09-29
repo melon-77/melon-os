@@ -1,0 +1,10 @@
+pkgname=python3-packaging
+pkgver=26.3
+pkgrel=0
+pkgdesc="packaging: Python version and requirement parsing (Mesa's build checks versions with it)"
+license="Apache-2.0 OR BSD-2-Clause"
+url=https://github.com/pypa/packaging
+source=(packaging-26.3.tar.gz)
+builddir=$srcdir/packaging-26.3
+depends=(python3)
+package(){ py_install packaging src/packaging; }

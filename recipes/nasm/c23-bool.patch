@@ -1,0 +1,19 @@
+--- a/include/compiler.h	2026-09-29 18:32:03.152776689 -0400
++++ b/include/compiler.h	2026-09-29 18:32:03.170437862 -0400
+@@ -188,11 +188,16 @@
+    begin included later, causing the "bool" macro to be defined. */
+ #  include <stdbool.h>
+ #  ifdef bool
++#   if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
++/* C23: bool is a keyword, but musl's <stdbool.h> still defines the macro */
++#    undef bool
++#   else
+ /* Force bool to be a typedef instead of a macro. What a "clever" hack
+    this is... */
+     typedef bool                /* The macro definition of bool */
+ #  undef bool
+         bool;                   /* No longer the macro definition */
++#   endif
+ #  endif
+ # elif defined(HAVE___BOOL)
+    typedef _Bool bool;

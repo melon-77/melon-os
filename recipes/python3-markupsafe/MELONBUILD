@@ -1,0 +1,11 @@
+pkgname=python3-markupsafe
+pkgver=3.0.3
+pkgrel=0
+pkgdesc="MarkupSafe: escapes text for HTML and XML (Mako needs it)"
+license=BSD-3-Clause
+url=https://palletsprojects.com/p/markupsafe/
+source=(markupsafe-3.0.3.tar.gz)
+builddir=$srcdir/markupsafe-3.0.3
+depends=(python3)
+# without its optional C speedups: the pure-Python code is what it falls back to
+package(){ py_install MarkupSafe src/markupsafe; rm -f $pkgdir/usr/lib/python3.*/site-packages/markupsafe/_speedups.[ch]; }

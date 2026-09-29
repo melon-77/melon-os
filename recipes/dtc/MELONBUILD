@@ -1,0 +1,10 @@
+pkgname=dtc
+pkgver=1.8.1
+pkgrel=0
+pkgdesc="Device Tree Compiler and libfdt"
+license="GPL-2.0-or-later AND BSD-2-Clause"
+url=https://git.kernel.org/pub/scm/utils/dtc/dtc.git
+source=(dtc-1.8.1.tar.xz)
+subpackages=(dtc-dev)
+build(){ meson_setup -Dpython=disabled -Dyaml=disabled -Dvalgrind=disabled -Dtests=false build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -f $pkgdir/usr/lib/libfdt.a; }

@@ -1,0 +1,10 @@
+pkgname=scdoc
+pkgver=1.11.5
+pkgrel=0
+pkgdesc="scdoc: makes man pages from a small markdown-like format (kmod's, and other projects' manuals)"
+license=MIT
+url=https://git.sr.ht/~sircmpwn/scdoc
+source=(scdoc-1.11.5.tar.gz)
+# its Makefile builds scdoc and then runs it to make its own man page: a melon binary, which runs here (rule 18)
+build(){ make -j$JOBS PREFIX=/usr CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"; }
+package(){ make PREFIX=/usr DESTDIR=$pkgdir PCDIR=/usr/lib/pkgconfig install; }

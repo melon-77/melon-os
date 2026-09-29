@@ -1,0 +1,10 @@
+pkgname=ninja
+pkgver=1.13.2
+pkgrel=0
+pkgdesc="Ninja: the small, fast build system meson and cmake generate files for"
+license=Apache-2.0
+url=https://ninja-build.org
+source=(ninja-1.13.2.tar.gz)
+build(){ cmake_setup -B build -DNINJA_BUILD_BINARY=ON; ninja -C build -j$JOBS; }
+package(){ install -Dm755 build/ninja $pkgdir/usr/bin/ninja
+  install -Dm644 misc/bash-completion $pkgdir/usr/share/bash-completion/completions/ninja; }

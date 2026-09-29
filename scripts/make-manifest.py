@@ -67,7 +67,16 @@ URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA
     'autoconf-archive-2024.10.16.tar.xz': 'https://ftp.gnu.org/gnu/autoconf-archive/autoconf-archive-2024.10.16.tar.xz',
     'flex-2.6.4.tar.gz': 'https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz',
     'perl-5.44.0.tar.xz': 'https://www.cpan.org/src/5.0/perl-5.44.0.tar.xz',
-    'file-5.48.tar.gz': 'https://astron.com/pub/file/file-5.48.tar.gz'}
+    'file-5.48.tar.gz': 'https://astron.com/pub/file/file-5.48.tar.gz',
+    'cmake-4.4.3.tar.gz': 'https://github.com/Kitware/CMake/releases/download/v4.4.3/cmake-4.4.3.tar.gz',
+    'meson-1.12.1.tar.gz': 'https://github.com/mesonbuild/meson/releases/download/1.12.1/meson-1.12.1.tar.gz',
+    'ninja-1.13.2.tar.gz': 'https://github.com/ninja-build/ninja/archive/refs/tags/v1.13.2.tar.gz',
+    'git-2.56.0.tar.xz': 'https://www.kernel.org/pub/software/scm/git/git-2.56.0.tar.xz',
+    'git-manpages-2.56.0.tar.xz': 'https://www.kernel.org/pub/software/scm/git/git-manpages-2.56.0.tar.xz',
+    'nasm-3.01.tar.xz': 'https://www.nasm.us/pub/nasm/releasebuilds/3.01/nasm-3.01.tar.xz',
+    'tcl8.6.17-src.tar.gz': 'https://prdownloads.sourceforge.net/tcl/tcl8.6.17-src.tar.gz',
+    'rsync-3.5.1.tar.gz': 'https://download.samba.org/pub/rsync/src/rsync-3.5.1.tar.gz',
+    'lz4-1.10.0.tar.gz': 'https://github.com/lz4/lz4/releases/download/v1.10.0/lz4-1.10.0.tar.gz'}
 
 rows, missing = [], []
 def add(path, method, arg):

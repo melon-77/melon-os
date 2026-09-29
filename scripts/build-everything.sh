@@ -47,7 +47,9 @@ INSTALLERS="kpmcore calamares calamares-melon melon-desktop"
 DEVTOOLS="mpc binutils gcc make pkgconf patch"
 # the build tools melon's own recipes need, so melon can build melon (self-hosting, step 1)
 BUILDTOOLS="perl m4 bison flex gawk gperf bc texinfo autoconf automake autoconf-archive file"
-ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $GETTEXT $RUST $DESKTOP_LIBS $RUSTC $KDE $INSTALLERS | awk '!seen[$0]++')
+# the ones that link curl or libarchive (SIMPLE) come after them
+BUILDTOOLS2="lz4 ninja cmake meson git nasm tcl rsync"
+ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $DESKTOP_LIBS $RUSTC $KDE $INSTALLERS | awk '!seen[$0]++')
 # recipes nobody listed yet go at the end
 EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))
 ALL="$ALL $EXTRA"

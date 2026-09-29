@@ -1,0 +1,18 @@
+pkgname=meson
+pkgver=1.12.1
+pkgrel=0
+pkgdesc="Meson: the build system most of melon's desktop is built with"
+license=Apache-2.0
+url=https://mesonbuild.com
+source=(meson-1.12.1.tar.gz)
+depends=(python3 ninja)
+# pure Python: the module goes into python3's site-packages, the command is the same small launcher pip writes
+package(){
+  local py=$(ls -d $SYSROOT/usr/lib/python3.*/ | head -1); py=${py#$SYSROOT}
+  install -d $pkgdir$py/site-packages && cp -r mesonbuild $pkgdir$py/site-packages/
+  find $pkgdir$py -name __pycache__ -prune -exec rm -rf {} +
+  printf '#!/usr/bin/python3\nimport sys\nfrom mesonbuild.mesonmain import main\nsys.exit(main())\n' > meson.launcher
+  install -Dm755 meson.launcher $pkgdir/usr/bin/meson
+  install -Dm644 man/meson.1 $pkgdir/usr/share/man/man1/meson.1
+  install -Dm644 data/shell-completions/bash/meson $pkgdir/usr/share/bash-completion/completions/meson
+}

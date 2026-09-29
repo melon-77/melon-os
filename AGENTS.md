@@ -26,7 +26,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | desktop plumbing | D-Bus, elogind, polkit, PipeWire + WirePlumber, NetworkManager, BlueZ, CUPS, UDisks2 | console profile keeps `dhcp` + wpa_supplicant |
 | graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe | |
 | developer tools | gcc 15.2 + g++, binutils 2.46, make 4.4.1, pkgconf, patch (`gcc`, `g++`, `binutils`, `make`, `pkgconf`, `patch`) | built cross-native with the cross toolchain's settings (PIE, SSP); in the package repository only, not on the ISOs; `melon-first-boot` offers them on first login (default no) |
-| build tools | perl 5.44, m4, bison, flex, gawk, gperf, GNU bc, texinfo, autoconf 2.73, automake 1.19, autoconf-archive, file (`BUILDTOOLS` in `build-everything.sh`) | what melon's recipes need to build on melon itself (self-hosting, see Roadmap); package repository only. gawk and GNU bc take over BusyBox's `awk`/`bc`/`dc` links; BusyBox's `/usr/bin` trigger puts them back when those packages go |
+| build tools | perl 5.44, m4, bison, flex, gawk, gperf, GNU bc, texinfo, autoconf 2.73, automake 1.19, autoconf-archive, file; cmake 4.4, meson 1.12, ninja 1.13, git 2.56, nasm 3.01, tcl 8.6, rsync 3.5, lz4 (`BUILDTOOLS`, `BUILDTOOLS2` in `build-everything.sh`) | what melon's recipes need to build on melon itself (self-hosting, see Roadmap); package repository only. gawk and GNU bc take over BusyBox's `awk`/`bc`/`dc` links; BusyBox's `/usr/bin` trigger puts them back when those packages go |
 | gaming | Flatpak 1.16 + Flathub, GameMode | Steam is glibc-only, so it can't run natively on musl: `melon-first-boot` offers Steam (and Firefox, VLC, Prism Launcher) from Flathub on first login |
 | game library | SDL3 3.4 + SDL3_image + SDL3_ttf (`sdl3`, `sdl3-image`, `sdl3-ttf`) | for melon's own games; SDL dlopen()s its Wayland/X11/audio backends |
 | apps and games | NetHack 5.0 (both ISOs), melon pinball (desktop ISO; its own repo, a submodule), Cataclysm: DDA and GNU gettext (package repository only) | what goes on an ISO follows the size rule in "Contributing" |
@@ -263,6 +263,8 @@ Rebuilding the kernel takes about an hour on 2 cores.
     `Config.pm` afterwards, so modules built on melon use `gcc` and `/usr`. The same trick compiles `file`'s magic
     database with the `file` just built. Perl's MakeMaker writes the directory of every library it finds into the
     module's RPATH through `LD_RUN_PATH`: `make LD_RUN_PATH=` keeps the sysroot out (a `LEAK:` line otherwise).
+    CMake's own `try_run` checks run the same way: `-DCMAKE_CROSSCOMPILING_EMULATOR=/usr/bin/env` (recipes/cmake).
+    A library built without a SONAME (perl's, Tcl's) gets one on its link line, or the `so:` dependency on it can't be met.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
@@ -504,8 +506,9 @@ the tarballs are identical. A version Ubuntu doesn't have comes straight from it
 - **Self-hosting (building melon on melon): in progress.** Step 1, the build tools as recipes: the first batch (perl,
   m4, bison, flex, gawk, gperf, bc, texinfo, autoconf, automake, autoconf-archive, file) is done and tested on melon
   (an autotools project with a bison grammar, a flex scanner, gperf and a Texinfo manual builds and runs; a Perl XS
-  module builds and passes its tests). Next: cmake, meson, ninja, git, nasm, tcl, rsync, lz4; then xorriso, mtools,
-  scdoc, itstool, dtc, pahole and the Python modules (mako, pexpect). Step 2: clang + libclc + SPIR-V tools (Mesa's
+  module builds and passes its tests). The second batch (cmake, meson, ninja, git, nasm, tcl, rsync, lz4) is done too:
+  cmake and meson projects build with ninja, git clones over https, nasm output links and runs. Next: xorriso,
+  mtools, scdoc, itstool, dtc, pahole and the Python modules (mako, pexpect). Step 2: clang + libclc + SPIR-V tools (Mesa's
   host tools), QEMU + OVMF for the tests, Go and gh. Step 3: rebuild everything on melon and run the test suite.
 - **Later:** a native Firefox build (needs clang and Node for melon as well as Rust; Firefox comes from Flathub until then).
 

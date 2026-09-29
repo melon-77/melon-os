@@ -239,8 +239,9 @@ Rebuilding the kernel takes about an hour on 2 cores.
     stay. The desktop-install test fails if anything under `/usr` or `/etc` belongs to `nobody`.
 46. **Rust recipes cross-compile with the build machine's Rust** (`scripts/host-rust.sh` puts upstream's release
     binaries in `hosttools/rust`, with the standard library for `$RUST_TARGET`). melon-build points cargo at
-    `x86_64-unknown-linux-musl`, links with melon's gcc and adds `-C target-feature=-crt-static`: Rust's musl targets
-    link statically by default, and melon's programs share its libc. Build scripts and proc-macros run on the build
+    `x86_64-unknown-linux-musl`, links with melon's gcc and passes `-C target-feature=-crt-static -C link-self-contained=no` in
+    `RUSTFLAGS` (never `CARGO_TARGET_<triple>_RUSTFLAGS`, which cargo merges with a project's own `.cargo/config.toml`, and
+    ripgrep's turns static linking back on): Rust's musl targets link statically by default, and melon's programs share its libc. Build scripts and proc-macros run on the build
     machine; their C parts get the build machine's gcc from the triple-named variables (`CC_x86_64_unknown_linux_gnu`,
     ...), never `HOST_CC`, which other build systems read too. `cargo_fetch` (in `prepare()`) downloads crates from
     crates.io into `sources/cargo`, pinned by the checksums in the project's `Cargo.lock`; `cargo_build` then builds

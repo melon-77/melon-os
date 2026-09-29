@@ -88,8 +88,6 @@ crt-static = false
 TOML
   # cargo's C dependencies: melon's OpenSSL, zlib and curl (its bundled libgit2 and libssh2 are built from source)
   export OPENSSL_DIR=$SYSROOT/usr OPENSSL_LIB_DIR=$SYSROOT/usr/lib OPENSSL_INCLUDE_DIR=$SYSROOT/usr/include
-  # bootstrap hands cargo its own flags; the ones melon-build sets for recipe crates would only be in the way
-  unset CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS
   python3 x.py build --stage 2 -j$JOBS
 }
 

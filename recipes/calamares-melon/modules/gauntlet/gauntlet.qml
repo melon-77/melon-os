@@ -249,6 +249,64 @@ Rectangle {
                 verticalAlignment: Text.AlignVCenter
             }
         }
+        // the desktop: Plasma from this ISO, or niri + Noctalia from melon's online repository (config.checkNiri)
+        onVisibleChanged: if (visible) config.checkNiri()
+        Label {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: 20
+            text: "Desktop"
+            color: "#f0a35e"; font.pixelSize: 18; font.bold: true
+        }
+        ButtonGroup { id: desktopChoice }
+        RadioButton {
+            Layout.alignment: Qt.AlignHCenter
+            ButtonGroup.group: desktopChoice
+            checked: !config.niri
+            onToggled: if (checked) config.niri = false
+            text: "KDE Plasma (on this ISO)"
+            font.pixelSize: 16
+            contentItem: Text {
+                text: parent.text; font: parent.font; color: "#e9f5e1"
+                leftPadding: parent.indicator.width + parent.spacing
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+        RadioButton {
+            Layout.alignment: Qt.AlignHCenter
+            ButtonGroup.group: desktopChoice
+            enabled: config.niriState === 1
+            checked: config.niri
+            onToggled: if (checked) config.niri = true
+            text: "niri with the Noctalia shell: scrollable tiling (downloaded while melon installs)"
+            font.pixelSize: 16
+            contentItem: Text {
+                text: parent.text; font: parent.font; color: parent.enabled ? "#e9f5e1" : "#7d8c78"
+                leftPadding: parent.indicator.width + parent.spacing
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+        RowLayout {
+            Layout.alignment: Qt.AlignHCenter
+            visible: config.niriState !== 1
+            Label {
+                text: config.niriState === 0 ? "Checking melon's online repository for niri..."
+                    : config.niriState === 2 ? "niri needs a network connection: it comes from melon's online repository."
+                    : "This ISO doesn't offer niri."
+                color: "#b9c7b3"; font.pixelSize: 14
+            }
+            Button {
+                visible: config.niriState === 2
+                text: "Check again"
+                onClicked: config.checkNiri()
+            }
+        }
+        Label {
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+            visible: config.niri && config.noRust
+            text: "niri and Noctalia are built with Rust: removing everything built with Rust leaves no desktop at all."
+            color: "#f0a35e"; font.pixelSize: 15
+        }
     }
 
     // ---------------------------------------------------------------- the trial survived

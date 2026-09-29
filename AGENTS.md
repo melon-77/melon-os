@@ -15,7 +15,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | userland | BusyBox 1.37 | applet symlinks created by its post-install script |
 | shell | bash 5.3 (login shell), BusyBox ash is `/bin/sh` | |
 | privileges | doas (OpenDoas 6.8.2) with a `sudo` command on top | members of `wheel` |
-| init | runit 2.3 | stages in `/etc/runit/{1,2,3}`, services in `/etc/sv`, enabled = symlink in `/var/service` |
+| init | runit 2.3 | stages in `/etc/runit/{1,2,3}`, services in `/etc/sv`, enabled = symlink in `/var/service`; **a switch to dinit is decided** (see Roadmap) |
 | devices | eudev 3.2 on the desktop profile (`udevd` service), BusyBox mdev (`mdevd` service) on the console profile | the desktop profile swaps `mdevd` for `udevd`; see rule 44 |
 | packages | apk-tools 3.0.8 | repo index `Packages.adb`, signed with `keys/melon-signing.rsa` |
 | kernel | Linux 7.0, `linux-melon` (generic) | config = `x86_64_defconfig` + `recipes/linux-melon/config-melon` |
@@ -28,6 +28,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | developer tools | gcc 15.2 + g++, binutils 2.46, make 4.4.1, pkgconf, patch (`gcc`, `g++`, `binutils`, `make`, `pkgconf`, `patch`) | built cross-native with the cross toolchain's settings (PIE, SSP); in the package repository only, not on the ISOs; `melon-first-boot` offers them on first login (default no) |
 | gaming | Flatpak 1.16 + Flathub, GameMode | Steam is glibc-only, so it can't run natively on musl: `melon-first-boot` offers Steam (and Firefox, VLC, Prism Launcher) from Flathub on first login |
 | game library | SDL3 3.4 + SDL3_image + SDL3_ttf (`sdl3`, `sdl3-image`, `sdl3-ttf`) | for melon's own games; SDL dlopen()s its Wayland/X11/audio backends |
+| apps and games | NetHack 5.0 (both ISOs), melon pinball (desktop ISO; its own repo, a submodule), Cataclysm: DDA and GNU gettext (package repository only) | what goes on an ISO follows the size rule in "Contributing" |
 
 Owner's config (`CONFIG_*` answers) lives in `docs/config.txt`. Don't change those choices without the owner's approval.
 
@@ -237,6 +238,11 @@ Rebuilding the kernel takes about an hour on 2 cores.
     gives root every file owned by an account from 1000 up; system accounts a recipe sets on purpose (below 1000)
     stay. The desktop-install test fails if anything under `/usr` or `/etc` belongs to `nobody`.
 
+47. **Flatpak must be built with X11 authorization (`-Dxauth=enabled`, libXau).** Without it, sandboxed X11 apps get
+    the host's `DISPLAY` and a path to an Xauthority file that doesn't exist inside the sandbox. Xwayland refuses them
+    ("Authorization required, but no authorization protocol specified") and they never open a window: Steam and VLC
+    "refused to launch". The desktop-install test checks that `/usr/bin/flatpak` links libXau.
+
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
 
@@ -438,7 +444,33 @@ the tarballs are identical. A version Ubuntu doesn't have comes straight from it
 - **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (`melon-flathub`), Steam, Firefox, VLC and
   Prism Launcher offered from Flathub on first login, GameMode. Still to do: gamepad and controller udev rules,
   MangoHud (`docs/stage2-plan.md`).
+- **Init: switch from runit to dinit (decided; the owner leads it).** Scope: the service directories under `/etc/sv`,
+  the runit stages, `melon-svc`, halt/poweroff/reboot, `melon-wifi`, `melonfetch`, the installers' service lists
+  (`.cold`, `cal-finish`, `mkiso.sh`), the QEMU tests and the docs, plus the runit questions in the gauntlet (the trial's
+  answers are hashed: regenerate them from the draft outside the repo). Chimera Linux (musl + dinit + elogind + Plasma)
+  is the model. Don't start it without the owner; keep new services in runit form until then.
+- **Smaller desktop ISO (decided):** the ISO's offline package repo stops carrying a second copy of the desktop
+  (about 460 MB, copied onto every install too); installers must be tested with no network.
 - **Later:** a native Firefox build (needs Rust, clang and Node for melon; Firefox comes from Flathub until then).
+
+## Contributing: workflow and the owner's rules
+
+- **Pull requests go to `testing`.** `main` is protected ("changes must be made through a pull request"): nobody
+  pushes to it directly, the owner and the build machine included. `testing` reaches `main` through its own pull
+  request (`testing` -> `main`, merge commit), after which `testing` is fast-forwarded to `main` again.
+- **Rebase, don't merge.** When `testing` moves, rebase your branch; no "Merge testing into ..." commits. PRs are
+  squash-merged. No test/webhook commits and no personal email addresses in history (use GitHub's noreply address).
+- **The build machine reviews PRs** about every 20 minutes. Its comments start with "Automated check from the melon
+  build machine:" or "Automated reply ...". It reads the diff, builds every changed recipe, installs and runs the
+  packages on a scratch melon root, runs the QEMU install tests when ISOs or installers change, and then requests
+  changes with the exact errors, asks the owner about product decisions, or merges into `testing`. It never pushes
+  to a contributor's branch. The owner answers on PRs or on the pinned issue #17 ("Owner <-> build machine").
+- **What goes on an ISO (the owner's size rule):** small packages, below about 45 MB, may go on the ISOs; anything
+  bigger is an online install from the package repository (gcc and friends, Cataclysm: DDA). **Extra desktops are
+  always online installs, whatever their size**: Plasma stays the only desktop on the ISO (issue #18, niri + Noctalia).
+- **Decided, don't re-propose:** Nix is available but off by default (not on the ISOs, no service, only root trusted);
+  foreign repos stay opt-in and tagged; the gauntlet's rewards are only for people who pass its final trial; melon's
+  own games may live in their own melon-77 repositories as submodules.
 
 ## Git conventions
 

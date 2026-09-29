@@ -1,0 +1,16 @@
+pkgname=libexif
+pkgver=0.6.25
+pkgrel=0
+pkgdesc="libexif: reads and writes the EXIF data of photos (PCManFM-Qt's thumbnails)"
+license=LGPL-2.1-or-later
+url=https://libexif.github.io
+source=(libexif-0.6.25.tar.gz)
+builddir=$srcdir/libexif-libexif-0_6_25-release
+subpackages=(libexif-dev)
+# a git snapshot without configure; AM_GNU_GETTEXT(external) gets musl's gettext through the cache answers (recipes/gettext)
+build(){
+  autoreconf -fi
+  ./configure $conf_flags gt_cv_func_gnugettext1_libc=yes gt_cv_func_gnugettext2_libc=yes --disable-static --disable-docs
+  make -j$JOBS
+}
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc; }

@@ -1,0 +1,12 @@
+pkgname=pcmanfm-qt
+pkgver=2.3.0
+pkgrel=0
+pkgdesc="PCManFM-Qt: a light Qt 6 file manager (the niri desktop's file manager)"
+license=GPL-2.0-or-later
+url=https://github.com/lxqt/pcmanfm-qt
+source=(pcmanfm-qt-2.3.0.tar.xz)
+makedepends=(qt6-qtbase-dev qt6-qttools-dev libfm-qt-dev lxqt-build-tools layer-shell-qt-dev)
+# Qt's Wayland platform plugin is loaded by name (rule 33)
+depends=(qt6-qtwayland)
+build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake -DBUILD_DOCUMENTATION=OFF -DUPDATE_TRANSLATIONS=OFF; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

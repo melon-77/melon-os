@@ -29,6 +29,7 @@ deb/efibootmgr_18.orig.tar.bz2	2b195f912aa353f0d11f21f207684c91460fbc37f9a4f2673
 deb/efivar_39.orig.tar.gz	c9edd15f2eeeea63232f3e669a48e992c7be9aff57ee22672ac31f5eca1609a6	apt	efivar=39-2
 deb/elfutils_0.194.orig.tar.bz2	09e2ff033d39baa8b388a2d7fbc5390bfde99ae3b7c67c7daaf7433fbcf0f01e	apt	elfutils=0.194-4
 deb/expat_2.7.4.orig.tar.gz	5b356795b889d3e5b379433ece069b8781bf0727f6959ad3bbc9da0c22164f59	apt	expat=2.7.4-1ubuntu0.2
+deb/fcft_3.3.2.orig.tar.xz	2fe61837ef964bd962d95336a881bff875ca44cfdeb91628e48c11e0ca10e097	apt	fcft=3.3.2-1
 deb/ffmpeg_8.0.1.orig.tar.xz	05ee0b03119b45c0bdb4df654b96802e909e0a752f72e4fe3794f487229e5a41	apt	ffmpeg=7:8.0.1-3ubuntu2
 deb/flac_1.5.0+ds.orig.tar.xz	51d6a5bf5a37b67f9af847daa07c07091f6bf1583d5abb7fbb064bc68428b0f1	apt	flac=1.5.0+ds-5
 deb/flatpak_1.16.6.orig.tar.xz	1e63e7f3fe44b602f34d92a6fe46fd8a3bc6be9460c03c2681e57976c658eec3	apt	flatpak=1.16.6-1
@@ -36,6 +37,7 @@ deb/flite_2.2.orig.tar.gz	ab1555fe5adc3f99f1d4a1a0eb1596d329fd6d74f1464a0097c81f
 deb/fontconfig_2.17.1.orig.tar.gz	f07504cef87f171ee1748352e2df9b9f125352f620fa0d03a9284306ea2c40a4	apt	fontconfig=2.17.1-3ubuntu1
 deb/fonts-hack_3.003.orig.tar.gz	3c6f1a20e86744077e83c9bacf879a5b13f659f1c07e9c5c57d6efc3cbe66c07	apt	fonts-hack=3.003-4
 deb/fonts-noto-color-emoji_2.051.orig.tar.xz	ca084e447d6154ad807a3765c51cfb02a8e9ad870505fe9a5cb396116f2d39ed	apt	fonts-noto-color-emoji=2.051-1build1
+deb/foot_1.25.0.orig.tar.xz	621f577d777ba967ca6c7faaa74d521c12991629d94ba1036136102cc4a96a3d	apt	foot=1.25.0-1
 deb/freetype_2.14.2+dfsg.orig-ft2demos.tar.xz	ae9ed4b095e73a3fbdb90363c138ea62ac4b0f55aa4bb345b9b2458783f9284f	apt	freetype=2.14.2+dfsg-1ubuntu0.1
 deb/freetype_2.14.2+dfsg.orig-ft2docs.tar.xz	0514edfd6a7b480f753aa48789d7112038a218b0b06afdca320c4bcbc2f66e6b	apt	freetype=2.14.2+dfsg-1ubuntu0.1
 deb/freetype_2.14.2+dfsg.orig.tar.xz	9a2bdc2c992fa82a309eccf5e8bcbf2a380a98ba22f9f2ec7e56767739a19a0a	apt	freetype=2.14.2+dfsg-1ubuntu0.1
@@ -161,7 +163,10 @@ deb/libei_1.5.0.orig-munit.tar.bz2	2407d9d6b6bb99c4c5c7dc0ba25b760faff952c3374b6
 deb/libei_1.5.0.orig.tar.bz2	da1fba92daccd0667bc46c3ee952d4ae8cfc6bdb4c0bb4d34df26528fb240618	apt	libei=1.5.0-3
 deb/libepoxy_1.5.10.orig.tar.gz	a7ced37f4102b745ac86d6a70a9da399cc139ff168ba6b8002b4d8d43c900c15	apt	libepoxy=1.5.10-2build1
 deb/libevdev_1.13.6+dfsg.orig.tar.xz	6643222f13cfbead0e30b8b74600f6d335f6ebb1ad8cbaf85783e36886689071	apt	libevdev=1.13.6+dfsg-1
+deb/libexif_0.6.25.orig.tar.gz	ee0795432c20d2fdb2a8a579dd6fc0e19d402e36f14f42c03ab60d2345950f09	apt	libexif=0.6.25-2ubuntu0.1
 deb/libffi_3.5.2.orig.tar.gz	dd19253d3007f366319a51d248a40c9e5fcace4498cbea990b566291844e4e30	apt	libffi=3.5.2-4
+deb/libfm-qt_2.3.1.orig.tar.xz	c582abdeb3e86ad7e3cedc60a4b6c697557b6f6a834e9d58c3743e843e519d25	apt	libfm-qt=2.3.1-0ubuntu1
+deb/libfm_1.4.1.orig.tar.gz	efcd1ddcf967606053bd8b65feeb04c2921238ee5353cda2e67d13e7dc82f0ee	apt	libfm=1.4.1-1
 deb/libfontenc_1.1.8.orig.tar.gz	b55039f70959a1b2f02f4ec8db071e5170528d2c9180b30575dccf7510d7fb9f	apt	libfontenc=1:1.1.8-1build2
 deb/libfreeaptx_0.2.2.orig.tar.gz	272860781cd055583ddfc520c66a765e676c74c5018c98f8293ea86011aeaad6	apt	libfreeaptx=0.2.2-1build1
 deb/libfyaml_0.9.4.orig.tar.gz	e76b79f0e98dc9a143c57bc4b7dfce27e0155deee4c373a86059d0599cbcc29e	apt	libfyaml=0.9.4-1
@@ -240,8 +245,11 @@ deb/llvm-toolchain-21_21.1.8.orig.tar.xz	d983d6b6ffce1d413a1910a9fd00f794bb99a5a
 deb/lm-sensors_3.6.2.orig.tar.gz	c6a0587e565778a40d88891928bf8943f27d353f382d5b745a997d635978a8f0	apt	lm-sensors=1:3.6.2-2build1
 deb/lua5.4_5.4.8.orig.tar.gz	4f18ddae154e793e46eeab727c59ef1c0c0c2b744e7b94219710d76f530629ae	apt	lua5.4=5.4.8-1build1
 deb/lvm2_2.03.31.orig.tar.xz	5541d15f739bc62263b551b1d8091ea8fc889a31ed20cdc58ff9f7192d8ecd4a	apt	lvm2=2.03.31-2ubuntu3
+deb/lxqt-build-tools_2.3.0.orig.tar.xz	f979142ceee22993da6f5d43a7eea9b0d8ef1ff9812ea9210f514e9a52407f42	apt	lxqt-build-tools=2.3.0-0ubuntu1
+deb/lxqt-menu-data_2.3.0.orig.tar.xz	703a44ba8a48927c073f2df200e330deb68b12f1589e06615603065f3d5b6e04	apt	lxqt-menu-data=2.3.0-0ubuntu1
 deb/mangohud_0.8.2~rc2.orig.tar.xz	6f4e5e1effb8d410d15e6da5adbdc5fb74c5c1a98b147e3eb9eba17290c0cbed	apt	mangohud=0.8.2~rc2-1
 deb/md4c_0.5.2.orig.tar.gz	55d0111d48fb11883aaee91465e642b8b640775a4d6993c2d0e7a8092758ef21	apt	md4c=0.5.2-2build1
+deb/menu-cache_1.1.1.orig.tar.gz	e8af90467df271c3c8700c840ca470ca2915699c6f213c502a87d74608748f08	apt	menu-cache=1.1.1-1build1
 deb/mesa_26.0.8.orig.tar.xz	caf1c0061a68e88dfa74967a7e780c0e85d65b6c4e334cd69095a5dc54ad78bc	apt	mesa=26.0.8-1ubuntu0.3
 deb/milou_6.6.4.orig.tar.xz	23305383141927777be94e9542a0cf839cf8949286ff071e08346aa8e15a6778	apt	milou=4:6.6.4-0ubuntu1
 deb/modemmanager_1.25.95.orig.tar.xz	4d93ffd677b4c9f7f773197a77bfe2cc40f3a6fea94409f91ffd51dd7c20c64d	apt	modemmanager=1.25.95-1ubuntu1
@@ -266,6 +274,7 @@ deb/ostree_2025.7.orig.tar.xz	af8d080b9585e7fd1faba8f022967e1c268ae62e20ecf32ee7
 deb/pam_1.7.0.orig.tar.xz	57dcd7a6b966ecd5bbd95e1d11173734691e16b68692fa59661cdae9b13b1697	apt	pam=1.7.0-5ubuntu3.2
 deb/pango1.0_1.57.0.orig.tar.xz	890640c841dae77d3ae3d8fe8953784b930fa241b17423e6120c7bfdf8b891e7	apt	pango1.0=1.57.0-1
 deb/patch_2.8.orig.tar.xz	f87cee69eec2b4fcbf60a396b030ad6aa3415f192aa5f7ee84cad5e11f7f5ae3	apt	patch=2.8-2build1
+deb/pcmanfm-qt_2.3.0.orig.tar.xz	30ab4cc0f36aedd3f454cec2468d7b8a5820f12de1dd9e69d2e65d7299716d09	apt	pcmanfm-qt=2.3.0-0ubuntu2
 deb/pcre2_10.46.orig.tar.gz	8d28d7f2c3b970c3a4bf3776bcbb5adfc923183ce74bc8df1ebaad8c1985bd07	apt	pcre2=10.46-1build1
 deb/pipewire_1.6.2.orig.tar.gz	13eaaf67558ddccf3d61ab7826f202d53538de422b015dd841ec92e1b7f5c0d8	apt	pipewire=1.6.2-1ubuntu1.2
 deb/pixman_0.46.4.orig.tar.gz	d09c44ebc3bd5bee7021c79f922fe8fb2fb57f7320f55e97ff9914d2346a591c	apt	pixman=0.46.4-1
@@ -327,9 +336,11 @@ deb/sqlite3_3.46.1.orig-www.tar.xz	648df41a8e532882b1905df45919aae4bafaf74c455f6
 deb/sqlite3_3.46.1.orig.tar.xz	d0cdd2ece271b29e7ce18095745d892517ee26d0f270065b3a25c2e9eb11639c	apt	sqlite3=3.46.1-9ubuntu0.3
 deb/squashfs-tools_4.7.5.orig.tar.gz	547b7b7f4d2e44bf91b6fc554664850c69563701deab9fd9cd7e21f694c88ea6	apt	squashfs-tools=1:4.7.5-1
 deb/systemsettings_6.6.4.orig.tar.xz	18d2aab42f3f3ce17c5e636238c2d7a1908152f2203f521d6d8441537d3edf04	apt	systemsettings=4:6.6.4-0ubuntu1
+deb/tllist_1.1.0.orig.tar.gz	85d33ecfa67b47ddf9586fda37b74d6f09c5b630275efdda6ab9d044e5da0ac2	apt	tllist=1.1.0-1build1
 deb/tomlplusplus_3.4.0+ds.orig.tar.xz	0ae736e13a49cc8a0aa7799705cf18bd93f5f56624613e6aa554b65fe2d72768	apt	tomlplusplus=3.4.0+ds-0.2build2
 deb/udisks2_2.10.91.orig.tar.bz2	2247ef8860a2846339240387ac1da5a7ed3432410d607fd9254a7dbe00335b1b	apt	udisks2=2.10.91-1ubuntu2.1
 deb/upower_1.91.1.orig.tar.bz2	d568638d670a63a1886335b7b136f4888cb38a3b28f3f4bcdeaffcca0b0f6df8	apt	upower=1.91.1-1
+deb/utf8proc_2.10.0.orig.tar.gz	6f4f1b639daa6dca9f80bc5db1233e9cbaa31a67790887106160b33ef743f136	apt	utf8proc=2.10.0-2
 deb/util-linux_2.41.3.orig.tar.xz	3330d873f0fceb5560b89a7dc14e4f3288bbd880e96903ed9b50ec2b5799e58b	apt	util-linux=2.41.3-3ubuntu2.2
 deb/vulkan-loader_1.4.341.0.orig.tar.xz	a022ed880ae99c91ed6aca34c2e6551a163617666034f0eeb9b9efdd54a272a6	apt	vulkan-loader=1.4.341.0-1
 deb/wayland-protocols_1.47.orig.tar.xz	5fd4349bcbc9bab9a46f8cf77d1f434296a7a052c87440a094f63fcf62a58e20	apt	wayland-protocols=1.47-1
@@ -414,11 +425,13 @@ elogind-255.24.tar.gz	7737e13f409bdf6041bd1a1f5580ab197790f6641e26faf93e09c19c68
 eudev-3.2.14.tar.gz	c340e6c51dfc5531ac0c0fa84a34b72162acf525f9023eb9cf4931b782c8f177	git	https://github.com/eudev-project/eudev v3.2.14
 expat-2.7.4.tar.gz	-	link	deb/expat_2.7.4.orig.tar.gz
 extra-cmake-modules-6.24.0.tar.xz	-	link	deb/kf6-extra-cmake-modules_6.24.0.orig.tar.xz
+fcft-3.3.2.tar.xz	-	link	deb/fcft_3.3.2.orig.tar.xz
 flatpak-1.16.6.tar.xz	-	link	deb/flatpak_1.16.6.orig.tar.xz
 fontconfig-2.17.1.tar.gz	-	link	deb/fontconfig_2.17.1.orig.tar.gz
 fonts-hack-ttf_3.003-3_all.deb	-	link	fonts/fonts-hack-ttf_3.003-3_all.deb
 fonts-noto-color-emoji_2.047-0ubuntu0.24.04.1_all.deb	-	link	fonts/fonts-noto-color-emoji_2.047-0ubuntu0.24.04.1_all.deb
 fonts-noto-core_20201225-2_all.deb	-	link	fonts/fonts-noto-core_20201225-2_all.deb
+foot-1.25.0.tar.xz	-	link	deb/foot_1.25.0.orig.tar.xz
 freetype-2.14.2.tar.xz	-	link	deb/freetype_2.14.2+dfsg.orig.tar.xz
 fribidi-1.0.16.tar.xz	-	link	deb/fribidi_1.0.16.orig.tar.xz
 fuse3-3.18.2.tar.gz	-	link	deb/fuse3_3.18.2.orig.tar.gz
@@ -538,7 +551,10 @@ libdmtx-0.7.8.tar.gz	-	link	deb/libdmtx_0.7.8.orig.tar.gz
 libdrm-2.4.131.tar.xz	-	link	deb/libdrm_2.4.131.orig.tar.xz
 libepoxy-1.5.10.tar.gz	-	link	deb/libepoxy_1.5.10.orig.tar.gz
 libevdev-1.13.6.tar.xz	-	link	deb/libevdev_1.13.6+dfsg.orig.tar.xz
+libexif-0.6.25.tar.gz	-	link	deb/libexif_0.6.25.orig.tar.gz
 libffi-3.5.2.tar.gz	-	link	deb/libffi_3.5.2.orig.tar.gz
+libfm-1.4.1.tar.gz	-	link	deb/libfm_1.4.1.orig.tar.gz
+libfm-qt-2.3.1.tar.xz	-	link	deb/libfm-qt_2.3.1.orig.tar.xz
 libfontenc-1.1.8.tar.gz	-	link	deb/libfontenc_1.1.8.orig.tar.gz
 libfreeaptx-0.2.2.tar.gz	-	link	deb/libfreeaptx_0.2.2.orig.tar.gz
 libfyaml-0.9.4.tar.gz	-	link	deb/libfyaml_0.9.4.orig.tar.gz
@@ -615,8 +631,11 @@ llvm-21.1.8.tar.xz	-	link	deb/llvm-toolchain-21_21.1.8.orig.tar.xz
 lm-sensors-3.6.2.tar.gz	-	link	deb/lm-sensors_3.6.2.orig.tar.gz
 lua-5.4.8.tar.gz	-	link	deb/lua5.4_5.4.8.orig.tar.gz
 lvm2-2.03.31.tar.xz	-	link	deb/lvm2_2.03.31.orig.tar.xz
+lxqt-build-tools-2.3.0.tar.xz	-	link	deb/lxqt-build-tools_2.3.0.orig.tar.xz
+lxqt-menu-data-2.3.0.tar.xz	-	link	deb/lxqt-menu-data_2.3.0.orig.tar.xz
 make-4.4.1.tar.gz	dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3	url	https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz
 md4c-0.5.2.tar.gz	-	link	deb/md4c_0.5.2.orig.tar.gz
+menu-cache-1.1.1.tar.gz	-	link	deb/menu-cache_1.1.1.orig.tar.gz
 mesa-26.0.8.tar.xz	-	link	deb/mesa_26.0.8.orig.tar.xz
 milou-6.6.4.tar.xz	-	link	deb/milou_6.6.4.orig.tar.xz
 modemmanager-1.25.95.tar.xz	-	link	deb/modemmanager_1.25.95.orig.tar.xz
@@ -645,6 +664,7 @@ opus-1.6.1.tar.xz	-	link	deb/opus_1.6.1.orig.tar.xz
 ostree-2025.7.tar.xz	-	link	deb/ostree_2025.7.orig.tar.xz
 pango-1.57.0.tar.xz	-	link	deb/pango1.0_1.57.0.orig.tar.xz
 patch-2.8.tar.xz	-	link	deb/patch_2.8.orig.tar.xz
+pcmanfm-qt-2.3.0.tar.xz	-	link	deb/pcmanfm-qt_2.3.0.orig.tar.xz
 pcre2-10.46.tar.gz	-	link	deb/pcre2_10.46.orig.tar.gz
 pipewire-1.6.2.tar.gz	-	link	deb/pipewire_1.6.2.orig.tar.gz
 pixman-0.46.4.tar.gz	-	link	deb/pixman_0.46.4.orig.tar.gz
@@ -711,10 +731,12 @@ sqlite-3.46.1.tar.xz	-	link	deb/sqlite3_3.46.1.orig.tar.xz
 squashfs-tools-4.7.5.tar.gz	-	link	deb/squashfs-tools_4.7.5.orig.tar.gz
 stb-0.0_git20250907.tar.xz	-	link	deb/libstb_0.0~git20250907.fede005+ds.orig.tar.xz
 systemsettings-6.6.4.tar.xz	-	link	deb/systemsettings_6.6.4.orig.tar.xz
+tllist-1.1.0.tar.gz	-	link	deb/tllist_1.1.0.orig.tar.gz
 tomlplusplus-3.4.0.tar.xz	-	link	deb/tomlplusplus_3.4.0+ds.orig.tar.xz
 udisks2-2.10.91.tar.bz2	-	link	deb/udisks2_2.10.91.orig.tar.bz2
 upower-1.91.1.tar.bz2	-	link	deb/upower_1.91.1.orig.tar.bz2
 userspace-rcu-0.15.6.tar.bz2	-	link	deb/liburcu_0.15.6.orig.tar.bz2
+utf8proc-2.10.0.tar.gz	-	link	deb/utf8proc_2.10.0.orig.tar.gz
 util-linux-2.41.3.tar.xz	-	link	deb/util-linux_2.41.3.orig.tar.xz
 vulkan-headers-1.4.341.tar.gz	2b11ae193ceb2c86b7a082534a8574c70bf95bcab18f302a288f2c4b7cbb3c8f	git	https://github.com/KhronosGroup/Vulkan-Headers v1.4.341
 vulkan-loader-1.4.341.0.tar.xz	-	link	deb/vulkan-loader_1.4.341.0.orig.tar.xz

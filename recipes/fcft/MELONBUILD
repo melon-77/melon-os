@@ -1,0 +1,15 @@
+pkgname=fcft
+pkgver=3.3.2
+pkgrel=0
+pkgdesc="fcft: font loading and glyph rasterization for Wayland clients (foot)"
+license=MIT
+url=https://codeberg.org/dnkl/fcft
+source=(fcft-3.3.2.tar.xz)
+makedepends=(tllist pixman-dev freetype-dev fontconfig-dev harfbuzz-dev utf8proc-dev)
+subpackages=(fcft-dev)
+# grapheme and run shaping (HarfBuzz + utf8proc): emoji sequences and scripts that need shaping render properly.
+# SVG glyphs (colour emoji fonts) with the bundled nanosvg.
+build(){ meson_setup -Dgrapheme-shaping=enabled -Drun-shaping=enabled -Dsvg-backend=nanosvg -Ddocs=disabled \
+  -Dtest-text-shaping=false -Dexamples=false build
+  ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

@@ -177,7 +177,7 @@ Rebuilding the kernel takes about an hour on 2 cores.
     (libdisplay-info reads `pnp.ids` at build time), `publicsuffix` (libpsl's built-in list), `autopoint`
     (cryptsetup's autoreconf), `libltdl-dev`, `libxml2-utils` (shared-mime-info runs `xmllint`), `appstream` +
     `libappstream-dev` + `itstool` (appstream's metainfo), `nasm` (FFmpeg's x86 assembly), `bubblewrap` (meson checks
-    for `bwrap` in flatpak and xdg-desktop-portal).
+    for `bwrap` in flatpak and xdg-desktop-portal), `intltool` and `gtk-doc-tools` (libfm's autoreconf, for libfm-extra).
 28. **Only encrypted installs have an initramfs.** `melon-mkinitramfs` builds it when
     `/etc/melon/encrypted-root` exists; `melon-update-grub` then writes `cryptroot=UUID=<luks>
     root=/dev/mapper/melonroot` and an `initrd` line. Everything else still boots straight from the kernel.

@@ -1,0 +1,15 @@
+pkgname=foot
+pkgver=1.25.0
+pkgrel=0
+pkgdesc="foot: a fast, lightweight Wayland terminal (the niri desktop's terminal)"
+license=MIT
+url=https://codeberg.org/dnkl/foot
+source=(foot-1.25.0.tar.xz)
+makedepends=(tllist fcft-dev pixman-dev wayland-dev wayland-protocols libxkbcommon-dev fontconfig-dev utf8proc-dev)
+# The "foot" terminfo entry comes from ncurses' own database (ncurses-terminfo), so foot doesn't install one.
+depends=(ncurses-terminfo)
+# No utmp helper (melon has no libutempter). Its default config is /etc/xdg/foot/foot.ini (system-wide).
+build(){ meson_setup -Dgrapheme-clustering=enabled -Dterminfo=disabled -Ddefault-terminfo=foot -Dutmp-backend=none \
+  -Ddocs=disabled -Dtests=false -Dthemes=true -Dime=true build
+  ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/lib/systemd $pkgdir/usr/share/doc; }

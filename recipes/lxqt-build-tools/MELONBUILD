@@ -1,0 +1,11 @@
+pkgname=lxqt-build-tools
+pkgver=2.3.0
+pkgrel=0
+pkgdesc="LXQt's CMake modules, needed to build libfm-qt and PCManFM-Qt"
+license=BSD-3-Clause
+url=https://github.com/lxqt/lxqt-build-tools
+source=(lxqt-build-tools-2.3.0.tar.xz)
+makedepends=(qt6-qtbase-dev)
+options=('!strip')
+build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

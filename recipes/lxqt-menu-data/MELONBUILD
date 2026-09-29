@@ -1,0 +1,11 @@
+pkgname=lxqt-menu-data
+pkgver=2.3.0
+pkgrel=0
+pkgdesc="LXQt's application menu definitions (the categories PCManFM-Qt's application list uses)"
+license=LGPL-2.1-or-later
+url=https://github.com/lxqt/lxqt-menu-data
+source=(lxqt-menu-data-2.3.0.tar.xz)
+makedepends=(lxqt-build-tools qt6-qtbase-dev qt6-qttools-dev)
+options=('!strip')
+build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

@@ -106,4 +106,12 @@ if [ -e /run/melon/.trial-passed ] && [ ! -e /run/melon/.gauntlet-skip ]; then
   /usr/libexec/melon/melon-rewards "$ROOT" "$NEWUSER"
   MELON_ROOT_DEV="$rootdev" MELON_BOOT_DEV="$bootdev" chroot "$ROOT" melon-update-grub
 fi
+# "remove everything built with Rust" (the checkbox at the end of the gauntlet): its reward first (melon-rust-free,
+# from melon-desktop), so the wallpaper stays whatever the removal takes; then the removal, with no safeguards
+if [ -e /run/melon/.remove-rust ]; then
+  say "rust-free reward"
+  /usr/libexec/melon/melon-rust-free "$ROOT" "$NEWUSER"
+  say "removing everything built with Rust"
+  /usr/libexec/melon/melon-remove-rust "$ROOT" || true
+fi
 say "done"

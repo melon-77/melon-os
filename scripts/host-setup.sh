@@ -5,7 +5,7 @@
 #  1. build dependencies from Ubuntu
 #  2. Ubuntu 26.04 ("resolute") source archive, where most melon sources come from
 #  3. let the build host run melon's musl binaries (build-time generators from earlier packages)
-#  4. host tools the cross builds need: apk, wayland-scanner 1.24, Mesa's mesa_clc, GRUB, Python, Qt
+#  4. host tools the cross builds need: apk, wayland-scanner 1.24, Mesa's mesa_clc, GRUB, Python, Rust, Qt
 set -euo pipefail
 M=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
 [ "$(id -u)" = 0 ] || { echo "run as root: sudo $0" >&2; exit 1; }
@@ -80,6 +80,9 @@ step "GRUB for building ISOs"
 
 step "Python 3.14 (cross-building melon's Python needs the same version on the host)"
 [ -x $M/hosttools/python/bin/python3.14 ] || $M/scripts/host-python.sh
+
+step "Rust 1.98.1 (recipes cross-compile Rust code with it; recipes/rust builds melon's own from source)"
+$M/scripts/host-rust.sh
 
 step "Qt 6 host tools (resumable; the long one)"
 $M/scripts/host-qt.sh

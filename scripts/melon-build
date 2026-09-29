@@ -59,6 +59,8 @@ qmlcachegen = '$M/hosttools/qt6/libexec/qmlcachegen'
 qmltyperegistrar = '$M/hosttools/qt6/libexec/qmltyperegistrar'
 # the sandbox helper projects compile in; melon's lives here (the build host needs one too for meson's check)
 bwrap = '/usr/bin/bwrap'
+# Rust (scripts/host-rust.sh): for melon's musl target, linked by melon's gcc and dynamically against its libc
+rust = ['$M/hosttools/rust/bin/rustc', '--target', '$RUST_TARGET', '-C', 'linker=$TARGET-gcc', '-C', 'target-feature=-crt-static']
 [properties]
 needs_exe_wrapper = false
 sys_root = '$SYSROOT'
@@ -91,6 +93,28 @@ cmake_setup(){ cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TC" -DCMAKE_INSTALL
 # the cross file supplies the target pkg-config settings; the environment is left to native (build-host) lookups
 meson_setup(){ local args=(); while IFS= read -r -d '' a; do args+=("$a"); done < <(python3 $M/scripts/meson-filter-opts.py "$@"; printf '\0')
   env -u PKG_CONFIG_LIBDIR -u PKG_CONFIG_SYSROOT_DIR -u PKG_CONFIG_PATH meson setup --cross-file "$MESON_CROSS" --prefix=/usr --libdir=lib --sbindir=bin --libexecdir=libexec --sysconfdir=/etc --localstatedir=/var --buildtype=release -Db_lto=false "${args[@]}"; }
+
+# Rust (scripts/host-rust.sh, AGENTS.md rule 46). Cargo builds for $RUST_TARGET with melon's gcc as the linker and links
+# dynamically against melon's musl: Rust's musl targets link statically by default (-crt-static turns that off).
+# Build scripts and proc-macros run on the build machine, so the C compiler variables named after the build machine's
+# triple keep their C parts on its own gcc (CC is the cross compiler). Crates come from crates.io into sources/cargo,
+# pinned by the checksums in the project's Cargo.lock: cargo_fetch in prepare(), cargo_build builds offline.
+[ -x $M/hosttools/rust/bin/cargo ] && export PATH=$M/hosttools/rust/bin:$PATH
+_rt=${RUST_TARGET//-/_}; _RT=${_rt^^}
+export CARGO_HOME=$SRC/cargo CARGO_TERM_COLOR=never CARGO_TERM_PROGRESS_WHEN=never PKG_CONFIG_ALLOW_CROSS=1
+export "CARGO_TARGET_${_RT}_LINKER=$TARGET-gcc"
+export "CC_$_rt=$TARGET-gcc" "CXX_$_rt=$TARGET-g++" "AR_$_rt=$TARGET-ar"
+export CC_x86_64_unknown_linux_gnu=gcc CXX_x86_64_unknown_linux_gnu=g++ AR_x86_64_unknown_linux_gnu=ar \
+  CFLAGS_x86_64_unknown_linux_gnu=-O2 CXXFLAGS_x86_64_unknown_linux_gnu=-O2
+need_rust(){ command -v cargo >/dev/null || { echo "no host Rust: run scripts/host-rust.sh" >&2; exit 1; }; }
+cargo_fetch(){ need_rust; cargo fetch --locked --target $RUST_TARGET "$@"; }
+# RUSTFLAGS, not CARGO_TARGET_<triple>_RUSTFLAGS: cargo merges that with a project's own .cargo/config.toml, and ripgrep's asks for
+# +crt-static and link-self-contained=yes on musl, which wins (-static-pie, "cannot find -lpcre2-8"). RUSTFLAGS replaces every
+# config-file rustflags, and with --target it reaches only target artifacts, not build scripts and proc-macros.
+cargo_build(){ need_rust; RUSTFLAGS="-C target-feature=-crt-static -C link-self-contained=no" CARGO_NET_OFFLINE=true \
+  cargo build --release --locked --target $RUST_TARGET "$@"; }
+# where cargo_build leaves the binaries
+cargo_out(){ echo target/$RUST_TARGET/release; }
 
 srcdir=$WORK/pkg/$name/src
 pkgbase=$WORK/pkg/$name/pkg

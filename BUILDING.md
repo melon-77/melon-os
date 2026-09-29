@@ -28,6 +28,7 @@ takes roughly 8–12 hours; on 2 cores it takes days.
 
     git clone https://github.com/melon-77/melon-os ~/melon
     cd ~/melon
+    git submodule update --init       # melon's own games (recipes/melon-pinball/game)
     sudo scripts/host-setup.sh        # build tools, sources (~2 GB), host tools; about an hour
     # put the signing key in place (below)
     sudo JOBS=16 scripts/build-everything.sh

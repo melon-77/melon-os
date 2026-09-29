@@ -48,7 +48,9 @@ DEVTOOLS="mpc binutils gcc make pkgconf patch"
 # the build tools melon's own recipes need, so melon can build melon (self-hosting, step 1)
 BUILDTOOLS="perl m4 bison flex gawk gperf bc texinfo autoconf automake autoconf-archive file"
 # the ones that link curl or libarchive (SIMPLE) come after them
-BUILDTOOLS2="lz4 ninja cmake meson git nasm tcl rsync"
+BUILDTOOLS2="lz4 ninja cmake meson git nasm tcl rsync
+  python3-markupsafe python3-mako python3-yaml python3-packaging python3-ptyprocess python3-pexpect python3-libxml2 itstool
+  xorriso mtools scdoc dtc dwarves publicsuffix"
 ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $DESKTOP_LIBS $RUSTC $KDE $INSTALLERS | awk '!seen[$0]++')
 # recipes nobody listed yet go at the end
 EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))

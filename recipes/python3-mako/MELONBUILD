@@ -1,0 +1,10 @@
+pkgname=python3-mako
+pkgver=1.4.3
+pkgrel=0
+pkgdesc="Mako templates for Python (Mesa's build generates code with it)"
+license=MIT
+url=https://www.makotemplates.org
+source=(mako-1.4.3.tar.gz)
+builddir=$srcdir/mako-1.4.3
+depends=(python3 python3-markupsafe)
+package(){ py_install Mako mako; rm -rf $pkgdir/usr/lib/python3.*/site-packages/mako/testing; }

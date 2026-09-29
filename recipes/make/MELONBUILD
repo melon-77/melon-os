@@ -1,0 +1,10 @@
+pkgname=make
+pkgver=4.4.1
+pkgrel=0
+pkgdesc="GNU make: builds programs from Makefiles"
+license=GPL-3.0-or-later
+url=https://www.gnu.org/software/make/
+source=(make-4.4.1.tar.gz)   # GNU upstream (Ubuntu's make-dfsg drops doc/, which configure needs)
+# its bundled gnulib declares getenv() the pre-C23 way: GCC 15 defaults to C23
+build(){ CFLAGS="$CFLAGS -std=gnu17" ./configure $conf_flags --disable-nls --without-guile; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,info} $pkgdir/usr/include; }

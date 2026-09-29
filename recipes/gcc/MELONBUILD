@@ -1,0 +1,45 @@
+pkgname=gcc
+pkgver=15.2.0
+pkgrel=0
+pkgdesc="GNU C compiler for building on melon (C; C++ is the g++ package)"
+license="GPL-3.0-or-later WITH GCC-exception-3.1"
+url=https://gcc.gnu.org
+# The same source and settings as the cross toolchain (scripts/toolchain.sh), built "cross-native": on the build
+# machine, to run on melon and make melon programs. The runtime libraries (libgcc_s, libstdc++, libatomic,
+# libgomp) stay in the libgcc/libstdc++ packages (gcc-runtime), so this package leaves them out.
+source=(gcc-15.2.0.tar.xz)
+makedepends=(gmp-dev mpfr-dev mpc-dev zlib-dev zstd-dev)
+depends=(binutils musl-dev libgcc libatomic libgomp)
+subpackages=(g++)
+depends_g__="gcc libstdc++-dev"
+pkgdesc_g__="GNU C++ compiler for building on melon"
+build(){
+  # gcc's diagnostics pass non-literal format strings on purpose: melon's -Werror=format-security stops the build.
+  # Its build-machine helpers (build-libcpp, gen*) get the build machine's own plain flags.
+  export CFLAGS="${CFLAGS/-Werror=format-security/}" CXXFLAGS="${CXXFLAGS/-Werror=format-security/}"
+  export CFLAGS_FOR_BUILD="-O2" CXXFLAGS_FOR_BUILD="-O2" LDFLAGS_FOR_BUILD=""
+  mkdir -p build; cd build
+  ../configure $conf_flags --target=$CHOST --with-build-sysroot=$SYSROOT --with-native-system-header-dir=/usr/include \
+    --enable-languages=c,c++ --disable-multilib --disable-nls --disable-werror --disable-bootstrap \
+    --disable-libsanitizer --disable-libssp --disable-libquadmath --disable-libgomp-offload \
+    --enable-default-pie --enable-default-ssp --enable-tls --enable-initfini-array \
+    --enable-libstdcxx-time --enable-__cxa_atexit --enable-threads=posix --enable-shared \
+    --with-pkgversion=melon --disable-symvers --disable-fixed-point --with-arch=$GCC_ARCH --with-tune=generic \
+    --with-system-zlib --with-zstd --with-gmp=$SYSROOT/usr --with-mpfr=$SYSROOT/usr --with-mpc=$SYSROOT/usr
+  make -j$JOBS
+}
+package(){
+  make -C build DESTDIR=$pkgdir install
+  # (the target libraries install to lib64: into lib first, so the clean-up below finds them)
+  mv $pkgdir/usr/lib64/* $pkgdir/usr/lib/ 2>/dev/null; rmdir $pkgdir/usr/lib64 2>/dev/null
+  # the runtime libraries and C++ headers belong to gcc-runtime's packages
+  rm -f $pkgdir/usr/lib/lib{gcc_s,stdc++,stdc++fs,supc++,atomic,gomp,itm,ssp}*.so* $pkgdir/usr/lib/lib{stdc++,stdc++fs,supc++}*.a \
+    $pkgdir/usr/lib/*.py $pkgdir/usr/lib/*.la
+  rm -rf $pkgdir/usr/include/c++ $pkgdir/usr/share/{doc,info,gcc-15.2.0} $pkgdir/usr/lib/gcc/$CHOST/15.2.0/include-fixed/README
+  # plain names (gcc, cc) next to the target-prefixed ones
+  ln -sf gcc $pkgdir/usr/bin/cc
+}
+pkg_g__(){
+  amove usr/bin/g++ usr/bin/c++ usr/bin/$CHOST-g++ usr/bin/$CHOST-c++ usr/libexec/gcc/$CHOST/15.2.0/cc1plus \
+    usr/share/man/man1/g++.1
+}

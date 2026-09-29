@@ -104,9 +104,8 @@ mksquashfs $LIVE $ISO/melon/live.sqfs -comp zstd -Xcompression-level 15 -noappen
 
 step "package repository (extras only; the base system comes from rootfs.sqfs)"
 mkdir -p $ISO/melon/repo/$APK_ARCH
-if [ -n "$DESKTOP_PKGS" ]; then
-  apkx fetch --recursive --output $ISO/melon/repo/$APK_ARCH $DESKTOP_PKGS >/dev/null
-fi
+# (the desktop packages themselves are NOT copied here: they are already in rootfs.sqfs, which the installers copy, and
+# a second copy cost about 460 MB on the ISO and on every installed system; anything else comes from the online repo)
 # always carry the small, commonly wanted extras so an offline install can still add them
 extras="melon-base bash busybox musl apk-tools"
 # guest tools, which the installers add when they run inside a VM

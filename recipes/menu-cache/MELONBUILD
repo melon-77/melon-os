@@ -1,0 +1,12 @@
+pkgname=menu-cache
+pkgver=1.1.1
+pkgrel=0
+pkgdesc="menu-cache: caches the freedesktop.org application menu (PCManFM-Qt's application list)"
+license=LGPL-2.1-or-later
+url=https://github.com/lxde/menu-cache
+source=(menu-cache-1.1.1.tar.gz)
+makedepends=(glib-dev libfm-extra-dev)
+subpackages=(menu-cache-dev)
+# a git snapshot without configure
+build(){ autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; }

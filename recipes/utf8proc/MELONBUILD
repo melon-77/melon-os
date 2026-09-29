@@ -1,0 +1,10 @@
+pkgname=utf8proc
+pkgver=2.10.0
+pkgrel=0
+pkgdesc="utf8proc: Unicode normalization, case folding and grapheme clusters (fcft and foot)"
+license=MIT
+url=https://juliastrings.github.io/utf8proc/
+source=(utf8proc-2.10.0.tar.gz)
+subpackages=(utf8proc-dev)
+build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DUTF8PROC_ENABLE_TESTING=OFF; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

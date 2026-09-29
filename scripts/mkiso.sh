@@ -48,6 +48,10 @@ rm -rf $ROOT/var/cache/apk/*
 mkdir -p $ROOT/usr/share/melon/profiles
 printf '%s\n' $PKGS > $ROOT/usr/share/melon/profiles/base
 [ -n "$LIVE_ONLY" ] && printf '%s\n' $LIVE_ONLY > $ROOT/usr/share/melon/profiles/live-only
+# the packages built with Rust (recipes with options=(rust)), for the installers' "remove everything built with Rust"
+for r in $(grep -lE '^options=\(.*\brust\b' $M/recipes/*/MELONBUILD); do
+  ( srcdir=/nonexistent; . "$r"; printf '%s\n' "$pkgname" ${subpackages[@]+"${subpackages[@]}"} )
+done > $ROOT/usr/share/melon/rust-packages
 if [ -n "$DESKTOP_PKGS" ]; then
   printf '%s\n' $PKGS $(printf '%s\n' $DESKTOP_PKGS | grep -vxF "${LIVE_ONLY:-@none@}") > $ROOT/usr/share/melon/profiles/desktop
   # services for the desktop profile: udev replaces mdev, NetworkManager replaces the dhcp/wpa services

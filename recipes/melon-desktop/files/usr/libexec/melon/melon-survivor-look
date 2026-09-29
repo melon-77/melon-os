@@ -7,5 +7,8 @@ plasma-apply-desktoptheme melon-gold >/dev/null 2>&1
 kwriteconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile MelonGold.profile
 kwriteconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image --group General \
   --key Image /usr/share/wallpapers/melon-survivor-gold/
-# last, so its result says whether the session was ready (plasmashell up): if not, the autostart tries next login
-plasma-apply-wallpaperimage /usr/share/wallpapers/melon-survivor-portal >/dev/null 2>&1
+# last, so its result says whether the session was ready (plasmashell up): if not, the autostart tries next login.
+# A survivor who also installed without Rust keeps that reward's wallpaper (melon-rust-free sets the same one)
+wp=/usr/share/wallpapers/melon-survivor-portal
+[ -e /etc/melon/rust-free ] && [ -d /usr/share/wallpapers/melon-farewell-ferris ] && wp=/usr/share/wallpapers/melon-farewell-ferris
+plasma-apply-wallpaperimage $wp >/dev/null 2>&1

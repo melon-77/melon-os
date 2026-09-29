@@ -1,0 +1,104 @@
+pkgname=rust
+pkgver=1.98.1
+pkgrel=1
+pkgdesc="The Rust compiler (rustc, rustdoc) and standard library, for building Rust programs on melon"
+license="MIT OR Apache-2.0"
+url=https://www.rust-lang.org
+# melon's own Rust, built "cross-native": on the build machine, to run on melon. build = host = target = melon's musl
+# (x86_64-unknown-linux-musl), so one LLVM (melon's, linked shared) and one C compiler (melon's gcc) do everything and
+# there is no second, glibc toolchain to mix in; melon's musl binaries run on the build machine (AGENTS.md rule 18).
+# Stage 0 is upstream's musl-hosted release of the same version (manifest entries; nothing is downloaded while building).
+# The Rust that cross-compiles other recipes (scripts/host-rust.sh, hosttools/rust) is a separate, glibc-hosted install.
+source=(rustc-1.98.1-src.tar.xz rustc-1.98.1-x86_64-unknown-linux-musl.tar.xz cargo-1.98.1-x86_64-unknown-linux-musl.tar.xz
+        rust-std-1.98.1-x86_64-unknown-linux-musl.tar.xz)
+builddir=$srcdir/rustc-1.98.1-src
+# llvm-dev: llvm-config and LLVM's shared library (Rust 1.98 needs LLVM 21 or newer; melon has 21.1.8)
+makedepends=(llvm-dev zlib-dev openssl-dev curl-dev)
+# rustc links programs with the system C compiler (cc), which brings binutils and musl-dev along
+depends=(gcc)
+subpackages=(cargo)
+depends_cargo="rust"
+pkgdesc_cargo="Cargo, Rust's package manager and build tool"
+# Written in Rust: the installers' "remove everything built with Rust" option takes rust and cargo off too
+# (melon-remove-rust; mkiso.sh lists this recipe's packages in /usr/share/melon/rust-packages).
+options=(rust)
+
+prepare(){
+  # stage 0: upstream's musl-hosted rustc, cargo and standard library, unpacked next to the sources
+  local c
+  for c in rustc-1.98.1-x86_64-unknown-linux-musl cargo-1.98.1-x86_64-unknown-linux-musl rust-std-1.98.1-x86_64-unknown-linux-musl; do
+    tar xJf $SRC/$c.tar.xz -C $srcdir
+    $srcdir/$c/install.sh --prefix=$srcdir/stage0 --disable-ldconfig --without=rust-docs >/dev/null
+  done
+  # llvm-config reports /usr/lib and /usr/include, which are the build machine's; point them at the sysroot
+  cat > $srcdir/llvm-config <<WRAP
+#!/bin/sh
+$SYSROOT/usr/bin/llvm-config "\$@" | sed -E 's#(^| )(-[LI])?/usr#\1\2$SYSROOT/usr#g'
+WRAP
+  chmod +x $srcdir/llvm-config
+}
+
+build(){
+  cat > bootstrap.toml <<TOML
+[llvm]
+download-ci-llvm = false
+link-shared = true
+
+[build]
+build = "x86_64-unknown-linux-musl"
+host = ["x86_64-unknown-linux-musl"]
+target = ["x86_64-unknown-linux-musl"]
+rustc = "$srcdir/stage0/bin/rustc"
+cargo = "$srcdir/stage0/bin/cargo"
+local-rebuild = true
+submodules = false
+docs = false
+compiler-docs = false
+extended = true
+tools = ["cargo"]
+sanitizers = false
+profiler = false
+python = "python3"
+jobs = $JOBS
+
+[install]
+prefix = "/usr"
+sysconfdir = "/etc"
+
+[rust]
+channel = "stable"
+codegen-tests = false
+rpath = false
+lld = false
+llvm-tools = false
+jemalloc = false
+debug = false
+debuginfo-level = 0
+codegen-units-std = 1
+deny-warnings = false
+
+[target.x86_64-unknown-linux-musl]
+cc = "$TARGET-gcc"
+cxx = "$TARGET-g++"
+ar = "$TARGET-ar"
+ranlib = "$TARGET-ranlib"
+linker = "$TARGET-gcc"
+llvm-config = "$srcdir/llvm-config"
+musl-root = "$SYSROOT/usr"
+crt-static = false
+TOML
+  # cargo's C dependencies: melon's OpenSSL, zlib and curl (its bundled libgit2 and libssh2 are built from source)
+  export OPENSSL_DIR=$SYSROOT/usr OPENSSL_LIB_DIR=$SYSROOT/usr/lib OPENSSL_INCLUDE_DIR=$SYSROOT/usr/include
+  python3 x.py build --stage 2 -j$JOBS
+}
+
+package(){
+  DESTDIR=$pkgdir python3 x.py install -j$JOBS
+  # the installer's bookkeeping, debugger wrappers and docs; melon's apk tracks the files
+  rm -rf $pkgdir/usr/lib/rustlib/{components,install.log,rust-installer-version,uninstall.sh,etc} $pkgdir/usr/lib/rustlib/manifest-* \
+    $pkgdir/usr/share/doc $pkgdir/usr/bin/rust-{gdb,gdbgui,lldb}
+}
+
+pkg_cargo(){
+  amove usr/bin/cargo 'usr/share/man/man1/cargo*.1' etc/bash_completion.d/cargo usr/share/zsh/site-functions/_cargo
+}

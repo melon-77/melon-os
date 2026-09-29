@@ -1,0 +1,9 @@
+pkgname=gperf
+pkgver=3.3
+pkgrel=0
+pkgdesc="GNU gperf: generates perfect hash functions (eudev, fontconfig and others use it)"
+license=GPL-3.0-or-later
+url=https://www.gnu.org/software/gperf/
+source=(gperf-3.3.tar.gz)
+build(){ ./configure $conf_flags; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,info}; }

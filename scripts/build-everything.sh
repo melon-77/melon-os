@@ -45,7 +45,9 @@ KDE=$(python3 $M/scripts/gen-kde-recipes.py | sed "s/\bqt6-qtbase\b/qt6-qtbase a
 INSTALLERS="kpmcore calamares calamares-melon melon-desktop"
 # a compiler and binutils that run on melon (the cross toolchain in tools/ only runs on the build machine)
 DEVTOOLS="mpc binutils gcc make pkgconf patch"
-ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $APPS $GAMES $SIMPLE $GETTEXT $RUST $DESKTOP_LIBS $RUSTC $KDE $INSTALLERS | awk '!seen[$0]++')
+# the build tools melon's own recipes need, so melon can build melon (self-hosting, step 1)
+BUILDTOOLS="perl m4 bison flex gawk gperf bc texinfo autoconf automake autoconf-archive file"
+ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $GETTEXT $RUST $DESKTOP_LIBS $RUSTC $KDE $INSTALLERS | awk '!seen[$0]++')
 # recipes nobody listed yet go at the end
 EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))
 ALL="$ALL $EXTRA"

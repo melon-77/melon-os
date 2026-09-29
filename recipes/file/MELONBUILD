@@ -1,0 +1,13 @@
+pkgname=file
+pkgver=5.48
+pkgrel=0
+pkgdesc="file and libmagic: identify files by their contents"
+license=BSD-2-Clause
+url=https://www.darwinsys.com/file/
+source=(file-5.48.tar.gz)
+subpackages=(file-dev)
+makedepends=(zlib-dev bzip2-dev xz-dev zstd-dev)
+# a cross build would want the build machine's file of exactly this version to compile the magic database;
+# the file just built is a melon binary and runs here (rule 18)
+build(){ ./configure $conf_flags --disable-static --disable-libseccomp; make -j$JOBS FILE_COMPILE=$PWD/src/file; }
+package(){ make DESTDIR=$pkgdir install FILE_COMPILE=$PWD/src/file; rm -rf $pkgdir/usr/share/doc; }

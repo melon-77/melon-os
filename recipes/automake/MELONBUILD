@@ -1,0 +1,10 @@
+pkgname=automake
+pkgver=1.19
+pkgrel=0
+pkgdesc="GNU Automake: makes Makefile.in files"
+license=GPL-2.0-or-later
+url=https://www.gnu.org/software/automake/
+source=(automake-1.19.tar.xz)
+depends=(autoconf perl)
+build(){ PERL=/usr/bin/perl ./configure $conf_flags; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,info}; }

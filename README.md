@@ -17,7 +17,7 @@ A from-scratch, rolling x86_64 distribution:
 | boot | GRUB 2.14, one ISO and one install that boot on both BIOS and UEFI |
 | root fs | XFS (FAT32 `/boot`) |
 | shell | bash 5.3 |
-| desktop | KDE Plasma on Wayland (stage 2), Flatpak for Steam and games (stage 3) |
+| desktop | KDE Plasma 6 on Wayland; Flatpak for Steam and other glibc apps; more desktops as online installs |
 
 ## Layout
 

@@ -419,6 +419,15 @@ offline copy from the ISO, and the live ISO uses it too. Everything is signed wi
 host doesn't need to be trusted. GitHub rejects files over 100 MB: split big packages (Intel Bluetooth
 firmware is its own package for that reason). Publish after building packages people should get.
 
+## Releases
+
+Releases are named **melon <version> “<melon variety>”**, the varieties in alphabetical order: 0.1 “Antalya”,
+0.2 “Bailan”, then 0.3 “Cantaloupe”, 0.4 “Dudaim”, 0.5 “Esfahan”, 0.6 “Fukui”, 0.7 “Galia”, 0.8 “Honeydew”, … (the
+owner's choice, 29 September 2026). Tags are `v<version>` from 0.3 on (0.1 and 0.2 kept their date tags). A release
+is marked Latest (the website's download button points at `releases/latest`), carries both ISOs and `SHA256SUMS`,
+has notes written for users (what's new, which file to download, `doas apk upgrade` for installed systems), and the
+release it replaces is retitled "(superseded)" with a link to the new one.
+
 ## Signing keys and rotation
 
 Installed systems trust two keys, both shipped in `/etc/apk/keys` by `apk-tools` (and in `keys/trusted/`):

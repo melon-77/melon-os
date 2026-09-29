@@ -42,6 +42,7 @@ deb/fuse3_3.18.2.orig.tar.gz	f01de85717e20adf5f98aff324acd85dd73d61a5ca3834d573d
 deb/gamemode_1.8.2.orig.tar.gz	a23a661150ada9441890874a429d01fef39adb0cefd191c43a33e0ca2206af52	apt	gamemode=1.8.2-2build1
 deb/gcc-15_15.2.0.orig.tar.gz	3063dafdeed9fb9565f099b2560379bce08dae2b461ed4e30dd8d999f5f5747c	apt	gcc-15=15.2.0-16ubuntu1
 deb/gdk-pixbuf_2.44.5+dfsg.orig.tar.xz	1c5919d245d2686a8bdf6bff2c07ecd102e98bd580cfbb65b63c70d014f24030	apt	gdk-pixbuf=2.44.5+dfsg-4ubuntu1
+deb/gettext_0.23.2.orig.tar.xz	86bec63472ae1e7a18871758a1358a9e9776f74643992a0276dd67e36de2da7d	apt	gettext=0.23.2-1
 deb/glib-networking_2.80.1.orig.tar.xz	b80e2874157cd55071f1b6710fa0b911d5ac5de106a9ee2a4c9c7bee61782f8e	apt	glib-networking=2.80.1-1build2
 deb/glib2.0_2.88.0.orig-unicode-data.tar.xz	4b55352323696c72187f855981ed1f7d1594a53f257f7803a928749cab9f9f44	apt	glib2.0=2.88.0-1ubuntu0.1
 deb/glib2.0_2.88.0.orig.tar.xz	3546251ccbb3744d4bc4eb48354540e1f6200846572bab68e3a2b7b2b64dfd07	apt	glib2.0=2.88.0-1ubuntu0.1
@@ -384,6 +385,7 @@ bubblewrap-0.11.1.tar.xz	-	link	deb/bubblewrap_0.11.1.orig.tar.xz
 busybox-1.37.0.tar.bz2	-	link	deb/busybox_1.37.0.orig.tar.bz2
 ca-certificates_20260601~24.04.1_all.deb	-	link	fonts/ca-certificates_20260601~24.04.1_all.deb
 calamares-3.3.14.tar.gz	-	link	deb/calamares_3.3.14.orig.tar.gz
+cataclysm-dda-0.9.1.tar.gz	27e35a0a5181f88f0929bef180ca0465d00e606e569911cb02d97b59b8b5768a	url	https://github.com/CleverRaven/Cataclysm-DDA/archive/refs/tags/0.I-1.tar.gz
 cryptsetup-2.8.4.tar.gz	-	link	deb/cryptsetup_2.8.4.orig.tar.gz
 curl-8.18.0.tar.gz	-	link	deb/curl_8.18.0.orig.tar.gz
 dbus-1.16.2.tar.xz	-	link	deb/dbus_1.16.2.orig.tar.xz
@@ -405,6 +407,7 @@ fuse3-3.18.2.tar.gz	-	link	deb/fuse3_3.18.2.orig.tar.gz
 gamemode-1.8.2.tar.gz	-	link	deb/gamemode_1.8.2.orig.tar.gz
 gcc-15.2.0.tar.xz	438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e	inner	deb/gcc-15_15.2.0.orig.tar.gz gcc-15-15.2.0/gcc-15.2.0.tar.xz
 gdk-pixbuf-2.44.5.tar.xz	-	link	deb/gdk-pixbuf_2.44.5+dfsg.orig.tar.xz
+gettext-0.23.2.tar.xz	-	link	deb/gettext_0.23.2.orig.tar.xz
 glib-2.88.0.tar.xz	-	link	deb/glib2.0_2.88.0.orig.tar.xz
 glslang-16.2.0.tar.gz	-	link	deb/glslang_16.2.0.orig.tar.gz
 gmp-6.3.0.tar.xz	-	link	deb/gmp_6.3.0+dfsg.orig.tar.xz

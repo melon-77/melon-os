@@ -1,0 +1,33 @@
+pkgname=gettext
+pkgver=0.23.2
+pkgrel=0
+pkgdesc="GNU gettext: tools for translating programs (msgfmt, xgettext, envsubst, ...)"
+license="GPL-3.0-or-later AND LGPL-2.1-or-later"
+url=https://www.gnu.org/software/gettext/
+source=(gettext-0.23.2.tar.xz)
+builddir=$srcdir/gettext-0.23.2
+makedepends=(ncurses-dev libxml2-dev acl-dev)
+subpackages=(gettext-dev gettext-doc)
+
+# musl has gettext() in libc and its own libintl.h, but configure only trusts a libc with glibc's internal symbols,
+# so it would build GNU libintl and install a second libintl.h over musl's. The cache answers make it use libc's
+# (Void does the same). --disable-nls would avoid libintl too, but also make the gettext command print every
+# message untranslated.
+#   --without-git   autopoint's archive as .tar.xz, so autopoint doesn't need git on melon
+#   *-prefix=       AC_LIB_LINKFLAGS searches the build machine's /usr unless it is pointed at the sysroot
+build(){
+  ./configure $conf_flags gt_cv_func_gnugettext1_libc=yes gt_cv_func_gnugettext2_libc=yes \
+    gt_cv_func_gnugettext3_libc=yes --disable-static --disable-rpath --enable-threads=posix --disable-openmp \
+    --disable-java --disable-csharp --without-emacs --without-git --without-cvs --without-included-libxml \
+    --with-libxml2-prefix=$SYSROOT/usr --with-libncurses-prefix=$SYSROOT/usr --without-libintl-prefix
+  make -j$JOBS
+}
+package(){
+  make DESTDIR=$pkgdir install
+  # GNU libintl must not be there: musl provides it
+  if [ -e $pkgdir/usr/include/libintl.h ] || ls $pkgdir/usr/lib/libintl.* >/dev/null 2>&1; then
+    echo "gettext: GNU libintl was built, which would replace musl's" >&2; return 1
+  fi
+}
+# the translators' helpers (gettextize, autopoint and its archive; default_dev takes the m4 macros) go with the headers
+pkg_dev(){ default_dev; amove usr/bin/gettextize usr/bin/autopoint 'usr/share/gettext/archive.*'; }

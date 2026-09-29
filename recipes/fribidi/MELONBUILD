@@ -1,0 +1,10 @@
+pkgname=fribidi
+pkgver=1.0.16
+pkgrel=0
+pkgdesc="GNU FriBidi: the Unicode bidirectional algorithm (right-to-left text in pango)"
+license=LGPL-2.1-or-later
+url=https://github.com/fribidi/fribidi
+source=(fribidi-1.0.16.tar.xz)
+subpackages=(fribidi-dev)
+build(){ meson_setup -Ddocs=false -Dtests=false -Dbin=false build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

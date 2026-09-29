@@ -1,0 +1,15 @@
+pkgname=sdbus-c++
+pkgver=2.2.1
+pkgrel=0
+pkgdesc="sdbus-c++: a C++ D-Bus library on top of sd-bus (Noctalia)"
+license="LGPL-2.1-or-later WITH custom exception"
+url=https://github.com/Kistler-Group/sdbus-cpp
+source=(sdbus-cpp-2.2.1.tar.gz)
+builddir=$srcdir/sdbus-cpp-2.2.1
+makedepends=(elogind-dev)
+subpackages=(sdbus-c++-dev)
+# sd-bus comes from elogind's libelogind: melon has no systemd.
+build(){ cmake_setup -B build -DSDBUSCPP_SDBUS_LIB=elogind -DSDBUSCPP_BUILD_DOCS=OFF -DSDBUSCPP_BUILD_TESTS=OFF \
+  -DSDBUSCPP_BUILD_CODEGEN=OFF -DSDBUSCPP_BUILD_EXAMPLES=OFF
+  ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

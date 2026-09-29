@@ -1,0 +1,12 @@
+pkgname=nlohmann-json
+pkgver=3.11.3
+pkgrel=0
+pkgdesc="JSON for Modern C++ (header-only; Noctalia)"
+license=MIT
+url=https://github.com/nlohmann/json
+# Ubuntu's version string is 3.12.0.really.3.12.0.really.3.11.3: the tarball is 3.11.3
+source=(nlohmann-json-3.11.3.tar.gz)
+builddir=$srcdir/json-3.11.3
+options=('!strip')
+build(){ cmake_setup -B build -DJSON_BuildTests=OFF -DJSON_Install=ON -DJSON_MultipleHeaders=ON; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

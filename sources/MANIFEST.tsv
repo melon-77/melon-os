@@ -14,6 +14,7 @@ deb/breeze_6.6.4.orig.tar.xz	15ec98c5bdae5cb762c162a2aae87605531e20cf80a7ebeaa36
 deb/bubblewrap_0.11.1.orig.tar.xz	c1b7455a1283b1295879a46d5f001dfd088c0bb0f238abb5e128b3583a246f71	apt	bubblewrap=0.11.1-1ubuntu0.3
 deb/busybox_1.37.0.orig.tar.bz2	3311dff32e746499f4df0d5df04d7eb396382d7e108bb9250e7b519b837043a4	apt	busybox=1:1.37.0-7ubuntu1
 deb/bzip2_1.0.8.orig.tar.gz	ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269	apt	bzip2=1.0.8-6ubuntu0.1
+deb/cairo_1.18.4.orig.tar.xz	445ed8208a6e4823de1226a74ca319d3600e83f6369f99b14265006599c32ccb	apt	cairo=1.18.4-3
 deb/calamares_3.3.14.orig.tar.gz	5547f80db067dea923ae693ba6bb88eb2b2eeac1da3ebec42fce453e31c290c0	apt	calamares=3.3.14-0ubuntu25.26.04.1
 deb/cryptsetup_2.8.4.orig.tar.gz	d1c18663eb565a0c5511110b8559db71e4fa4c482740273d39fd0a9dff7fbd29	apt	cryptsetup=2:2.8.4-1ubuntu4
 deb/cups-filters_2.0.1.orig.tar.xz	39e71de3ce06762b342749f1dc7cba6817738f7bf4d322c1bb9ab10b8569ab80	apt	cups-filters=2.0.1-0ubuntu4.1
@@ -38,6 +39,7 @@ deb/fonts-noto-color-emoji_2.051.orig.tar.xz	ca084e447d6154ad807a3765c51cfb02a8e
 deb/freetype_2.14.2+dfsg.orig-ft2demos.tar.xz	ae9ed4b095e73a3fbdb90363c138ea62ac4b0f55aa4bb345b9b2458783f9284f	apt	freetype=2.14.2+dfsg-1ubuntu0.1
 deb/freetype_2.14.2+dfsg.orig-ft2docs.tar.xz	0514edfd6a7b480f753aa48789d7112038a218b0b06afdca320c4bcbc2f66e6b	apt	freetype=2.14.2+dfsg-1ubuntu0.1
 deb/freetype_2.14.2+dfsg.orig.tar.xz	9a2bdc2c992fa82a309eccf5e8bcbf2a380a98ba22f9f2ec7e56767739a19a0a	apt	freetype=2.14.2+dfsg-1ubuntu0.1
+deb/fribidi_1.0.16.orig.tar.xz	1b1cde5b235d40479e91be2f0e88a309e3214c8ab470ec8a2744d82a5a9ea05c	apt	fribidi=1.0.16-5
 deb/fuse3_3.18.2.orig.tar.gz	f01de85717e20adf5f98aff324acd85dd73d61a5ca3834d573dcf0bd6e54a298	apt	fuse3=3.18.2-1
 deb/gamemode_1.8.2.orig.tar.gz	a23a661150ada9441890874a429d01fef39adb0cefd191c43a33e0ca2206af52	apt	gamemode=1.8.2-2build1
 deb/gcc-15_15.2.0.orig.tar.gz	3063dafdeed9fb9565f099b2560379bce08dae2b461ed4e30dd8d999f5f5747c	apt	gcc-15=15.2.0-16ubuntu1
@@ -167,6 +169,7 @@ deb/libgcrypt20_1.12.0.orig.tar.bz2	0311454e678189bad62a7e9402a9dd793025efff6e74
 deb/libglvnd_1.7.0.orig.tar.gz	073e7292788d4d3eeb45ea6c7bdcce9bfdb3b3eef8d7dbd47f2f30dce046ef98	apt	libglvnd=1.7.0-3
 deb/libgpg-error_1.58.orig.tar.bz2	f943aea9a830a8bd938e5124b579efaece24a3225ff4c3d27611a80ce1260c27	apt	libgpg-error=1.58-2
 deb/libgudev_238.orig.tar.xz	61266ab1afc9d73dbc60a8b2af73e99d2fdff47d99544d085760e4fa667b5dd1	apt	libgudev=238-7build1
+deb/libical3_3.0.20.orig.tar.gz	e73de92f5a6ce84c1b00306446b290a2b08cdf0a80988eca0a2c9d5c3510b4c2	apt	libical3=3.0.20-2build1
 deb/libice_1.1.1.orig.tar.gz	04fbd34a11ba08b9df2e3cdb2055c2e3c1c51b3257f683d7fcf42dabcf8e1210	apt	libice=2:1.1.1-1build1
 deb/libinih_61.orig.tar.gz	7caf26a2202a4ca689df3fe4175dfa74e0faa18fcca07331bba934fd0ecb8f12	apt	libinih=61-1ubuntu1
 deb/libinput_1.31.1.orig.tar.gz	72c7d62a117f89a0e611d76b0a28ba8bf08fc24083d2678060aee8de88c87953	apt	libinput=1.31.1-1ubuntu1.2
@@ -185,13 +188,17 @@ deb/libpng1.6_1.6.57.orig.tar.gz	4cbb7b0746edc1683c9581b373365e955133b7f1243f171
 deb/libppd_2.1.1.orig.tar.xz	3fa341cc03964046d2bf6b161d80c1b4b2e20609f38d860bcaa11cb70c1285e4	apt	libppd=2:2.1.1-0ubuntu2
 deb/libpsl_0.21.2.orig.tar.xz	11e34380f2c81d6e72c710464aae3b680df4ddcc1007826c630fb03c7ca6aa54	apt	libpsl=0.21.2-1.1build2
 deb/libpwquality_1.4.5.orig.tar.bz2	6fcf18b75d305d99d04d2e42982ed5b787a081af2842220ed63287a2d6a10988	apt	libpwquality=1.4.5-5build1
+deb/libqalculate_5.9.0.orig.tar.gz	63bcd5a4a32bc7811d0c60865fa35caa2e32aa0a09493b3760d913013bcd2be6	apt	libqalculate=5.9.0-1
 deb/libsdl3-image_3.4.0+ds.orig.tar.xz	fdb9ccec3ec87094a5113d6bed033a130e060b02c29596dd762862c329b4446f	apt	libsdl3-image=3.4.0+ds-1
 deb/libsdl3-ttf_3.2.2+ds.orig.tar.xz	b10a1a0796955f48b766a87195a24523324b8dbf8c88d8626cfbfd050f8acfdf	apt	libsdl3-ttf=3.2.2+ds-1build1
 deb/libsdl3_3.4.2+ds.orig.tar.xz	f105b4826e55d85527617bc7bb52bf68ba4e21b680b02ab43d9dffcf46b6e7fd	apt	libsdl3=3.4.2+ds-1ubuntu1
 deb/libseccomp_2.6.0.orig.tar.gz	83b6085232d1588c379dc9b9cae47bb37407cf262e6e74993c61ba72d2a784dc	apt	libseccomp=2.6.0-2ubuntu5
+deb/libsecret_0.21.7.orig.tar.xz	6b452e4750590a2b5617adc40026f28d2f4903de15f1250e1d1c40bfd68ed55e	apt	libsecret=0.21.7-2build1
 deb/libsm_1.2.6.orig.tar.gz	166b4b50d606cdd83f1ddc61b5b9162600034f848b3e32ccbb0e63536b7d6cdd	apt	libsm=2:1.2.6-1build1
 deb/libsndfile_1.2.2.orig.tar.gz	ffe12ef8add3eaca876f04087734e6e8e029350082f3251f565fa9da55b52121	apt	libsndfile=1.2.2-4
+deb/libsodium_1.0.18.orig.tar.gz	d59323c6b712a1519a5daf710b68f5e7fde57040845ffec53850911f10a5d4f4	apt	libsodium=1.0.18-2
 deb/libsoup3_3.6.6.orig.tar.xz	51ed0ae06f9d5a40f401ff459e2e5f652f9a510b7730e1359ee66d14d4872740	apt	libsoup3=3.6.6-1
+deb/libstb_0.0~git20250907.fede005+ds.orig.tar.xz	f6dcc67fcf215d3e59ede31fa7b9e744826642519dc628d9edde7ffec01ed3b5	apt	libstb=0.0~git20250907.fede005+ds-1
 deb/libtirpc_1.3.7.orig.tar.bz2	b47d3ac19d3549e54a05d0019a6c400674da716123858cfdb6d3bdd70a66c702	apt	libtirpc=1.3.7-0.1
 deb/libtool_2.5.4.orig.tar.xz	d9189031edeaa6aa74695b2aeb80a8c26df50b29d8b72c991667e01adecea42c	apt	libtool=2.5.4-9
 deb/liburcu_0.15.6.orig.tar.bz2	850b192096eb11ebf2c70e8f97bc7da7479ee41da1bebeb44e3986908bac414f	apt	liburcu=0.15.6-1
@@ -233,6 +240,7 @@ deb/lm-sensors_3.6.2.orig.tar.gz	c6a0587e565778a40d88891928bf8943f27d353f382d5b7
 deb/lua5.4_5.4.8.orig.tar.gz	4f18ddae154e793e46eeab727c59ef1c0c0c2b744e7b94219710d76f530629ae	apt	lua5.4=5.4.8-1build1
 deb/lvm2_2.03.31.orig.tar.xz	5541d15f739bc62263b551b1d8091ea8fc889a31ed20cdc58ff9f7192d8ecd4a	apt	lvm2=2.03.31-2ubuntu3
 deb/mangohud_0.8.2~rc2.orig.tar.xz	6f4e5e1effb8d410d15e6da5adbdc5fb74c5c1a98b147e3eb9eba17290c0cbed	apt	mangohud=0.8.2~rc2-1
+deb/md4c_0.5.2.orig.tar.gz	55d0111d48fb11883aaee91465e642b8b640775a4d6993c2d0e7a8092758ef21	apt	md4c=0.5.2-2build1
 deb/mesa_26.0.8.orig.tar.xz	caf1c0061a68e88dfa74967a7e780c0e85d65b6c4e334cd69095a5dc54ad78bc	apt	mesa=26.0.8-1ubuntu0.3
 deb/milou_6.6.4.orig.tar.xz	23305383141927777be94e9542a0cf839cf8949286ff071e08346aa8e15a6778	apt	milou=4:6.6.4-0ubuntu1
 deb/modemmanager_1.25.95.orig.tar.xz	4d93ffd677b4c9f7f773197a77bfe2cc40f3a6fea94409f91ffd51dd7c20c64d	apt	modemmanager=1.25.95-1ubuntu1
@@ -245,6 +253,7 @@ deb/nano_8.7.1.orig.tar.xz	76f0dcb248f2e2f1251d4ecd20fd30fb400a360a3a37c6c340e0a
 deb/ncurses_6.6+20251231.orig.tar.gz	e280541f4f601b8586bec305976c873fd641607f9bc4254bf661034dcccac4e9	apt	ncurses=6.6+20251231-1
 deb/network-manager_1.54.3.orig.tar.bz2	e38d55611af8127e1a2b1a7b4952bded1f61917cbc49d4ee7a272ec3fcd7b51b	apt	network-manager=1.54.3-2ubuntu3.1
 deb/nghttp2_1.68.0.orig.tar.gz	2c16ffc588ad3f9e2613c3fad72db48ecb5ce15bc362fcc85b342e48daf51013	apt	nghttp2=1.68.0-2ubuntu0.2
+deb/nlohmann-json3_3.12.0.really.3.12.0.really.3.11.3.orig.tar.gz	0d8ef5af7f9794e3263480193c491549b2ba6cc74bb018906202ada498a79406	apt	nlohmann-json3=3.12.0.really.3.12.0.really.3.11.3-3build1
 deb/npth_1.8.orig.tar.bz2	8bd24b4f23a3065d6e5b26e98aba9ce783ea4fd781069c1b35d149694e90ca3e	apt	npth=1.8-3build1
 deb/ntfs-3g_2022.10.3.orig.tar.gz	8bd7749ea9d8534c9f0664d48b576e90b96d45ec8803c9427f6ffaa2f0dde299	apt	ntfs-3g=1:2022.10.3-5ubuntu1.1
 deb/open-vm-tools_13.0.10.orig.tar.xz	90f09355e93b6248cc9a62d70ab5ac7d9c0a696313295c325d3acccfdd75a7bf	apt	open-vm-tools=2:13.0.10-1ubuntu1
@@ -254,6 +263,7 @@ deb/openssl_3.5.5.orig.tar.gz	b28c91532a8b65a1f983b4c28b7488174e4a01008e29ce8e69
 deb/opus_1.6.1.orig.tar.xz	001ac615b9f8f8994b229ad2b1a5969ed12ab48b0d154d0af1016a5899cd6ba1	apt	opus=1.6.1-1
 deb/ostree_2025.7.orig.tar.xz	af8d080b9585e7fd1faba8f022967e1c268ae62e20ecf32ee7b364c1e307570b	apt	ostree=2025.7-3build1
 deb/pam_1.7.0.orig.tar.xz	57dcd7a6b966ecd5bbd95e1d11173734691e16b68692fa59661cdae9b13b1697	apt	pam=1.7.0-5ubuntu3.2
+deb/pango1.0_1.57.0.orig.tar.xz	890640c841dae77d3ae3d8fe8953784b930fa241b17423e6120c7bfdf8b891e7	apt	pango1.0=1.57.0-1
 deb/patch_2.8.orig.tar.xz	f87cee69eec2b4fcbf60a396b030ad6aa3415f192aa5f7ee84cad5e11f7f5ae3	apt	patch=2.8-2build1
 deb/pcre2_10.46.orig.tar.gz	8d28d7f2c3b970c3a4bf3776bcbb5adfc923183ce74bc8df1ebaad8c1985bd07	apt	pcre2=10.46-1build1
 deb/pipewire_1.6.2.orig.tar.gz	13eaaf67558ddccf3d61ab7826f202d53538de422b015dd841ec92e1b7f5c0d8	apt	pipewire=1.6.2-1ubuntu1.2
@@ -304,8 +314,10 @@ deb/qt6-webview_6.10.2.orig.tar.xz	7ec406ff0998900ccef0ff8e4e5b1fbf15e4e18f3b43e
 deb/readline_8.3.orig.tar.gz	fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc	apt	readline=8.3-4
 deb/runit_2.3.0.orig.tar.gz	190e11c1f8072b543bb6bd53850555c458d6e306d53df3fc1232d300c3e21b51	apt	runit=2.3.0-1ubuntu1
 deb/sbc_2.1.orig.tar.gz	8cf661b5463ff9b5a10986ba127cc90146d7b7a06aec6483247332d59d3e5cdd	apt	sbc=2.1-1build1
+deb/sdbus-cpp_2.2.1.orig.tar.gz	da69a0104beb6e51415a59f1571a47beb1eacc65cc6027b250eb1cf13ff4f802	apt	sdbus-cpp=2.2.1-1
 deb/sddm-kcm_6.6.4.orig.tar.xz	b38c60186c4a810893df554e94acbb5a1cbc6c4f8ba57aacd42190dc77b577c9	apt	sddm-kcm=4:6.6.4-0ubuntu1
 deb/sddm_0.21.0+git20250502.4fe234b.orig.tar.gz	7441d09319e6f988b5ef523b4e7c0ec967f359d4b71fb85d3bdfaf762555520a	apt	sddm=0.21.0+git20250502.4fe234b-2ubuntu3
+deb/seatd_0.9.2.orig.tar.gz	2811654fc87b3b1877f62e69cbf1e761c7072146f127860d9b8fe1ca27607d0e	apt	seatd=0.9.2-2
 deb/shared-mime-info_2.4.orig.tar.bz2	32dc32ae39ff1c1bf8434dd3b36770b48538a1772bc0298509d034f057005992	apt	shared-mime-info=2.4-5build3
 deb/sound-theme-freedesktop_0.8.orig.tar.bz2	cb518b20eef05ec2e82dda1fa89a292c1760dc023aba91b8aa69bafac85e8a14	apt	sound-theme-freedesktop=0.8-7build1
 deb/spirv-headers_1.6.1+1.4.341.0.orig.tar.gz	a1dcbe4af25a33454cbee28448953fd961e2283e81d1e1cf752b1a22593599cd	apt	spirv-headers=1.6.1+1.4.341.0-1
@@ -314,6 +326,7 @@ deb/sqlite3_3.46.1.orig-www.tar.xz	648df41a8e532882b1905df45919aae4bafaf74c455f6
 deb/sqlite3_3.46.1.orig.tar.xz	d0cdd2ece271b29e7ce18095745d892517ee26d0f270065b3a25c2e9eb11639c	apt	sqlite3=3.46.1-9ubuntu0.3
 deb/squashfs-tools_4.7.5.orig.tar.gz	547b7b7f4d2e44bf91b6fc554664850c69563701deab9fd9cd7e21f694c88ea6	apt	squashfs-tools=1:4.7.5-1
 deb/systemsettings_6.6.4.orig.tar.xz	18d2aab42f3f3ce17c5e636238c2d7a1908152f2203f521d6d8441537d3edf04	apt	systemsettings=4:6.6.4-0ubuntu1
+deb/tomlplusplus_3.4.0+ds.orig.tar.xz	0ae736e13a49cc8a0aa7799705cf18bd93f5f56624613e6aa554b65fe2d72768	apt	tomlplusplus=3.4.0+ds-0.2build2
 deb/udisks2_2.10.91.orig.tar.bz2	2247ef8860a2846339240387ac1da5a7ed3432410d607fd9254a7dbe00335b1b	apt	udisks2=2.10.91-1ubuntu2.1
 deb/upower_1.91.1.orig.tar.bz2	d568638d670a63a1886335b7b136f4888cb38a3b28f3f4bcdeaffcca0b0f6df8	apt	upower=1.91.1-1
 deb/util-linux_2.41.3.orig.tar.xz	3330d873f0fceb5560b89a7dc14e4f3288bbd880e96903ed9b50ec2b5799e58b	apt	util-linux=2.41.3-3ubuntu2.2
@@ -384,6 +397,7 @@ bluez-5.85.tar.gz	-	link	deb/bluez_5.85.orig.tar.gz
 bubblewrap-0.11.1.tar.xz	-	link	deb/bubblewrap_0.11.1.orig.tar.xz
 busybox-1.37.0.tar.bz2	-	link	deb/busybox_1.37.0.orig.tar.bz2
 ca-certificates_20260601~24.04.1_all.deb	-	link	fonts/ca-certificates_20260601~24.04.1_all.deb
+cairo-1.18.4.tar.xz	-	link	deb/cairo_1.18.4.orig.tar.xz
 calamares-3.3.14.tar.gz	-	link	deb/calamares_3.3.14.orig.tar.gz
 cargo-1.98.1-x86_64-unknown-linux-gnu.tar.xz	ea1de9f9e23107d97ee2b41a72c552f34064a593da503789218387aee59f3ba4	url	https://static.rust-lang.org/dist/cargo-1.98.1-x86_64-unknown-linux-gnu.tar.xz
 cataclysm-dda-0.9.1.tar.gz	27e35a0a5181f88f0929bef180ca0465d00e606e569911cb02d97b59b8b5768a	url	https://github.com/CleverRaven/Cataclysm-DDA/archive/refs/tags/0.I-1.tar.gz
@@ -404,6 +418,7 @@ fonts-hack-ttf_3.003-3_all.deb	-	link	fonts/fonts-hack-ttf_3.003-3_all.deb
 fonts-noto-color-emoji_2.047-0ubuntu0.24.04.1_all.deb	-	link	fonts/fonts-noto-color-emoji_2.047-0ubuntu0.24.04.1_all.deb
 fonts-noto-core_20201225-2_all.deb	-	link	fonts/fonts-noto-core_20201225-2_all.deb
 freetype-2.14.2.tar.xz	-	link	deb/freetype_2.14.2+dfsg.orig.tar.xz
+fribidi-1.0.16.tar.xz	-	link	deb/fribidi_1.0.16.orig.tar.xz
 fuse3-3.18.2.tar.gz	-	link	deb/fuse3_3.18.2.orig.tar.gz
 gamemode-1.8.2.tar.gz	-	link	deb/gamemode_1.8.2.orig.tar.gz
 gcc-15.2.0.tar.xz	438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e	inner	deb/gcc-15_15.2.0.orig.tar.gz gcc-15-15.2.0/gcc-15.2.0.tar.xz
@@ -528,6 +543,7 @@ libfyaml-0.9.4.tar.gz	-	link	deb/libfyaml_0.9.4.orig.tar.gz
 libgcrypt-1.12.0.tar.bz2	-	link	deb/libgcrypt20_1.12.0.orig.tar.bz2
 libgpg-error-1.58.tar.bz2	-	link	deb/libgpg-error_1.58.orig.tar.bz2
 libgudev-238.tar.xz	-	link	deb/libgudev_238.orig.tar.xz
+libical-3.0.20.tar.gz	-	link	deb/libical3_3.0.20.orig.tar.gz
 libice-1.1.1.tar.gz	-	link	deb/libice_1.1.1.orig.tar.gz
 libinput-1.31.1.tar.gz	-	link	deb/libinput_1.31.1.orig.tar.gz
 libjpeg-turbo-2.1.5.tar.gz	-	link	deb/libjpeg-turbo_2.1.5.orig.tar.gz
@@ -544,9 +560,12 @@ libplasma-6.6.4.tar.xz	-	link	deb/libplasma_6.6.4.orig.tar.xz
 libpng-1.6.57.tar.gz	-	link	deb/libpng1.6_1.6.57.orig.tar.gz
 libppd-2.1.1.tar.xz	-	link	deb/libppd_2.1.1.orig.tar.xz
 libpsl-0.21.2.tar.xz	-	link	deb/libpsl_0.21.2.orig.tar.xz
+libqalculate-5.9.0.tar.gz	-	link	deb/libqalculate_5.9.0.orig.tar.gz
 libseccomp-2.6.0.tar.gz	-	link	deb/libseccomp_2.6.0.orig.tar.gz
+libsecret-0.21.7.tar.xz	-	link	deb/libsecret_0.21.7.orig.tar.xz
 libsm-1.2.6.tar.gz	-	link	deb/libsm_1.2.6.orig.tar.gz
 libsndfile-1.2.2.tar.gz	-	link	deb/libsndfile_1.2.2.orig.tar.gz
+libsodium-1.0.18.tar.gz	-	link	deb/libsodium_1.0.18.orig.tar.gz
 libtirpc-1.3.7.tar.bz2	-	link	deb/libtirpc_1.3.7.orig.tar.bz2
 libtool-2.5.4.tar.xz	-	link	deb/libtool_2.5.4.orig.tar.xz
 libusb-1.0.29.tar.bz2	-	link	deb/libusb-1.0_1.0.29.orig.tar.bz2
@@ -594,6 +613,7 @@ lm-sensors-3.6.2.tar.gz	-	link	deb/lm-sensors_3.6.2.orig.tar.gz
 lua-5.4.8.tar.gz	-	link	deb/lua5.4_5.4.8.orig.tar.gz
 lvm2-2.03.31.tar.xz	-	link	deb/lvm2_2.03.31.orig.tar.xz
 make-4.4.1.tar.gz	dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3	url	https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz
+md4c-0.5.2.tar.gz	-	link	deb/md4c_0.5.2.orig.tar.gz
 mesa-26.0.8.tar.xz	-	link	deb/mesa_26.0.8.orig.tar.xz
 milou-6.6.4.tar.xz	-	link	deb/milou_6.6.4.orig.tar.xz
 modemmanager-1.25.95.tar.xz	-	link	deb/modemmanager_1.25.95.orig.tar.xz
@@ -609,6 +629,7 @@ ncurses-6.6.tar.gz	-	link	deb/ncurses_6.6+20251231.orig.tar.gz
 nethack-500-src.tgz	2959b7886aac76185b90aea0c9f80d14343f604de0ae96b3dd2a760f7ab3bde9	url	https://www.nethack.org/download/5.0.0/nethack-500-src.tgz
 networkmanager-1.54.3.tar.bz2	-	link	deb/network-manager_1.54.3.orig.tar.bz2
 nghttp2-1.68.0.tar.gz	-	link	deb/nghttp2_1.68.0.orig.tar.gz
+nlohmann-json-3.11.3.tar.gz	-	link	deb/nlohmann-json3_3.12.0.really.3.12.0.really.3.11.3.orig.tar.gz
 npth-1.8.tar.bz2	-	link	deb/npth_1.8.orig.tar.bz2
 ntfs-3g-2022.10.3.tar.gz	-	link	deb/ntfs-3g_2022.10.3.orig.tar.gz
 open-vm-tools-13.0.10.tar.xz	-	link	deb/open-vm-tools_13.0.10.orig.tar.xz
@@ -617,6 +638,7 @@ opendoas-6.8.2.tar.xz	-	link	deb/opendoas_6.8.2.orig.tar.xz
 openssl-3.5.5.tar.gz	-	link	deb/openssl_3.5.5.orig.tar.gz
 opus-1.6.1.tar.xz	-	link	deb/opus_1.6.1.orig.tar.xz
 ostree-2025.7.tar.xz	-	link	deb/ostree_2025.7.orig.tar.xz
+pango-1.57.0.tar.xz	-	link	deb/pango1.0_1.57.0.orig.tar.xz
 patch-2.8.tar.xz	-	link	deb/patch_2.8.orig.tar.xz
 pcre2-10.46.tar.gz	-	link	deb/pcre2_10.46.orig.tar.gz
 pipewire-1.6.2.tar.gz	-	link	deb/pipewire_1.6.2.orig.tar.gz
@@ -669,18 +691,22 @@ rust-std-1.98.1-x86_64-unknown-linux-gnu.tar.xz	fa3ff450172a16c026944030230c5069
 rust-std-1.98.1-x86_64-unknown-linux-musl.tar.xz	bd9f35880de21dab0e387e84009c00001ae7836a4ba565cb16823f13f75f325f	url	https://static.rust-lang.org/dist/rust-std-1.98.1-x86_64-unknown-linux-musl.tar.xz
 rustc-1.98.1-x86_64-unknown-linux-gnu.tar.xz	e974f036b28565f37c0f3bd92ddefa809bee16c04f9dcf07b9ed96e05aaaf7c4	url	https://static.rust-lang.org/dist/rustc-1.98.1-x86_64-unknown-linux-gnu.tar.xz
 sbc-2.1.tar.gz	-	link	deb/sbc_2.1.orig.tar.gz
+sdbus-cpp-2.2.1.tar.gz	-	link	deb/sdbus-cpp_2.2.1.orig.tar.gz
 sddm-0.21.0+git20250502.4fe234b.tar.gz	-	link	deb/sddm_0.21.0+git20250502.4fe234b.orig.tar.gz
 sddm-kcm-6.6.4.tar.xz	-	link	deb/sddm-kcm_6.6.4.orig.tar.xz
 sdl3-3.4.2.tar.xz	-	link	deb/libsdl3_3.4.2+ds.orig.tar.xz
 sdl3-image-3.4.0.tar.xz	-	link	deb/libsdl3-image_3.4.0+ds.orig.tar.xz
 sdl3-ttf-3.2.2.tar.xz	-	link	deb/libsdl3-ttf_3.2.2+ds.orig.tar.xz
+seatd-0.9.2.tar.gz	-	link	deb/seatd_0.9.2.orig.tar.gz
 shared-mime-info-2.4.tar.bz2	-	link	deb/shared-mime-info_2.4.orig.tar.bz2
 sound-theme-freedesktop-0.8.tar.bz2	-	link	deb/sound-theme-freedesktop_0.8.orig.tar.bz2
 spirv-headers-1.4.341.0.tar.gz	-	link	deb/spirv-headers_1.6.1+1.4.341.0.orig.tar.gz
 spirv-tools-2026.1.tar.gz	-	link	deb/spirv-tools_2026.1.orig.tar.gz
 sqlite-3.46.1.tar.xz	-	link	deb/sqlite3_3.46.1.orig.tar.xz
 squashfs-tools-4.7.5.tar.gz	-	link	deb/squashfs-tools_4.7.5.orig.tar.gz
+stb-0.0_git20250907.tar.xz	-	link	deb/libstb_0.0~git20250907.fede005+ds.orig.tar.xz
 systemsettings-6.6.4.tar.xz	-	link	deb/systemsettings_6.6.4.orig.tar.xz
+tomlplusplus-3.4.0.tar.xz	-	link	deb/tomlplusplus_3.4.0+ds.orig.tar.xz
 udisks2-2.10.91.tar.bz2	-	link	deb/udisks2_2.10.91.orig.tar.bz2
 upower-1.91.1.tar.bz2	-	link	deb/upower_1.91.1.orig.tar.bz2
 userspace-rcu-0.15.6.tar.bz2	-	link	deb/liburcu_0.15.6.orig.tar.bz2

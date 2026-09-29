@@ -1,0 +1,15 @@
+pkgname=libseat
+pkgver=0.9.2
+pkgrel=0
+pkgdesc="libseat from seatd: seat and device access for Wayland compositors (niri), through elogind"
+license=MIT
+url=https://git.sr.ht/~kennylevinsen/seatd
+source=(seatd-0.9.2.tar.gz)
+builddir=$srcdir/seatd-0.9.2
+makedepends=(elogind-dev)
+subpackages=(libseat-dev)
+# Only the logind backend: melon already runs elogind, so no seatd daemon and no new service.
+build(){ meson_setup -Dlibseat-logind=elogind -Dlibseat-seatd=disabled -Dlibseat-builtin=disabled -Dserver=disabled \
+  -Dexamples=disabled -Dman-pages=disabled build
+  ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

@@ -1,0 +1,11 @@
+pkgname=libsodium
+pkgver=1.0.18
+pkgrel=0
+pkgdesc="libsodium: a portable cryptography library (Noctalia's encrypted state)"
+license=ISC
+url=https://libsodium.org
+source=(libsodium-1.0.18.tar.gz)
+subpackages=(libsodium-dev)
+# the tarball is a git snapshot without configure
+build(){ autoreconf -fi; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; }

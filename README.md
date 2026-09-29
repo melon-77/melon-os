@@ -11,7 +11,7 @@ A from-scratch, rolling x86_64 distribution:
 |---|---|
 | libc | musl 1.2.5 |
 | userland | BusyBox 1.37 |
-| init | runit 2.3 (a switch to dinit is planned) |
+| init | runit 2.3 |
 | packages | apk-tools 3 (signed apk v3 packages, binary + source recipes) |
 | kernel | Linux 7.0, generic flavour |
 | boot | GRUB 2.14, one ISO and one install that boot on both BIOS and UEFI |

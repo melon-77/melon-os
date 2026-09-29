@@ -34,8 +34,10 @@ SIMPLE=$(python3 $M/scripts/gen-simple-recipes.py)
 GETTEXT="gettext"
 # written in Rust (options=(rust)), cross-compiled with the build machine's Rust from scripts/host-rust.sh
 RUST="ripgrep"
-# libraries the niri desktop needs (issue #18): pango and cairo for both, libseat for niri, the rest for Noctalia
-NIRI_LIBS="fribidi cairo pango libseat sdbus-c++ libsodium libsecret libqalculate libical md4c nlohmann-json tomlplusplus stb"
+# libraries the niri desktop needs (issue #18): pango and cairo for both, libseat for niri, the rest for Noctalia.
+# librsvg is Rust (options=(rust)) built through cargo-c, so it comes after the Rust tools
+NIRI_LIBS="fribidi cairo pango libseat sdbus-c++ libsodium libsecret libqalculate libical md4c nlohmann-json tomlplusplus stb
+  librsvg"
 # rustc and cargo that run on melon (recipes/rust): needs melon's llvm (DESKTOP_LIBS), gcc and binutils (DEVTOOLS)
 RUSTC="rust"
 DESKTOP_LIBS="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio libdaemon avahi cups qpdf poppler libcupsfilters libppd

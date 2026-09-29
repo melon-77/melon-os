@@ -1,0 +1,11 @@
+pkgname=nasm
+pkgver=3.01
+pkgrel=0
+pkgdesc="NASM: the x86 assembler (FFmpeg, x264 and libjpeg-turbo's fast paths are written for it)"
+license=BSD-2-Clause
+url=https://www.nasm.us
+source=(nasm-3.01.tar.xz)
+# configure picks -std=c23, where bool is a keyword; musl's stdbool.h still defines it as a macro, and compiler.h's
+# typedef trick for that macro then fails (c23-bool.patch: just undefine it there)
+build(){ ./configure $conf_flags; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; }

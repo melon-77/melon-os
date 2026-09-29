@@ -1,0 +1,28 @@
+pkgname=python3-libxml2
+pkgver=2.15.2
+pkgrel=0
+pkgdesc="Python bindings for libxml2 (itstool needs them)"
+license=MIT
+url=https://gitlab.gnome.org/GNOME/libxml2
+source=(libxml2-2.15.2.tar.xz)   # keep pkgver equal to libxml2's
+builddir=$srcdir/libxml2-2.15.2
+makedepends=(python3-dev zlib-dev)
+depends=(python3)
+# The same libxml2 source with its Python part on; only the module is packaged (libxml2 itself stays its own
+# package). The bindings are generated from doxygen's XML, which the release ships in dist-doc/xml: a stand-in
+# "doxygen" copies it. meson asks melon's own python3 (it runs here, rule 18) for the module's headers and suffix.
+build(){
+  install -d $srcdir/bin
+  printf '#!/bin/sh\nrm -rf "$BUILD_ROOT/doc/xml"; mkdir -p "$BUILD_ROOT/doc/html"\ncp -r "$SOURCE_ROOT/dist-doc/xml" "$BUILD_ROOT/doc/xml"\n' > $srcdir/bin/doxygen
+  chmod 755 $srcdir/bin/doxygen
+  local py=$(ls $SYSROOT/usr/bin/python3.* | grep -E 'python3\.[0-9]+$' | sort -V | tail -1)
+  printf "[binaries]\npython3 = '%s'\npython = '%s'\ndoxygen = '%s'\n" "$py" "$py" "$srcdir/bin/doxygen" > $srcdir/python.ini
+  meson_setup --cross-file $srcdir/python.ini -Dpython=enabled -Dicu=disabled -Dlzma=disabled -Dzlib=enabled \
+    -Dhistory=disabled -Dreadline=disabled -Ddocs=disabled build
+  ninja -C build -j$JOBS
+}
+package(){
+  DESTDIR=$pkgdir ninja -C build install
+  local site=$(cd $pkgdir && ls -d usr/lib/python3.*/site-packages)
+  mv $pkgdir/$site $srcdir/site && rm -rf $pkgdir/* && install -d $pkgdir/$(dirname $site) && mv $srcdir/site $pkgdir/$site
+}

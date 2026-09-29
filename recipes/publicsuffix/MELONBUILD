@@ -1,0 +1,9 @@
+pkgname=publicsuffix
+pkgver=20260924
+pkgrel=0
+pkgdesc="The Public Suffix List (libpsl's build reads it; browsers and cookie code use it)"
+license=MPL-2.0
+url=https://publicsuffix.org
+source=(publicsuffix-20260924.dat)   # upstream's list at commit a179a48 (github.com/publicsuffix/list)
+builddir=$srcdir
+package(){ install -Dm644 publicsuffix-20260924.dat $pkgdir/usr/share/publicsuffix/public_suffix_list.dat; }

@@ -1,0 +1,11 @@
+pkgname=autoconf
+pkgver=2.73
+pkgrel=0
+pkgdesc="GNU Autoconf: makes configure scripts"
+license=GPL-3.0-or-later
+url=https://www.gnu.org/software/autoconf/
+source=(autoconf-2.73.tar.xz)
+depends=(m4 perl)
+# Perl and m4 scripts: the paths configure finds (/usr/bin/perl, /usr/bin/m4) are the same on melon
+build(){ M4=/usr/bin/m4 PERL=/usr/bin/perl ./configure $conf_flags; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,info}; }

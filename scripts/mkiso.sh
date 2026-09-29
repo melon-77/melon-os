@@ -48,6 +48,10 @@ rm -rf $ROOT/var/cache/apk/*
 mkdir -p $ROOT/usr/share/melon/profiles
 printf '%s\n' $PKGS > $ROOT/usr/share/melon/profiles/base
 [ -n "$LIVE_ONLY" ] && printf '%s\n' $LIVE_ONLY > $ROOT/usr/share/melon/profiles/live-only
+# the packages built with Rust (recipes with options=(rust)), for the installers' "remove everything built with Rust"
+for r in $(grep -lE '^options=\(.*\brust\b' $M/recipes/*/MELONBUILD); do
+  ( srcdir=/nonexistent; . "$r"; printf '%s\n' "$pkgname" ${subpackages[@]+"${subpackages[@]}"} )
+done > $ROOT/usr/share/melon/rust-packages
 if [ -n "$DESKTOP_PKGS" ]; then
   printf '%s\n' $PKGS $(printf '%s\n' $DESKTOP_PKGS | grep -vxF "${LIVE_ONLY:-@none@}") > $ROOT/usr/share/melon/profiles/desktop
   # services for the desktop profile: udev replaces mdev, NetworkManager replaces the dhcp/wpa services
@@ -100,9 +104,8 @@ mksquashfs $LIVE $ISO/melon/live.sqfs -comp zstd -Xcompression-level 15 -noappen
 
 step "package repository (extras only; the base system comes from rootfs.sqfs)"
 mkdir -p $ISO/melon/repo/$APK_ARCH
-if [ -n "$DESKTOP_PKGS" ]; then
-  apkx fetch --recursive --output $ISO/melon/repo/$APK_ARCH $DESKTOP_PKGS >/dev/null
-fi
+# (the desktop packages themselves are NOT copied here: they are already in rootfs.sqfs, which the installers copy, and
+# a second copy cost about 460 MB on the ISO and on every installed system; anything else comes from the online repo)
 # always carry the small, commonly wanted extras so an offline install can still add them
 extras="melon-base bash busybox musl apk-tools"
 # guest tools, which the installers add when they run inside a VM

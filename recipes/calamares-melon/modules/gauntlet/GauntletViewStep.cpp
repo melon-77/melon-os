@@ -55,6 +55,28 @@ GauntletConfig::setAlpine( bool a )
 }
 
 void
+GauntletConfig::setNoRust( bool r )
+{
+    if ( r == m_noRust )
+    {
+        return;
+    }
+    m_noRust = r;
+    // cal-finish removes everything built with Rust (melon-remove-rust) and hands out its reward when this file exists
+    QDir().mkpath( QStringLiteral( "/run/melon" ) );
+    QFile f( QStringLiteral( "/run/melon/.remove-rust" ) );
+    if ( r )
+    {
+        f.open( QIODevice::WriteOnly );
+    }
+    else
+    {
+        f.remove();
+    }
+    emit noRustChanged();
+}
+
+void
 GauntletConfig::recordMistake()
 {
     ++m_mistakes;
@@ -66,6 +88,8 @@ GauntletViewStep::GauntletViewStep( QObject* parent )
     , m_config( new GauntletConfig( this ) )
 {
     connect( m_config, &GauntletConfig::passedChanged, this, &GauntletViewStep::nextStatusChanged );
+    // a choice from an earlier Calamares run in this live session must not outlive its unticked checkbox
+    QFile::remove( QStringLiteral( "/run/melon/.remove-rust" ) );
     // a hidden command can let the owner through without answering (to look at the rest of the installer):
     // it leaves this file behind, and Next unlocks as soon as it appears. No rewards then (see cal-finish).
     auto* skipCheck = new QTimer( this );

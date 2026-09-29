@@ -18,6 +18,7 @@ class GauntletConfig : public QObject
     Q_PROPERTY( int setback READ setback CONSTANT )
     Q_PROPERTY( int mistakes READ mistakes NOTIFY progressChanged )
     Q_PROPERTY( bool alpine READ alpine WRITE setAlpine NOTIFY alpineChanged )
+    Q_PROPERTY( bool noRust READ noRust WRITE setNoRust NOTIFY noRustChanged )
     Q_PROPERTY( bool trialPassed READ trialPassed WRITE setTrialPassed NOTIFY trialPassedChanged )
 
 public:
@@ -29,9 +30,11 @@ public:
     int setback() const { return m_setback; }
     int mistakes() const { return m_mistakes; }
     bool alpine() const { return m_alpine; }
+    bool noRust() const { return m_noRust; }
     bool trialPassed() const { return m_trialPassed; }
     void setTrialPassed( bool t );
     void setAlpine( bool a );
+    void setNoRust( bool r );
 
     void setProgress( int p );
     void setPassed( bool p );
@@ -47,6 +50,7 @@ signals:
     void progressChanged();
     void passedChanged( bool );
     void alpineChanged();
+    void noRustChanged();
     void trialPassedChanged();
 
 private:
@@ -56,6 +60,7 @@ private:
     int m_setback = 10;
     int m_mistakes = 0;
     bool m_alpine = false;
+    bool m_noRust = false;
     bool m_trialPassed = false;
 };
 

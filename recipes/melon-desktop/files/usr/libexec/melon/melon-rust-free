@@ -1,0 +1,26 @@
+#!/bin/sh
+# melon-rust-free ROOT [USER]: the reward for installing melon without anything built with Rust: the "farewell,
+# Ferris" wallpaper, set for USER on their next Plasma login, and the badge /etc/melon/rust-free. The installers run
+# it before melon-remove-rust, so the wallpaper stays even when the removal takes the desktop along.
+set -eu
+ROOT=${1:-/} U=${2:-}
+R=/usr/share/melon/.rewards
+W=melon-farewell-ferris
+mkdir -p "$ROOT/usr/share/wallpapers" "$ROOT/etc/melon"
+cp -a "$R/rust-free/$W" "$ROOT/usr/share/wallpapers/"
+[ -s "$ROOT/etc/melon/rust-free" ] || date +%Y-%m-%d > "$ROOT/etc/melon/rust-free"
+if [ -n "$U" ] && [ -d "$ROOT/home/$U" ]; then
+  ids=$(awk -F: -v u="$U" '$1==u{print $3":"$4}' "$ROOT/etc/passwd")
+  mkdir -p "$ROOT/home/$U/.config/autostart"
+  # plasma-apply-wallpaperimage fails until plasmashell is up: the autostart then stays and tries again next login
+  cat > "$ROOT/home/$U/.config/autostart/melon-rust-free.desktop" <<DESK
+[Desktop Entry]
+Type=Application
+Name=melon rust-free wallpaper
+Exec=sh -c 'plasma-apply-wallpaperimage /usr/share/wallpapers/$W && rm -f ~/.config/autostart/melon-rust-free.desktop'
+X-KDE-autostart-phase=2
+NoDisplay=true
+DESK
+  chown "$ids" "$ROOT/home/$U/.config" "$ROOT/home/$U/.config/autostart" \
+    "$ROOT/home/$U/.config/autostart/melon-rust-free.desktop"
+fi

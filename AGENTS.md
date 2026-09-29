@@ -444,10 +444,11 @@ the tarballs are identical. A version Ubuntu doesn't have comes straight from it
 - **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (`melon-flathub`), Steam, Firefox, VLC and
   Prism Launcher offered from Flathub on first login, GameMode. Still to do: gamepad and controller udev rules,
   MangoHud (`docs/stage2-plan.md`).
-- **Init: runit stays melon's init (the owner's decision).** dinit may one day become an *optional variant* that the
-  owner builds himself, never a switch forced on the whole OS. Don't start a dinit port. Improve runit instead:
+- **Init: runit stays melon's init (the owner's decision).** dinit may one day become an *optional variant* the owner
+  builds, never a switch forced on the whole OS. Don't start a dinit port. Improve runit instead:
   readiness through `./check` scripts, and a clear start order in run scripts (a small shared helper is being
-  considered). A variant would need services for both inits, so keep run scripts simple and self-contained.
+  considered). A variant would need services for both inits, so keep run scripts simple and self-contained; what a
+  dinit variant would have to cover is listed in `docs/dinit-variant.md`.
 - **Smaller desktop ISO (decided):** the ISO's offline package repo stops carrying a second copy of the desktop
   (about 460 MB, copied onto every install too); installers must be tested with no network.
 - **Later:** a native Firefox build (needs Rust, clang and Node for melon; Firefox comes from Flathub until then).

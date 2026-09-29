@@ -1,0 +1,24 @@
+pkgname=noctalia
+pkgver=5.2.0
+pkgrel=0
+# upstream's PACKAGING.md asks for this exact description
+pkgdesc="A sleek, customizable desktop shell crafted for Wayland."
+license=MIT
+url=https://github.com/noctalia-dev/noctalia
+source=(noctalia-5.2.0.tar.gz)
+makedepends=(sdbus-c++-dev wayland-dev wayland-protocols mesa-dev freetype-dev fontconfig-dev cairo-dev pango-dev
+  harfbuzz-dev librsvg-dev libxkbcommon-dev glib-dev libsecret-dev libsodium-dev polkit-dev pipewire-dev wireplumber-dev
+  curl-dev libqalculate-dev libxml2-dev md4c-dev nlohmann-json tomlplusplus libical-dev linux-pam-dev stb)
+# shell sounds; the PipeWire daemon, upower and a Secret Service provider come with the niri profile
+depends=(sound-theme-freedesktop)
+
+# jemalloc is glibc-only. The assets under /usr/share/noctalia are needed at runtime (fonts, translations, templates).
+# No systemd unit: niri starts it (melon-niri's /etc/niri/config.kdl).
+build(){ meson_setup -Djemalloc=disabled -Dtests=disabled -Dnative_optimizations=false build; ninja -C build -j$JOBS; }
+package(){
+  DESTDIR=$pkgdir ninja -C build install
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/noctalia/LICENSE
+  # completions are a packaging step (PACKAGING.md); melon's binaries run on the build machine (rule 18)
+  mkdir -p $pkgdir/usr/share/bash-completion/completions
+  build/noctalia completions bash > $pkgdir/usr/share/bash-completion/completions/noctalia
+}

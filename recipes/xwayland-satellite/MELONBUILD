@@ -1,0 +1,21 @@
+pkgname=xwayland-satellite
+pkgver=0.8.3
+pkgrel=0
+pkgdesc="xwayland-satellite: X11 apps (Steam, older games) under Wayland compositors without Xwayland of their own (niri)"
+license=MPL-2.0
+url=https://github.com/Supreeeme/xwayland-satellite
+source=(xwayland-satellite-0.8.3.tar.gz)
+makedepends=(libxcb-dev xcb-util-cursor-dev)
+# it starts Xwayland by name
+depends=(xwayland)
+# written in Rust: the installers' "remove everything built with Rust" option takes it off
+options=(rust)
+
+# xcb-util-cursor-sys generates its bindings with bindgen (melon-build points it at the sysroot).
+# GIT_CEILING_DIRECTORIES: build.rs asks git for a version; outside a checkout vergen falls back to defaults.
+prepare(){ cargo_fetch; }
+build(){ GIT_CEILING_DIRECTORIES=$srcdir cargo_build; }
+package(){
+  install -Dm755 $(cargo_out)/xwayland-satellite $pkgdir/usr/bin/xwayland-satellite
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/xwayland-satellite/LICENSE
+}

@@ -158,7 +158,7 @@ Rebuilding the kernel takes about an hour on 2 cores.
     Qt 6 host tools in `hosttools/qt6` (`scripts/host-qt.sh`, same Qt version as the target, passed as
     `QT_HOST_PATH`). The host also needs `libltdl-dev` (libffi's autoreconf). Meson only finds programs for a
     cross build in the cross file's `[binaries]`, never on `PATH`, so `melon-build` lists the host Qt tools
-    (moc, uic, rcc, ...) and `bwrap` there.
+    (moc, uic, rcc, ...), `bwrap` and `wayland-scanner` there.
 21. **Never kill build processes with `pkill -f <pattern>`** when your own shell's command line contains
     the pattern: it kills your shell too. Find the PID and kill that.
 22. **Edit scripts that may be running (`melon-build`, `mkiso.sh`, queue scripts) through a temporary file
@@ -259,6 +259,9 @@ Rebuilding the kernel takes about an hour on 2 cores.
     a C library for musl targets unless told otherwise (`PCRE2_SYS_STATIC=0` in ripgrep): link melon's. **Every recipe
     that puts Rust code into a package says `options=(rust)`**: the installers' "remove everything built with Rust"
     option finds the packages by it (see Installers).
+    Crates that generate bindings with bindgen (xcb-util-cursor-sys) use the build machine's libclang; melon-build sets
+    `BINDGEN_EXTRA_CLANG_ARGS_<triple>=--sysroot=...` so it parses melon's headers. Projects whose meson drives cargo
+    themselves (librsvg) find `cargo`, `rustc` and cargo-c's `cargo-cbuild` (installed by `host-rust.sh`) in the cross file.
 
 47. **Flatpak must be built with X11 authorization (`-Dxauth=enabled`, libXau).** Without it, sandboxed X11 apps get
     the host's `DISPLAY` and a path to an Xauthority file that doesn't exist inside the sandbox. Xwayland refuses them

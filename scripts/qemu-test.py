@@ -29,14 +29,15 @@ uefi = '--uefi' in sys.argv
 i686 = '--i686' in sys.argv          # 32-bit ISO / disk: run in qemu-system-i386
 luks = '--luks' in sys.argv
 vmware = '--vmware' in sys.argv
+offline = '--offline' in sys.argv  # the VM keeps its network card but can't reach anything outside (no internet)
 DISKNAME = 'sda' if vmware else 'vda'
 args = [a for a in sys.argv[2:] if not a.startswith('--')]
-log = open(f'{M}/logs/qemu-{mode}{"-uefi" if uefi else ""}{"-i686" if "--i686" in sys.argv else ""}{"-vmware" if vmware else ""}.log', 'w')
+log = open(f'{M}/logs/qemu-{mode}{"-uefi" if uefi else ""}{"-i686" if "--i686" in sys.argv else ""}{"-vmware" if vmware else ""}{"-offline" if offline else ""}.log', 'w')
 
 cmd = ['qemu-system-i386' if i686 else 'qemu-system-x86_64', '-m', '1024' if i686 else '3072', '-smp', '2', '-nographic', '-no-reboot',
        '-audiodev', f'wav,id=snd0,path={M}/logs/audio-capture.wav',
        '-device', 'intel-hda', '-device', 'hda-duplex,audiodev=snd0',
-       '-netdev', 'user,id=n0', '-device', ('vmxnet3' if vmware else 'virtio-net-pci') + ',netdev=n0',
+       '-netdev', 'user,id=n0' + (',restrict=on' if offline else ''), '-device', ('vmxnet3' if vmware else 'virtio-net-pci') + ',netdev=n0',
        # QEMU guest agent channel (the host side is a socket the test talks to)
        '-device', 'virtio-serial', '-chardev', 'socket,path=/tmp/melon-qga.sock,server=on,wait=off,id=qga0',
        '-device', 'virtserialport,chardev=qga0,name=org.qemu.guest_agent.0',

@@ -46,7 +46,8 @@ scripts/melon-build     build ONE recipe -> signed .apk(s) in repo/x86_64, reind
 scripts/build-all.sh    build a list of recipes in order, logs to logs/pkg-<name>.log
 scripts/check-order.sh  every makedepends is built before the recipe that needs it (build-everything.sh runs it first)
 scripts/mkiso.sh        live/installer ISO: rootfs.sqfs (pristine apk-installed system, copied to disk by the
-                        installers) + live.sqfs (small live-session layer) + a repo of extra packages
+                        installers) + live.sqfs (small live-session layer) + a small repo of extras (VM guest tools,
+                        a few base packages; never a second copy of what rootfs.sqfs already holds)
 scripts/qemu-test.py    headless boot + install + reboot test over the serial console
 recipes/<name>/MELONBUILD   one directory per recipe (see below)
 recipes/<name>/*.patch      applied automatically with patch -p1, in name order
@@ -292,6 +293,7 @@ scripts/qemu-test.py desktop out/melon-desktop-*-x86_64.iso              # servi
 qemu-img create -f raw /tmp/desk.img 16G
 scripts/qemu-test.py desktop-install out/melon-desktop-*-x86_64.iso /tmp/desk.img   # install, SDDM greeter stays up,
                                                                           # log in through it, Plasma runs; LOOK at both screenshots
+# --offline (any mode): the VM keeps its network card but reaches nothing outside; the installers must still work
 ```
 
 **melon pinball** (`recipes/melon-pinball`; the game itself is the `game/` submodule, github.com/melon-77/melon-pinball:
@@ -470,12 +472,13 @@ the tarballs are identical. A version Ubuntu doesn't have comes straight from it
   readiness through `./check` scripts, and a clear start order in run scripts (a small shared helper is being
   considered). A variant would need services for both inits, so keep run scripts simple and self-contained; what a
   dinit variant would have to cover is listed in `docs/dinit-variant.md`.
-- **Smaller desktop ISO (decided):** the ISO's offline package repo stops carrying a second copy of the desktop
-  (about 460 MB, copied onto every install too); installers must be tested with no network.
+- **Smaller desktop ISO: done.** The ISO's offline repo no longer carries a second copy of the desktop (it did: about
+  460 MB on the ISO and on every install, in `/var/lib/melon/repo`). The installers only need that repo for extras; a
+  desktop app someone removes comes back from the online repo. Tested with `qemu-test.py ... --offline`.
 - **Rust:** recipes can be written in Rust (rule 46; ripgrep is the first), and melon has its own `rust` and `cargo`
-  packages (`recipes/rust`, rustc 1.98.1 built from source, in the package repository only, not on the ISOs). **Not
-  built yet**: written against the 1.98.1 sources and bootstrap options, but nobody has run it, so expect the first
-  `scripts/melon-build rust` to need fixes. It builds cross-native with build = host = target = musl
+  packages (`recipes/rust`, rustc 1.98.1 built from source, in the package repository only, not on the ISOs). Built
+  and tested on the build machine (29 September 2026): cargo builds and runs a program with a crates.io dependency on
+  melon. `codegen-tests = false` in its `bootstrap.toml`, because melon's llvm ships no FileCheck. It builds cross-native with build = host = target = musl
   (`x86_64-unknown-linux-musl`), from upstream's musl-hosted stage 0 (manifest entries), against melon's LLVM 21
   (shared) and its native gcc; `musl-dynamic-by-default.patch` sets musl's `crt_static_default` to false as Alpine
   and Void do (upstream's own FIXME, compiler-team#422), so `cargo build` on melon links dynamically like melon's

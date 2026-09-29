@@ -718,3 +718,15 @@ zxing-cpp-2.3.0.tar.xz	-	link	deb/zxing-cpp_2.3.0.orig.tar.xz
 rustc-1.98.1-src.tar.xz	be1816e7f6c40abb90245ad6e024bed2a7e88d7dda4561e4d5470207df616b9f	url	https://static.rust-lang.org/dist/rustc-1.98.1-src.tar.xz
 rustc-1.98.1-x86_64-unknown-linux-musl.tar.xz	dea916164b47437402d8041cbba90c1ff9ce859948b1ece8e36b08100ff92063	url	https://static.rust-lang.org/dist/rustc-1.98.1-x86_64-unknown-linux-musl.tar.xz
 cargo-1.98.1-x86_64-unknown-linux-musl.tar.xz	2bced641e198f9c4e7b129770de65cb052f2486a8f58d577792ea57c66c91b1c	url	https://static.rust-lang.org/dist/cargo-1.98.1-x86_64-unknown-linux-musl.tar.xz
+perl-5.44.0.tar.xz	505cf43912e9480495c344c70260452e32aa2a73c546a026b3f100053b23ce91	url	https://www.cpan.org/src/5.0/perl-5.44.0.tar.xz
+m4-1.4.21.tar.xz	f25c6ab51548a73a75558742fb031e0625d6485fe5f9155949d6486a2408ab66	url	https://ftp.gnu.org/gnu/m4/m4-1.4.21.tar.xz
+bison-3.8.2.tar.xz	9bba0214ccf7f1079c5d59210045227bcf619519840ebfa80cd3849cff5a5bf2	url	https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.xz
+flex-2.6.4.tar.gz	e87aae032bf07c26f85ac0ed3250998c37621d95f8bd748b31f15b33c45ee995	url	https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz
+gawk-5.4.1.tar.xz	07f6f7342b7febe4313fc2c2542ad93d64fe20ad8717200109f105a826f5fd37	url	https://ftp.gnu.org/gnu/gawk/gawk-5.4.1.tar.xz
+gperf-3.3.tar.gz	fd87e0aba7e43ae054837afd6cd4db03a3f2693deb3619085e6ed9d8d9604ad8	url	https://ftp.gnu.org/gnu/gperf/gperf-3.3.tar.gz
+bc-1.08.2.tar.gz	ae470fec429775653e042015edc928d07c8c3b2fc59765172a330d3d87785f86	url	https://ftp.gnu.org/gnu/bc/bc-1.08.2.tar.gz
+texinfo-7.3.tar.xz	51f74eb0f51cfa9873b85264dfdd5d46e8957ec95b88f0fb762f63d9e164c72e	url	https://ftp.gnu.org/gnu/texinfo/texinfo-7.3.tar.xz
+autoconf-2.73.tar.xz	9fd672b1c8425fac2fa67fa0477b990987268b90ff36d5f016dae57be0d6b52e	url	https://ftp.gnu.org/gnu/autoconf/autoconf-2.73.tar.xz
+automake-1.19.tar.xz	e3e2c2e3abf37898138db5b6c1d1dc35c9160c5978be7947d2c741705251d445	url	https://ftp.gnu.org/gnu/automake/automake-1.19.tar.xz
+autoconf-archive-2024.10.16.tar.xz	7bcd5d001916f3a50ed7436f4f700e3d2b1bade3ed803219c592d62502a57363	url	https://ftp.gnu.org/gnu/autoconf-archive/autoconf-archive-2024.10.16.tar.xz
+file-5.48.tar.gz	ed14656883b23a364b4057c05595d93252da9bc473d30106519519d0da141283	url	https://astron.com/pub/file/file-5.48.tar.gz

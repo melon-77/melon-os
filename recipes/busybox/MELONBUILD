@@ -1,9 +1,13 @@
 pkgname=busybox
 pkgver=1.37.0
+pkgrel=1
 pkgdesc="Size optimized toolbox of many common UNIX utilities"
 license=GPL-2.0-only
 url=https://busybox.net
 source=(busybox-1.37.0.tar.bz2)
+# a package that shipped a command BusyBox also has (gawk's awk, GNU bc) takes its link over; when that package goes,
+# the trigger puts BusyBox's link back (--install -s never replaces an existing file)
+triggers_busybox=(/usr/bin)
 build(){
   make defconfig
   set_cfg(){ sed -i "/^\(# \)\?$1[= ]/d" .config; echo "$1=$2" >> .config; }

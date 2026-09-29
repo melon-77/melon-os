@@ -1,0 +1,10 @@
+pkgname=autoconf-archive
+pkgver=2024.10.16
+pkgrel=0
+pkgdesc="GNU Autoconf Archive: extra autoconf macros many projects use"
+license=GPL-3.0-or-later
+url=https://www.gnu.org/software/autoconf-archive/
+source=(autoconf-archive-2024.10.16.tar.xz)
+depends=(autoconf)
+build(){ ./configure $conf_flags; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,info}; }

@@ -1,0 +1,40 @@
+pkgname=perl
+pkgver=5.44.0
+pkgrel=0
+pkgdesc="Perl 5: the scripting language (autoconf, automake, texinfo and git's tools are written in it)"
+license="Artistic-1.0-Perl OR GPL-1.0-or-later"
+url=https://www.perl.org
+source=(perl-5.44.0.tar.xz)
+subpackages=(perl-doc)
+makedepends=(zlib-dev bzip2-dev)
+# Configure runs as if native: melon's compiler and its test programs run on the build machine (rule 18).
+# It only needs to be told where melon's headers and libraries are; Config.pm gets plain paths back in package().
+build(){
+  export BUILD_ZLIB=False ZLIB_INCLUDE=$SYSROOT/usr/include ZLIB_LIB=$SYSROOT/usr/lib
+  export BUILD_BZIP2=0 BZIP2_INCLUDE=$SYSROOT/usr/include BZIP2_LIB=$SYSROOT/usr/lib
+  ./Configure -des -Dcc="$CC" -Dld="$CC" -Dar="$AR" -Dnm="$NM" -Dranlib="$RANLIB" \
+    -Doptimize="$CFLAGS" -Dldflags="$LDFLAGS" -Dlddlflags="-shared $LDFLAGS" \
+    -Dcccdlflags=-fPIC -Dccdlflags=-rdynamic \
+    -Dlibpth="$SYSROOT/usr/lib" -Dglibpth="$SYSROOT/usr/lib" -Dplibpth= -Dloclibpth= -Dlocincpth= \
+    -Dusrinc="$SYSROOT/usr/include" -Uusenm \
+    -Dprefix=/usr -Dvendorprefix=/usr -Dsiteprefix=/usr/local \
+    -Dprivlib=/usr/share/perl5/core_perl -Darchlib=/usr/lib/perl5/core_perl \
+    -Dvendorlib=/usr/share/perl5/vendor_perl -Dvendorarch=/usr/lib/perl5/vendor_perl \
+    -Dsitelib=/usr/local/share/perl5/site_perl -Dsitearch=/usr/local/lib/perl5/site_perl \
+    -Dman1dir=/usr/share/man/man1 -Dman3dir=/usr/share/man/man3 -Dman1ext=1 -Dman3ext=3pm \
+    -Dsiteman1dir=/usr/local/share/man/man1 -Dsiteman3dir=/usr/local/share/man/man3 \
+    -Dusethreads -Duseshrplib -Duselargefiles -Ud_csh -Dd_semctl_semun \
+    -Dcf_by=melon -Dcf_email=root@localhost -Dperladmin=root@localhost \
+    -Dmyhostname=localhost -Dmydomain=.localdomain -Dosvers=melon -Dmyuname='linux melon'
+  # libperl.so gets a SONAME (so: dependencies need one); LD_RUN_PATH= keeps MakeMaker from writing the sysroot's
+  # library directory into Compress::Raw::Zlib's and ::Bzip2's RPATH
+  make -j$JOBS LD_RUN_PATH= SHRPLDFLAGS='$(LDDLFLAGS) -Wl,-soname,libperl.so'
+}
+package(){
+  make DESTDIR=$pkgdir install
+  # the build used melon's cross compiler and the sysroot; modules built on melon itself use gcc and /usr
+  local f; for f in $pkgdir/usr/lib/perl5/core_perl/Config.pm $pkgdir/usr/lib/perl5/core_perl/Config_heavy.pl; do
+    sed -i -e "s|$SYSROOT||g" -e "s|$TARGET-||g" "$f"; done
+  rm -f $pkgdir/usr/lib/perl5/core_perl/.packlist
+}
+pkg_doc(){ default_doc; amove usr/share/perl5/core_perl/pod; }

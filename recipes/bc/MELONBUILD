@@ -1,0 +1,11 @@
+pkgname=bc
+pkgver=1.08.2
+pkgrel=0
+pkgdesc="GNU bc and dc: arbitrary precision calculators (the kernel build runs bc)"
+license=GPL-3.0-or-later
+url=https://www.gnu.org/software/bc/
+source=(bc-1.08.2.tar.gz)
+makedepends=(readline-dev)
+# the build runs its own fbc to make libmath.h: a melon binary, which runs on the build machine (rule 18)
+build(){ CFLAGS="$CFLAGS -std=gnu17" ./configure $conf_flags --with-readline; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/{doc,info}; }

@@ -1,0 +1,10 @@
+pkgname=lz4
+pkgver=1.10.0
+pkgrel=0
+pkgdesc="LZ4: very fast compression (library and lz4 command; rsync uses it)"
+license="BSD-2-Clause AND GPL-2.0-or-later"
+url=https://lz4.org
+source=(lz4-1.10.0.tar.gz)
+subpackages=(lz4-dev)
+build(){ make -j$JOBS PREFIX=/usr CC="$CC" AR="$AR" BUILD_STATIC=no; }
+package(){ make PREFIX=/usr DESTDIR=$pkgdir BUILD_STATIC=no install; }

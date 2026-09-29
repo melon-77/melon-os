@@ -1,0 +1,23 @@
+pkgname=tcl
+pkgver=8.6.17
+pkgrel=0
+pkgdesc="Tcl: the scripting language (sqlite's build and tests run tclsh)"
+license=TCL
+url=https://www.tcl-lang.org
+source=(tcl8.6.17-src.tar.gz)
+builddir=$srcdir/tcl8.6.17/unix
+subpackages=(tcl-dev)
+makedepends=(zlib-dev)
+# the bundled sqlite extension would be a second sqlite; melon has one
+prepare(){ rm -rf $srcdir/tcl8.6.17/pkgs/sqlite3*; }
+# libtcl gets a SONAME (so: dependencies need one); only libtcl: the bundled packages' modules are loaded by path
+build(){ ./configure $conf_flags --enable-threads --enable-64bit --disable-rpath
+  make -j$JOBS libtcl8.6.so SHLIB_LD="$CC -shared $CFLAGS $LDFLAGS -Wl,-soname,libtcl8.6.so"; make -j$JOBS; }
+package(){
+  make DESTDIR=$pkgdir INSTALL_ROOT=$pkgdir install install-private-headers
+  ln -s tclsh8.6 $pkgdir/usr/bin/tclsh
+  # tclConfig.sh records the build tree; programs built on melon need the installed paths
+  sed -i -e "s|$srcdir/tcl8.6.17/unix|/usr/lib|g" -e "s|$srcdir/tcl8.6.17|/usr/include|g" $pkgdir/usr/lib/tclConfig.sh
+  rm -rf $pkgdir/usr/share/man/mann
+}
+pkg_dev(){ default_dev; amove usr/lib/tclConfig.sh usr/lib/tclooConfig.sh 'usr/lib/libtclstub*'; }

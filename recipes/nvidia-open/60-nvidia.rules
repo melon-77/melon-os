@@ -1,0 +1,6 @@
+# nvidia-open: the driver's device nodes. NVIDIA's closed tools (nvidia-modprobe) make them on other systems; melon has
+# none of those, so udev makes them when the modules load (Flatpak's NVIDIA libraries open these files).
+KERNEL=="nvidia", RUN+="/bin/sh -c 'mknod -m 666 /dev/nvidiactl c $$(grep nvidia-frontend /proc/devices | cut -d \  -f 1) 255'"
+KERNEL=="nvidia_modeset", RUN+="/bin/sh -c 'mknod -m 666 /dev/nvidia-modeset c $$(grep nvidia-frontend /proc/devices | cut -d \  -f 1) 254'"
+KERNEL=="card*", SUBSYSTEM=="drm", DRIVERS=="nvidia", RUN+="/bin/sh -c 'mknod -m 666 /dev/nvidia%n c $$(grep nvidia-frontend /proc/devices | cut -d \  -f 1) %n'"
+KERNEL=="nvidia_uvm", RUN+="/bin/sh -c 'mknod -m 666 /dev/nvidia-uvm c $$(grep nvidia-uvm /proc/devices | cut -d \  -f 1) 0; mknod -m 666 /dev/nvidia-uvm-tools c $$(grep nvidia-uvm /proc/devices | cut -d \  -f 1) 1'"

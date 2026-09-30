@@ -49,6 +49,7 @@ accept new packages.
 
 ## Sources
 
-`sources/MANIFEST.tsv` lists every source file with its sha256 and where it comes from (mostly the
-Ubuntu source archive, some git tags on GitHub). `scripts/fetch-sources.sh` downloads them; after
+`sources/MANIFEST.tsv` lists every source file with its sha256 and where it comes from: upstream release
+tarballs and git tags, and for older recipes the Ubuntu source archive (being replaced by upstream as recipes are
+updated; new sources never come from Ubuntu, see AGENTS.md "Sources"). `scripts/fetch-sources.sh` downloads them; after
 adding a source, run `scripts/make-manifest.py` and commit the manifest.

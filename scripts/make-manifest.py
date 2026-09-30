@@ -96,7 +96,11 @@ URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA
     # step 2 (self-hosting): Go and its bootstrap (checked against go.dev), QEMU (signed by Michael Roth)
     'go1.27.1.src.tar.gz': 'https://go.dev/dl/go1.27.1.src.tar.gz',
     'go1.27.1.linux-amd64.tar.gz': 'https://go.dev/dl/go1.27.1.linux-amd64.tar.gz',
-    'qemu-11.1.1.tar.xz': 'https://download.qemu.org/qemu-11.1.1.tar.xz'}
+    'qemu-11.1.1.tar.xz': 'https://download.qemu.org/qemu-11.1.1.tar.xz',
+    # NVIDIA: linux-firmware (signed by its maintainer), NVIDIA's module source and driver (NVIDIA's sha256, Arch's sha512)
+    'linux-firmware-20260916.tar.xz': 'https://cdn.kernel.org/pub/linux/kernel/firmware/linux-firmware-20260916.tar.xz',
+    'NVIDIA-kernel-module-source-615.71.09.tar.xz': 'https://download.nvidia.com/XFree86/NVIDIA-kernel-module-source/NVIDIA-kernel-module-source-615.71.09.tar.xz',
+    'NVIDIA-Linux-x86_64-615.71.09.run': 'https://download.nvidia.com/XFree86/Linux-x86_64/615.71.09/NVIDIA-Linux-x86_64-615.71.09.run'}
 
 rows, missing = [], []
 def add(path, method, arg):

@@ -33,8 +33,8 @@ recipes/calamares-melon/   graphical installer branding and the 200-question gau
 
 ## Building
 
-Sources come from upstream release tarballs (fetched via the Ubuntu source archive in the original build
-environment) into `sources/`. Then:
+Sources come from upstream releases (`scripts/fetch-sources.sh`, into `sources/`; older recipes still use the Ubuntu
+source archive's copies of the same tarballs, and new ones come straight from upstream). Then:
 
 ```sh
 scripts/toolchain.sh
@@ -69,3 +69,8 @@ sudo apk add bash curl ca-certificates libgcc libstdc++ ripgrep
 curl -fsSL https://claude.ai/install.sh | bash
 echo 'export USE_BUILTIN_RIPGREP=0' >> ~/.bashrc    # Claude Code then searches with melon's ripgrep
 ```
+
+**NVIDIA graphics:** on a computer with an NVIDIA card (GTX 16/RTX 20 and newer), `melon-first-boot` offers the open
+driver (`sudo apk add linux-firmware-nvidia mesa-nvk`: nouveau with NVK, the desktop and games use the card) or NVIDIA's
+own kernel driver (`sudo apk add nvidia-open`: Flatpak games get NVIDIA's libraries from Flathub; the desktop can't use
+them, as they need glibc). Restart after installing either.

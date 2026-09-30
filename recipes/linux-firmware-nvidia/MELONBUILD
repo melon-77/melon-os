@@ -1,0 +1,36 @@
+pkgname=linux-firmware-nvidia
+pkgver=20260916
+pkgrel=0
+pkgdesc="Firmware for NVIDIA GPUs with nouveau (GSP 570.144 for RTX 20/GTX 16 and newer, and older cards' microcode)"
+license=custom
+url=https://gitlab.com/kernel-firmware/linux-firmware
+# upstream's release (kernel.org, signed by its maintainer); only nvidia/ is used. Not in source=(): the whole tree would
+# be unpacked for a few files.
+_fw=linux-firmware-20260916
+builddir=$srcdir/$_fw
+options=('!strip')
+prepare(){ xz -dc $SRC/$_fw.tar.xz | tar x -C $srcdir $_fw/WHENCE $_fw/nvidia $_fw/LICENSES/LICENCE.nvidia; }
+package(){
+  local d=$pkgdir/usr/lib/firmware f t l pending left n
+  # Files, compressed like the rest of melon's firmware. Left out: Tegra (in linux-firmware-other) and GSP 535.113.01,
+  # which kernel 7.0's nouveau only falls back to when 570.144 is missing (about 40 MB)
+  grep -E '^(File|RawFile): nvidia/' WHENCE | awk '{print $2}' | grep -v -e '^nvidia/tegra' -e '535\.113\.01' |
+    while read -r f; do install -Dm644 "$f" "$d/$f"; done
+  find $d -type f -exec zstd -q -19 -T0 --rm {} +
+  # Links (chips that share another chip's firmware), several passes because links point at links
+  pending=$(grep -E '^Link: nvidia/' WHENCE | grep -v '^Link: nvidia/tegra' | sed 's/^Link: //')
+  while :; do
+    left=; n=0
+    while IFS= read -r l; do
+      [ -n "$l" ] || continue
+      f=${l%% -> *}; t=${l#* -> }; mkdir -p "$d/$(dirname "$f")"
+      if [ -d "$d/$(dirname "$f")/$t" ]; then ln -s "$t" "$d/$f"; n=$((n+1))
+      elif [ -e "$d/$(dirname "$f")/$t.zst" ]; then ln -s "$t.zst" "$d/$f.zst"; n=$((n+1))
+      else left+="$l"$'\n'; fi
+    done <<< "$pending"
+    pending=$left; [ $n -gt 0 ] && [ -n "$pending" ] || break
+  done
+  # what is left points at the files left out above
+  [ -z "$pending" ] || echo "links to left-out files, not made: $(printf '%s' "$pending" | grep -c .)"
+  install -Dm644 LICENSES/LICENCE.nvidia $pkgdir/usr/share/licenses/$pkgname/LICENCE.nvidia
+}

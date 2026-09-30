@@ -1,0 +1,4 @@
+#!/bin/sh
+# the new modules (and the nouveau blacklist) take effect after a reboot
+for d in /usr/lib/modules/*; do [ -d "$d" ] && depmod -a "${d##*/}"; done
+exit 0

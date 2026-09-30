@@ -1,0 +1,41 @@
+pkgname=mesa-nvk
+pkgver=26.0.8
+pkgrel=0
+pkgdesc="NVK: Mesa's Vulkan driver for NVIDIA GPUs (GTX 16/RTX 20 and newer, with nouveau and linux-firmware-nvidia)"
+license=MIT
+url=https://docs.mesa3d.org/drivers/nvk.html
+source=(mesa-26.0.8.tar.xz)   # keep pkgver equal to mesa's
+builddir=$srcdir/mesa-26.0.8
+makedepends=(libdrm-dev wayland-dev wayland-protocols libx11-dev libxext-dev libxrandr-dev libxcb-dev libxshmfence-dev
+  expat-dev zlib-dev zstd-dev eudev-dev xorgproto)
+# NVK's shader compiler (NAK) is Rust, so it is its own package: "remove everything built with Rust" takes NVK away
+# and leaves the rest of Mesa. Rust is cross-compiled for melon like every Rust recipe (rule 46), bindgen is the build
+# machine's (scripts/host-rust.sh, with cbindgen) with its libclang, pointed at melon's headers. Mesa's Rust crates come through its
+# meson wraps (pinned by hash in subprojects/*.wrap), downloaded once into sources/mesa-packagecache.
+options=(rust)
+prepare(){
+  mkdir -p $SRC/mesa-packagecache && rm -rf subprojects/packagecache && ln -s $SRC/mesa-packagecache subprojects/packagecache
+  cat > $srcdir/rust.ini <<INI
+[binaries]
+rust = ['rustc', '--target', '$RUST_TARGET', '-C', 'linker=$TARGET-gcc', '-C', 'target-feature=-crt-static', '-C', 'link-self-contained=no']
+bindgen = '$M/hosttools/rust/bin/bindgen'
+cbindgen = '$M/hosttools/rust/bin/cbindgen'
+INI
+}
+build(){
+  # the build machine's libclang finds its own headers (stdatomic.h) only when told where they are
+  export LIBCLANG_PATH=$(ls -d /usr/lib/llvm-*/lib | sort -V | tail -1)
+  export BINDGEN_EXTRA_CLANG_ARGS="--target=x86_64-linux-musl --sysroot=$SYSROOT -resource-dir=$(ls -d $LIBCLANG_PATH/clang/* | sort -V | tail -1)"
+  PATH=$M/hosttools/bin:$PATH meson_setup --cross-file $srcdir/rust.ini \
+    -Dvulkan-drivers=nouveau -Dgallium-drivers= -Dplatforms=wayland,x11 -Dvulkan-layers= \
+    -Degl=disabled -Dgbm=disabled -Dglx=disabled -Dopengl=false -Dgles1=disabled -Dgles2=disabled -Dllvm=disabled \
+    -Dmesa-clc=system -Dvalgrind=disabled -Dlibunwind=disabled -Dlmsensors=disabled -Dbuild-tests=false -Dzstd=enabled \
+    -Dxmlconfig=disabled build
+  PATH=$M/hosttools/bin:$PATH ninja -C build -j$JOBS
+}
+package(){
+  PATH=$M/hosttools/bin:$PATH DESTDIR=$srcdir/inst ninja -C build install
+  # only NVK itself: everything else is the mesa package's
+  install -Dm755 $srcdir/inst/usr/lib/libvulkan_nouveau.so $pkgdir/usr/lib/libvulkan_nouveau.so
+  install -d $pkgdir/usr/share/vulkan/icd.d && cp $srcdir/inst/usr/share/vulkan/icd.d/nouveau_icd*.json $pkgdir/usr/share/vulkan/icd.d/
+}

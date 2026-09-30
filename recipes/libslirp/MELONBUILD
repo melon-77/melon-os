@@ -1,0 +1,12 @@
+pkgname=libslirp
+pkgver=4.9.5
+pkgrel=0
+pkgdesc="libslirp: user-mode TCP/IP networking (QEMU's -netdev user)"
+license=BSD-3-Clause
+url=https://gitlab.freedesktop.org/slirp/libslirp
+source=(libslirp-4.9.5.tar.gz)   # GitLab's archive of tag v4.9.5
+builddir=$srcdir/libslirp-v4.9.5
+subpackages=(libslirp-dev)
+makedepends=(glib-dev)
+build(){ meson_setup build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

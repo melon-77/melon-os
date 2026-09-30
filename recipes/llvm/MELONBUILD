@@ -1,5 +1,6 @@
 pkgname=llvm
 pkgver=21.1.8
+pkgrel=2
 pkgdesc="LLVM compiler infrastructure (shared library for Mesa's AMD and software renderers)"
 license="Apache-2.0 WITH LLVM-exception"
 url=https://llvm.org
@@ -29,8 +30,14 @@ build(){
 package(){
   DESTDIR=$pkgdir ninja -C build install
   rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man $pkgdir/usr/share/opt-viewer
-  # everything links the shared libLLVM, so the ~1 GB of static component archives are not shipped
-  rm -f $pkgdir/usr/lib/libLLVM*.a $pkgdir/usr/lib/libLTO.a $pkgdir/usr/lib/libRemarks.a
+  # everything links the shared libLLVM, so the ~1 GB of static component archives are not shipped, except the few
+  # that tablegen tools always link statically (a standalone clang build makes clang-tblgen from them)
+  local keep='libLLVM(Support|Demangle|TableGen|TableGenBasic|TableGenCommon)\.a' a
+  for a in $pkgdir/usr/lib/libLLVM*.a $pkgdir/usr/lib/libLTO.a $pkgdir/usr/lib/libRemarks.a; do
+    [[ $(basename $a) =~ ^$keep$ ]] || rm -f $a; done
+  # ... and LLVM's CMake package must not insist on the deleted ones: find_package(LLVM) checks that every exported
+  # file exists (it stopped clang's build against this package)
+  sed -i -E "/_cmake_import_check_files_for_.*\\.a\" \)$/{/$keep\"/!d}" $pkgdir/usr/lib/cmake/llvm/LLVMExports-release.cmake
 }
 pkg_libs(){ amove 'usr/lib/libLLVM.so.*' usr/lib/libLLVM-21*.so; }
 pkg_dev(){ default_dev; amove usr/bin usr/lib/cmake; }

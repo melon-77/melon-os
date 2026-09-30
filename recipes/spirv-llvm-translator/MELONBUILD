@@ -1,0 +1,17 @@
+pkgname=spirv-llvm-translator
+pkgver=21.1.7
+pkgrel=0
+pkgdesc="Khronos' LLVM <-> SPIR-V translator (libLLVMSPIRVLib and llvm-spirv; Mesa's OpenCL C shaders go through it)"
+license="Apache-2.0 WITH LLVM-exception"
+url=https://github.com/KhronosGroup/SPIRV-LLVM-Translator
+source=(spirv-llvm-translator-21.1.7.tar.gz)   # the v21.1.x line matches melon's LLVM 21; 21.1.8+ need newer SPIRV-Headers than melon's 1.4.341
+builddir=$srcdir/SPIRV-LLVM-Translator-21.1.7
+makedepends=(llvm-dev spirv-headers spirv-tools-dev)
+subpackages=(spirv-llvm-translator-dev)
+# SPIRV-Headers from melon's package (unset, CMake would download them)
+build(){
+  cmake_native -S . -B build -DLLVM_DIR=$SYSROOT/usr/lib/cmake/llvm -DLLVM_EXTERNAL_SPIRV_HEADERS_SOURCE_DIR=$SYSROOT/usr \
+    -DBUILD_SHARED_LIBS=ON -DLLVM_SPIRV_INCLUDE_TESTS=OFF -DCCACHE_ALLOWED=OFF
+  ninja -C build -j$JOBS
+}
+package(){ DESTDIR=$pkgdir ninja -C build install; }

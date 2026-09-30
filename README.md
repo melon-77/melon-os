@@ -51,3 +51,21 @@ Packages are signed with `keys/melon-signing.rsa` (not committed; generate your 
 
 Boot the ISO. The graphical installer (desktop ISO) is Calamares. There is also a quick console
 installer for people who know its name.
+
+## Developer tools
+
+Compilers and build tools come from the package repository (they're not on the ISOs), for example:
+
+```sh
+sudo apk add gcc g++ make pkgconf      # also offered on first login
+sudo apk add clang go cmake meson git github-cli
+sudo apk add qemu ovmf                  # virtual machines with KVM, BIOS and UEFI
+```
+
+**Claude Code** runs on melon. Anthropic's installer recognises musl and installs its musl build for your user:
+
+```sh
+sudo apk add bash curl ca-certificates libgcc libstdc++ ripgrep
+curl -fsSL https://claude.ai/install.sh | bash
+echo 'export USE_BUILTIN_RIPGREP=0' >> ~/.bashrc    # Claude Code then searches with melon's ripgrep
+```

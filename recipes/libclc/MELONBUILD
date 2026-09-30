@@ -1,0 +1,16 @@
+pkgname=libclc
+pkgver=21.1.8
+pkgrel=0
+pkgdesc="libclc: the OpenCL C library as SPIR-V (Mesa's OpenCL C shaders for Intel's drivers link against it)"
+license="Apache-2.0 WITH LLVM-exception"
+url=https://libclc.llvm.org
+source=(llvm-21.1.8.tar.xz)   # the same llvm-project source as recipes/llvm: keep pkgver equal to llvm's
+builddir=$srcdir/llvm-toolchain-21_21.1.8/libclc
+makedepends=(llvm-dev clang spirv-llvm-translator)
+# clang, llvm-as, llvm-link, opt and llvm-spirv come from the sysroot and run here (rule 18). Only the SPIR-V targets
+# Mesa uses: the library is data (bitcode), the same on every machine.
+build(){
+  cmake_native -S . -B build -DLLVM_DIR=$SYSROOT/usr/lib/cmake/llvm -DLIBCLC_TARGETS_TO_BUILD="spirv-mesa3d-;spirv64-mesa3d-"
+  ninja -C build -j$JOBS
+}
+package(){ DESTDIR=$pkgdir ninja -C build install; }

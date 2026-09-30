@@ -24,10 +24,11 @@ source by our own scripts and shipped as a signed apk v3 package.
 | filesystem | merged `/usr`: `/bin`, `/sbin`, `/usr/sbin` -> `usr/bin`, `/lib` -> `usr/lib` | packages must only ship files under `/usr`, `/etc`, `/var`, `/boot` |
 | desktop | KDE Plasma 6.6 on Wayland (KWin, Xwayland), Qt 6.10, SDDM | desktop ISO and desktop profile; list in `scripts/desktop-packages.txt` |
 | desktop plumbing | D-Bus, elogind, polkit, PipeWire + WirePlumber, NetworkManager, BlueZ, CUPS, UDisks2 | console profile keeps `dhcp` + wpa_supplicant |
-| graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe | |
+| graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe; zink (OpenGL on Vulkan) | |
 | developer tools | gcc 15.2 + g++, binutils 2.46, make 4.4.1, pkgconf, patch (`gcc`, `g++`, `binutils`, `make`, `pkgconf`, `patch`) | built cross-native with the cross toolchain's settings (PIE, SSP); in the package repository only, not on the ISOs; `melon-first-boot` offers them on first login (default no) |
 | build tools | perl 5.44, m4, bison, flex, gawk, gperf, GNU bc, texinfo, autoconf 2.73, automake 1.19, autoconf-archive, file; cmake 4.4, meson 1.12, ninja 1.13, git 2.56, nasm 3.01, tcl 8.6, rsync 3.5, lz4; xorriso, mtools, scdoc, itstool, dtc, pahole (`dwarves`), the Public Suffix List, Python's mako, PyYAML, packaging, pexpect and libxml2 bindings (`python3-*`) (`BUILDTOOLS`, `BUILDTOOLS2` in `build-everything.sh`) | what melon's recipes need to build on melon itself (self-hosting, see Roadmap); package repository only. gawk and GNU bc take over BusyBox's `awk`/`bc`/`dc` links; BusyBox's `/usr/bin` trigger puts them back when those packages go |
 | compilers, VMs | clang 21 (+ `libclc`, `spirv-llvm-translator`), Go 1.27, gh (`github-cli`), QEMU 11.1 + OVMF (`qemu`, `ovmf`) (`STEP2` in `build-everything.sh`) | package repository only. clang: Mesa's OpenCL C shader compiler on melon; QEMU + OVMF run melon's own install tests on melon; OVMF is Ubuntu 26.04's prebuilt `ovmf-generic` at Ubuntu's paths |
+| NVIDIA | the open driver: nouveau + `linux-firmware-nvidia` (GSP 570.144 from upstream linux-firmware) + NVK (`mesa-nvk`), with zink for OpenGL; or NVIDIA's own kernel driver: `nvidia-open` 615 (open modules + NVIDIA's firmware) | package repository only; `melon-first-boot` asks which one on computers with an NVIDIA card (GTX 16/RTX 20 and newer). NVIDIA's userspace needs glibc: with `nvidia-open` only Flatpak apps (Steam) get NVIDIA's libraries, from Flathub |
 | gaming | Flatpak 1.16 + Flathub, GameMode | Steam is glibc-only, so it can't run natively on musl: `melon-first-boot` offers Steam (and Firefox, VLC, Prism Launcher) from Flathub on first login |
 | game library | SDL3 3.4 + SDL3_image + SDL3_ttf (`sdl3`, `sdl3-image`, `sdl3-ttf`) | for melon's own games; SDL dlopen()s its Wayland/X11/audio backends |
 | apps and games | NetHack 5.0 (both ISOs), melon pinball (desktop ISO; its own repo, a submodule), Cataclysm: DDA and GNU gettext (package repository only) | what goes on an ISO follows the size rule in "Contributing" |
@@ -282,6 +283,19 @@ Rebuilding the kernel takes about an hour on 2 cores.
     builds with `CC=gcc`, a wrapper that runs melon's cross compiler, so Go on melon calls plain `gcc`. Go programs in
     recipes (recipes/github-cli) build with melon's own `go` from the sysroot; their modules are downloaded in
     `prepare()` into `sources/gomod`, checked against `go.sum` and sum.golang.org, and the build runs with `GOPROXY=off`.
+51. **NVIDIA's kernel modules fit one exact kernel.** `nvidia-open` is built against melon's kernel source with the exact
+    `/boot/config-melon` (a full kernel build, for `Module.symvers`, which NVIDIA's configure checks read) and depends on
+    that `linux-melon` version-release: **every linux-melon version or pkgrel change needs an nvidia-open pkgrel bump
+    and rebuild in the same change**, or systems with it can't take the new kernel. Its firmware (`nvidia-open-firmware`)
+    is NVIDIA's, shipped unmodified with NVIDIA's licence (the licence's condition for redistributing it). A real test
+    needs an NVIDIA card: QEMU can't emulate one. What the build machine checks: the modules' vermagic, `depmod -e`
+    against `System.map`, and loading them in a melon VM (`NVRM: No NVIDIA GPU found`, then a clean exit).
+52. **NVK (recipes/mesa-nvk) is Rust**, so it is its own recipe with `options=(rust)` (the rest of Mesa isn't Rust, and
+    "remove everything built with Rust" must not take the whole Mesa). Keep its `pkgver` equal to `mesa`'s. Meson
+    cross-compiles its Rust through an extra cross file (`rust` with rule 46's flags, `bindgen`, `cbindgen`); bindgen and
+    cbindgen are the build machine's (`scripts/host-rust.sh`) and load the build machine's libclang, which needs
+    `-resource-dir` to find its own headers (`BINDGEN_EXTRA_CLANG_ARGS`). Mesa's Rust crates come through its meson wraps
+    (pinned by hash) into `sources/mesa-packagecache`.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
@@ -541,6 +555,10 @@ that is the only place Ubuntu is still needed.
   source. Step 3: build melon on melon (`build-everything.sh` inside a melon system, the recipes' remaining build-machine
   tools such as Mesa's `hosttools/bin` and the host Qt and Rust replaced by melon's own), run the test suite there, and
   compare the packages with the WSL-built ones.
+- **NVIDIA (the owner: both drivers, 29 September 2026): built, waiting for a test on real hardware** by a contributor
+  with an NVIDIA card (GTX 16/RTX 20 or newer). Both ways are online installs chosen in `melon-first-boot`. Later: a
+  `linux-melon-dev` package (the kernel's build files, `Module.symvers`) would spare nvidia-open its own kernel build and
+  let people build other out-of-tree modules on melon.
 - **Later:** a native Firefox build (needs clang and Node for melon as well as Rust; Firefox comes from Flathub until then).
 
 ## Contributing: workflow and the owner's rules

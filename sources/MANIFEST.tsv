@@ -759,3 +759,6 @@ go1.27.1.src.tar.gz	4e408abae126d916b6164627193f2c54f0e3ca1312d693b86db45f862ab2
 go1.27.1.linux-amd64.tar.gz	63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445	url	https://go.dev/dl/go1.27.1.linux-amd64.tar.gz
 qemu-11.1.1.tar.xz	079ffbff8a7111bbc89022107cbabf3bbfd614d5fc9d7cc675991196aca12482	url	https://download.qemu.org/qemu-11.1.1.tar.xz
 spirv-llvm-translator-21.1.7.tar.gz	1a00e06eba69c24ded4ed5708ef3c55ad8786227017271fc335d3cc9abad2def	git	https://github.com/KhronosGroup/SPIRV-LLVM-Translator v21.1.7
+linux-firmware-20260916.tar.xz	f80dcb757a623deda62200c08e0e1a88c76fb6b54964f31b35fa74da1c90ccc5	url	https://cdn.kernel.org/pub/linux/kernel/firmware/linux-firmware-20260916.tar.xz
+NVIDIA-kernel-module-source-615.71.09.tar.xz	b038fe5d70e7c3209459a8121f231543939895145f0ad0d58d34f170e7eaf7e9	url	https://download.nvidia.com/XFree86/NVIDIA-kernel-module-source/NVIDIA-kernel-module-source-615.71.09.tar.xz
+NVIDIA-Linux-x86_64-615.71.09.run	cdceed22bbeb61248d1a6deabc2596673e3a6501698ee71ac8d2fdc28f3b70fe	url	https://download.nvidia.com/XFree86/Linux-x86_64/615.71.09/NVIDIA-Linux-x86_64-615.71.09.run

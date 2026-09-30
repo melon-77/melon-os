@@ -1,0 +1,48 @@
+pkgname=nvidia-open
+pkgver=615.71.09
+pkgrel=0
+pkgdesc="NVIDIA's own kernel driver for GTX 16/RTX 20 and newer (open kernel modules; replaces nouveau while installed)"
+license="MIT AND GPL-2.0-only"
+url=https://github.com/NVIDIA/open-gpu-kernel-modules
+# NVIDIA's module source and driver release (for its GSP firmware), both from download.nvidia.com, checked against
+# NVIDIA's sha256 and Arch's sha512. The kernel source is melon's (recipes/linux-melon), prepared with the exact config
+# melon's kernel was built with, so the modules match it (no module versioning or signing in melon's kernel).
+source=(NVIDIA-kernel-module-source-615.71.09.tar.xz linux-7.0.tar.gz)
+builddir=$srcdir/NVIDIA-kernel-module-source-615.71.09
+_run=NVIDIA-Linux-x86_64-615.71.09.run   # 530 MB; only its firmware/ is used, see prepare()
+makedepends=(linux-melon)
+# the modules only fit this exact kernel: a linux-melon rebuild needs an nvidia-open rebuild (pkgrel bump) too
+_kpkg=$(. $M/recipes/linux-melon/MELONBUILD >/dev/null 2>&1; echo "$pkgver-r${pkgrel:-0}")
+depends=("linux-melon=$_kpkg" nvidia-open-firmware)
+subpackages=(nvidia-open-firmware)
+pkgdesc_nvidia_open_firmware="GSP firmware for NVIDIA's driver $pkgver (unmodified, under NVIDIA's licence)"
+license_nvidia_open_firmware=custom
+options=('!strip')
+_kmake(){ env -u PKG_CONFIG_SYSROOT_DIR -u PKG_CONFIG_LIBDIR -u CFLAGS -u CXXFLAGS -u LDFLAGS -u CC -u CXX -u LD -u AR -u NM \
+  -u STRIP -u OBJCOPY -u READELF -u OBJDUMP -u AS -u RANLIB make ARCH=x86 CROSS_COMPILE=$TARGET- HOSTCC=gcc "$@"; }
+prepare(){ sh $SRC/$_run --extract-only --target $srcdir/run >/dev/null; }
+build(){
+  cd $srcdir/linux-7.0
+  cp $SYSROOT/boot/config-melon .config
+  # a full build of melon's kernel with its config: NVIDIA's configure checks read Module.symvers (which symbols the
+  # kernel exports), and only a build makes it. A linux-melon-dev package would save this.
+  _kmake olddefconfig; _kmake -j$JOBS vmlinux modules >/dev/null
+  _kver=$(_kmake -s kernelrelease); [ "$_kver" = "$(cat $SYSROOT/usr/lib/modules/*/melon-kver)" ]
+  cd $builddir
+  env -u CFLAGS -u CXXFLAGS -u LDFLAGS make -j$JOBS modules SYSSRC=$srcdir/linux-7.0 SYSOUT=$srcdir/linux-7.0 \
+    TARGET_ARCH=x86_64 ARCH=x86_64 CC=$TARGET-gcc LD=$TARGET-ld AR=$TARGET-ar CXX=$TARGET-g++ OBJCOPY=$TARGET-objcopy \
+    CROSS_COMPILE=$TARGET- HOSTCC=gcc
+}
+package(){
+  local kver=$(cat $SYSROOT/usr/lib/modules/*/melon-kver) k
+  for k in kernel-open/*.ko; do $TARGET-strip --strip-debug $k; install -Dm644 $k $pkgdir/usr/lib/modules/$kver/extra/$(basename $k); done
+  install -Dm644 $startdir/nvidia-open.conf $pkgdir/usr/lib/modprobe.d/nvidia-open.conf
+  install -Dm644 $startdir/60-nvidia.rules $pkgdir/usr/lib/udev/rules.d/60-nvidia.rules
+  install -Dm644 $srcdir/run/LICENSE $pkgdir/usr/share/licenses/$pkgname/LICENSE-driver
+  install -Dm644 COPYING $pkgdir/usr/share/licenses/$pkgname/COPYING
+}
+# the firmware exactly as NVIDIA ships it (its licence allows redistribution for Linux only unmodified, with the licence)
+pkg_firmware(){
+  local f; for f in $srcdir/run/firmware/*.bin; do install -Dm644 $f $subpkgdir/usr/lib/firmware/nvidia/$pkgver/$(basename $f); done
+  install -Dm644 $srcdir/run/LICENSE $subpkgdir/usr/share/licenses/nvidia-open-firmware/LICENSE
+}

@@ -1,0 +1,3 @@
+#!/bin/sh
+for d in /usr/lib/modules/*; do [ -d "$d" ] && depmod -a "${d##*/}"; done
+exit 0

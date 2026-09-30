@@ -752,3 +752,10 @@ packaging-26.3.tar.gz	94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd600
 pexpect-4.9.0.tar.gz	ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f	url	https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz
 ptyprocess-0.7.0.tar.gz	5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220	url	https://files.pythonhosted.org/packages/20/e5/16ff212c1e452235a90aeb09066144d0c5a6a8c0834397e03f5224495c4e/ptyprocess-0.7.0.tar.gz
 publicsuffix-20260924.dat	7333192f818588d9d0044d27d67210c782acd6d87cf71f54a00dfa20a561cfc9	url	https://raw.githubusercontent.com/publicsuffix/list/a179a48c465e818cfd8d626691cb317985da87fb/public_suffix_list.dat
+gh-2.101.0.tar.gz	a266fe8575c0e061b987920c1831a15f71bf0036a8729a5ebb93c2fb0164899c	git	https://github.com/cli/cli v2.101.0
+libslirp-4.9.5.tar.gz	f43e68b60b580647574ec4a0e2b6c600a56281e6c39f79426510832dc810f483	git	https://gitlab.freedesktop.org/slirp/libslirp v4.9.5
+firmware/ovmf-generic_2025.11-3ubuntu7.2_all.deb	631c4527f313ade8c3608f555f5058c4c88ca87ca823897e5021f7c7269a92c0	pool	http://archive.ubuntu.com/ubuntu/pool/main/e/edk2/ovmf-generic_2025.11-3ubuntu7.2_all.deb
+go1.27.1.src.tar.gz	4e408abae126d916b6164627193f2c54f0e3ca1312d693b86db45f862ab238b1	url	https://go.dev/dl/go1.27.1.src.tar.gz
+go1.27.1.linux-amd64.tar.gz	63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445	url	https://go.dev/dl/go1.27.1.linux-amd64.tar.gz
+qemu-11.1.1.tar.xz	079ffbff8a7111bbc89022107cbabf3bbfd614d5fc9d7cc675991196aca12482	url	https://download.qemu.org/qemu-11.1.1.tar.xz
+spirv-llvm-translator-21.1.7.tar.gz	1a00e06eba69c24ded4ed5708ef3c55ad8786227017271fc335d3cc9abad2def	git	https://github.com/KhronosGroup/SPIRV-LLVM-Translator v21.1.7

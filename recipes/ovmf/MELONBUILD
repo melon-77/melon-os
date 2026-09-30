@@ -1,0 +1,13 @@
+pkgname=ovmf
+pkgver=2025.11
+pkgrel=1
+pkgdesc="OVMF: UEFI firmware for QEMU/KVM x86_64 guests (with and without Secure Boot)"
+license=BSD-2-Clause-Patent
+url=https://github.com/tianocore/edk2
+# prebuilt: Ubuntu 26.04's ovmf-generic 2025.11-3ubuntu7.2 (edk2's build needs its own toolchain setup; the
+# firmware is the same on every machine). Same paths as on Ubuntu, which qemu-test.py uses.
+source=(firmware/ovmf-generic_2025.11-3ubuntu7.2_all.deb)
+builddir=$srcdir
+# QEMU installs its own firmware descriptors (usr/share/qemu/firmware, for the edk2 build it ships): keep those
+package(){ dpkg-deb -x ovmf-generic_2025.11-3ubuntu7.2_all.deb $pkgdir; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/qemu/firmware; }
+options=('!strip')

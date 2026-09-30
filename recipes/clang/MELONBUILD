@@ -1,0 +1,29 @@
+pkgname=clang
+pkgver=21.1.8
+pkgrel=1
+pkgdesc="Clang: the C, C++ and OpenCL C compiler on LLVM (Mesa's OpenCL C shader compiler needs it)"
+license="Apache-2.0 WITH LLVM-exception"
+url=https://clang.llvm.org
+source=(llvm-21.1.8.tar.xz)   # the same llvm-project source as recipes/llvm: keep pkgver equal to llvm's
+builddir=$srcdir/llvm-toolchain-21_21.1.8
+makedepends=(llvm-dev zlib-dev zstd-dev)
+subpackages=(clang-dev clang-libs)
+# clang drives GNU ld and takes crt files and libgcc from melon's gcc
+depends=(clang-libs gcc binutils)
+pkgdesc_clang_libs="Clang's shared libraries (libclang-cpp, libclang)"
+build(){
+  # Built on its own against melon's installed LLVM (llvm-dev), configured like recipes/llvm as a native build:
+  # the llvm-tblgen from the sysroot and the clang-tblgen built here are melon binaries and run here (rule 18).
+  cmake -G Ninja -S clang -B build \
+    -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_SYSROOT=$SYSROOT \
+    -DCMAKE_FIND_ROOT_PATH=$SYSROOT -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+    -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
+    -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+    -DLLVM_DIR=$SYSROOT/usr/lib/cmake/llvm -DLLVM_LINK_LLVM_DYLIB=ON -DCLANG_LINK_CLANG_DYLIB=ON -DLLVM_ENABLE_RTTI=ON \
+    -DCLANG_INCLUDE_TESTS=OFF -DCLANG_INCLUDE_DOCS=OFF -DLLVM_INCLUDE_TESTS=OFF -DCLANG_ENABLE_ARCMT=OFF \
+    -DLLVM_PARALLEL_LINK_JOBS=2
+  ninja -C build -j$JOBS
+}
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/man $pkgdir/usr/share/doc; }
+pkg_libs(){ amove 'usr/lib/libclang-cpp.so.*' 'usr/lib/libclang.so.*'; }
+pkg_dev(){ default_dev; amove usr/lib/cmake; }

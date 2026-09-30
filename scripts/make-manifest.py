@@ -34,7 +34,7 @@ for d in sorted(os.listdir(f'{S}/deb')):
 POOL = {  # binary .debs: source package, component
     'linux-firmware': ('linux-firmware', 'main'), 'fonts-hack-ttf': ('fonts-hack', 'universe'),
     'fonts-noto-color-emoji': ('fonts-noto-color-emoji', 'main'), 'fonts-noto-core': ('fonts-noto', 'main'),
-    'ca-certificates': ('ca-certificates', 'main')}
+    'ca-certificates': ('ca-certificates', 'main'), 'ovmf-generic': ('edk2', 'main')}
 GIT = {  # tarball name prefix -> repo, tag pattern
     'apk-tools': ('https://github.com/alpinelinux/apk-tools', 'v{v}'),
     'argp-standalone': ('https://github.com/ericonr/argp-standalone', '{v}'),
@@ -43,7 +43,10 @@ GIT = {  # tarball name prefix -> repo, tag pattern
     'musl-fts': ('https://github.com/void-linux/musl-fts', 'v{v}'),
     'musl-obstack': ('https://github.com/void-linux/musl-obstack', 'v{v}'),
     'ripgrep': ('https://github.com/BurntSushi/ripgrep', '{v}'),
-    'vulkan-headers': ('https://github.com/KhronosGroup/Vulkan-Headers', 'v{v}')}
+    'vulkan-headers': ('https://github.com/KhronosGroup/Vulkan-Headers', 'v{v}'),
+    'spirv-llvm-translator': ('https://github.com/KhronosGroup/SPIRV-LLVM-Translator', 'v{v}'),
+    'gh': ('https://github.com/cli/cli', 'v{v}'),
+    'libslirp': ('https://gitlab.freedesktop.org/slirp/libslirp', 'v{v}')}
 URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA 0.H, Rust 1.93 and its make-dfsg drops make's doc/; host-rust.sh wants 1.98.1)
     'cataclysm-dda-0.9.1.tar.gz': 'https://github.com/CleverRaven/Cataclysm-DDA/archive/refs/tags/0.I-1.tar.gz',
     'cargo-1.98.1-x86_64-unknown-linux-gnu.tar.xz': 'https://static.rust-lang.org/dist/cargo-1.98.1-x86_64-unknown-linux-gnu.tar.xz',
@@ -89,7 +92,11 @@ URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA
     'packaging-26.3.tar.gz': 'https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz',
     'pexpect-4.9.0.tar.gz': 'https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz',
     'ptyprocess-0.7.0.tar.gz': 'https://files.pythonhosted.org/packages/20/e5/16ff212c1e452235a90aeb09066144d0c5a6a8c0834397e03f5224495c4e/ptyprocess-0.7.0.tar.gz',
-    'publicsuffix-20260924.dat': 'https://raw.githubusercontent.com/publicsuffix/list/a179a48c465e818cfd8d626691cb317985da87fb/public_suffix_list.dat'}
+    'publicsuffix-20260924.dat': 'https://raw.githubusercontent.com/publicsuffix/list/a179a48c465e818cfd8d626691cb317985da87fb/public_suffix_list.dat',
+    # step 2 (self-hosting): Go and its bootstrap (checked against go.dev), QEMU (signed by Michael Roth)
+    'go1.27.1.src.tar.gz': 'https://go.dev/dl/go1.27.1.src.tar.gz',
+    'go1.27.1.linux-amd64.tar.gz': 'https://go.dev/dl/go1.27.1.linux-amd64.tar.gz',
+    'qemu-11.1.1.tar.xz': 'https://download.qemu.org/qemu-11.1.1.tar.xz'}
 
 rows, missing = [], []
 def add(path, method, arg):

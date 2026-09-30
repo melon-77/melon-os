@@ -1,0 +1,22 @@
+pkgname=qemu
+pkgver=11.1.1
+pkgrel=0
+pkgdesc="QEMU: PC emulator and virtualizer with KVM (x86_64 and i386 guests; qemu-img)"
+license=GPL-2.0-only
+url=https://www.qemu.org
+source=(qemu-11.1.1.tar.xz)
+makedepends=(glib-dev pixman-dev zlib-dev zstd-dev libslirp-dev ncurses-dev libpng-dev libjpeg-turbo-dev libseccomp-dev
+  pipewire-dev linux-headers)
+# Headless and VNC displays plus curses (no SDL2 or GTK in melon); sound through PipeWire, or to a .wav file (the
+# tests). melon's own QEMU tests need KVM, user networking (libslirp), the VMware/virtio/USB devices and the ROMs
+# QEMU ships (SeaBIOS, option ROMs). UEFI firmware is the ovmf package.
+build(){
+  PKG_CONFIG=pkg-config ./configure --cross-prefix=$TARGET- --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
+    --libexecdir=/usr/libexec --python=/usr/bin/python3 --target-list=x86_64-softmmu,i386-softmmu \
+    --enable-kvm --enable-slirp --enable-vnc --enable-vnc-jpeg --enable-png --enable-curses --enable-seccomp \
+    --enable-pixman --enable-zstd --audio-drv-list=pipewire --enable-tools --disable-guest-agent \
+    --disable-gtk --disable-sdl --disable-opengl --disable-spice --disable-xen --disable-docs --disable-werror \
+    --disable-rust --disable-debug-info --disable-download
+  make -j$JOBS
+}
+package(){ make DESTDIR=$pkgdir install; }

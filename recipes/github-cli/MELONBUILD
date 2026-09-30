@@ -1,0 +1,28 @@
+pkgname=github-cli
+pkgver=2.101.0
+pkgrel=0
+pkgdesc="gh: GitHub on the command line (pull requests, issues, releases)"
+license=MIT
+url=https://cli.github.com
+source=(gh-2.101.0.tar.gz)
+builddir=$srcdir/cli-2.101.0
+makedepends=(go)
+# Built with melon's own go from the sysroot (a melon binary, it runs here). Modules come from proxy.golang.org into
+# sources/gomod in prepare(), checked against go.sum and sum.golang.org; the build itself is offline.
+_go(){ env GOROOT=$SYSROOT/usr/lib/go GOMODCACHE=$SRC/gomod GOCACHE=$srcdir/cache GOPATH=$srcdir/gopath GOTOOLCHAIN=local \
+  GOFLAGS="-buildvcs=false -trimpath" CGO_ENABLED=0 $SYSROOT/usr/lib/go/bin/go "$@"; }
+prepare(){ _go mod download -x >/dev/null; }
+build(){
+  export GOPROXY=off
+  _go build -mod=readonly -ldflags "-s -w -X github.com/cli/cli/v2/internal/build.Version=$pkgver" \
+    -o bin/gh ./cmd/gh
+  _go run -mod=readonly ./cmd/gen-docs --man-page --doc-path share/man/man1 >/dev/null
+  for s in bash fish zsh; do bin/gh completion -s $s > gh.$s; done
+}
+package(){
+  install -Dm755 bin/gh $pkgdir/usr/bin/gh
+  install -d $pkgdir/usr/share/man/man1 && cp share/man/man1/*.1 $pkgdir/usr/share/man/man1/
+  install -Dm644 gh.bash $pkgdir/usr/share/bash-completion/completions/gh
+  install -Dm644 gh.fish $pkgdir/usr/share/fish/vendor_completions.d/gh.fish
+  install -Dm644 gh.zsh $pkgdir/usr/share/zsh/site-functions/_gh
+}

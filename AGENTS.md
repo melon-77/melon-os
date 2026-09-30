@@ -27,6 +27,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe | |
 | developer tools | gcc 15.2 + g++, binutils 2.46, make 4.4.1, pkgconf, patch (`gcc`, `g++`, `binutils`, `make`, `pkgconf`, `patch`) | built cross-native with the cross toolchain's settings (PIE, SSP); in the package repository only, not on the ISOs; `melon-first-boot` offers them on first login (default no) |
 | build tools | perl 5.44, m4, bison, flex, gawk, gperf, GNU bc, texinfo, autoconf 2.73, automake 1.19, autoconf-archive, file; cmake 4.4, meson 1.12, ninja 1.13, git 2.56, nasm 3.01, tcl 8.6, rsync 3.5, lz4; xorriso, mtools, scdoc, itstool, dtc, pahole (`dwarves`), the Public Suffix List, Python's mako, PyYAML, packaging, pexpect and libxml2 bindings (`python3-*`) (`BUILDTOOLS`, `BUILDTOOLS2` in `build-everything.sh`) | what melon's recipes need to build on melon itself (self-hosting, see Roadmap); package repository only. gawk and GNU bc take over BusyBox's `awk`/`bc`/`dc` links; BusyBox's `/usr/bin` trigger puts them back when those packages go |
+| compilers, VMs | clang 21 (+ `libclc`, `spirv-llvm-translator`), Go 1.27, gh (`github-cli`), QEMU 11.1 + OVMF (`qemu`, `ovmf`) (`STEP2` in `build-everything.sh`) | package repository only. clang: Mesa's OpenCL C shader compiler on melon; QEMU + OVMF run melon's own install tests on melon; OVMF is Ubuntu 26.04's prebuilt `ovmf-generic` at Ubuntu's paths |
 | gaming | Flatpak 1.16 + Flathub, GameMode | Steam is glibc-only, so it can't run natively on musl: `melon-first-boot` offers Steam (and Firefox, VLC, Prism Launcher) from Flathub on first login |
 | game library | SDL3 3.4 + SDL3_image + SDL3_ttf (`sdl3`, `sdl3-image`, `sdl3-ttf`) | for melon's own games; SDL dlopen()s its Wayland/X11/audio backends |
 | apps and games | NetHack 5.0 (both ISOs), melon pinball (desktop ISO; its own repo, a submodule), Cataclysm: DDA and GNU gettext (package repository only) | what goes on an ISO follows the size rule in "Contributing" |
@@ -92,6 +93,8 @@ Things the builder gives you:
 - Triggers: `triggers_<x>=(dir ...)` plus a `<pkg>.trigger` script; apk runs the script (with the changed
   directories as arguments) after any transaction that touches those directories, and when `<pkg>` itself is
   installed. Use them for caches other packages feed, e.g. `recipes/shared-mime-info`.
+- `cmake_native <args>` configures CMake as a native build with melon's compilers and sysroot, so generators the build
+  makes (LLVM's tablegens) run here (rule 18); `recipes/llvm`, `recipes/clang`. `cmake_setup` is the cross build.
 - `py_install <name> <dirs...>` installs pure-Python modules into python3's site-packages with a small `.dist-info`
   (`recipes/python3-mako`). Modules with C parts need their build system (`recipes/python3-libxml2`).
 - `options=('!strip')` skips stripping. `options=(keepdirs)` keeps empty directories.
@@ -250,7 +253,8 @@ Rebuilding the kernel takes about an hour on 2 cores.
     ...), never `HOST_CC`, which other build systems read too. `cargo_fetch` (in `prepare()`) downloads crates from
     crates.io into `sources/cargo`, pinned by the checksums in the project's `Cargo.lock`; `cargo_build` then builds
     offline with `--locked`, and `cargo_out` names the output directory. A build script that asks git for a commit
-    hash finds melon's checkout: set `GIT_CEILING_DIRECTORIES=$srcdir`. `-sys` crates build their own static copy of
+    hash would find melon's own checkout: melon-build exports `GIT_CEILING_DIRECTORIES=$WORK` for every build (clang's
+    `--version` had named melon's repo). `-sys` crates build their own static copy of
     a C library for musl targets unless told otherwise (`PCRE2_SYS_STATIC=0` in ripgrep): link melon's. **Every recipe
     that puts Rust code into a package says `options=(rust)`**: the installers' "remove everything built with Rust"
     option finds the packages by it (see Installers).
@@ -267,6 +271,17 @@ Rebuilding the kernel takes about an hour on 2 cores.
     module's RPATH through `LD_RUN_PATH`: `make LD_RUN_PATH=` keeps the sysroot out (a `LEAK:` line otherwise).
     CMake's own `try_run` checks run the same way: `-DCMAKE_CROSSCOMPILING_EMULATOR=/usr/bin/env` (recipes/cmake).
     A library built without a SONAME (perl's, Tcl's) gets one on its link line, or the `so:` dependency on it can't be met.
+
+49. **melon's llvm-dev keeps only five static archives** (LLVMSupport, LLVMDemangle, LLVMTableGen, -Basic, -Common): the
+    rest (about 1 GB) would pass GitHub's file limit, and everything links the shared libLLVM. Tablegen tools always link
+    those five statically, and a standalone build against melon's LLVM (clang, recipes/clang) makes its own
+    `clang-tblgen`. The recipe also drops the deleted archives from `LLVMExports-release.cmake`: `find_package(LLVM)`
+    refuses to configure while an exported file is missing.
+50. **Go records its defaults when it is built:** a set `CGO_ENABLED` becomes the permanent default, and the C compiler's
+    name is baked in. recipes/go leaves `CGO_ENABLED` unset (cgo switches on by itself when a compiler is installed) and
+    builds with `CC=gcc`, a wrapper that runs melon's cross compiler, so Go on melon calls plain `gcc`. Go programs in
+    recipes (recipes/github-cli) build with melon's own `go` from the sysroot; their modules are downloaded in
+    `prepare()` into `sources/gomod`, checked against `go.sum` and sum.golang.org, and the build runs with `GOPROXY=off`.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
@@ -512,8 +527,14 @@ the tarballs are identical. A version Ubuntu doesn't have comes straight from it
   cmake and meson projects build with ninja, git clones over https, nasm output links and runs. The third batch
   (xorriso, mtools, scdoc, itstool, dtc, pahole, the Public Suffix List, and Python's mako, PyYAML, packaging, pexpect
   and libxml2 bindings) too: each was run on melon (an ISO and a FAT image made, itstool, scdoc, dtc and pahole output,
-  pexpect driving a shell). Step 2: clang + libclc + SPIR-V tools (Mesa's
-  host tools), QEMU + OVMF for the tests, Go and gh. Step 3: rebuild everything on melon and run the test suite.
+  pexpect driving a shell). **Step 2 is done too:** clang 21 with libclc and the SPIR-V translator (Mesa's
+  `mesa_clc` and `vtn_bindgen2` build on melon from Mesa's source and turn OpenCL C into valid SPIR-V), QEMU 11.1 with
+  libslirp and OVMF (melon's own `qemu-test.py live`, `disk` and `disk --uefi` pass when run inside melon with melon's
+  QEMU, Python and pexpect), Go 1.27 (cgo on by default with melon's gcc) and gh. Claude Code installs on melon with
+  Anthropic's own installer, which picks its musl build (README, "Developer tools"); it isn't packaged, as it isn't open
+  source. Step 3: build melon on melon (`build-everything.sh` inside a melon system, the recipes' remaining build-machine
+  tools such as Mesa's `hosttools/bin` and the host Qt and Rust replaced by melon's own), run the test suite there, and
+  compare the packages with the WSL-built ones.
 - **Later:** a native Firefox build (needs clang and Node for melon as well as Rust; Firefox comes from Flathub until then).
 
 ## Contributing: workflow and the owner's rules

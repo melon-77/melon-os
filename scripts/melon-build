@@ -35,6 +35,9 @@ export PKG_CONFIG_PATH=
 # msgfmt finds ITS rules (polkit, gschema, ...) installed by earlier melon packages
 export GETTEXTDATADIRS=$SYSROOT/usr/share/gettext:/usr/share/gettext
 export CONFIG_SITE=$M/scripts/config.site
+# build systems that ask git for "their" revision (clang --version, Rust build scripts) must not find melon's own
+# checkout above the source tree: git stops looking at $WORK
+export GIT_CEILING_DIRECTORIES=$WORK
 CHOST=$TARGET CBUILD=$(gcc -dumpmachine)
 export CHOST CBUILD
 conf_flags="--host=$CHOST --build=$CBUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --mandir=/usr/share/man --infodir=/usr/share/info --libdir=/usr/lib --bindir=/usr/bin --sbindir=/usr/bin --libexecdir=/usr/libexec"
@@ -90,6 +93,12 @@ export CMAKE_TC
 cmake_setup(){ cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TC" -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
   -DCMAKE_INSTALL_SBINDIR=bin -DCMAKE_INSTALL_LIBEXECDIR=libexec -DCMAKE_INSTALL_SYSCONFDIR=/etc -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_TESTING=OFF "$@"; }
+# CMake configured as a *native* build with melon's compilers and sysroot: CMake doesn't know it is cross-compiling,
+# so the programs a build makes and runs (LLVM's tablegens, generators) run here directly (rule 18). recipes/clang.
+cmake_native(){ cmake -G Ninja -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_SYSROOT=$SYSROOT \
+  -DCMAKE_FIND_ROOT_PATH=$SYSROOT -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY -DCMAKE_INSTALL_PREFIX=/usr \
+  -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CXXFLAGS" "$@"; }
 # the cross file supplies the target pkg-config settings; the environment is left to native (build-host) lookups
 meson_setup(){ local args=(); while IFS= read -r -d '' a; do args+=("$a"); done < <(python3 $M/scripts/meson-filter-opts.py "$@"; printf '\0')
   env -u PKG_CONFIG_LIBDIR -u PKG_CONFIG_SYSROOT_DIR -u PKG_CONFIG_PATH meson setup --cross-file "$MESON_CROSS" --prefix=/usr --libdir=lib --sbindir=bin --libexecdir=libexec --sysconfdir=/etc --localstatedir=/var --buildtype=release -Db_lto=false "${args[@]}"; }

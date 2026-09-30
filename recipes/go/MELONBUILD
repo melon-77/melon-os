@@ -1,0 +1,32 @@
+pkgname=go
+pkgver=1.27.1
+pkgrel=0
+pkgdesc="Go: the Go programming language toolchain"
+license=BSD-3-Clause
+url=https://go.dev
+source=(go1.27.1.src.tar.gz)
+builddir=$srcdir/go
+# Go builds itself with an existing Go: upstream's linux-amd64 release of the same version (sources/, checked like
+# every other source) is the bootstrap. It isn't in source=() because both tarballs unpack into go/.
+_bootstrap=go1.27.1.linux-amd64.tar.gz
+prepare(){ mkdir -p $srcdir/bootstrap && tar xf $SRC/$_bootstrap -C $srcdir/bootstrap; }
+build(){
+  # CGO_ENABLED stays unset, so Go on melon uses cgo whenever a C compiler is installed. The default compiler it
+  # records is plain gcc/g++: during the build those names run melon's cross compiler (the toolchain's cgo parts
+  # link against musl, so its binaries are melon binaries; they also run here, rule 18).
+  mkdir -p $srcdir/cc
+  printf '#!/bin/sh\nexec %s "$@"\n' "$CC" > $srcdir/cc/gcc; printf '#!/bin/sh\nexec %s "$@"\n' "$CXX" > $srcdir/cc/g++
+  chmod 755 $srcdir/cc/gcc $srcdir/cc/g++
+  cd src
+  env -u CGO_ENABLED PATH=$srcdir/cc:$PATH CC=gcc CXX=g++ CGO_CFLAGS="$CFLAGS" CGO_LDFLAGS="$LDFLAGS" \
+    GOROOT_BOOTSTRAP=$srcdir/bootstrap/go GOCACHE=$srcdir/cache GOTOOLCHAIN=local GOAMD64=v1 GOPATH=$srcdir/gopath \
+    GOFLAGS=-buildvcs=false ./make.bash -v
+}
+package(){
+  local g=$pkgdir/usr/lib/go; install -d $g $pkgdir/usr/bin
+  cp -a bin pkg src lib misc go.env VERSION $g/
+  rm -rf $g/pkg/obj $g/pkg/bootstrap $g/pkg/tool/*/api
+  # tests and their data are only for testing Go itself
+  find $g/src -type d -name testdata -prune -exec rm -rf {} +; find $g/src -name '*_test.go' -delete
+  ln -s ../lib/go/bin/go $pkgdir/usr/bin/go; ln -s ../lib/go/bin/gofmt $pkgdir/usr/bin/gofmt
+}

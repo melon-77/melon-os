@@ -478,13 +478,19 @@ If `melon-signing.rsa` leaks or is lost:
 
 ## Sources
 
-The original build container can't reach kernel.org, gnu.org or most upstream sites. It can reach the
-Ubuntu archive and public GitHub. Upstream tarballs were therefore taken from the Ubuntu 26.04 source
-archive (`apt-get source --download-only <pkg>`, then the `*.orig.tar.*`, symlinked into `sources/` under
-its upstream name) or from GitHub (apk-tools). Firmware blobs come from Ubuntu's `linux-firmware-*`
-.debs. If you have normal internet access, fetching the same versions from upstream is fine, as long as
-the tarballs are identical. A version Ubuntu doesn't have comes straight from its upstream site: list it in
-`URL` in `scripts/make-manifest.py` (method `url` in `MANIFEST.tsv`, checked by sha256 like the others).
+**New sources come from upstream, not from Ubuntu** (the owner's decision, 29 September 2026). Take each project's own
+release: the tarball from its official site or a pinned tag of its official repository. Firmware comes from upstream
+linux-firmware (kernel.org), NVIDIA's driver from NVIDIA. Verify every download: the release's signature where the
+project signs (the GNU keyring, kernel.org's `.sign` files, the release manager's key), otherwise its published checksum,
+cross-checked against another distribution's recipe (Alpine's APKBUILD, Arch's PKGBUILD); say in the commit how it was
+checked. List the file in `URL` (method `url`) or `GIT` in `scripts/make-manifest.py` and add its row to
+`sources/MANIFEST.tsv` (sha256 checked on every fetch).
+
+History: the first build container could only reach the Ubuntu archive and GitHub, so many older recipes still use
+Ubuntu 26.04's `*.orig.tar.*` (the upstream tarballs, repacked by name only; method `apt`) and some firmware and data
+come from Ubuntu `.deb`s (method `pool`). That's no reason to keep pulling from Ubuntu: when you touch one of those
+recipes (a version bump, a fix), move its source to upstream. The build machine happens to run Ubuntu (BUILDING.md);
+that is the only place Ubuntu is still needed.
 
 ## Roadmap
 

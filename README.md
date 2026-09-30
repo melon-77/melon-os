@@ -33,8 +33,8 @@ recipes/calamares-melon/   graphical installer branding and the 200-question gau
 
 ## Building
 
-Sources come from upstream release tarballs (fetched via the Ubuntu source archive in the original build
-environment) into `sources/`. Then:
+Sources come from upstream releases (`scripts/fetch-sources.sh`, into `sources/`; older recipes still use the Ubuntu
+source archive's copies of the same tarballs, and new ones come straight from upstream). Then:
 
 ```sh
 scripts/toolchain.sh

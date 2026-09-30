@@ -69,3 +69,8 @@ sudo apk add bash curl ca-certificates libgcc libstdc++ ripgrep
 curl -fsSL https://claude.ai/install.sh | bash
 echo 'export USE_BUILTIN_RIPGREP=0' >> ~/.bashrc    # Claude Code then searches with melon's ripgrep
 ```
+
+**NVIDIA graphics:** on a computer with an NVIDIA card (GTX 16/RTX 20 and newer), `melon-first-boot` offers the open
+driver (`sudo apk add linux-firmware-nvidia mesa-nvk`: nouveau with NVK, the desktop and games use the card) or NVIDIA's
+own kernel driver (`sudo apk add nvidia-open`: Flatpak games get NVIDIA's libraries from Flathub; the desktop can't use
+them, as they need glibc). Restart after installing either.

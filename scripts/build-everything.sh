@@ -34,6 +34,14 @@ SIMPLE=$(python3 $M/scripts/gen-simple-recipes.py)
 GETTEXT="gettext"
 # written in Rust (options=(rust)), cross-compiled with the build machine's Rust from scripts/host-rust.sh
 RUST="ripgrep"
+# libraries the niri desktop needs (issue #18): pango and cairo for both, libseat for niri, the rest for Noctalia.
+# librsvg is Rust (options=(rust)) built through cargo-c, so it comes after the Rust tools
+NIRI_LIBS="fribidi cairo pango libseat sdbus-c++ libsodium libsecret libqalculate libical md4c nlohmann-json tomlplusplus stb
+  librsvg"
+# the niri desktop (issue #18): after DESKTOP_LIBS, since niri and Noctalia need Mesa and xwayland-satellite Xwayland
+NIRI="tllist utf8proc fcft foot xwayland-satellite niri noctalia melon-niri"
+# the niri desktop's file manager, PCManFM-Qt: Qt 6 without KDE Frameworks, but it needs layer-shell-qt (KDE)
+NIRI_APPS="libexif libfm-extra menu-cache lxqt-build-tools lxqt-menu-data libfm-qt pcmanfm-qt"
 # rustc and cargo that run on melon (recipes/rust): needs melon's llvm (DESKTOP_LIBS), gcc and binutils (DEVTOOLS)
 RUSTC="rust"
 DESKTOP_LIBS="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio libdaemon avahi cups qpdf poppler libcupsfilters libppd
@@ -55,7 +63,7 @@ NVIDIA="linux-firmware-nvidia mesa-nvk nvidia-open"
 BUILDTOOLS2="lz4 ninja cmake meson git nasm tcl rsync
   python3-markupsafe python3-mako python3-yaml python3-packaging python3-ptyprocess python3-pexpect python3-libxml2 itstool
   xorriso mtools scdoc dtc dwarves publicsuffix"
-ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $DESKTOP_LIBS $STEP2 $NVIDIA $RUSTC $KDE $INSTALLERS | awk '!seen[$0]++')
+ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $NIRI_LIBS $DESKTOP_LIBS $NIRI $STEP2 $NVIDIA $RUSTC $KDE $NIRI_APPS $INSTALLERS | awk '!seen[$0]++')
 # recipes nobody listed yet go at the end
 EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))
 ALL="$ALL $EXTRA"

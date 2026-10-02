@@ -1,0 +1,16 @@
+pkgname=stb
+pkgver=0.0_git20250907
+pkgrel=0
+pkgdesc="stb: single-file public domain C libraries (headers only; Noctalia needs stb_image_resize2 and stb_image_write)"
+license="MIT OR Unlicense"
+url=https://github.com/nothings/stb
+source=(stb-0.0_git20250907.tar.xz)
+builddir=$srcdir/libstb-0.0~git20250907.fede005
+options=('!strip')
+# upstream has no build system: the headers go to /usr/include/stb, where Noctalia looks for them
+build(){ :; }
+package(){
+  install -d $pkgdir/usr/include/stb
+  install -m644 stb_*.h $pkgdir/usr/include/stb/
+  install -Dm644 LICENSE $pkgdir/usr/share/licenses/stb/LICENSE
+}

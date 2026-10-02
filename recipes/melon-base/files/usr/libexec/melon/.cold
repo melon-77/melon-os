@@ -16,6 +16,7 @@
 # (with the melon gauntlet); this one installs the same thing in a handful of prompts.
 #   MELON_PROFILE=base     console system
 #   MELON_PROFILE=desktop  everything the desktop ISO installs (KDE Plasma, Wayland, Flatpak, ...)
+#   MELON_PROFILE=niri     the same desktop with niri and Noctalia instead of Plasma (online: needs a network)
 set -e
 PATH=/usr/bin
 REPO=${MELON_REPO:-/media/melon/melon/repo}
@@ -88,10 +89,22 @@ if [ "$ARCH" != x86 ] && [ -d /sys/firmware/efi ]; then
     echo "   Disk Management, 'Shrink Volume') and start again; carrying on erases the whole disk."
   fi
 fi
-PROFILES=$(ls /usr/share/melon/profiles 2>/dev/null | grep -v "\.services$" | xargs)
+# a profile with a <name>.online marker (niri) needs packages that are only in the online repository: offer it only
+# when that repository answers and has all of them (melon-profile-online)
+ONLINE_REPO="$(cat /usr/share/melon/repo-url 2>/dev/null)/$ARCH/Packages.adb"
+PROFILES=; NOTOFFERED=
+for f in /usr/share/melon/profiles/*; do
+  n=${f##*/}; [ -f "$f" ] || continue
+  case $n in *.services|*.online|live-only) continue ;; esac
+  if [ -f "$f.online" ] && ! /usr/libexec/melon/melon-profile-online $n; then NOTOFFERED="$NOTOFFERED $n"; continue; fi
+  PROFILES="$PROFILES $n"
+done
+PROFILES=${PROFILES# }
+[ -n "$NOTOFFERED" ] && echo "   Not offered without a working network:$NOTOFFERED (they install from melon's online repository)"
 DEFPROFILE=base; [ -f /usr/share/melon/profiles/desktop ] && DEFPROFILE=desktop
 ask MELON_PROFILE "What to install ($PROFILES)" $DEFPROFILE
 [ -f /usr/share/melon/profiles/$MELON_PROFILE ] || die "unknown profile $MELON_PROFILE"
+case " $NOTOFFERED " in *" $MELON_PROFILE "*) die "the $MELON_PROFILE profile installs from melon's online repository, which can't be reached" ;; esac
 ask MELON_HOSTNAME "Hostname" melon
 askpw MELON_ROOTPW "Root password"
 ask MELON_USER "Your user name (empty for none)" ""
@@ -101,7 +114,10 @@ if ls -d /sys/class/net/*/wireless >/dev/null 2>&1; then
   [ -n "$MELON_WIFI_SSID" ] && askpw MELON_WIFI_PSK "Wi-Fi password"
 fi
 ask MELON_ALPINE "Also offer Alpine's packages as an opt-in @alpine repo (y/n)" n
-ask MELON_NORUST "Remove everything built with Rust, and whatever depends on it (y/n)" n
+case $MELON_PROFILE in
+  niri) ask MELON_NORUST "Remove everything built with Rust, and whatever depends on it (niri and Noctalia are: no desktop is left) (y/n)" n ;;
+  *) ask MELON_NORUST "Remove everything built with Rust, and whatever depends on it (y/n)" n ;;
+esac
 ENCRYPT=n
 if command -v cryptsetup >/dev/null; then
   ask MELON_ENCRYPT "Encrypt the system with a passphrase (LUKS) (y/n)" n
@@ -185,8 +201,11 @@ grep -v '^#' /usr/share/melon/profiles/$MELON_PROFILE | grep . > /tmp/melon-want
 DEL=$(grep -vxF -f /tmp/melon-want $TARGET/etc/apk/world | xargs || true)
 ADD=$(grep -vxF -f $TARGET/etc/apk/world /tmp/melon-want | xargs || true)
 APKT="apk --root $TARGET --arch $ARCH --repositories-file /dev/null --repository $REPO/$ARCH/Packages.adb --no-cache"
-if [ -n "$DEL" ]; then say "Removing what the $MELON_PROFILE profile doesn't include"; $APKT del $DEL >/dev/null; fi
+# an online profile (niri): its packages come from the online repository, the ISO's repo stays for the rest
+[ -f /usr/share/melon/profiles/$MELON_PROFILE.online ] && APKT="$APKT --repository $ONLINE_REPO"
+# adding first: an online profile (niri) that can't be downloaded stops here, before anything was removed
 if [ -n "$ADD" ]; then say "Installing the $MELON_PROFILE profile with apk"; $APKT add $ADD; fi
+if [ -n "$DEL" ]; then say "Removing what the $MELON_PROFILE profile doesn't include"; $APKT del $DEL >/dev/null; fi
 # in a virtual machine: the guest tools (screen resize, clean shutdown from the host, time sync, ...)
 VMSVCS=
 if VIRT=$(melon-detect-virt); then

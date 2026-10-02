@@ -8,6 +8,9 @@
                                                  a USB stick mounts through UDisks2, screenshot in logs/qemu-desktop.png
   qemu-test.py desktop-install <desktop-iso> <disk.img>   install the desktop profile, boot the installed disk
                                                  with graphics, log in through SDDM: greeter stays up, Plasma starts
+  qemu-test.py niri-install <desktop-iso> <disk.img>   the same with the niri profile (niri + Noctalia instead of Plasma):
+                                                 the "online" repository is this machine's repo/ served over HTTP, so it
+                                                 tests the packages just built; with --offline the installer must refuse niri
   qemu-test.py dualboot <iso> <disk.img>         a fake Windows disk (EFI partition, MSR, NTFS C:, free space): install
                                                  alongside on UEFI, boot melon from the firmware's boot menu, Windows in
                                                  GRUB, and nothing of Windows' changed
@@ -67,7 +70,7 @@ if mode == 'desktop':
     cmd = [c for c in cmd if c != '-nographic'] + ['-display', 'none', '-serial', 'stdio', '-device', 'virtio-vga', '-m', '4096',
                                                  '-cdrom', iso, '-boot', 'd', '-device', 'qemu-xhci,id=xhci',
                                                  '-drive', f'if=none,id=stick,format=raw,file={usb}', '-device', 'usb-storage,bus=xhci.0,drive=stick']
-elif mode == 'desktop-install':
+elif mode in ('desktop-install', 'niri-install'):
     iso, disk = args
     base = cmd + ['-m', '4096']
     cmd = base + ['-cdrom', iso] + disk_args(disk) + ['-boot', 'd']
@@ -232,8 +235,10 @@ if mode == 'desktop':
     step('desktop test: ' + ('OK' if ok else 'FAILED'))
     sys.exit(0 if ok else 1)
 
-if mode == 'desktop-install':
+if mode in ('desktop-install', 'niri-install'):
     import socket, re as _re
+    niri = mode == 'niri-install'
+    shot = 'qemu-niri' if niri else 'qemu-desktop'  # screenshot names
     def mon(line):
         m = socket.socket(socket.AF_UNIX); m.connect('/tmp/melon-qmon.sock'); time.sleep(0.3)
         m.sendall(line.encode() + b'\n'); time.sleep(0.4); m.close()
@@ -246,9 +251,25 @@ if mode == 'desktop-install':
     p.send('\r')
     p.expect(PROMPT, timeout=900); step('logged in on the live desktop ISO')
     sh('stty cols 160 rows 50; export TERM=vt100')
+    if niri and not offline:
+        # niri comes from melon's online repository: here that is this machine's repo/, served to the VM over HTTP
+        # (QEMU's user network reaches the host as 10.0.2.2), so the test covers the packages just built
+        import http.server, threading, functools
+        srv = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(
+            http.server.SimpleHTTPRequestHandler, directory=f'{M}/repo'))
+        srv.RequestHandlerClass.log_message = lambda *a: None
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        sh(f'echo http://10.0.2.2:{srv.server_address[1]} > /usr/share/melon/repo-url')
+        step(f'online repository: repo/ over HTTP on port {srv.server_address[1]}')
     sh(f'export MELON_DISK={DISKNAME} MELON_HOSTNAME=melondesk MELON_ROOTPW=melonroot MELON_USER=jcole '
-       'MELON_USERPW=melonuser MELON_PROFILE=desktop MELON_YES=1 MELON_SERIAL=1 MELON_ENCRYPT=n')
+       f'MELON_USERPW=melonuser MELON_PROFILE={"niri" if niri else "desktop"} MELON_YES=1 MELON_SERIAL=1 MELON_ENCRYPT=n')
     out = sh('/usr/libexec/melon/.cold', timeout=3600)
+    if niri and offline:
+        # without a network the niri profile isn't offered, and asking for it stops before the disk is touched
+        refused = "can't be reached" in out and 'Partitioning' not in out
+        step('niri without a network: ' + ('refused before partitioning' if refused else f'NOT REFUSED {out[-500:]!r}'))
+        p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)
+        sys.exit(0 if refused else 1)
     ok = 'melon is installed' in out
     step(f'desktop install: {"OK" if ok else "FAILED"}')
     if not ok: print(out[-3000:])
@@ -273,10 +294,39 @@ if mode == 'desktop-install':
     time.sleep(20)                                  # a crash-looping greeter comes back with a new pid
     stable = pid and count(greeter) == pid and count("loginctl list-sessions --no-legend | awk '$3==\"sddm\" && $6==\"active\"' | wc -l") == 1
     ok &= bool(stable); step('greeter after 20 s: ' + ('same process, active session' if stable else 'RESTARTED OR NO SESSION'))
-    mon(f'screendump {M}/logs/qemu-desktop-greeter.ppm'); time.sleep(3)
+    mon(f'screendump {M}/logs/{shot}-greeter.ppm'); time.sleep(3)
     for ch in 'melonuser':
         mon(f'sendkey {ch}'); time.sleep(0.15)
     mon('sendkey ret'); step('typed the password into the greeter')
+    if niri:
+        # the only session left is melon's niri session: niri, Noctalia, PipeWire, and melon-first-boot's foot
+        # (started by niri-autostart from /etc/xdg/autostart)
+        def running(c): return count(f"ps -o user,comm | awk '$1==\"jcole\" && $2==\"{c}\"' | wc -l")
+        for _ in range(60):
+            if running('niri') and running('noctalia'): break
+            time.sleep(3)
+        time.sleep(20)                              # let Noctalia finish drawing
+        sess = count("loginctl list-sessions --no-legend | awk '$3==\"jcole\" && $6==\"active\"' | wc -l")
+        procs = {c: running(c) for c in ('niri', 'noctalia', 'pipewire', 'wireplumber', 'foot')}
+        up = procs['niri'] == 1 and procs['noctalia'] >= 1 and sess == 1; ok &= up
+        step(f'niri for jcole after 20 s: {procs} active sessions={sess}')
+        ok &= procs['pipewire'] >= 1 and procs['wireplumber'] >= 1
+        ok &= procs['foot'] >= 1; step('melon-first-boot on niri: ' + ('foot open' if procs['foot'] else 'NOT STARTED'))
+        # Plasma's shell is gone, KWin stays for the login screen, and the niri config niri loaded is melon's
+        gone = count('[ ! -e /usr/bin/plasmashell ] && [ -x /usr/bin/kwin_wayland ] && echo 1 || echo 0') == 1; ok &= gone
+        step('packages: ' + ('no plasmashell, KWin kept for SDDM' if gone else 'PLASMA STILL THERE OR KWIN MISSING'))
+        cfg = count('su -s /bin/sh jcole -c "niri validate -c /etc/niri/config.kdl" >/dev/null 2>&1 && echo 1 || echo 0') == 1; ok &= cfg
+        step('/etc/niri/config.kdl: ' + ('valid' if cfg else 'INVALID'))
+        flapping = sh('sv status /var/service/* 2>&1 | grep "want up" | cut -d: -f2 | xargs echo FLAP=')
+        flap = _re.search(r'FLAP=([^\r\n]*)', flapping); flap = flap.group(1).strip() if flap else '?'
+        ok &= flap == ''; step('services: ' + ('none restarting in a loop' if flap == '' else f'RESTARTING: {flap}'))
+        nob = count('find /usr /etc -xdev \\( -user 65534 -o -group 65534 \\) | wc -l')
+        ok &= nob == 0; step('system files owned by nobody: ' + ('none' if nob == 0 else f'{nob} FOUND'))
+        time.sleep(5); mon(f'screendump {M}/logs/qemu-niri-installed.ppm'); time.sleep(3)
+        step('screenshots: logs/qemu-niri-greeter.ppm, logs/qemu-niri-installed.ppm')
+        p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)
+        step('installed niri test: ' + ('OK' if ok else 'FAILED'))
+        sys.exit(0 if ok else 1)
     time.sleep(3); mon(f'screendump {M}/logs/qemu-desktop-splash.ppm')   # Plasma's loading screen
     shell = "ps -o user,comm | awk '$1==\"jcole\" && $2==\"plasmashell\"' | wc -l"
     for _ in range(60):

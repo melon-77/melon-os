@@ -1,0 +1,13 @@
+pkgname=libfm-qt
+pkgver=2.3.1
+pkgrel=0
+pkgdesc="libfm-qt: file management widgets for Qt 6 (PCManFM-Qt)"
+license=LGPL-2.1-or-later
+url=https://github.com/lxqt/libfm-qt
+source=(libfm-qt-2.3.1.tar.xz)
+makedepends=(qt6-qtbase-dev qt6-qttools-dev lxqt-build-tools lxqt-menu-data glib-dev menu-cache-dev libexif-dev libxcb-dev)
+# its menus come from lxqt-menu-data, read at runtime (rule 33)
+depends=(lxqt-menu-data)
+subpackages=(libfm-qt-dev)
+build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake -DBUILD_DOCUMENTATION=OFF; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

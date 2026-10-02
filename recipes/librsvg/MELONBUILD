@@ -1,0 +1,25 @@
+pkgname=librsvg
+pkgver=2.61.3
+pkgrel=0
+pkgdesc="librsvg: SVG rendering library (Noctalia's icons and art)"
+license=LGPL-2.1-or-later
+url=https://gitlab.gnome.org/GNOME/librsvg
+source=(librsvg-2.61.3.tar.xz)
+makedepends=(cairo-dev pango-dev gdk-pixbuf-dev glib-dev freetype-dev harfbuzz-dev libxml2-dev)
+subpackages=(librsvg-dev)
+# written in Rust: the installers' "remove everything built with Rust" option takes it off, and everything that needs
+# it (Noctalia) with it
+options=(rust)
+
+# meson drives cargo and cargo-c (scripts/host-rust.sh) through its cargo_wrapper.py; melon-build's cross file names
+# both. Debian's tarball has no vendor/, so the crates come from Cargo.lock (cargo_fetch) and the build runs offline.
+# RUSTFLAGS as in cargo_build (rule 46): a cdylib can't link statically against musl.
+# No rsvg-convert (its man page needs rst2man), no gdk-pixbuf SVG loader, no AVIF (dav1d), no introspection or Vala.
+prepare(){ cargo_fetch; }
+build(){
+  export RUSTFLAGS="-C target-feature=-crt-static -C link-self-contained=no" CARGO_NET_OFFLINE=true
+  meson_setup -Dtriplet=$RUST_TARGET -Dpixbuf=enabled -Dpixbuf-loader=disabled -Drsvg-convert=disabled -Davif=disabled \
+    -Dintrospection=disabled -Dvala=disabled -Ddocs=disabled -Dtests=false build
+  ninja -C build -j$JOBS
+}
+package(){ DESTDIR=$pkgdir ninja -C build install; }

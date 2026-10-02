@@ -1,0 +1,54 @@
+// melon's settings for niri, on top of niri's default-config.kdl (see /etc/niri/config.kdl).
+
+// Noctalia: bar, dock, launcher, notifications, lock screen, wallpaper
+spawn-at-startup "noctalia"
+// XDG autostart entries meant for niri (melon-first-boot's app offer, ...)
+spawn-at-startup "/usr/libexec/melon/niri-autostart"
+
+layout {
+    focus-ring {
+        active-color "#6fbf4a"
+        inactive-color "#19201b"
+    }
+}
+
+// the overview shows melon's dark green instead of a wallpaper copy
+overview {
+    backdrop-color "#19201b"
+}
+
+window-rule {
+    geometry-corner-radius 12
+    clip-to-geometry true
+}
+
+// Noctalia's settings open as a floating window
+window-rule {
+    match app-id="dev.noctalia.Noctalia"
+    open-floating true
+    default-column-width { fixed 1080; }
+    default-window-height { fixed 920; }
+}
+
+debug {
+    // lets Noctalia's notification actions raise their windows
+    honor-xdg-activation-with-invalid-serial
+}
+
+binds {
+    Mod+T hotkey-overlay-title="Open a Terminal: foot" { spawn "foot"; }
+    Mod+E hotkey-overlay-title="Files: PCManFM-Qt" { spawn "pcmanfm-qt"; }
+    Mod+D hotkey-overlay-title="Run an Application: Noctalia" { spawn-sh "noctalia msg panel-toggle launcher"; }
+    Mod+Space hotkey-overlay-title="Run an Application: Noctalia" { spawn-sh "noctalia msg panel-toggle launcher"; }
+    Mod+S hotkey-overlay-title="Control Center" { spawn-sh "noctalia msg panel-toggle control-center"; }
+    Mod+Comma hotkey-overlay-title="Noctalia Settings" { spawn-sh "noctalia msg settings-toggle"; }
+    Super+Alt+L hotkey-overlay-title="Lock the Screen: Noctalia" { spawn-sh "noctalia msg session lock"; }
+    Alt+Tab { spawn-sh "noctalia msg window-switcher"; }
+
+    // Noctalia shows the on-screen display for these
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "noctalia msg volume-up"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "noctalia msg volume-down"; }
+    XF86AudioMute allow-when-locked=true { spawn-sh "noctalia msg volume-mute"; }
+    XF86MonBrightnessUp allow-when-locked=true { spawn-sh "noctalia msg brightness-up"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn-sh "noctalia msg brightness-down"; }
+}

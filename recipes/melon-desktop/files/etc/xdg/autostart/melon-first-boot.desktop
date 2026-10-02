@@ -6,4 +6,4 @@ Exec=melon-first-boot
 Icon=melon
 NoDisplay=true
 X-KDE-autostart-phase=2
-OnlyShowIn=KDE;
+OnlyShowIn=KDE;niri;

@@ -1,0 +1,15 @@
+pkgname=pango
+pkgver=1.57.0
+pkgrel=0
+pkgdesc="Pango: text layout and rendering (niri, Noctalia, librsvg)"
+license=LGPL-2.1-or-later
+url=https://gitlab.gnome.org/GNOME/pango
+source=(pango-1.57.0.tar.xz)
+makedepends=(glib-dev fribidi-dev harfbuzz-dev fontconfig-dev freetype-dev cairo-dev)
+subpackages=(pango-dev)
+# pangocairo and pangoft2 are what niri and Noctalia use. No libthai (Thai line breaking), no Xft.
+build(){ meson_setup -Dcairo=enabled -Dfontconfig=enabled -Dfreetype=enabled -Dlibthai=disabled -Dxft=disabled \
+  -Dsysprof=disabled -Dintrospection=disabled -Ddocumentation=false -Dman-pages=false -Dbuild-testsuite=false \
+  -Dbuild-examples=false build
+  ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

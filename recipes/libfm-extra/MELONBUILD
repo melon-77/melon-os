@@ -1,0 +1,18 @@
+pkgname=libfm-extra
+pkgver=1.4.1
+pkgrel=0
+pkgdesc="libfm-extra: the small part of libfm that menu-cache needs (no GTK)"
+license=LGPL-2.1-or-later
+url=https://github.com/lxde/libfm
+source=(libfm-1.4.1.tar.gz)
+builddir=$srcdir/lxde-libfm-5550a30
+makedepends=(glib-dev)
+subpackages=(libfm-extra-dev)
+# --with-extra-only builds only libfm-extra (no GTK, no Vala). The tarball is a git snapshot: autoreconf needs
+# intltool and gtk-doc's macros on the build machine (rule 27).
+build(){
+  autoreconf -fi
+  ./configure $conf_flags --with-extra-only --with-gtk=no --disable-static --disable-gtk-doc
+  make -j$JOBS
+}
+package(){ make DESTDIR=$pkgdir install; }

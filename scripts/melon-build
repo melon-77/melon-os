@@ -60,10 +60,16 @@ lrelease = '$M/hosttools/qt6/bin/lrelease'
 lupdate = '$M/hosttools/qt6/bin/lupdate'
 qmlcachegen = '$M/hosttools/qt6/libexec/qmlcachegen'
 qmltyperegistrar = '$M/hosttools/qt6/libexec/qmltyperegistrar'
+# wayland-scanner 1.24 from the build machine (rule 20), for projects that look it up as a program (Noctalia)
+wayland-scanner = '/usr/local/bin/wayland-scanner'
 # the sandbox helper projects compile in; melon's lives here (the build host needs one too for meson's check)
 bwrap = '/usr/bin/bwrap'
 # Rust (scripts/host-rust.sh): for melon's musl target, linked by melon's gcc and dynamically against its libc
 rust = ['$M/hosttools/rust/bin/rustc', '--target', '$RUST_TARGET', '-C', 'linker=$TARGET-gcc', '-C', 'target-feature=-crt-static']
+# projects that drive cargo themselves look these up as programs (librsvg: cargo, rustc and cargo-c's cargo-cbuild)
+cargo = '$M/hosttools/rust/bin/cargo'
+rustc = '$M/hosttools/rust/bin/rustc'
+cargo-cbuild = '$M/hosttools/rust/bin/cargo-cbuild'
 [properties]
 needs_exe_wrapper = false
 sys_root = '$SYSROOT'
@@ -123,6 +129,9 @@ export "CARGO_TARGET_${_RT}_LINKER=$TARGET-gcc"
 export "CC_$_rt=$TARGET-gcc" "CXX_$_rt=$TARGET-g++" "AR_$_rt=$TARGET-ar"
 export CC_x86_64_unknown_linux_gnu=gcc CXX_x86_64_unknown_linux_gnu=g++ AR_x86_64_unknown_linux_gnu=ar \
   CFLAGS_x86_64_unknown_linux_gnu=-O2 CXXFLAGS_x86_64_unknown_linux_gnu=-O2
+# bindgen (-sys crates that generate their bindings: xcb-util-cursor-sys, pipewire-sys) runs the build machine's libclang;
+# it must parse melon's headers, not the build machine's
+export "BINDGEN_EXTRA_CLANG_ARGS_$_rt=--sysroot=$SYSROOT"
 need_rust(){ command -v cargo >/dev/null || { echo "no host Rust: run scripts/host-rust.sh" >&2; exit 1; }; }
 cargo_fetch(){ need_rust; cargo fetch --locked --target $RUST_TARGET "$@"; }
 # RUSTFLAGS, not CARGO_TARGET_<triple>_RUSTFLAGS: cargo merges that with a project's own .cargo/config.toml, and ripgrep's asks for

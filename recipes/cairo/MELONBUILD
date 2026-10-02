@@ -1,0 +1,16 @@
+pkgname=cairo
+pkgver=1.18.4
+pkgrel=0
+pkgdesc="Cairo: 2D vector graphics (text and icons in pango, librsvg and the niri desktop)"
+license="LGPL-2.1-only OR MPL-1.1"
+url=https://cairographics.org
+source=(cairo-1.18.4.tar.xz)
+makedepends=(pixman-dev freetype-dev fontconfig-dev libpng-dev zlib-dev glib-dev)
+subpackages=(cairo-dev)
+# glib gives cairo-gobject (librsvg needs it); zlib the PDF/PostScript/script surfaces. No X11 surfaces: nothing on melon
+# draws to X11 through cairo (niri and Noctalia are Wayland, X11 apps bring their own toolkit under Xwayland).
+build(){ meson_setup -Dfreetype=enabled -Dfontconfig=enabled -Dpng=enabled -Dzlib=enabled -Dglib=enabled \
+  -Dxlib=disabled -Dxcb=disabled -Dxlib-xcb=disabled -Dtee=disabled -Dlzo=disabled -Dspectre=disabled \
+  -Dsymbol-lookup=disabled -Dgtk2-utils=disabled -Ddwrite=disabled -Dquartz=disabled -Dtests=disabled -Dgtk_doc=false build
+  ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

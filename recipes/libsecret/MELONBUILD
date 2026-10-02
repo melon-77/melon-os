@@ -1,0 +1,14 @@
+pkgname=libsecret
+pkgver=0.21.7
+pkgrel=0
+pkgdesc="libsecret: client library for the Secret Service D-Bus API (Noctalia)"
+license=LGPL-2.1-or-later
+url=https://gitlab.gnome.org/GNOME/libsecret
+source=(libsecret-0.21.7.tar.xz)
+makedepends=(glib-dev libgcrypt-dev)
+subpackages=(libsecret-dev)
+# Only the client library and secret-tool: a Secret Service provider (gnome-keyring, KWallet, ...) is a separate program.
+build(){ meson_setup -Dcrypto=libgcrypt -Dmanpage=false -Dvapi=false -Dgtk_doc=false -Dintrospection=false \
+  -Dbash_completion=disabled -Dtpm2=false -Dpam=false build
+  ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

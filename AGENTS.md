@@ -23,6 +23,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | disks | GPT: 1 MiB BIOS boot, 1 GiB FAT32 `/boot` (also the ESP), XFS `/` | kernel boots with `root=PARTUUID=...`; only encrypted (LUKS) installs have an initramfs (rule 28); dual boot next to Windows on UEFI (see Installers) |
 | filesystem | merged `/usr`: `/bin`, `/sbin`, `/usr/sbin` -> `usr/bin`, `/lib` -> `usr/lib` | packages must only ship files under `/usr`, `/etc`, `/var`, `/boot` |
 | desktop | KDE Plasma 6.6 on Wayland (KWin, Xwayland), Qt 6.10, SDDM | desktop ISO and desktop profile; list in `scripts/desktop-packages.txt` |
+| second desktop | niri 26.04 + the Noctalia 5.2 shell, xwayland-satellite (`melon-niri`); foot and PCManFM-Qt as its apps | online install only (the `niri` profile, `scripts/niri-packages.txt`); see Installers |
 | desktop plumbing | D-Bus, elogind, polkit, PipeWire + WirePlumber, NetworkManager, BlueZ, CUPS, UDisks2 | console profile keeps `dhcp` + wpa_supplicant |
 | graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe; zink (OpenGL on Vulkan) | |
 | developer tools | gcc 15.2 + g++, binutils 2.46, make 4.4.1, pkgconf, patch (`gcc`, `g++`, `binutils`, `make`, `pkgconf`, `patch`) | built cross-native with the cross toolchain's settings (PIE, SSP); in the package repository only, not on the ISOs; `melon-first-boot` offers them on first login (default no) |
@@ -158,7 +159,7 @@ Rebuilding the kernel takes about an hour on 2 cores.
     Qt 6 host tools in `hosttools/qt6` (`scripts/host-qt.sh`, same Qt version as the target, passed as
     `QT_HOST_PATH`). The host also needs `libltdl-dev` (libffi's autoreconf). Meson only finds programs for a
     cross build in the cross file's `[binaries]`, never on `PATH`, so `melon-build` lists the host Qt tools
-    (moc, uic, rcc, ...) and `bwrap` there.
+    (moc, uic, rcc, ...), `bwrap` and `wayland-scanner` there.
 21. **Never kill build processes with `pkill -f <pattern>`** when your own shell's command line contains
     the pattern: it kills your shell too. Find the PID and kill that.
 22. **Edit scripts that may be running (`melon-build`, `mkiso.sh`, queue scripts) through a temporary file
@@ -176,7 +177,7 @@ Rebuilding the kernel takes about an hour on 2 cores.
     (libdisplay-info reads `pnp.ids` at build time), `publicsuffix` (libpsl's built-in list), `autopoint`
     (cryptsetup's autoreconf), `libltdl-dev`, `libxml2-utils` (shared-mime-info runs `xmllint`), `appstream` +
     `libappstream-dev` + `itstool` (appstream's metainfo), `nasm` (FFmpeg's x86 assembly), `bubblewrap` (meson checks
-    for `bwrap` in flatpak and xdg-desktop-portal).
+    for `bwrap` in flatpak and xdg-desktop-portal), `intltool` and `gtk-doc-tools` (libfm's autoreconf, for libfm-extra).
 28. **Only encrypted installs have an initramfs.** `melon-mkinitramfs` builds it when
     `/etc/melon/encrypted-root` exists; `melon-update-grub` then writes `cryptroot=UUID=<luks>
     root=/dev/mapper/melonroot` and an `initrd` line. Everything else still boots straight from the kernel.
@@ -259,6 +260,9 @@ Rebuilding the kernel takes about an hour on 2 cores.
     a C library for musl targets unless told otherwise (`PCRE2_SYS_STATIC=0` in ripgrep): link melon's. **Every recipe
     that puts Rust code into a package says `options=(rust)`**: the installers' "remove everything built with Rust"
     option finds the packages by it (see Installers).
+    Crates that generate bindings with bindgen (xcb-util-cursor-sys) use the build machine's libclang; melon-build sets
+    `BINDGEN_EXTRA_CLANG_ARGS_<triple>=--sysroot=...` so it parses melon's headers. Projects whose meson drives cargo
+    themselves (librsvg) find `cargo`, `rustc` and cargo-c's `cargo-cbuild` (installed by `host-rust.sh`) in the cross file.
 
 47. **Flatpak must be built with X11 authorization (`-Dxauth=enabled`, libXau).** Without it, sandboxed X11 apps get
     the host's `DISPLAY` and a path to an Xauthority file that doesn't exist inside the sandbox. Xwayland refuses them
@@ -333,6 +337,9 @@ scripts/qemu-test.py desktop out/melon-desktop-*-x86_64.iso              # servi
 qemu-img create -f raw /tmp/desk.img 16G
 scripts/qemu-test.py desktop-install out/melon-desktop-*-x86_64.iso /tmp/desk.img   # install, SDDM greeter stays up,
                                                                           # log in through it, Plasma runs; LOOK at both screenshots
+scripts/qemu-test.py niri-install out/melon-desktop-*-x86_64.iso /tmp/desk.img      # the niri profile from repo/ served as the
+                                                                          # "online" repo: niri, Noctalia, PipeWire, first-boot foot;
+                                                                          # --offline: the installer must refuse niri. LOOK at logs/qemu-niri-*.ppm
 # --offline (any mode): the VM keeps its network card but reaches nothing outside; the installers must still work
 ```
 
@@ -399,6 +406,12 @@ the serial port, so tests don't need a screen. The test also records the sound c
   `theme.conf`), GRUB theme `usr/share/melon/grub/themes/melon` (the desktop ISO uses it too). The art generators are
   in `art/` (run from a checkout of the melon-art working directory with its fonts); `art/grubtheme.py` needs
   `grub-mkfont` (from Ubuntu's grub-common: `apt-get download grub-common` and `dpkg -x` it, no install needed).
+- **Default user settings live system-wide, never in home directories** (melon may ship dotfiles later). A package's
+  defaults go where the program looks when the user has none of their own: `/etc/xdg/...` (Plasma, Konsole: see
+  melon-desktop), `/etc/niri/config.kdl` for niri. Packages and install scripts don't write into `$HOME`; `/etc/skel`
+  is only for files with no system-wide location (`.bashrc`, `.profile`). Then dotfiles (a future melon dotfiles
+  package, or a user's own through Home Manager) override melon's defaults without file conflicts. The first-login
+  scripts that do write into home directories (`melon-survivor-look`, `melon-rust-free`) are where dotfiles could clash.
 - **Hidden owner commands** work like the console installer: `/etc/profile.d/zz-melon.sh` recognises them by the
   first 16 hex digits of their name's sha256 and nothing else. The same rules apply: never write their names in any
   file, comment, commit or test. `59c1a50f2e93bdc1` unlocks every gauntlet reward (`/usr/libexec/melon/.gold`,
@@ -445,6 +458,16 @@ the serial port, so tests don't need a screen. The test also records the sound c
   `<name>.services` the runit services (`name` enables one, `-name` drops a base service). `mkiso.sh`
   writes them. The desktop profile swaps `mdevd`/`dhcp` for `udevd` and NetworkManager, and the
   installer gives NetworkManager the Wi-Fi network instead of wpa_supplicant.
+- **The niri desktop (issue #18): online only.** The `niri` profile is the desktop profile without Plasma's shell plus
+  `melon-niri` (niri, Noctalia, xwayland-satellite, melon's session). None of it is on an ISO: `mkiso.sh` writes
+  `profiles/niri` and `niri.online`, and both installers offer it only when `melon-profile-online niri` finds every package
+  in the online repository (Calamares: the desktop choice after the gauntlet, `/run/melon/.desktop-niri`; console:
+  `MELON_PROFILE=niri`). They install niri's packages first and remove Plasma's shell only after that worked. KWin stays:
+  SDDM's greeter runs on it. The session (`/usr/libexec/melon/niri-session`) gives niri a D-Bus session bus and starts
+  PipeWire; `/etc/niri/config.kdl` only includes niri's defaults and `/usr/share/melon/niri/melon.kdl` (Noctalia, foot,
+  PCManFM-Qt, melon's colours), so users' own configs can include them too. niri doesn't read `/etc/xdg/autostart`:
+  `niri-autostart` starts the entries whose `OnlyShowIn` lists `niri` (melon-first-boot). niri, xwayland-satellite and
+  librsvg (Noctalia needs it) are Rust: "remove everything built with Rust" leaves a niri install without a desktop.
 - **Other distros' repos are opt-in only.** Both installers offer Alpine as the tagged repo `@alpine`
   (`melon-repo enable alpine`); apk only uses it for packages asked for as `name@alpine`. Void isn't
   offered (xbps, not apk). Never make a foreign repo untagged or on by default.

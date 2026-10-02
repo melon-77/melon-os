@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="A 200-question quiz that scores 114 Linux distros against your answers.">
+<meta name="description" content="A 200-question quiz that scores 110 Linux distros against your answers.">
 <link rel="icon" href="../assets/favicon.png">
 <title>200-Question Distro Finder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -193,19 +193,12 @@ const APT="sudo apt update && sudo apt upgrade";
 // Ubuntu family
 D("ubuntu","Ubuntu","Debian","apt + snap","Fixed; 6-month, 2-year LTS","systemd","GNOME","https://ubuntu.com/desktop",APT,"The default answer for a reason: huge community, every tutorial assumes it, and Canonical backs it with years of LTS support. Snaps are the price of admission.","-1 -1 0 0 -1 1 -1 -1 -1 1 2 -2 0 2","debb ubub apt snap fixed lts systemd gnome nvidia arm secureboot apparmor zfs server enterprise wsl");
 D("kubuntu","Kubuntu","Ubuntu","apt + snap","Fixed; 6-month, LTS","systemd","KDE Plasma","https://kubuntu.org",APT,"Ubuntu's foundation and hardware support wearing KDE Plasma: a Windows-shaped desktop with a setting for everything.","-1 -1 0 0 -1 1 0 -1 -1 -1 1 -2 1 1","debb ubub apt snap fixed lts systemd kde secureboot apparmor winlike nvidia");
-D("xubuntu","Xubuntu","Ubuntu","apt + snap","Fixed; 6-month, LTS","systemd","Xfce","https://xubuntu.org",APT,"Ubuntu with the light, traditional Xfce desktop. Quick on older hardware while keeping Ubuntu's driver support and community.","-1 -1 0 -1 1 0 0 -1 -1 -1 1 -2 1 1","debb ubub apt snap fixed lts systemd xfce secureboot apparmor");
-D("lubuntu","Lubuntu","Ubuntu","apt + snap","Fixed; 6-month, LTS","systemd","LXQt","https://lubuntu.me",APT,"The lightest official Ubuntu flavour, using LXQt. Good for revived laptops that still want Ubuntu underneath.","-1 -1 0 -1 2 -1 0 -1 -1 -1 1 -2 1 0","debb ubub apt snap fixed lts systemd lxqt secureboot tiny");
-D("ubuntumate","Ubuntu MATE","Ubuntu","apt + snap","Fixed; 6-month, LTS","systemd","MATE","https://ubuntu-mate.org",APT,"Ubuntu with MATE, the continuation of the classic GNOME 2 desktop. Familiar, configurable and easy on resources.","-1 -1 -1 -1 1 1 0 -1 -1 -1 1 -2 1 0","debb ubub apt snap fixed lts systemd mate secureboot");
-D("ubuntubudgie","Ubuntu Budgie","Ubuntu","apt + snap","Fixed; 6-month, LTS","systemd","Budgie","https://ubuntubudgie.org",APT,"Ubuntu with the elegant Budgie desktop: a clean panel, a sidebar, and a calmer macOS-ish feel.","-1 -1 0 -1 0 2 0 -1 -1 -1 1 -2 0 0","debb ubub apt snap fixed lts systemd budgie secureboot maclike");
 D("ubuntustudio","Ubuntu Studio","Ubuntu","apt + snap","Fixed; 6-month, LTS","systemd","KDE Plasma","https://ubuntustudio.org",APT,"Ubuntu tuned for creators: low-latency audio, plus a preinstalled kit for music, video, photography and graphics.","-1 -1 0 0 -1 1 0 -1 -1 -1 1 -2 0 0","debb ubub apt snap fixed lts systemd kde creative secureboot");
 D("edubuntu","Edubuntu","Ubuntu","apt + snap","Fixed; 6-month, LTS","systemd","GNOME","https://www.edubuntu.org",APT,"The revived education flavour of Ubuntu, with learning software for kids through university and tools for classrooms.","-2 -2 -1 -1 -1 1 0 -1 -1 -1 1 -2 0 0","debb ubub apt snap fixed lts systemd gnome edu secureboot");
 D("mint","Linux Mint","Ubuntu LTS","apt + Flatpak","Fixed; follows Ubuntu LTS","systemd","Cinnamon (Xfce, MATE too)","https://linuxmint.com",APT,"The friendliest landing for anyone leaving Windows. A traditional taskbar desktop, codecs and drivers handled for you, no snaps, and updates that rarely surprise.","-2 -2 -1 0 0 1 0 -1 -1 -1 -1 -2 2 2","debb ubub apt flatpak fixed lts systemd cinnamon xfce mate codecs winlike secureboot nvidia");
-D("lmde","LMDE","Debian Stable","apt + Flatpak","Fixed; follows Debian","systemd","Cinnamon","https://linuxmint.com/download_lmde.php",APT,"Linux Mint Debian Edition: the full Mint experience on pure Debian, with no Ubuntu in the stack.","-1 -1 -1 0 0 1 1 0 -1 -1 -1 -2 2 1","debb apt flatpak fixed systemd cinnamon winlike codecs");
 D("popos","Pop!_OS","Ubuntu LTS","apt + Flatpak","Fixed; follows Ubuntu LTS","systemd","COSMIC","https://system76.com/pop","sudo apt update && sudo apt full-upgrade","System76's distro with its own Rust-built COSMIC desktop, built-in auto-tiling, and an ISO with NVIDIA drivers in it. Great for creators, devs and hybrid-GPU laptops.","-1 -1 0 1 -1 1 0 -1 -1 -1 1 -2 0 1","debb ubub apt flatpak fixed lts systemd cosmic tiling nvidia");
 D("zorin","Zorin OS","Ubuntu LTS","apt + Flatpak + snap","Fixed; follows Ubuntu LTS","systemd","GNOME (Zorin layouts)","https://zorin.com/os",APT,"Built to make Windows and macOS refugees feel at home, with one-click layouts that mimic both. Polished and beginner-proof, with a Lite edition for older PCs.","-2 -2 -1 0 0 2 0 -1 -1 -2 1 -2 2 1","debb ubub apt flatpak snap fixed lts systemd gnome winlike maclike codecs nvidia secureboot");
 D("elementary","elementary OS","Ubuntu LTS","apt + Flatpak (AppCenter)","Fixed; follows Ubuntu LTS","systemd","Pantheon","https://elementary.io",APT,"The most design-led desktop in Linux: a calm, macOS-flavoured Pantheon desktop with a curated, pay-what-you-want AppCenter.","-2 -2 -1 -1 -1 2 1 0 0 -2 0 -2 -1 0","debb ubub apt flatpak fixed lts systemd pantheon maclike");
-D("kdeneon","KDE neon","Ubuntu LTS","apt + Flatpak","Ubuntu LTS base, newest Plasma","systemd","KDE Plasma","https://neon.kde.org","sudo pkcon update","KDE's own showcase: a stable Ubuntu LTS base with the very latest Plasma and KDE apps as soon as they ship.","0 -1 1 0 -1 1 0 -1 -1 -1 1 -2 1 0","debb ubub apt flatpak systemd kde");
-D("linuxlite","Linux Lite","Ubuntu LTS","apt","Fixed; follows Ubuntu LTS","systemd","Xfce","https://www.linuxliteos.com",APT,"Aimed squarely at Windows users on modest hardware: a simple Xfce desktop, friendly Lite tools, and lots of hand-holding.","-2 -2 -1 -1 1 0 0 -1 -1 -2 0 -2 2 0","debb ubub apt fixed lts systemd xfce winlike tiny");
 D("bodhi","Bodhi Linux","Ubuntu LTS","apt","Fixed; follows Ubuntu LTS","systemd","Moksha","https://www.bodhilinux.com",APT,"A tiny, fast Ubuntu-based distro with Moksha, an elegant Enlightenment-derived desktop that runs happily on old machines.","-1 -1 -1 -1 2 0 0 -1 -1 -2 -1 -2 0 -1","debb ubub apt fixed lts systemd moksha tiny");
 D("trisquel","Trisquel","Ubuntu LTS","apt","Fixed; follows Ubuntu LTS","systemd","MATE","https://trisquel.info",APT,"An FSF-endorsed, 100% free software Ubuntu derivative with a libre kernel. Beginner-friendly freedom.","-1 -1 -1 -2 0 0 1 2 -1 -1 -2 -2 0 -2","debb ubub apt fixed lts systemd mate fsf");
 // Debian family
@@ -213,9 +206,7 @@ D("debian","Debian Stable","Independent","apt","Fixed; ~2-year releases, ~5 year
 D("devuan","Devuan","Debian","apt","Fixed; follows Debian","sysvinit, OpenRC or runit","Your choice at install","https://www.devuan.org",APT,"Debian without systemd. Pick sysvinit, OpenRC or runit and keep everything else Debian gives you.","1 0 -2 -1 1 -1 1 2 -1 1 -2 2 0 -1","debb apt fixed sysv openrc runit dechoice server");
 D("mx","MX Linux","Debian Stable","apt + Flatpak","Fixed; follows Debian","sysvinit (systemd optional)","Xfce (KDE, Fluxbox too)","https://mxlinux.org",APT,"Debian made friendly and light, with a toolbox of handy MX utilities, a sysvinit default and snappy performance on modest hardware.","-1 -1 -1 -1 1 0 0 0 -1 -1 -2 1 1 1","debb apt flatpak fixed sysv xfce kde tiny live");
 D("antix","antiX","Debian","apt","Fixed; follows Debian","sysvinit or runit","IceWM and other window managers","https://antixlinux.com",APT,"systemd-free and astonishingly light: boots on very old machines with a few hundred MB of RAM and runs fine from a USB stick.","0 0 -1 -2 2 -2 1 1 -1 -1 -2 2 0 -1","debb apt fixed sysv runit wm tiny live x32");
-D("peppermint","Peppermint OS","Debian","apt + Flatpak","Fixed; follows Debian","systemd","Xfce","https://peppermintos.com",APT,"A minimal, fast Debian with Xfce that ships almost nothing so you add only what you need.","0 0 -1 -1 2 -1 1 0 -1 -1 -2 -1 0 -1","debb apt flatpak fixed systemd xfce tiny");
 D("q4os","Q4OS","Debian","apt","Fixed; follows Debian","systemd","Trinity or KDE Plasma","https://q4os.org",APT,"A Debian desktop with a Windows-XP-ish feel, offered with the featherweight Trinity desktop for old PCs or Plasma for newer ones.","-1 -1 -2 -1 2 0 0 -1 -1 -1 -1 -1 2 -1","debb apt fixed systemd trinity kde winlike tiny x32");
-D("sparky","SparkyLinux","Debian Testing / Stable","apt","Semi-rolling (Testing) or fixed","systemd","LXQt (many editions)","https://sparkylinux.org",APT,"A Debian derivative with a semi-rolling edition on Debian Testing, plenty of desktop choices and a handy APTus tool.","0 0 1 0 1 0 0 0 -1 -1 -2 -1 0 -1","debb apt rolling systemd lxqt dechoice");
 D("deepin","deepin","Debian-derived","apt","Fixed","systemd","DDE","https://www.deepin.org",APT,"Arguably Linux's flashiest desktop: the deepin Desktop Environment, with its own polished suite of apps.","-2 -2 0 -1 -2 2 -2 -1 -1 -2 1 -2 1 -1","debb apt fixed systemd dde maclike");
 D("vanilla","Vanilla OS","Debian Sid","ABRoot + apx + Flatpak","Image-based","systemd","GNOME","https://vanillaos.org","sudo abroot upgrade","An immutable Debian-based desktop: the system updates atomically with ABRoot, and apx runs packages from other distros in containers.","-1 -1 1 0 -1 2 0 0 2 -2 -1 -2 -1 -1","debb atomic distrobox flatpak gnome systemd");
 D("endless","Endless OS","Debian","OSTree + Flatpak","Image-based","systemd","GNOME-based","https://www.endlessos.org","flatpak update","An immutable, offline-first OS packed with educational content and apps, designed to work well with little or no internet.","-2 -2 -1 -1 -1 1 0 0 2 -2 1 -2 0 -1","debb ostree atomic flatpak gnome systemd offline edu");
@@ -278,7 +269,6 @@ D("rhel","Red Hat Enterprise Linux","Independent (Red Hat)","dnf","Fixed; ~10-ye
 D("proxmox","Proxmox VE","Debian","apt","Fixed; follows Debian","systemd","Web dashboard (headless)","https://www.proxmox.com/en/proxmox-virtual-environment","apt update && apt full-upgrade","A homelab favourite: a Debian-based hypervisor for VMs and containers, managed from a web dashboard, with ZFS built in.","1 0 -1 -2 -1 0 0 -1 -1 2 1 -2 -1 0","debb apt fixed systemd server virt hypervisor zfs nodesk","hypervisor");
 // Boards & gaming appliances
 D("rpios","Raspberry Pi OS","Debian","apt","Fixed; follows Debian","systemd","Raspberry Pi desktop","https://www.raspberrypi.com/software","sudo apt update && sudo apt full-upgrade","The official OS for Raspberry Pi boards, tuned for their hardware, GPIO and camera stack. If your machine is a Pi, start here.","-1 0 -1 -1 2 0 0 -1 -1 0 1 -2 0 1","debb apt fixed systemd arm sbc","sbc");
-D("dietpi","DietPi","Debian","apt + dietpi-software","Fixed; follows Debian","systemd","None (optional)","https://dietpi.com","dietpi-update","An ultra-lean Debian for single-board computers and VMs, with a menu that installs popular server software in one go.","1 0 -1 -2 2 -2 0 -1 -1 2 -2 -2 -1 -1","debb apt fixed systemd arm sbc server tiny nodesk","sbc");
 D("batocera","Batocera","Independent (Buildroot)","Image-based","Image-based","BusyBox init","EmulationStation","https://batocera.org","# update from the Updates & Downloads menu","A plug-and-play retro gaming OS that boots straight into an emulator front-end. Runs from USB, on PCs and Pi boards alike.","-2 -2 0 2 1 1 0 -1 2 -2 -2 -1 0 -1","indep atomic retro gaming live arm","retro");
 
 // Added: more desktops, servers, appliances and niches
@@ -295,14 +285,8 @@ D("mabox","Mabox Linux","Manjaro","pacman + AUR","Rolling","systemd","Openbox","
 D("parabola","Parabola GNU/Linux-libre","Arch","pacman","Rolling","systemd or OpenRC","Your choice","https://www.parabola.nu","sudo pacman -Syu","An FSF-endorsed, 100% free Arch derivative with the linux-libre kernel. Arch's DIY spirit with no proprietary bits.","2 2 2 -2 1 -2 1 2 -2 -1 -2 0 -2 -2","archb pacman rolling systemd openrc fsf dechoice");
 D("steamos","SteamOS","Arch","Image-based + Flatpak","Atomic A/B images","systemd","Steam Gaming Mode + KDE Plasma","https://store.steampowered.com/steamos","# updates through Steam's settings","Valve's own console-style OS from the Steam Deck: Gaming Mode first, a KDE desktop when you want it. Built for Valve's and supported handhelds.","-2 -2 1 2 -1 1 0 -2 2 -2 1 -2 0 0","archb atomic steamui gaming handheld kde flatpak","steamui");
 D("pureos","PureOS","Debian","apt + Flatpak","Fixed; follows Debian","systemd","GNOME","https://pureos.net","sudo apt update && sudo apt upgrade","Purism's FSF-endorsed, privacy-respecting Debian derivative, the OS on Librem laptops and phones.","-1 -1 -1 -2 -1 1 2 2 -1 -1 1 -2 -1 -2","debb apt flatpak fixed systemd gnome fsf");
-D("tuxedo","TUXEDO OS","Ubuntu LTS","apt + Flatpak","Fixed; follows Ubuntu LTS","systemd","KDE Plasma","https://www.tuxedocomputers.com/os","sudo apt update && sudo apt upgrade","An Ubuntu LTS base with a recent KDE Plasma and no snaps, from the German laptop maker TUXEDO. Runs on any PC.","-1 -1 0 0 -1 1 0 -1 -1 -1 1 -2 1 -1","debb ubub apt flatpak fixed lts systemd kde nvidia");
 D("rhino","Rhino Linux","Ubuntu (rolling)","apt + Pacstall","Rolling","systemd","Unicorn (Xfce-based)","https://rhinolinux.org","rpk update","A rolling-release Ubuntu: it tracks Ubuntu's development branch and adds Pacstall, an AUR-style user repository.","0 0 2 0 0 1 0 -1 -1 -2 -2 -2 0 -2","debb ubub apt rolling systemd xfce");
-D("pardus","Pardus","Debian Stable","apt","Fixed; follows Debian","systemd","GNOME or Xfce","https://pardus.org.tr/en/","sudo apt update && sudo apt upgrade","A polished Debian derivative from Turkey's national research institute, used across schools and public offices.","-1 -1 -1 -1 0 1 0 0 -1 -1 1 -2 1 -1","debb apt fixed systemd gnome xfce edu");
 D("siduction","siduction","Debian Unstable (Sid)","apt","Rolling","systemd","KDE Plasma, Xfce, LXQt and more","https://siduction.org","sudo apt update && sudo apt full-upgrade","Debian Sid made usable as a rolling release, with the tools and community to handle what Unstable throws at you.","1 0 2 0 0 0 0 0 -1 -1 -2 -2 0 -2","debb apt rolling systemd kde dechoice");
-D("bunsenlabs","BunsenLabs","Debian Stable","apt","Fixed; follows Debian","systemd","Openbox","https://www.bunsenlabs.org","sudo apt update && sudo apt upgrade","CrunchBang's spiritual successor: a dark, fast Openbox desktop on Debian with handy pipe menus.","1 1 -1 -1 2 0 0 0 -1 -1 -2 -2 -1 -2","debb apt fixed systemd wm tiny");
-D("avlinux","AV Linux","MX Linux / Debian","apt","Fixed","sysvinit","Xfce","http://www.bandshed.net/avlinux/","sudo apt update && sudo apt upgrade","A ready-made studio for audio and video production: low-latency setup, plugins and creative apps preinstalled.","0 -1 -1 -1 0 1 0 -1 -1 -2 -2 1 0 -2","debb apt fixed sysv xfce creative");
-D("ubuntuunity","Ubuntu Unity","Ubuntu","apt + snap","Fixed; 6-month, LTS","systemd","Unity","https://ubuntuunity.org","sudo apt update && sudo apt upgrade","The official flavour that keeps Ubuntu's classic Unity desktop alive: a left launcher, global menu and HUD.","-1 -1 0 -1 -1 1 0 -1 -1 -1 1 -2 -1 0","debb ubub apt snap fixed lts systemd maclike secureboot");
-D("ubuntucinnamon","Ubuntu Cinnamon","Ubuntu","apt + snap","Fixed; 6-month, LTS","systemd","Cinnamon","https://ubuntucinnamon.org","sudo apt update && sudo apt upgrade","Ubuntu with Mint's Cinnamon desktop: a Windows-style layout with Ubuntu's base and release cadence.","-2 -1 0 -1 0 1 0 -1 -1 -1 1 -2 2 0","debb ubub apt snap fixed lts systemd cinnamon winlike secureboot");
 D("armbian","Armbian","Debian or Ubuntu","apt","Fixed","systemd","Headless or desktop","https://www.armbian.com","sudo apt update && sudo apt upgrade","Debian and Ubuntu builds for hundreds of ARM single-board computers, tuned per board. The go-to for non-Pi boards.","1 0 0 -2 2 -1 0 -1 -1 1 -2 -2 -1 0","debb apt fixed systemd arm sbc server nodesk","sbc");
 D("libreelec","LibreELEC","Independent (Just enough OS)","Image-based","Image-based","systemd","Kodi","https://libreelec.tv","# update from LibreELEC's settings in Kodi","Just enough OS to boot straight into Kodi: a living-room media center for PCs and Pi boards that updates itself.","-2 -2 0 0 2 1 0 -1 2 -2 -2 -2 0 -1","indep atomic htpc arm tiny systemd","htpc");
 D("dsl","Damn Small Linux","antiX / Debian","apt","Fixed","sysvinit","JWM / Fluxbox","https://www.damnsmalllinux.org","sudo apt update && sudo apt upgrade","The classic tiny distro, revived on an antiX base: a full desktop small enough for a CD, made for very old 32- and 64-bit PCs.","0 0 -2 -2 2 -1 0 0 -1 -2 -2 2 0 -2","debb apt fixed sysv wm tiny live x32");
@@ -315,6 +299,20 @@ D("mobian","Mobian","Debian","apt","Fixed; follows Debian","systemd","Phosh","ht
 D("ubuntutouch","Ubuntu Touch","Ubuntu","Image-based + Click apps","Over-the-air images","systemd","Lomiri","https://ubuntu-touch.io","# updates via System Settings","UBports' community-run mobile OS with the Lomiri interface, for a range of former Android phones.","0 -1 -1 -2 1 1 1 0 2 -2 -2 -2 -1 -1","ubub phone arm atomic","phone");
 D("omarchy","Omarchy","Arch","pacman + AUR","Rolling","systemd","Hyprland","https://omarchy.org","sudo pacman -Syu","An opinionated, fully configured Arch + Hyprland setup: tiling, themes and keybindings done for you, keyboard-first.","1 -1 2 0 0 2 0 -1 -2 -2 -2 -2 -2 -1","archb pacman aur rolling systemd wm tiling");
 D("kdelinux","KDE Linux","Arch packages (image-based)","Image-based + Flatpak","Image-based","systemd","KDE Plasma","https://kde.org/linux/","# updates arrive as whole system images","KDE's own immutable distro, built to show off Plasma exactly as KDE intends. Still early (alpha); for adventurous KDE fans.","-1 -2 2 0 -1 2 0 0 2 -2 0 -2 1 -2","archb atomic kde flatpak systemd");
+
+// Independent and unusual distros (not Debian/Ubuntu respins)
+D("nutyx","NuTyX","Independent","cards","Fixed and rolling branches","SysVinit or systemd","Xfce, KDE Plasma and others","https://nutyx.org","sudo cards upgrade","A small independent distro from France with its own package manager (cards) that mixes binary packages and ports-style recipes.","1 1 0 -1 1 -1 1 1 -1 -1 -2 1 -1 -2","indep sysv systemd xfce dechoice source");
+D("exherbo","Exherbo","Independent","paludis (cave)","Rolling, source-based","systemd","None; you choose","https://www.exherbo.org","cave sync","A source-based rolling distro started by former Gentoo developers, with the paludis package manager and a repository spread across contributors.","2 2 1 -2 1 -2 1 1 -1 0 -2 -1 -2 -2","indep source rolling systemd nodesk");
+D("aerynos","AerynOS","Independent (formerly Serpent OS)","moss","Rolling, atomic transactions","systemd","GNOME or COSMIC","https://aerynos.com","sudo moss sync","A brand-new independent distro with its own atomic package manager (moss) and a stateless design. Still alpha, from people behind Solus.","1 -1 2 0 -1 1 0 0 2 -2 -2 -2 -1 -2","indep atomic rolling systemd gnome cosmic");
+D("adelie","Adélie Linux","Independent","apk","Fixed","OpenRC (s6 supervision)","KDE Plasma, Xfce, MATE, LXQt","https://www.adelielinux.org","apk update && apk upgrade","An independent musl-based distro that cares about portability: it runs on PowerPC, ARM and old 32-bit PCs as well as x86-64.","2 1 -1 -2 1 -1 1 1 -1 0 -2 2 -2 -2","indep apk fixed openrc musl dechoice lxqt xfce x32 arm");
+D("openeuler","openEuler","Independent (OpenAtom Foundation)","dnf","Fixed; 2-year LTS releases","systemd","Headless (desktops available)","https://www.openeuler.org/en/","sudo dnf upgrade","An independent RPM-based enterprise server OS, started by Huawei, with strong ARM server support and long-term releases.","1 -1 -1 -2 -1 -1 0 0 -1 2 2 -2 -1 -1","indep dnf fixed lts systemd server enterprise arm");
+D("oasis","oasis","Independent","Built from a git tree","Whatever you build","sinit-style","velox (minimal WM)","https://github.com/oasislinux/oasis","# pull the source tree and rebuild","A radical minimal system where every program is statically linked, built with a single fast build step and tracked in git.","2 2 0 -2 2 -2 2 1 1 -1 -2 2 -2 -2","indep musl tiny source wm");
+D("altlinux","ALT Linux","Independent","apt-rpm (Sisyphus)","Fixed branches + Sisyphus","systemd","KDE Plasma, Xfce, MATE and others","https://www.altlinux.org","sudo apt-get update && sudo apt-get dist-upgrade","A long-running independent distro from Russia that pairs RPM packages with an apt-style tool and the huge Sisyphus repository.","0 -1 -1 -1 0 0 0 0 -1 0 0 -2 0 -2","indep apt fixed systemd dechoice");
+D("wolfi","Wolfi","Independent (Chainguard)","apk","Rolling","None (container images)","None","https://wolfi.dev","apk update && apk upgrade","An 'undistro' made only for container images: glibc-based, rolling, minimal, and built to keep known vulnerabilities near zero.","2 0 2 -2 2 -2 2 0 2 2 1 -1 -2 -2","indep apk rolling container server nodesk hardened","container");
+D("bottlerocket","Bottlerocket","Independent (AWS)","Image-based","Image-based","systemd","None (container host)","https://bottlerocket.dev","# updates through its API client","AWS's minimal, immutable host OS for containers, updated as whole images and managed through an API instead of a shell.","2 0 1 -2 1 -2 2 0 2 2 2 -2 -2 -2","indep atomic server container containerhost nodesk hardened","containerhost");
+D("slowroll","openSUSE Slowroll","openSUSE Tumbleweed","zypper","Slow rolling (roughly monthly)","systemd","KDE Plasma (GNOME too)","https://en.opensuse.org/openSUSE:Slowroll","sudo zypper dup","Tumbleweed at a calmer pace: rolling, but updates arrive in bigger, less frequent batches with bug fixes in between.","0 0 1 0 -1 0 0 0 0 -1 1 -2 0 -1","suseb zypper rolling systemd kde btrfs dechoice");
+D("calculate","Calculate Linux","Gentoo","Portage (binary by default)","Rolling","OpenRC","KDE Plasma, Xfce, Cinnamon, MATE","https://www.calculate-linux.org","sudo cl-update","Gentoo with the compiling made optional: binary packages, its own update and setup tools, and Gentoo's flexibility underneath.","1 0 1 -1 0 0 0 0 -1 0 -2 2 0 -2","gentoob portage rolling openrc kde xfce source");
+D("t2","T2 SDE","Independent","Your own build","Whatever you build","Your pick","Whatever you build","https://t2sde.org","# build your own system with its scripts","A system development environment for building your own Linux distro, for almost any CPU architecture, from source.","2 2 1 -2 1 -2 1 1 -1 0 -2 1 -2 -2","indep source buildown","buildown");
 
 const DMAP=Object.fromEntries(DISTROS.map(d=>[d.id,d]));
 const ALLTAGS=new Set(); DISTROS.forEach(d=>d.tags.forEach(t=>ALLTAGS.add(t)));
@@ -339,24 +337,24 @@ function parseFx(s){
 /* ---------- questions ---------- */
 const SECTIONS=[
 {name:"You",qs:[
- ["How long have you used Linux?",[["Never, this is my first time","exp:-2 win:1"],["I tried a live USB once","exp:-1"],["A year or two as my daily driver","exp:1"],["Five years or more","exp:2"],["Long enough that I've built my own distro","exp:2 diy:2 #buildown:3 #source:1"]]],
- ["Which OS are you mainly coming from?",[["Windows","win:2 #winlike:1"],["macOS","win:-1 polish:1 #maclike:2"],["ChromeOS","exp:-1 polish:1 #atomic:1"],["Another Linux distro","exp:1"],["A BSD","exp:2 nosysd:1 #musl:1 #runit:1 #slackb:1"]]],
+ ["How long have you used Linux?",[["Never, this is my first time","exp:-2 win:1"],["I tried a live USB once","exp:-1"],["A year or two as my daily driver","exp:1"],["Five years or more","exp:2"],["Long enough that I've assembled a whole OS from parts","exp:2 diy:2 #buildown:3 #source:1"]]],
+ ["Which OS are you mainly coming from?",[["Windows","win:2 #winlike:1"],["macOS","win:-1 polish:1 #maclike:2"],["ChromeOS","exp:-1 polish:1 #atomic:1"],["Another Linux distro","exp:1"],["Something older and more Unix-y","exp:2 nosysd:1 #musl:1 #runit:1 #slackb:1"]]],
  ["How do you feel about the terminal?",[["It scares me","exp:-2"],["I'll paste commands if a guide says so","exp:-1"],["I'm comfortable in it","exp:1"],["I live in it","exp:2 diy:1 polish:-1"]]],
  ["When something breaks, you…",[["Want it to fix itself, or ask someone","exp:-2 diy:-2"],["Google the error and follow the top answer","exp:-1"],["Read the logs and work it out","exp:1 diy:1"],["Enjoy it. Breaking things is how I learn","exp:2 diy:2 edge:1"]]],
  ["How long should setting up a fresh install take?",[["Under 30 minutes, then I'm done","diy:-2 exp:-1"],["An afternoon","diy:-1"],["A weekend is fine","diy:1"],["Days. Setup is the hobby","diy:2 #source:2 #buildown:1"]]],
  ["Have you ever read a man page voluntarily?",[["What's a man page?","exp:-2"],["Once or twice","exp:-1"],["Regularly","exp:1"],["I've written one","exp:2"]]],
  ["Do you want to understand how your OS works under the hood?",[["No, I just want it to work","diy:-2"],["A little curiosity","diy:-1"],["Yes, that's half the point","diy:2 exp:1"],["I want to understand every file in /","diy:2 #buildown:2 #source:1 #slackb:1"]]],
- ["How do you feel about following a long wiki install guide?",[["Hard pass","diy:-2 arch:-2 gentoo:-2 artix:-1"],["Fine if it's well written","diy:1"],["I love that kind of thing","diy:2 arch:2 gentoo:1 artix:1"]]],
+ ["How do you feel about following a long written install guide?",[["Hard pass","diy:-2 arch:-2 gentoo:-2 artix:-1"],["Fine if it's well written","diy:1"],["I love that kind of thing","diy:2 arch:2 gentoo:1 artix:1"]]],
  ["Will this be your only OS?",[["Yes, it's replacing everything","main:1"],["Dual boot with Windows","win:1"],["Secondary machine or VM","exp:1"],["It's for a dedicated tinkering box","diy:1 edge:1"]]],
  ["Who else uses this computer?",[["Just me",""],["Family members who aren't techy","exp:-2 polish:1 diy:-2 immut:1 #atomic:1"],["Kids","exp:-1 immut:1 #edu:2"],["Coworkers or a shared lab","server:1 immut:1"]]],
  ["How do you prefer to learn?",[["YouTube videos","main:1 exp:-1"],["Official documentation","exp:1"],["Forums and Reddit threads","main:1"],["Reading the source code","exp:2 diy:1"]]],
  ["How important is a big community where answers already exist?",[["Essential","main:2"],["Nice to have","main:1"],["Don't need it, I'll figure it out","main:-1 exp:1"],["I prefer small, tight-knit communities","main:-2"]]],
- ["Your relationship with config files:",[["I never want to see one","diy:-2 polish:1"],["I edit them when I have to",""],["My dotfiles live in a git repo","diy:1 exp:1 #declarative:1"],["My whole system should be one config file","immut:2 diy:2 #declarative:4"]]],
+ ["Your relationship with config files:",[["I never want to see one","diy:-2 polish:1"],["I edit them when I have to",""],["My dotfiles live in a git repo","diy:1 exp:1 #declarative:1"],["I'd love to describe my whole computer in one text file","immut:2 diy:2 #declarative:4"]]],
  ["Pick a motto:",[["“It just works.”","diy:-2 polish:2"],["“Keep it simple.”","diy:1 light:1 #archb:1 #runit:1"],["“Stable is boring, and boring is good.”","edge:-2 server:1 #debb:1"],["“Freedom first.”","free:2 #fsf:2"],["“Gotta go fast.”","edge:2 #optimized:2"]]],
  ["How do you feel about rebooting for updates?",[["Whatever, it's fine",""],["I hate it","server:1"],["I'd love to reboot into a fresh, tested image","immut:2 #atomic:2"],["I'd rather not reboot for months","server:2 edge:-1 #lts:1"]]],
  ["If a GUI and a CLI tool do the same job, you use…",[["The GUI, always","exp:-2 polish:1"],["The GUI, mostly","exp:-1"],["The CLI, mostly","exp:1"],["The CLI, always","exp:2 polish:-1"]]],
  ["Your patience for troubleshooting hardware drivers?",[["None","exp:-2 corp:1 main:1 #nvidia:1"],["Low","exp:-1 main:1"],["Moderate",""],["High","exp:1 diy:1"]]],
- ["How do you feel about “the Arch Way”?",[["Never heard of it","exp:-1"],["Sounds like a lot of work","#archb:-2 diy:-1"],["I respect it","#archb:1"],["I use Arch, btw","arch:4 exp:2 diy:2 #archb:1"]]],
+ ["A system that hands you almost nothing and expects you to build up from there?",[["Never thought about it","exp:-1"],["Sounds like a lot of work","#archb:-2 diy:-1"],["I respect it","#archb:1"],["That's exactly how I like it","arch:4 exp:2 diy:2 #archb:1"]]],
  ["What should your distro say about you?",[["Nothing, it's a tool","main:1"],["I'm a power user","exp:2 diy:1"],["I care about privacy and freedom","priv:1 free:1"],["I'm a gamer","game:2 #gaming:1"],["I have taste","polish:2 #maclike:1"]]],
  ["How likely are you to distro-hop in the next year?",[["Not at all, I want a forever home","edge:-1 main:1 server:1"],["Possibly",""],["Probably","edge:1 diy:1"],["I hop weekly","edge:2 diy:2 immut:-1"]]],
 ]},
@@ -366,65 +364,65 @@ const SECTIONS=[
  ["What graphics does it have?",[["NVIDIA","#nvidia:3 free:-1 #musl:-1"],["AMD Radeon","game:1 edge:1"],["Intel integrated",""],["Apple Silicon","!apple #apple:6"],["No idea","exp:-2"]]],
  ["What kind of storage?",[["An old spinning hard drive","light:1"],["A small SSD (128 GB or less)","light:1 #tiny:1 nixos:-1"],["A 256–512 GB SSD",""],["1 TB or more of NVMe","light:-1"]]],
  ["What CPU architecture?",[["A regular x86-64 PC",""],["Raspberry Pi","!arm #sbc:6 light:1"],["Another ARM board or laptop","!arm #arm:2"],["An Apple Silicon Mac","!apple #apple:6"],["An old 32-bit-only x86 machine","!x32 light:2 #tiny:2"]]],
- ["What form factor?",[["Laptop",""],["Desktop tower",""],["Handheld (Steam Deck, ROG Ally, Legion Go)","#handheld:5 game:2 #steamui:2"],["Headless server or homelab box","server:2 #server:2 #nodesk:1"],["Mini PC under the TV","game:1 #steamui:2 #retro:1 #htpc:2 light:1"],["A phone or tablet","!phone #phone:8"]]],
+ ["What form factor?",[["Laptop",""],["Desktop tower",""],["A gaming handheld PC","#handheld:5 game:2 #steamui:2"],["Headless server or homelab box","server:2 #server:2 #nodesk:1"],["Mini PC under the TV","game:1 #steamui:2 #retro:1 #htpc:2 light:1"],["A phone or tablet","!phone #phone:8"]]],
  ["How much does battery life matter?",[["A lot","light:1 edge:1 #fedb:1"],["Somewhat",""],["Not a laptop",""]]],
  ["Is any of your hardware brand new (released in the last 6 months)?",[["Yes","edge:2 #rolling:1 #fedb:1"],["No","edge:-1"],["Not sure",""]]],
  ["Wi-Fi and Bluetooth chips that need proprietary firmware?",[["They must work out of the box","free:-2 exp:-1 main:1"],["I'd install firmware myself","free:-1 exp:1"],["I pick hardware with free firmware","free:2 #fsf:3"]]],
- ["Is this a System76 machine?",[["Yes","popos:7"],["No",""]]],
+ ["Did your computer come with Linux preinstalled by its maker?",[["Yes","popos:4 #nvidia:1"],["No",""]]],
  ["Multiple monitors with mixed scaling or refresh rates?",[["Yes, that's my setup","edge:1 polish:1 #kde:1 #gnome:1"],["Single monitor",""]]],
  ["Touchscreen or 2-in-1?",[["Yes, and I want gestures and rotation","#gnome:2 polish:1"],["No",""]]],
- ["Wayland or X11?",[["Wayland, it's the future","edge:1 #fedb:1 #gnome:1 #kde:1"],["X11, it works","edge:-1 #xfce:1 #mate:1 #cinnamon:1 #sysv:1"],["Don't know, don't care","exp:-1"]]],
+ ["Display tech: the new one that's still maturing, or the old one that's rock solid?",[["The new one, it's the future","edge:1 #fedb:1 #gnome:1 #kde:1"],["The old reliable one","edge:-1 #xfce:1 #mate:1 #cinnamon:1 #sysv:1"],["Don't know, don't care","exp:-1"]]],
  ["Do printing and scanning need to just work?",[["Yes","exp:-1 main:1 #ubub:1"],["I rarely print",""],["I never print","diy:1"]]],
  ["NVIDIA drivers: how should they arrive?",[["Preinstalled, please","#nvidia:3 diy:-2 free:-2"],["I'll install them","diy:1"],["I avoid NVIDIA","free:1"],["Not relevant",""]]],
- ["Where will it actually run?",[["On bare metal",""],["Mostly in a VM","light:1 exp:1"],["Inside WSL on Windows","#wsl:5 win:1"],["In containers","#container:3 server:1 #tiny:1"]]],
+ ["Where will it actually run?",[["On bare metal",""],["Mostly in a VM","light:1 exp:1"],["Inside Windows, as a built-in Windows feature","#wsl:5 win:1"],["In containers","#container:3 server:1 #tiny:1"]]],
  ["RGB, racing wheels, fancy peripherals?",[["I need control software for them","game:2 #gaming:2"],["Not important",""]]],
  ["How many machines will run this distro?",[["Just this one",""],["A few personal machines","#declarative:2 immut:1"],["A whole homelab","server:1 #declarative:1 #server:1 #virt:1"],["A fleet at work","server:2 corp:2 #enterprise:3"]]],
  ["Secure Boot?",[["It must stay on","#secureboot:3 corp:1"],["I'll turn it off",""],["What's Secure Boot?","exp:-2"]]],
  ["Performance or efficiency?",[["Max performance, every frame counts","#optimized:3 game:1 edge:1"],["Quiet and efficient","light:1"],["Balanced",""]]],
 ]},
 {name:"Desktop",qs:[
- ["Which layout feels like home?",[["Windows-style taskbar and start menu","win:2 #winlike:3"],["A macOS-style dock","polish:2 #maclike:3"],["GNOME's clean activities overview","#gnome:3"],["Tiling windows, keyboard for everything","exp:2 diy:2 polish:-2 #tiling:2 #wm:2 #nodesk:1"],["Just a terminal","exp:2 server:1 polish:-2 #nodesk:2"]]],
- ["Preferred desktop environment?",[["GNOME","#gnome:3"],["KDE Plasma","#kde:3"],["Cinnamon","#cinnamon:4"],["Xfce or LXQt","#xfce:3 #lxqt:3 light:1"],["MATE or Trinity (classic style)","#mate:4 #trinity:4"],["Budgie","#budgie:4"],["COSMIC","#cosmic:5"],["Pantheon or Deepin's DDE","#pantheon:4 #dde:4"],["A window manager (i3, Sway, Hyprland)","#wm:3 #nodesk:2 diy:2"],["No idea","exp:-1"]]],
+ ["Which layout feels like home?",[["Windows-style taskbar and start menu","win:2 #winlike:3"],["A macOS-style dock","polish:2 #maclike:3"],["A clean full-screen overview of windows and apps","#gnome:3"],["Tiling windows, keyboard for everything","exp:2 diy:2 polish:-2 #tiling:2 #wm:2 #nodesk:1"],["Just a terminal","exp:2 server:1 polish:-2 #nodesk:2"]]],
+ ["Which desktop personality fits you?",[["Modern and minimal, few buttons","#gnome:3"],["Packed with options and widgets","#kde:3"],["Comfy and classic, with a start menu","#cinnamon:4"],["Light and simple","#xfce:3 #lxqt:3 light:1"],["Old-school, like early-2000s desktops","#mate:4 #trinity:4"],["A clean panel with a sidebar","#budgie:4"],["Brand new, with tiling built in","#cosmic:5"],["Calm and mac-like","#pantheon:4 #dde:4"],["Just windows and keyboard shortcuts","#wm:3 #nodesk:2 diy:2"],["No idea","exp:-1"]]],
  ["How much will you customize the look?",[["Keep the defaults; they should look good","polish:2 diy:-1"],["Small tweaks","polish:1"],["Theme everything","diy:1 #kde:1"],["Rice it down to the last pixel","diy:2 exp:1 #wm:1 #archb:1"]]],
  ["Animations and effects?",[["Love them","polish:2 light:-1 #kde:1 #dde:1"],["A few, tasteful ones","polish:1"],["Turn them all off","light:1 polish:-1"]]],
  ["Should the desktop feel like one designed product?",[["Yes","polish:2 #pantheon:2 #cosmic:1 #gnome:1"],["Somewhat","polish:1"],["No, I'll mix and match","diy:1 polish:-1"]]],
- ["How do you open apps?",[["Start menu","win:2 #winlike:1"],["Dock","polish:1 #maclike:1"],["Super key and type","#gnome:2 #cosmic:1"],["A launcher like rofi or fuzzel","diy:2 exp:1 #wm:2"]]],
+ ["How do you open apps?",[["Start menu","win:2 #winlike:1"],["Dock","polish:1 #maclike:1"],["Super key and type","#gnome:2 #cosmic:1"],["A keyboard pop-up launcher I set up myself","diy:2 exp:1 #wm:2"]]],
  ["Do you want one big control center for system settings?",[["Must have","diy:-2 polish:1 #suseb:2 #kde:1 #cinnamon:1"],["GUI for the basics is enough",""],["Don't need it; I edit files","exp:1 diy:1 polish:-1"]]],
  ["Should it look like Windows 11?",[["As close as possible","#winlike:3 zorin:2 win:2"],["A bit","win:1 #winlike:1"],["No","win:-1"]]],
  ["Preinstalled apps?",[["Lots of useful stuff","diy:-2 #codecs:1"],["A few essentials",""],["Nothing. I'll install what I want","diy:2 #nodesk:2 #archb:1"]]],
  ["Knobs and settings?",[["A setting for everything","#kde:3 diy:1"],["Sensible defaults, few knobs","#gnome:2 #pantheon:2 polish:2"],["Don't care",""]]],
  ["Tiling?",[["Built-in auto-tiling would be great","#cosmic:3 #tiling:2"],["I want a full tiling window manager","diy:2 exp:1 #wm:3"],["No, floating windows",""]]],
- ["Hyprland, Sway, i3?",[["I want the newest Hyprland features","edge:2 #rolling:2 #archb:1 #nix:1 omarchy:2"],["Sway or i3, solid and boring","#wm:1 #fixed:1"],["Neither",""]]],
- ["GNOME's design choices (no minimize button by default, extensions for tweaks)?",[["I love them","#gnome:3"],["Tolerable with a few extensions","#gnome:1"],["I can't stand them","#gnome:-3"]]],
- ["Want a light desktop to save resources?",[["Yes, Xfce or LXQt territory","light:2 #xfce:2 #lxqt:2 #tiny:1"],["Don't care",""],["I want the full-fat experience","light:-1 polish:1 #kde:1"]]],
+ ["Keyboard-driven tiling setups?",[["The flashiest, newest one with animations","edge:2 #rolling:2 #archb:1 #nix:1 omarchy:2"],["A plain, stable one","#wm:1 #fixed:1"],["Neither",""]]],
+ ["A desktop with strong opinions (no minimize button by default) that you change with add-ons?",[["I love them","#gnome:3"],["Tolerable with a few extensions","#gnome:1"],["I can't stand them","#gnome:-3"]]],
+ ["Want a light desktop to save resources?",[["Yes, as light as possible","light:2 #xfce:2 #lxqt:2 #tiny:1"],["Don't care",""],["I want the full-fat experience","light:-1 polish:1 #kde:1"]]],
  ["A welcome app with tips and driver installers after setup?",[["Yes please","exp:-2 #winlike:1 mint:1 manjaro:1 endeavour:1 zorin:1 garuda:1"],["Maybe",""],["No","exp:1"]]],
- ["Desktops built by the distro itself (COSMIC, Pantheon, Cinnamon, Budgie)?",[["Love that","#cosmic:2 #pantheon:2 #cinnamon:2 #budgie:2 #dde:1"],["Prefer vanilla upstream desktops","#fedb:1 #archb:1 #suseb:1"],["No preference",""]]],
+ ["A desktop designed by the same people who make the OS?",[["Love that","#cosmic:2 #pantheon:2 #cinnamon:2 #budgie:2 #dde:1"],["Prefer standard, unmodified desktops","#fedb:1 #archb:1 #suseb:1"],["No preference",""]]],
  ["Do you have a HiDPI screen that needs fractional scaling?",[["Yes","#kde:1 #gnome:1 polish:1 edge:1"],["No",""]]],
  ["A macOS-style top bar?",[["Yes","#maclike:2 polish:1"],["No",""]]],
  ["Would you use a desktop that looks like 2008 if it was rock solid?",[["Yes","edge:-2 polish:-1 #mate:1 #xfce:1 #trinity:1"],["I'd rather not","edge:1 polish:1"]]],
  ["Looks versus function?",[["Looks first","polish:2"],["Equal","polish:1"],["Function first","polish:-1"],["Looks don't exist to me","polish:-2 exp:1"]]],
 ]},
 {name:"Software",qs:[
- ["Snaps?",[["Fine by me","#snap:3"],["I prefer Flatpak","#snap:-2 #flatpak:2"],["Native packages only","immut:-1 #flatpak:-1 #snap:-1"],["What are those?","exp:-1"]]],
- ["How important is the AUR (Arch's giant user repo)?",[["Can't live without it","#aur:4"],["Nice to have","#aur:1"],["Don't need it",""],["Sounds risky","#aur:-1 priv:1"]]],
- ["How big should the repo be?",[["Everything imaginable, packaged","#nix:2 #aur:1 #debb:1 main:1"],["A solid core, plus Flatpak","#flatpak:2 immut:1"],["A small, curated set","light:1 #tiny:1 #musl:1"]]],
+ ["App formats that bundle everything and update on their own?",[["Fine, any kind, even the company-run one","#snap:3"],["Fine, but only the community-run kind","#snap:-2 #flatpak:2"],["No, packages from the system only","immut:-1 #flatpak:-1 #snap:-1"],["What are those?","exp:-1"]]],
+ ["A giant community-run collection of build scripts for almost any program?",[["Can't live without it","#aur:4"],["Nice to have","#aur:1"],["Don't need it",""],["Sounds risky","#aur:-1 priv:1"]]],
+ ["How big should the repo be?",[["Everything imaginable, packaged","#nix:2 #aur:1 #debb:1 main:1"],["A solid core, plus sandboxed apps","#flatpak:2 immut:1"],["A small, curated set","light:1 #tiny:1 #musl:1"]]],
  ["Compiling software from source?",[["Never","diy:-2 #source:-3"],["Occasionally",""],["I'd compile everything with my own flags","#source:4 #optimized:1 diy:2 exp:2"]]],
  ["Must Steam, Discord, Spotify and Zoom work?",[["Yes","free:-2 main:1"],["Some of them","free:-1"],["I avoid proprietary software","free:2 #fsf:2"]]],
  ["Media codecs (H.264, HEVC) out of the box?",[["Must have","free:-2 #codecs:3"],["I'll add them","exp:1"],["I stick to free formats","free:2 #fsf:1"]]],
- ["Which package manager do you want (or want to learn)?",[["apt","#apt:3"],["dnf","#dnf:3"],["pacman","#pacman:3"],["zypper","#zypper:3"],["nix or guix","#nix:4 #guixpm:4"],["xbps","#xbps:4"],["apk","#apk:4"],["portage","#portage:4"],["Image-based (rpm-ostree, ABRoot…)","#atomic:3 #ostree:2"],["None. I'll track packages myself","#buildown:4 #slackpkg:2"]]],
+ ["What should installing software feel like?",[["The commands every tutorial online already uses","#apt:3"],["Solid and corporate, like the servers at work","#dnf:3"],["Terse and lightning fast","#pacman:3"],["Thorough, with a solver that explains conflicts","#zypper:3"],["Every package isolated, so nothing can ever conflict","#nix:4 #guixpm:4"],["Tiny and minimal, done before you blink","#xbps:3 #apk:3"],["Built from source with the options I choose","#portage:4"],["The whole system updates as one image","#atomic:3 #ostree:2"],["I'll track packages myself","#buildown:4 #slackpkg:2"],["No idea",""]]],
  ["Windows software through Wine or Proton?",[["I need it often","win:1 game:1 #gaming:1"],["Occasionally",""],["Never","win:-1"]]],
  ["A graphical app store?",[["Must have","exp:-2 polish:1 #flatpak:1"],["Sometimes",""],["Never, CLI only","exp:1"]]],
- ["Running any distro's software inside containers (Distrobox, Toolbox)?",[["Love that idea","#distrobox:3 immut:2"],["Maybe",""],["Sounds like overhead","immut:-1 #distrobox:-1"]]],
+ ["Running other systems' software inside containers on your desktop?",[["Love that idea","#distrobox:3 immut:2"],["Maybe",""],["Sounds like overhead","immut:-1 #distrobox:-1"]]],
  ["Rolling back the whole system after a bad update?",[["Essential","#btrfs:2 #atomic:2 #declarative:2 immut:2"],["Nice to have","immut:1 #btrfs:1"],["I'll fix it myself","diy:1 exp:1"]]],
- ["musl or glibc?",[["glibc, for compatibility","#musl:-3"],["musl appeals to me","#musl:4 light:1"],["What's that?","exp:-1"]]],
+ ["A smaller, stricter core C library instead of the standard, most compatible one?",[["Most compatible, please","#musl:-3"],["Smaller and stricter appeals to me","#musl:4 light:1"],["What's that?","exp:-1"]]],
  ["How new should your apps be?",[["Always the latest release","edge:2 #rolling:1"],["A few months old is fine",""],["Old and well-tested","edge:-2 #lts:1"]]],
- ["Third-party repos?",[["PPAs, happily","#ubub:2"],["COPR","#fedb:2"],["Open Build Service","#suseb:2"],["I avoid third-party repos","priv:1 #debb:1"]]],
+ ["Extra software sources run by individuals?",[["Sure, I add them happily","#ubub:2"],["Only from the OS's own build service","#fedb:1 #suseb:2"],["I avoid them","priv:1 #debb:1"]]],
  ["Office documents?",[["Need tight Microsoft Office compatibility","win:2 corp:1"],["LibreOffice is fine",""],["Plain text and Markdown","exp:1 light:1"]]],
- ["You hear about a cool program. How do you install it?",[["Search the app store","exp:-2 polish:1 #flatpak:1"],["apt / dnf / pacman install it","exp:1"],["Check the AUR","#aur:3"],["Add it to my config and rebuild","#declarative:4 immut:2"],["Download the source tarball","#slackb:2 #buildown:2 #source:1"],["Grab an AppImage","#appimage:3"]]],
- ["Need an enterprise app certified for RHEL or Ubuntu?",[["Yes","#enterprise:3 corp:2 server:1"],["No",""]]],
+ ["You hear about a cool program. How do you install it?",[["Search the app store","exp:-2 polish:1 #flatpak:1"],["One command in the terminal","exp:1"],["Check the community build-script collection","#aur:3"],["Add it to my config and rebuild","#declarative:4 immut:2"],["Download the source tarball","#slackb:2 #buildown:2 #source:1"],["Download a single portable app file","#appimage:3"]]],
+ ["Need an app that is only certified for specific enterprise OSes?",[["Yes","#enterprise:3 corp:2 server:1"],["No",""]]],
  ["Electron apps (VS Code, Slack, Discord)?",[["I use lots of them","free:-1 light:-1"],["I avoid them","light:1 free:1"]]],
- ["How do you feel about systemd?",[["Love it, or at least fine with it","nosysd:-2 #systemd:1"],["Don't care",""],["Prefer alternatives","nosysd:2"],["Hate it passionately","nosysd:2 #systemd:-3"]]],
- ["Preferred init system?",[["systemd","#systemd:2 nosysd:-2"],["OpenRC","#openrc:4 nosysd:1"],["runit","#runit:4 nosysd:1"],["sysvinit","#sysv:4 nosysd:1"],["s6 or dinit","#s6:3 #dinit:3 nosysd:1"],["GNU Shepherd","#shepherd:5"],["Whatever it ships with",""]]],
+ ["The big all-in-one service manager most systems use?",[["Fine with it","nosysd:-2 #systemd:1"],["Don't care",""],["Prefer something simpler","nosysd:2"],["Strongly against it","nosysd:2 #systemd:-3"]]],
+ ["How should services start at boot?",[["Whatever the big modern standard is","#systemd:2 nosysd:-2"],["Classic scripts with dependency ordering","#openrc:4 nosysd:1"],["Tiny supervisors, one folder per service","#runit:4 nosysd:1"],["Old-school numbered scripts","#sysv:4 nosysd:1"],["Newer minimal supervisors","#s6:3 #dinit:3 nosysd:1"],["Defined in code, like the rest of the system","#shepherd:5"],["Whatever it ships with",""]]],
 ]},
 {name:"Updates",qs:[
  ["Which release model?",[["Fixed releases every ~6 months","#fixed:2 #fedb:1"],["Long-term support for years","edge:-2 server:2 #lts:3"],["Rolling, always the newest","edge:2 #rolling:3"],["Rolling, but tested or delayed","#rolling:2 tumbleweed:2 manjaro:1 solus:1 edge:1"],["Atomic images","#atomic:3 immut:2"]]],
@@ -434,33 +432,33 @@ const SECTIONS=[
  ["Kernel?",[["Latest mainline","edge:2 #rolling:1"],["An LTS kernel","edge:-1 #lts:1"],["One I compiled myself","#source:3 diy:2"]]],
  ["Read the news before updating?",[["Yes, it's a ritual","#archb:2 exp:1"],["Only if something breaks",""],["Updates should be safe without reading anything","diy:-1 #atomic:1 #btrfs:1"]]],
  ["Automatic background updates?",[["Yes","immut:2 polish:1 diy:-2 #atomic:2"],["Just notify me","mint:1"],["Manual only","diy:1 exp:1"]]],
- ["Btrfs snapshots before every update?",[["Must have","#btrfs:4"],["Nice",""],["No","#btrfs:-1"]]],
+ ["Automatic snapshots before every update?",[["Must have","#btrfs:4"],["Nice",""],["No","#btrfs:-1"]]],
  ["How long should a release be supported?",[["9 months is fine","edge:1 #fedb:1"],["3–5 years","#lts:2 #debb:1"],["10 years","#enterprise:3 #rhelb:2 server:2"],["Doesn't apply, I want rolling","#rolling:3 edge:2"]]],
  ["Does a two-year-old Firefox bother you?",[["Yes, a lot","edge:2"],["A bit","edge:1"],["No","edge:-2"]]],
  ["Should your OS change visibly over time or stay identical?",[["Change and improve","edge:1"],["Stay identical for years","edge:-2 server:1 #lts:1"]]],
  ["Updates staged in the background, applied on reboot?",[["Love it","#atomic:3"],["Fine",""],["I want them applied live","#atomic:-2"]]],
- ["Debian Testing or Sid sound appealing?",[["Yes","#debb:2 edge:1 sparky:1 vanilla:1"],["No",""]]],
+ ["Running the development branch of a famously stable system?",[["Yes","#debb:2 edge:1 siduction:2 vanilla:1"],["No",""]]],
  ["Reproducible builds and signed packages?",[["I care a lot","#declarative:3 priv:1 #debb:1"],["Don't care",""]]],
  ["A distro run by one maintainer or a tiny team?",[["Fine","main:-2"],["Makes me uneasy","main:1 corp:1"],["I need a big organization behind it","corp:2 main:1"]]],
  ["Decades of track record?",[["Very important","main:1 debian:2 slackware:2 #debb:1"],["Doesn't matter",""],["Young projects are exciting","edge:1 main:-1"]]],
  ["An update fails at 2 a.m. What now?",[["Boot the previous snapshot","#btrfs:2 #atomic:2 #declarative:1"],["chroot in from a USB stick","exp:2 #archb:1 #portage:1"],["Reinstall","exp:-1"],["Panic","exp:-2"]]],
- ["Graphics stack (Mesa) freshness?",[["Must be new for my GPU","edge:2 game:1 #rolling:1"],["Whatever ships",""]]],
+ ["How fresh should the graphics drivers be?",[["Must be new for my GPU","edge:2 game:1 #rolling:1"],["Whatever ships",""]]],
  ["How many small bugs can you live with day to day?",[["None","edge:-2 polish:1"],["Some","edge:1"],["Lots, it's part of the fun","edge:2 exp:1"]]],
- ["Debian Stable or Arch?",[["Debian Stable","#debb:2 edge:-2"],["Arch","#archb:2 edge:2"],["Somewhere in between","#fedb:2 #suseb:1"]]],
+ ["Frozen for two years, or changing every day?",[["Frozen and safe","#debb:2 edge:-2"],["Changing every day","#archb:2 edge:2"],["Somewhere in between","#fedb:2 #suseb:1"]]],
 ]},
 {name:"Gaming",qs:[
  ["How much do you game?",[["Not at all","game:-2 #gaming:-1"],["Casually",""],["Several hours a week","game:1"],["It's my main use","game:2 #gaming:2"]]],
  ["What do you play?",[["Nothing","game:-2"],["My Steam library","game:2 #gaming:1"],["Emulators","game:1 #retro:2"],["Online shooters with anti-cheat","game:1 win:1"],["Minecraft and indies","game:1"]]],
- ["Boot straight into a console-like Steam mode?",[["Yes","#steamui:5 game:2"],["No",""]]],
- ["Gaming tweaks preinstalled (GameMode, MangoHud, tuned kernel)?",[["Yes","#gaming:3 game:2 diy:-1"],["I'll set them up","diy:1 game:1"],["Don't care",""]]],
- ["Lutris, Heroic, Epic or GOG games?",[["Yes","game:1 #gaming:1"],["No",""]]],
+ ["Boot straight into a console-style game launcher?",[["Yes","#steamui:5 game:2"],["No",""]]],
+ ["Gaming performance tweaks and overlays preinstalled?",[["Yes","#gaming:3 game:2 diy:-1"],["I'll set them up","diy:1 game:1"],["Don't care",""]]],
+ ["Games from stores other than Steam?",[["Yes","game:1 #gaming:1"],["No",""]]],
  ["VR?",[["Yes","edge:2 game:2 #gaming:1"],["No",""]]],
  ["Streaming or recording with OBS?",[["Yes","game:1 #creative:1 #gaming:1"],["No",""]]],
  ["Video editing?",[["DaVinci Resolve","#fedb:1 #rhelb:1 free:-1 #creative:1"],["Kdenlive","#kde:1 #creative:1"],["None",""]]],
  ["Music production with low-latency audio?",[["Yes","#creative:3 edge:1"],["No",""]]],
  ["Lots of movies and music in every format?",[["Yes","free:-2 #codecs:2"],["No",""]]],
  ["Netflix and other DRM streaming in the browser?",[["Yes","free:-2"],["No","free:1"]]],
- ["Retro emulation (RetroArch, EmuDeck)?",[["Yes","#retro:4 game:1"],["No",""]]],
+ ["Emulating old consoles?",[["Yes","#retro:4 game:1"],["No",""]]],
  ["HDR gaming?",[["Yes","edge:2 game:2 #kde:2 #gaming:1"],["No",""]]],
  ["A laptop with hybrid Intel/AMD + NVIDIA graphics?",[["Yes","#nvidia:3 free:-1"],["No",""]]],
  ["Design work (GIMP, Krita, Inkscape, Blender)?",[["Yes, daily","#creative:1 polish:1"],["Need Adobe apps specifically","win:1"],["No",""]]],
@@ -476,19 +474,19 @@ const SECTIONS=[
  ["Reproducible dev environments?",[["A huge deal","#declarative:4 immut:2"],["Docker covers it","#container:2 server:1"],["Don't care",""]]],
  ["CUDA or machine-learning work?",[["Yes","#ubub:2 #nvidia:3 free:-2 popos:1"],["No",""]]],
  ["Corporate IT, VPN clients or compliance tools?",[["Yes","#enterprise:2 #ubub:2 corp:2 #rhelb:1"],["No",""]]],
- ["Containers?",[["Docker, heavily","#container:1 #ubub:1 #debb:1 server:1"],["Podman","#fedb:2 #rhelb:1 #container:1 #distrobox:1"],["Neither",""]]],
+ ["Containers?",[["Docker, heavily","#container:1 #ubub:1 #debb:1 server:1"],["Daemonless, rootless containers","#fedb:2 #rhelb:1 #container:1 #distrobox:1"],["Neither",""]]],
  ["Newest compilers and toolchains?",[["Yes","edge:2 #rolling:2"],["Stable is fine","edge:-1"],["I pin per project","#declarative:2"]]],
  ["Do you need to test software across many distros?",[["Yes, constantly","#distrobox:3 immut:1"],["No",""]]],
- ["Which packaging format would you write?",[["PKGBUILD","#archb:3"],["Nix derivations","#nix:3"],["ebuilds","#portage:3"],[".deb","#debb:3"],["RPM spec files","#fedb:2 #rhelb:1 #suseb:1"],["I'll never package anything",""]]],
- ["Should it match your production servers?",[["Yes, RHEL family","#rhelb:3 server:1"],["Yes, Debian or Ubuntu","#debb:3"],["No",""]]],
+ ["If you packaged software, which style appeals?",[["A short shell script with a few variables","#archb:3"],["An expression in its own functional language","#nix:3"],["A script full of optional feature switches","#portage:3"],["A folder of control files and rules","#debb:3"],["One spec file with build and install sections","#fedb:2 #rhelb:1 #suseb:1"],["I'll never package anything",""]]],
+ ["Should it match your production servers?",[["Yes, the paid enterprise family big companies use","#rhelb:3 server:1"],["Yes, the free family most web servers run","#debb:3"],["No",""]]],
  ["Embedded or IoT development?",[["Yes","#arm:2 #musl:1 #apk:1 #buildown:1"],["No",""]]],
  ["Data science and notebooks?",[["Yes","#ubub:1 #nvidia:1"],["No",""]]],
  ["Do you want to learn how Linux distros are built (toolchains, bootstrapping)?",[["Yes, deeply","#buildown:5 #source:2 diy:2"],["Somewhat","#archb:1 diy:1"],["No","diy:-1"]]],
  ["Editor?",[["VS Code","free:-1"],["JetBrains",""],["Vim, Neovim or Emacs","exp:1 diy:1"],["None",""]]],
- ["Run Windows VMs with KVM / virt-manager?",[["Yes","#virt:2"],["No",""]]],
+ ["Run Windows in a virtual machine?",[["Yes","#virt:2"],["No",""]]],
  ["Daily video calls (Zoom, Teams)?",[["Yes","main:1 free:-1"],["No",""]]],
  ["Paid vendor support contracts available?",[["I need that option","#enterprise:3 corp:2"],["No","corp:-1"]]],
- ["How do you manage dotfiles?",[["Home Manager","#nix:4 #declarative:2"],["GNU Stow or a git repo","diy:1"],["I don't",""]]],
+ ["How do you manage your settings files?",[["A declarative tool that builds my whole home folder","#nix:4 #declarative:2"],["A git repo and some symlinks","diy:1"],["I don't",""]]],
  ["Security testing?",[["Pentesting is my job","#pentest:7"],["CTFs as a hobby","#pentest:4"],["No","#pentest:-3"]]],
  ["Is this mainly a work machine?",[["Yes, it has to be dependable","edge:-1 main:1 corp:1"],["Mixed",""],["No, it's a play machine","edge:1 diy:1"]]],
 ]},
@@ -500,9 +498,9 @@ const SECTIONS=[
  ["Full-disk encryption?",[["Must have","priv:1"],["Nice to have",""],["No",""]]],
  ["Free software philosophy?",[["GNU / FSF all the way","free:2 #fsf:4"],["Mostly","free:1 #debb:1 #fedb:1"],["Pragmatic","free:-1"],["Don't care","free:-2"]]],
  ["Who should run your distro?",[["A company","corp:2"],["No preference",""],["A community or nonprofit","corp:-2"]]],
- ["Canonical's choices (snaps, Ubuntu Pro prompts)?",[["Fine with them","#ubub:2 #snap:1"],["Mixed",""],["I dislike them","#ubub:-2 #snap:-2 lmde:2 debian:1"]]],
- ["Red Hat's source-code policy changes?",[["Don't affect me",""],["They matter to me","rhel:-2 centosstream:-1 corp:-1"]]],
- ["Mandatory access control?",[["SELinux, enforcing","#selinux:3 priv:2"],["AppArmor is fine","#apparmor:3"],["Don't care",""]]],
+ ["A company nudging you toward its own app store and paid extras?",[["Fine with it","#ubub:2 #snap:1"],["Mixed",""],["I dislike it","#ubub:-2 #snap:-2 mint:1 debian:1"]]],
+ ["A company restricting who can get its source code?",[["Doesn't affect me",""],["They matter to me","rhel:-2 centosstream:-1 corp:-1"]]],
+ ["Mandatory access control?",[["Strict, label-based and enforcing","#selinux:3 priv:2"],["Simpler per-app profiles","#apparmor:3"],["Don't care",""]]],
  ["A minimal attack surface?",[["Yes","#tiny:2 #musl:1 #hardened:2 priv:1"],["Not a priority",""]]],
  ["Firmware blobs from vendors?",[["Fine","free:-1"],["Avoid them","free:2 #fsf:3"]]],
  ["The Unix philosophy (small tools, simple design)?",[["Deeply important","#runit:1 #sysv:1 #musl:1 #slackb:1 nosysd:1"],["Nice idea",""],["Don't care","nosysd:-1"]]],
@@ -517,37 +515,37 @@ const SECTIONS=[
 {name:"Tinkering",qs:[
  ["Build your own kernel?",[["Never",""],["Once, for fun","diy:1"],["Regularly","#source:3 diy:2 exp:2"]]],
  ["Choose every single package yourself?",[["Yes","diy:2 #nodesk:2 #source:1"],["Mostly","diy:1"],["No, give me defaults","diy:-2"]]],
- ["Bootloader?",[["GRUB is fine",""],["systemd-boot","#archb:1 popos:1"],["I don't know what that is","exp:-2"],["EFI stub, configured by hand","exp:2 diy:2 #source:1"]]],
- ["Filesystem?",[["Btrfs","#btrfs:3"],["ext4","#btrfs:-1"],["ZFS","#zfs:4"],["Don't know","exp:-1"]]],
+ ["Bootloader?",[["GRUB is fine",""],["A minimal boot manager","#archb:1 popos:1"],["I don't know what that is","exp:-2"],["EFI stub, configured by hand","exp:2 diy:2 #source:1"]]],
+ ["Filesystem?",[["One with built-in snapshots","#btrfs:3"],["The classic, simple default","#btrfs:-1"],["Pooled storage with checksums on everything","#zfs:4"],["Don't know","exp:-1"]]],
  ["Shell scripts to automate your life?",[["Lots","exp:1 diy:1"],["Some",""],["Never","exp:-1"]]],
  ["Start from a blank system?",[["Yes","diy:2 #nodesk:3"],["No","diy:-2 #nodesk:-2"]]],
  ["How do you want to install?",[["Graphical installer with defaults","diy:-2 exp:-1 #nodesk:-1"],["Graphical installer with options","#dechoice:2"],["By hand, in text","#nodesk:3 diy:2 arch:2 gentoo:1"],["From a declarative config","#declarative:4"],["Bootstrap my own toolchain","#buildown:6"]]],
  ["Packages optimized for your CPU (x86-64-v3 and up)?",[["Yes","#optimized:4"],["No",""]]],
  ["Break and rebuild the system for fun?",[["Yes","edge:1 diy:2 exp:1"],["No","diy:-1"]]],
  ["Configuration management?",[["Ansible or similar","server:1 #server:1"],["I'd rather the OS itself be declarative","#declarative:4"],["No",""]]],
- ["USE flags: does that sound fun?",[["Yes","#portage:4"],["No","#portage:-2"]]],
+ ["Per-package feature switches on every build: does that sound fun?",[["Yes","#portage:4"],["No","#portage:-2"]]],
  ["Know what every installed package does?",[["Yes","diy:2 #tiny:2 #nodesk:1"],["No",""]]],
  ["Dependency resolution?",[["Automatic, obviously","#slackb:-3 #buildown:-2"],["I'll resolve dependencies myself","#slackb:3 #buildown:2 diy:2"]]],
  ["How much compile time is acceptable?",[["None","#source:-2"],["Some",""],["Overnight builds are fine","#source:3"]]],
  ["Are you building, or do you want to build, your own distro?",[["Yes","#buildown:6 #source:2 diy:2 exp:2"],["No",""]]],
  ["Would you write a 400-line config that declares your whole system?",[["Yes","#declarative:5 immut:2"],["No","#declarative:-2"]]],
- ["Build your own custom OS image (Universal Blue style)?",[["Yes","#ostree:3 bluefin:1 aurora:1 bazzite:1 immut:2"],["No",""]]],
- ["Out-of-tree kernel modules (DKMS) all the time?",[["Yes","immut:-1 #atomic:-1"],["No",""]]],
+ ["Build your own custom OS image from a recipe?",[["Yes","#ostree:3 bluefin:1 aurora:1 bazzite:1 immut:2"],["No",""]]],
+ ["Drivers from outside the official kernel, all the time?",[["Yes","immut:-1 #atomic:-1"],["No",""]]],
  ["What's the most fun part?",[["Making it pretty","polish:2 #kde:1 #wm:1"],["Making it fast","#optimized:3"],["Making it minimal","#tiny:2 #musl:1 light:1"],["Making it reproducible","#declarative:4"],["Making it from nothing","#buildown:5"]]],
  ["A read-only root filesystem?",[["Love it","#atomic:3 immut:2"],["Hate it","#atomic:-3 immut:-2"],["Neutral",""]]],
 ]},
 {name:"Final",qs:[
  ["Will it also serve things (web, Plex, Home Assistant)?",[["Yes, alongside desktop use","server:2 #server:2"],["Yes, a dedicated box for VMs and containers","#hypervisor:6 server:2 #virt:2"],["Yes, a NAS for my files","#nas:6 server:2 #zfs:1"],["No",""]]],
  ["Uptime?",[["Months between reboots","server:2 #lts:1"],["Rebooting daily is fine",""]]],
- ["A free Red Hat Enterprise Linux rebuild?",[["Yes, that's what I want","#rhelb:5 corp:1"],["No",""]]],
+ ["A free copy of a paid enterprise OS?",[["Yes, that's what I want","#rhelb:5 corp:1"],["No",""]]],
  ["Containers in production?",[["Tiny base images","#container:2 #musl:1 alpine:3"],["A host that only runs containers or Kubernetes","#containerhost:6 server:2 immut:1"],["No",""]]],
  ["Community vibe?",[["Friendly to beginners","#ubub:1 main:1 mint:1 zorin:1"],["Read the manual first","#archb:1 #portage:1 exp:1"],["Academic and serious","#debb:1 #declarative:1"],["Small and friendly","main:-1 endeavour:2 void:1"]]],
  ["Your favourite kind of docs?",[["A legendary wiki","#archb:3"],["Thorough handbooks","#portage:2 #debb:1"],["Forum threads","main:1"]]],
- ["Where do you hang out online?",[["r/linux4noobs","exp:-2 #ubub:1"],["r/unixporn","polish:1 diy:2 #wm:2 #archb:1"],["r/linux_gaming","game:2 #gaming:2"],["Hacker News or Lobsters","#declarative:2 exp:1"],["Mailing lists and IRC","#debb:1 #slackb:1 #portage:1 exp:2"]]],
+ ["Where do you hang out online?",[["Beginner help forums","exp:-2 #ubub:1"],["Desktop customization showcases","polish:1 diy:2 #wm:2 #archb:1"],["Linux gaming communities","game:2 #gaming:2"],["Tech news aggregators","#declarative:2 exp:1"],["Mailing lists and IRC","#debb:1 #slackb:1 #portage:1 exp:2"]]],
  ["How should the distro's reputation look to others?",[["Respectable and safe","main:1 corp:1"],["Elite","exp:1 #source:1 #archb:1"],["Nobody's heard of it","main:-2"]]],
  ["Must the project be 10+ years old?",[["Yes","main:1 #debb:1 #slackb:1 #fedb:1"],["No",""]]],
  ["Should it be easy to recommend to non-tech friends?",[["Yes","#winlike:2 main:1"],["No",""]]],
- ["Working toward a Linux certification?",[["RHCSA","#rhelb:4"],["LPIC or Linux+","#debb:1 #suseb:1"],["No",""]]],
+ ["Working toward a Linux certification?",[["An enterprise vendor's admin certification","#rhelb:4"],["A vendor-neutral Linux certification","#debb:1 #suseb:1"],["No",""]]],
  ["Is this computer for school?",[["Yes","#edu:3 #ubub:1"],["No",""]]],
  ["Want the same distro most YouTube tutorials use?",[["Yes","#ubub:2 main:2"],["No","main:-1"]]],
  ["Weekly time you'll spend on maintenance?",[["Zero minutes","diy:-2 #atomic:2"],["About 15 minutes",""],["An hour or more","diy:2"]]],
@@ -555,7 +553,7 @@ const SECTIONS=[
  ["Accessibility needs, such as a screen reader?",[["Yes","#gnome:2 main:1"],["No",""]]],
  ["Carry your OS on a USB stick?",[["Yes","#live:5 #tiny:1"],["No",""]]],
  ["Would you pay for a distro?",[["Yes, for a premium edition","zorin:2 elementary:2"],["Donate, maybe",""],["It should be free",""]]],
- ["Which name sounds coolest?",[["Arch","arch:1"],["Gentoo","gentoo:1"],["Void","void:1"],["NixOS","nixos:1"],["Mint","mint:1"],["Fedora","fedora:1"],["Alpine","alpine:1"],["Garuda","garuda:1"]]],
+ ["Pick a vibe:",[["A precision tool","#archb:1 exp:1"],["A forge","#source:1 diy:1"],["Empty space","#runit:1 light:1"],["A blueprint","#declarative:1"],["A cozy couch","#winlike:1 polish:1"],["A research lab","#fedb:1 corp:1"],["A mountain hut","#tiny:1 #musl:1"],["A dragon","#gaming:1 polish:1"]]],
  ["What matters most, in the end?",[["Ease","exp:-2 diy:-2 main:2"],["Stability","edge:-2 server:1 #lts:1"],["Newest everything","edge:2 #rolling:2"],["Control","diy:2 exp:1"],["Gaming","game:2 #gaming:2"],["Privacy","priv:2 #hardened:1"],["Beauty","polish:2"]]],
 ]},
 ];
@@ -601,7 +599,7 @@ const fmt=p=>Math.max(0,Math.min(99,Math.round(p)));
 </script>
 <script>
 /* ---------- state ---------- */
-const KEY="distro-finder-v2";
+const KEY="distro-finder-v3";
 let S={view:"intro",idx:0,ans:{}};
 try{const raw=localStorage.getItem(KEY); if(raw){const o=JSON.parse(raw); if(o&&o.ans) S={view:"intro",idx:o.idx||0,ans:o.ans};}}catch(e){}
 if(window.claude?.hot?.data?.S) S=window.claude.hot.data.S;

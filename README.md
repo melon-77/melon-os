@@ -52,6 +52,12 @@ Packages are signed with `keys/melon-signing.rsa` (not committed; generate your 
 Boot the ISO. The graphical installer (desktop ISO) is Calamares. There is also a quick console
 installer for people who know its name.
 
+## Website
+
+[melon-77.github.io/melon-os](https://melon-77.github.io/melon-os/) is built from the `gh-pages` branch. It also hosts
+the [distro finder](https://melon-77.github.io/melon-os/distro-finder/), a 200-question quiz that scores 114 Linux
+distros, melon included, against your answers.
+
 ## Developer tools
 
 Compilers and build tools come from the package repository (they're not on the ISOs), for example:

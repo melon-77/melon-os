@@ -111,7 +111,8 @@ fi
 
 step "wayland-scanner 1.24 (Ubuntu 24.04 has 1.22)"
 if ! /usr/local/bin/wayland-scanner --version 2>&1 | grep -q '1\.24' &&
-   ! { [ "$ID" = melon ] && wayland-scanner --version 2>&1 | grep -q '1\.2[4-9]'; }; then   # melon ships 1.24
+   ! { [ "$ID" = melon ] && wayland-scanner --version 2>&1 | grep -q '1\.2[4-9]' &&   # melon ships 1.24: the cross file's
+       ln -sfn "$(command -v wayland-scanner)" /usr/local/bin/wayland-scanner; }; then  # path (rule 20) points at it
   cd $W; tar xzf $M/sources/wayland-1.24.0.tar.gz; cd wayland-1.24.0
   meson setup build --prefix=/usr/local -Dlibraries=false -Ddocumentation=false -Dtests=false -Ddtd_validation=false >/dev/null
   ninja -C build >/dev/null; ninja -C build install >/dev/null

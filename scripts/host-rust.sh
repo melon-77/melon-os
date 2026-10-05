@@ -19,7 +19,7 @@ rm -rf $W $H; mkdir -p $W; cd $W
 HT=x86_64-unknown-linux-gnu; [ -e /lib/ld-musl-x86_64.so.1 ] && ! [ -e /lib64/ld-linux-x86-64.so.2 ] && HT=x86_64-unknown-linux-musl
 comps="rustc-$V-$HT cargo-$V-$HT rust-std-$V-$HT"; [ $HT = x86_64-unknown-linux-musl ] || comps="$comps rust-std-$V-x86_64-unknown-linux-musl"
 for c in $comps; do
-  tar xJf $M/sources/$c.tar.xz
+  xz -dc $M/sources/$c.tar.xz | tar -xf -   # not tar xJf: BusyBox tar (melon) stops at xz dictionaries over 64 MiB
   $c/install.sh --prefix=$H --disable-ldconfig --without=rust-docs >/dev/null
 done
 cd /; rm -rf $W

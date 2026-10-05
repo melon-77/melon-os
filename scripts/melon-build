@@ -141,6 +141,9 @@ pkgdir=$pkgbase/$pkgname
 startdir=$M/recipes/$name
 export srcdir pkgdir builddir startdir pkgname pkgver
 
+# unpack a source tarball. .xz goes through xz itself: BusyBox's tar (melon as the build machine) decodes xz only up to a
+# 64 MiB dictionary, and Rust's release tarballs use 128 MiB ("tar: corrupted data"). Recipes can call it too.
+untar(){ case $1 in *.xz|*.txz) xz -dc "$1" | tar -xf - -C "${2:-.}";; *) tar -xf "$1" -C "${2:-.}";; esac; }
 has_opt(){ local o; for o in "${options[@]:-}"; do [ "$o" = "$1" ] && return 0; done; return 1; }
 
 # ---------- install makedepends into the sysroot ----------
@@ -165,7 +168,7 @@ for s in "${source[@]:-}"; do
   [ -z "$s" ] && continue
   if [ -f "$startdir/$s" ]; then cp "$startdir/$s" "$srcdir/"; continue; fi
   f=$SRC/$s; [ -e "$f" ] || { echo "missing source $f"; exit 1; }
-  case $s in *.tar*|*.tgz) msg "unpack $s"; tar xf "$f" -C "$srcdir";; *) cp "$f" "$srcdir/";; esac
+  case $s in *.tar*|*.tgz) msg "unpack $s"; untar "$f" "$srcdir";; *) cp "$f" "$srcdir/";; esac
 done
 cd "$srcdir"; [ -d "$builddir" ] && cd "$builddir"
 # apply patches shipped with the recipe

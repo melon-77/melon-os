@@ -309,6 +309,10 @@ Rebuilding the kernel takes about an hour on 2 cores.
     upstream's musl-hosted build on melon (`host-rust.sh`); there the build machine's Rust triple equals
     `$RUST_TARGET`, so build scripts' C parts use melon's cross gcc too, and they still run because the build machine
     is melon. Recipes must not assume Ubuntu paths (`/usr/lib/llvm-*`): look for melon's (`/usr/lib`) as well.
+    melon's `tar` is BusyBox's, whose xz decoder stops at a 64 MiB dictionary (Rust's tarballs use 128 MiB: "tar: corrupted
+    data"): unpack `.xz` with `untar` (melon-build) or `xz -dc | tar -xf -`, never `tar xJf`. Host Rust programs that dlopen()
+    (bindgen loads libclang) must be built with `-C target-feature=-crt-static` there: a static musl program can't dlopen.
+    melon's `/usr/include` lacks `sys/cdefs.h` without `bsd-compat-headers` (rule 5), and its python3 has no pip.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.

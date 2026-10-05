@@ -12,7 +12,7 @@ M=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
 . /etc/os-release
 [ "$ID" = melon ] || [ "$VERSION_ID" = 24.04 ] || echo "warning: tested on Ubuntu 24.04 and melon, this is $PRETTY_NAME"
 # build output goes to logs/host-setup.log; a failing step prints its end instead of stopping without a word
-mkdir -p "$M/logs"; LOG=$M/logs/host-setup.log; : > "$LOG"
+mkdir -p "$M/logs"; export LOG=$M/logs/host-setup.log; : > "$LOG"
 set -E; trap 'rc=$?; echo "host-setup.sh failed (line $LINENO, exit $rc). End of $LOG:" >&2; tail -n 40 "$LOG" >&2; exit $rc' ERR
 step(){ printf '\033[1;35m== %s\033[0m\n' "$*"; echo "== $*" >> "$LOG"; }
 

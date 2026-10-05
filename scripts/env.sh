@@ -17,4 +17,14 @@ export SRC=$M/sources
 export WORK=$M/work$ARCH_SUFFIX
 export REPO=$M/repo
 export PATH=$TOOLS/bin:$PATH
+# The build machine: Ubuntu (or WSL2 Ubuntu), or melon itself (BUILDING.md, "melon as the build machine").
+# On melon, `gcc -dumpmachine` is melon's own target triple, x86_64-melon-linux-musl; configure scripts would take the
+# cross toolchain for a native one, so the build machine calls itself <arch>-pc-linux-musl (AGENTS.md rule 53).
+export MELON_HOST=$( (. /etc/os-release 2>/dev/null && echo "${ID:-unknown}") || echo unknown)
+BUILD_TRIPLE=$(gcc -dumpmachine 2>/dev/null || echo "$(uname -m)-pc-linux-gnu")
+case $BUILD_TRIPLE in *-melon-linux-*) BUILD_TRIPLE=$(uname -m)-pc-linux-musl ;; esac
+export BUILD_TRIPLE
+# the cross toolchain's binutils and gcc: say which machine they run on when that's melon
+TOOLCHAIN_HOST_FLAGS=; [ "$MELON_HOST" = melon ] && TOOLCHAIN_HOST_FLAGS="--build=$BUILD_TRIPLE --host=$BUILD_TRIPLE"
+export TOOLCHAIN_HOST_FLAGS
 export JOBS=${JOBS:-$(nproc)}   # JOBS=10 scripts/... to use fewer (RAM: about 1 GB per job for Qt/KDE)

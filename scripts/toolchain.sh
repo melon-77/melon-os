@@ -12,7 +12,7 @@ step(){ echo "=== $(date +%T) $*"; }
 step binutils
 if [ ! -x $TOOLS/bin/$TARGET-as ]; then rm -rf b-binutils binutils-with-gold-2.46
 tar xf $SRC/binutils-2.46.tar.xz; mkdir b-binutils; cd b-binutils
-../binutils-with-gold-2.46/configure --target=$TARGET --prefix=$TOOLS --with-sysroot=$SYSROOT \
+../binutils-with-gold-2.46/configure $TOOLCHAIN_HOST_FLAGS --target=$TARGET --prefix=$TOOLS --with-sysroot=$SYSROOT \
   --disable-nls --disable-werror --disable-multilib --disable-gprofng --enable-deterministic-archives --disable-gold >/dev/null
 make -j$JOBS >/dev/null; make install >/dev/null; cd ..
 fi
@@ -36,7 +36,7 @@ tar xzf $SRC/musl-1.2.5.tar.gz; cd musl-1.2.5
 for p in $M/patches/musl/*.patch; do patch -p1 -s < $p; done
 make ARCH=$MUSL_ARCH prefix=/usr DESTDIR=$SYSROOT install-headers >/dev/null; cd ..
 
-GCC_CONF="--target=$TARGET --prefix=$TOOLS --with-sysroot=$SYSROOT --with-build-sysroot=$SYSROOT
+GCC_CONF="$TOOLCHAIN_HOST_FLAGS --target=$TARGET --prefix=$TOOLS --with-sysroot=$SYSROOT --with-build-sysroot=$SYSROOT
   --enable-languages=c,c++ --disable-multilib --disable-nls --disable-werror
   --disable-libsanitizer --disable-libssp --disable-libquadmath --disable-libgomp-offload
   --enable-default-pie --enable-default-ssp --enable-tls --enable-initfini-array

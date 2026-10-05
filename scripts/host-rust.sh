@@ -15,8 +15,10 @@ bindgen(){ $H/bin/bindgen --version 2>/dev/null | grep -q " $BG$" || _inst bindg
   $H/bin/bindgen --version; $H/bin/cbindgen --version; }
 if [ -x $H/bin/rustc ] && $H/bin/rustc --version | grep -q "^rustc $V "; then echo "host rust $V already installed"; bindgen; exit 0; fi
 rm -rf $W $H; mkdir -p $W; cd $W
-for c in rustc-$V-x86_64-unknown-linux-gnu cargo-$V-x86_64-unknown-linux-gnu rust-std-$V-x86_64-unknown-linux-gnu \
-         rust-std-$V-x86_64-unknown-linux-musl; do
+# the build machine's own Rust: glibc builds on Ubuntu, upstream's musl-hosted builds on melon (no glibc there)
+HT=x86_64-unknown-linux-gnu; [ -e /lib/ld-musl-x86_64.so.1 ] && ! [ -e /lib64/ld-linux-x86-64.so.2 ] && HT=x86_64-unknown-linux-musl
+comps="rustc-$V-$HT cargo-$V-$HT rust-std-$V-$HT"; [ $HT = x86_64-unknown-linux-musl ] || comps="$comps rust-std-$V-x86_64-unknown-linux-musl"
+for c in $comps; do
   tar xJf $M/sources/$c.tar.xz
   $c/install.sh --prefix=$H --disable-ldconfig --without=rust-docs >/dev/null
 done

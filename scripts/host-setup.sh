@@ -52,7 +52,7 @@ melon_deps(){
   local pkgs="gcc g++ binutils make pkgconf patch perl bison flex texinfo bc gawk gperf m4 python3 python3-mako
     python3-yaml python3-packaging python3-pexpect ninja cmake meson autoconf automake autoconf-archive libtool gettext
     file xz zstd lz4 bzip2 rsync curl git ca-certificates xorriso mtools dosfstools xfsprogs squashfs-tools qemu ovmf
-    kmod dwarves scdoc tcl hwdata publicsuffix dtc glslang spirv-tools libxslt libxml2 appstream itstool nasm bubblewrap
+    kmod dwarves scdoc tcl hwdata publicsuffix dtc glslang spirv-tools spirv-tools-dev libxslt libxml2 appstream itstool nasm bubblewrap
     ntfs-3g linux-headers llvm llvm-dev clang clang-dev libclc spirv-llvm-translator spirv-llvm-translator-dev
     spirv-headers openssl-dev zlib-dev zstd-dev elfutils-dev expat-dev libffi-dev sqlite-dev ncurses-dev readline-dev
     bzip2-dev xz-dev util-linux-dev libxml2-dev appstream-dev mesa-dev libxkbcommon-dev wayland wayland-dev

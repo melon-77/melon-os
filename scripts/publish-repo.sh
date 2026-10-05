@@ -12,12 +12,12 @@
 set -euo pipefail
 . "$(dirname "$(readlink -f "$0")")/env.sh"
 W=$M/work/publish
-URL=$(git -C $M remote get-url origin)
+URL=$(git -c safe.directory="$M" -C $M remote get-url origin)   # run as root (doas sets no SUDO_UID) on the user's checkout
 rm -rf $W; mkdir -p $W; cd $W
 git init -q -b packages
 for d in $REPO/*/; do
   a=$(basename $d); [ -f $d/Packages.adb ] || continue
-  big=$(find $d -name '*.apk' -size +99M)
+  big=$(find $d -name '*.apk' -size +103809024c)   # 99 MiB in bytes: BusyBox find (melon) has no M suffix
   [ -z "$big" ] || { echo "publish-repo: over GitHub's 100 MB limit: $big" >&2; exit 1; }
   # hard links save the copy, but the kernel refuses them for files another user owns (protected_hardlinks),
   # and packages built with sudo belong to root: link or copy each file on its own

@@ -313,6 +313,12 @@ Rebuilding the kernel takes about an hour on 2 cores.
     data"): unpack `.xz` with `untar` (melon-build) or `xz -dc | tar -xf -`, never `tar xJf`. Host Rust programs that dlopen()
     (bindgen loads libclang) must be built with `-C target-feature=-crt-static` there: a static musl program can't dlopen.
     melon's `/usr/include` lacks `sys/cdefs.h` without `bsd-compat-headers` (rule 5), and its python3 has no pip.
+    `find`, `grep` and `realpath` are BusyBox's too: no `find -uid/-gid` or size suffixes beyond `k`, no `grep --exclude`,
+    no `realpath` options; scripts use what both have (or python3). The build machine's gcc is GCC 15 (C23 by default,
+    rule 40: the cross toolchain's in-tree GMP gets `-std=gnu17`), and its cmake is CMake 4
+    (`CMAKE_POLICY_VERSION_MINIMUM=3.5` in melon-build for projects asking for less than 3.5). host-setup.sh links
+    automake's `config.sub`/`config.guess` into `/usr/share/misc` and installs `libtool-dev` and `gettext-dev`
+    (libtool.m4, autopoint) for autoreconf.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.

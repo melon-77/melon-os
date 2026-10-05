@@ -50,7 +50,7 @@ EOF
 melon_deps(){
   step "build dependencies (melon packages)"
   local pkgs="gcc g++ binutils make pkgconf patch perl bison flex texinfo bc gawk gperf m4 python3 python3-mako
-    python3-yaml python3-packaging python3-pexpect ninja cmake meson autoconf automake autoconf-archive libtool gettext
+    python3-markupsafe python3-yaml python3-packaging python3-pexpect ninja cmake meson autoconf automake autoconf-archive libtool libtool-dev gettext gettext-dev
     file xz zstd lz4 bzip2 rsync curl git ca-certificates xorriso mtools dosfstools xfsprogs squashfs-tools qemu ovmf
     kmod dwarves scdoc tcl hwdata publicsuffix dtc glslang spirv-tools spirv-tools-dev libxslt libxml2 appstream itstool nasm bubblewrap
     ntfs-3g linux-headers bsd-compat-headers llvm llvm-dev clang clang-dev libclc spirv-llvm-translator spirv-llvm-translator-dev
@@ -64,6 +64,11 @@ melon_deps(){
     for p in $pkgs; do apk add -q "$p" >/dev/null 2>&1 || missing="$missing $p"; done
     [ -z "$missing" ] || echo "warning: not in melon's repository (builds that need them will fail):$missing"
   fi
+  # recipes copy a current config.sub/config.guess from /usr/share/misc (rule 40), Ubuntu's place (autotools-dev);
+  # melon's are automake's
+  local f a; a=$(ls -d /usr/share/automake-* 2>/dev/null | tail -1 || true)
+  mkdir -p /usr/share/misc
+  for f in config.sub config.guess; do [ -e /usr/share/misc/$f ] || [ -z "$a" ] || ln -s "$a/$f" /usr/share/misc/$f; done
   # Python modules melon doesn't package (ppd's shell completion, Mesa's test runner). melon's recipes turn both off
   # (ppd -Dbashcomp=disabled -Dzshcomp=, Mesa -Dbuild-tests=false), and melon's python3 has no pip: optional.
   if python3 -m pip --version >/dev/null 2>&1; then

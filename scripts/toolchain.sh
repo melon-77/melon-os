@@ -45,7 +45,10 @@ GCC_CONF="$TOOLCHAIN_HOST_FLAGS --target=$TARGET --prefix=$TOOLS --with-sysroot=
 
 step gcc stage1
 mkdir b-gcc; cd b-gcc
-../gcc-15.2.0/configure $GCC_CONF >/dev/null
+# -std=gnu17 for the build machine's compiler: in-tree GMP's configure test calls `void g(){}` with arguments, which
+# GCC 15's default C23 rejects ("could not find a working compiler", rule 40). GCC 13 on Ubuntu defaults to gnu17 anyway;
+# the target libraries keep their own flags (CFLAGS_FOR_TARGET).
+CFLAGS="-g -O2 -std=gnu17" ../gcc-15.2.0/configure $GCC_CONF >/dev/null
 make -j$JOBS all-gcc >/dev/null; make install-gcc >/dev/null
 # libgcc's static parts build fine now; the shared libgcc_s needs the C library, which comes next.
 # Install the static pieces by hand so musl can be built with this compiler.

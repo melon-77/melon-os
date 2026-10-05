@@ -150,6 +150,9 @@ Rebuilding the kernel takes about an hour on 2 cores.
     and `/etc/ld-musl-x86_64.path` lists `sysroot/usr/lib` (same for `i386` in 32-bit builds), so
     build-time generators from earlier packages (glib-compile-resources, kconfig_compiler, ...) just run.
     Meson's cross file sets `needs_exe_wrapper=false` for the same reason.
+    **On a melon build machine, never do this:** there the loader is the system's own musl, and pointing it at the
+    sysroot swaps libc under every program. `host-setup.sh` only writes `/etc/ld-musl-x86_64.path` with the system's
+    directories first and `sysroot/usr/lib` last (BUILDING.md, "melon as the build machine").
 19. **`meson_setup` drops `-D` options the project doesn't have** (`scripts/meson-filter-opts.py`) and
     unsets the `PKG_CONFIG_*` variables for native lookups. Upstream renames options often; a stale
     option must not fail the whole build.
@@ -296,6 +299,16 @@ Rebuilding the kernel takes about an hour on 2 cores.
     cbindgen are the build machine's (`scripts/host-rust.sh`) and load the build machine's libclang, which needs
     `-resource-dir` to find its own headers (`BINDGEN_EXTRA_CLANG_ARGS`). Mesa's Rust crates come through its meson wraps
     (pinned by hash) into `sources/mesa-packagecache`.
+
+53. **On melon, the build machine's triple is not melon's.** `gcc -dumpmachine` on melon prints `x86_64-melon-linux-musl`,
+    the cross toolchain's own target, so binutils and gcc would configure themselves as native compilers and autoconf
+    would see `--build` equal to `--host`. `env.sh` sets `BUILD_TRIPLE` (`x86_64-pc-linux-musl` on melon, gcc's own
+    answer elsewhere): `melon-build` passes it as `--build`, and `toolchain.sh` gives binutils and gcc
+    `--build`/`--host` from `TOOLCHAIN_HOST_FLAGS` (empty on Ubuntu, so Ubuntu builds don't change). Programs built
+    for the Ubuntu host (`tools/`, `hosttools/`) don't run on melon (no glibc): rebuild them there. Host Rust is
+    upstream's musl-hosted build on melon (`host-rust.sh`); there the build machine's Rust triple equals
+    `$RUST_TARGET`, so build scripts' C parts use melon's cross gcc too, and they still run because the build machine
+    is melon. Recipes must not assume Ubuntu paths (`/usr/lib/llvm-*`): look for melon's (`/usr/lib`) as well.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.

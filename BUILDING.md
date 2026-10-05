@@ -38,7 +38,27 @@ and continues an interrupted one. Logs are in `logs/` (`logs/pkg-<name>.log` per
 land in `out/`. `scripts/publish-repo.sh` then puts the packages online for installed systems.
 
 The build runs as root because packages are installed into `sysroot/` with their real owners and
-because the host needs `/lib/ld-musl-x86_64.so.1` (see AGENTS.md, rule 18).
+because an Ubuntu host needs `/lib/ld-musl-x86_64.so.1` (see AGENTS.md, rule 18).
+
+## melon as the build machine
+
+melon builds itself. On a melon install (desktop or console profile, upgraded with `doas apk upgrade`), the same
+steps work: clone, `doas scripts/host-setup.sh`, put the key in place, `doas JOBS=16 scripts/build-everything.sh`.
+What's different:
+
+- `host-setup.sh` installs the build tools from melon's own package repository instead of Ubuntu's (it lists any name
+  it can't find), adds a small `dpkg-deb -x` replacement for the recipes that unpack `.deb` files, and uses melon's
+  own `apk` and `wayland-scanner`.
+- **Moving from an Ubuntu or WSL build machine:** keep `keys/`, `sources/`, `repo/` and `sysroot/`, but delete
+  `tools/` and `hosttools/` (except `hosttools/bin/apk`, which `host-setup.sh` replaces anyway): they hold programs
+  built against Ubuntu's glibc, which melon doesn't have. `host-setup.sh` rebuilds the host tools, and
+  `build-everything.sh` rebuilds the cross toolchain (about an hour or two) before carrying on with the packages,
+  skipping every package already in `repo/`.
+- The loader is melon's own: `/lib/ld-musl-x86_64.so.1` is never pointed at the sysroot (AGENTS.md, rule 18).
+  `/etc/ld-musl-x86_64.path` lists the system's library directories first and the sysroot's last.
+- Keep the build machine's own packages up to date from the online repository, and don't upgrade it from packages it
+  just built until they pass the QEMU tests: a broken gcc or musl on the build machine stops it from fixing itself.
+  Keep a melon live USB around for that case.
 
 ## The signing key
 

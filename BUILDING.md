@@ -42,9 +42,17 @@ because an Ubuntu host needs `/lib/ld-musl-x86_64.so.1` (see AGENTS.md, rule 18)
 
 ## melon as the build machine
 
-melon builds itself. On a melon install (desktop or console profile, upgraded with `doas apk upgrade`), the same
-steps work: clone, `doas scripts/host-setup.sh`, put the key in place, `doas JOBS=16 scripts/build-everything.sh`.
-What's different:
+melon builds itself. On a melon install (desktop or console profile), starting with no checkout:
+
+1. `doas apk upgrade`, then `doas apk add git` (git is in the online repository, not on the ISOs).
+2. `git clone -b testing https://github.com/melon-77/melon-os ~/melon`, then `cd ~/melon`.
+3. If you are moving from an old build machine, copy its `keys/`, `sources/`, `repo/` and `sysroot/` into `~/melon`
+   (not `tools/` or `hosttools/`, see below). Otherwise put the signing key in `keys/` ("The signing key" below).
+4. `doas scripts/host-setup.sh`
+5. `doas scripts/build-everything.sh` (it uses every core; for fewer, `doas env JOBS=10 scripts/build-everything.sh`:
+   doas doesn't take `NAME=value` before the command the way sudo does)
+
+What's different from an Ubuntu build machine:
 
 - `host-setup.sh` installs the build tools from melon's own package repository instead of Ubuntu's (it lists any name
   it can't find), adds a small `dpkg-deb -x` replacement for the recipes that unpack `.deb` files, and uses melon's

@@ -57,7 +57,7 @@ melon_deps(){
     spirv-headers openssl-dev zlib-dev zstd-dev elfutils-dev expat-dev libffi-dev sqlite-dev ncurses-dev readline-dev
     bzip2-dev xz-dev util-linux-dev libxml2-dev appstream-dev mesa-dev libxkbcommon-dev wayland wayland-dev
     wayland-protocols fontconfig-dev freetype-dev dbus-dev glib-dev libpng-dev libdrm-dev libx11-dev libxext-dev
-    libxcb-dev libxrender-dev"
+    libxcb-dev libxrender-dev pcre2-dev xorgproto libxau-dev libxdmcp-dev libxfixes-dev libxxf86vm-dev"
   local p
   # shellcheck disable=SC2086
   if ! apk add -q $pkgs; then   # one at a time, so one missing name doesn't stop the rest
@@ -66,8 +66,8 @@ melon_deps(){
     [ -z "$missing" ] || echo "warning: not in melon's repository (builds that need them will fail):$missing"
   fi
   # packages new enough that the online repository may not have them yet: asked for on their own, so a missing one
-  # doesn't send the list above through the slow one-at-a-time path; host-setup.sh builds both from sources/ below
-  for p in python3-jinja2 rpcsvc-proto; do apk add -q "$p" >/dev/null 2>&1 || true; done
+  # doesn't send the list above through the slow one-at-a-time path; host-setup.sh takes them from sources/ below
+  for p in python3-jinja2 python3-pyparsing rpcsvc-proto; do apk add -q "$p" >/dev/null 2>&1 || true; done
   # recipes copy a current config.sub/config.guess from /usr/share/misc (rule 40), Ubuntu's place (autotools-dev);
   # melon's are automake's
   local f a; a=$(ls -d /usr/share/automake-* 2>/dev/null | tail -1 || true)
@@ -112,17 +112,22 @@ unset CC CXX CFLAGS CXXFLAGS LDFLAGS PKG_CONFIG_LIBDIR PKG_CONFIG_SYSROOT_DIR PK
 step "sources"
 $M/scripts/fetch-sources.sh
 
-# elogind's build runs tools/meson-render-jinja2.py with the build machine's python3 (`import jinja2`; Ubuntu has it).
-# melon_deps asks for python3-jinja2, but a new build machine can come before that package is in the online repository:
-# then Jinja2 comes from its sdist (pure Python, sha256 checked by fetch-sources.sh above), src/jinja2 copied to where
-# the package puts it in python3's site-packages. A later `apk add python3-jinja2` writes over it (apk replaces files no
-# package owns). gzip -dc | tar -xf -: on melon, tar is BusyBox's.
-if [ "$ID" = melon ] && ! python3 -c 'import jinja2' 2>/dev/null; then
-  step "Jinja2 3.1.6 for the build machine's python3 (python3-jinja2 isn't in melon's repository yet)"
-  gzip -dc $M/sources/jinja2-3.1.6.tar.gz | tar -xf - -C $W
-  pl=$(python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'); mkdir -p "$pl"
-  cp -r $W/jinja2-3.1.6/src/jinja2 "$pl/"
-  python3 -c 'import jinja2; print("jinja2", jinja2.__version__, "in", jinja2.__file__)' >>$LOG 2>&1
+# Python modules builds import on the build machine (Ubuntu has them): elogind's tools/meson-render-jinja2.py imports
+# jinja2, flatpak's variant-schema-compiler pyparsing. melon_deps asks for python3-jinja2 and python3-pyparsing, but a
+# new build machine can come before those packages are in the online repository: then each comes from its sdist (pure
+# Python, sha256 checked by fetch-sources.sh above), its module copied to where the package puts it in python3's
+# site-packages. A later `apk add` writes over it (apk replaces files no package owns). gzip -dc | tar -xf -: on melon,
+# tar is BusyBox's.
+if [ "$ID" = melon ]; then
+  pl=$(python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
+  for mod in jinja2:jinja2-3.1.6:src/jinja2 pyparsing:pyparsing-3.3.3:pyparsing; do
+    IFS=: read -r name dir path <<<"$mod"
+    python3 -c "import $name" 2>/dev/null && continue
+    step "$dir for the build machine's python3 (python3-$name isn't in melon's repository yet)"
+    gzip -dc $M/sources/$dir.tar.gz | tar -xf - -C $W
+    mkdir -p "$pl"; cp -r $W/$dir/$path "$pl/"
+    python3 -c "import $name; print('$name', $name.__version__, 'in', $name.__file__)" >>$LOG 2>&1
+  done
 fi
 
 step "host apk (signs and indexes packages)"

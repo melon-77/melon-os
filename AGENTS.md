@@ -26,7 +26,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | desktop plumbing | D-Bus, elogind, polkit, PipeWire + WirePlumber, NetworkManager, BlueZ, CUPS, UDisks2 | console profile keeps `dhcp` + wpa_supplicant |
 | graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe; zink (OpenGL on Vulkan) | |
 | developer tools | gcc 15.2 + g++, binutils 2.46, make 4.4.1, pkgconf, patch (`gcc`, `g++`, `binutils`, `make`, `pkgconf`, `patch`) | built cross-native with the cross toolchain's settings (PIE, SSP); in the package repository only, not on the ISOs; `melon-first-boot` offers them on first login (default no) |
-| build tools | perl 5.44, m4, bison, flex, gawk, gperf, GNU bc, texinfo, autoconf 2.73, automake 1.19, autoconf-archive, file; cmake 4.4, meson 1.12, ninja 1.13, git 2.56, nasm 3.01, tcl 8.6, rsync 3.5, lz4; xorriso, mtools, scdoc, itstool, dtc, pahole (`dwarves`), rpcgen (`rpcsvc-proto`), the Public Suffix List, Python's mako, Jinja2, PyYAML, packaging, pexpect and libxml2 bindings (`python3-*`) (`BUILDTOOLS`, `BUILDTOOLS2` in `build-everything.sh`) | what melon's recipes need to build on melon itself (self-hosting, see Roadmap); package repository only. gawk and GNU bc take over BusyBox's `awk`/`bc`/`dc` links; BusyBox's `/usr/bin` trigger puts them back when those packages go |
+| build tools | perl 5.44, m4, bison, flex, gawk, gperf, GNU bc, texinfo, autoconf 2.73, automake 1.19, autoconf-archive, file; cmake 4.4, meson 1.12, ninja 1.13, git 2.56, nasm 3.01, tcl 8.6, rsync 3.5, lz4; xorriso, mtools, scdoc, itstool, dtc, pahole (`dwarves`), rpcgen (`rpcsvc-proto`), the Public Suffix List, Python's mako, Jinja2, pyparsing, PyYAML, packaging, pexpect and libxml2 bindings (`python3-*`) (`BUILDTOOLS`, `BUILDTOOLS2` in `build-everything.sh`) | what melon's recipes need to build on melon itself (self-hosting, see Roadmap); package repository only. gawk and GNU bc take over BusyBox's `awk`/`bc`/`dc` links; BusyBox's `/usr/bin` trigger puts them back when those packages go |
 | compilers, VMs | clang 21 (+ `libclc`, `spirv-llvm-translator`), Go 1.27, gh (`github-cli`), QEMU 11.1 + OVMF (`qemu`, `ovmf`) (`STEP2` in `build-everything.sh`) | package repository only. clang: Mesa's OpenCL C shader compiler on melon; QEMU + OVMF run melon's own install tests on melon; OVMF is Ubuntu 26.04's prebuilt `ovmf-generic` at Ubuntu's paths |
 | NVIDIA | the open driver: nouveau + `linux-firmware-nvidia` (GSP 570.144 from upstream linux-firmware) + NVK (`mesa-nvk`), with zink for OpenGL; or NVIDIA's own kernel driver: `nvidia-open` 615 (open modules + NVIDIA's firmware) | package repository only; `melon-first-boot` asks which one on computers with an NVIDIA card (GTX 16/RTX 20 and newer). NVIDIA's userspace needs glibc: with `nvidia-open` only Flatpak apps (Steam) get NVIDIA's libraries, from Flathub |
 | gaming | Flatpak 1.16 + Flathub, GameMode | Steam is glibc-only, so it can't run natively on musl: `melon-first-boot` offers Steam (and Firefox, VLC, Prism Launcher) from Flathub on first login |
@@ -320,11 +320,15 @@ Rebuilding the kernel takes about an hour on 2 cores.
     (`CMAKE_POLICY_VERSION_MINIMUM=3.5` in melon-build for projects asking for less than 3.5). host-setup.sh links
     automake's `config.sub`/`config.guess` into `/usr/share/misc` and installs `libtool-dev` and `gettext-dev`
     (libtool.m4, autopoint) for autoreconf. Python modules a build imports on the build machine are melon packages too
-    (no pip): elogind's build imports Jinja2, so host-setup.sh asks for `python3-jinja2` and, while the online repository
-    doesn't have it, copies the module from its sdist in `sources/` (a new recipe's package is online only once the owner
-    publishes it, so whatever the build machine itself needs must also work before that). The same goes for tools: `rpcgen`
+    (no pip): elogind's build imports Jinja2 and flatpak's pyparsing, so host-setup.sh asks for `python3-jinja2` and
+    `python3-pyparsing` and, while the online repository doesn't have them, copies each module from its sdist in
+    `sources/` (a new recipe's package is online only once the owner publishes it, so whatever the build machine itself
+    needs must also work before that). The same goes for tools: `rpcgen`
     (open-vm-tools' configure; melon's libtirpc has none) is built from `sources/` into `/usr/local/bin` until
     `rpcsvc-proto` is published.
+    melon's `-dev` packages don't pull in the `-dev` packages their `.pc` files require, so a native pkg-config lookup
+    on melon fails unless host-setup.sh asks for those too (`pcre2-dev` for glib-2.0, `xorgproto` and the libXau, Xdmcp,
+    Xfixes and Xxf86vm `-dev` packages for x11 and gl): appstream's cross build looks the build machine's appstream up.
     QEMU's configure makes a venv with pip (`mkvenv.py`), which melon's python3 can't (no ensurepip): on melon,
     recipes/qemu and qemu-guest-agent use the host Python (`hosttools/python` keeps ensurepip) and put setuptools
     and wheel (PyPI wheels in `sources/`) next to QEMU's own in `python/wheels`, where its offline "tooling" group

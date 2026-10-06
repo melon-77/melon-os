@@ -57,7 +57,10 @@ What's different from an Ubuntu build machine:
 
 - `host-setup.sh` installs the build tools from melon's own package repository instead of Ubuntu's (it lists any name
   it can't find), adds a small `dpkg-deb -x` replacement for the recipes that unpack `.deb` files, uses melon's
-  own `apk` and `wayland-scanner`, and builds `rpcgen` into `/usr/local/bin` while the repository has no `rpcsvc-proto`.
+  own `apk` and `wayland-scanner`, and builds `rpcgen` into `/usr/local/bin` while the repository has no `rpcsvc-proto`
+  (Python's Jinja2 and pyparsing likewise come from their source tarballs until their packages are published).
+- A package that failed is unpacked fresh on the next run when its recipe changed since (after a `git pull` with a fix);
+  otherwise `build-everything.sh` carries on where it stopped.
 - **Moving from an Ubuntu or WSL build machine:** keep `keys/`, `sources/`, `repo/` and `sysroot/`, but delete
   `tools/` and `hosttools/` (except `hosttools/bin/apk`, which `host-setup.sh` replaces anyway): they hold programs
   built against Ubuntu's glibc, which melon doesn't have. `host-setup.sh` rebuilds the host tools, and

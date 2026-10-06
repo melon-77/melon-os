@@ -50,22 +50,24 @@ EOF
 melon_deps(){
   step "build dependencies (melon packages)"
   local pkgs="gcc g++ binutils make pkgconf patch perl bison flex texinfo bc gawk gperf m4 python3 python3-mako
-    python3-markupsafe python3-jinja2 python3-yaml python3-packaging python3-pexpect ninja cmake meson autoconf automake autoconf-archive libtool libtool-dev gettext gettext-dev
+    python3-markupsafe python3-yaml python3-packaging python3-pexpect ninja cmake meson autoconf automake autoconf-archive libtool libtool-dev gettext gettext-dev
     file xz zstd lz4 bzip2 rsync curl git ca-certificates xorriso mtools dosfstools xfsprogs squashfs-tools qemu ovmf
-    kmod dwarves scdoc tcl hwdata publicsuffix rpcsvc-proto dtc glslang spirv-tools spirv-tools-dev libxslt libxml2 appstream itstool nasm bubblewrap
+    kmod dwarves scdoc tcl hwdata publicsuffix dtc glslang spirv-tools spirv-tools-dev libxslt libxml2 appstream itstool nasm bubblewrap
     ntfs-3g linux-headers bsd-compat-headers llvm llvm-dev clang clang-dev libclc spirv-llvm-translator spirv-llvm-translator-dev
     spirv-headers openssl-dev zlib-dev zstd-dev elfutils-dev expat-dev libffi-dev sqlite-dev ncurses-dev readline-dev
     bzip2-dev xz-dev util-linux-dev libxml2-dev appstream-dev mesa-dev libxkbcommon-dev wayland wayland-dev
     wayland-protocols fontconfig-dev freetype-dev dbus-dev glib-dev libpng-dev libdrm-dev libx11-dev libxext-dev
     libxcb-dev libxrender-dev"
+  local p
   # shellcheck disable=SC2086
   if ! apk add -q $pkgs; then   # one at a time, so one missing name doesn't stop the rest
-    local p missing=
-    for p in $pkgs; do apk add -q "$p" >/dev/null 2>&1 || case $p in
-      python3-jinja2|rpcsvc-proto) ;;   # not published yet: built from sources/ further down
-      *) missing="$missing $p" ;; esac; done
+    local missing=
+    for p in $pkgs; do apk add -q "$p" >/dev/null 2>&1 || missing="$missing $p"; done
     [ -z "$missing" ] || echo "warning: not in melon's repository (builds that need them will fail):$missing"
   fi
+  # packages new enough that the online repository may not have them yet: asked for on their own, so a missing one
+  # doesn't send the list above through the slow one-at-a-time path; host-setup.sh builds both from sources/ below
+  for p in python3-jinja2 rpcsvc-proto; do apk add -q "$p" >/dev/null 2>&1 || true; done
   # recipes copy a current config.sub/config.guess from /usr/share/misc (rule 40), Ubuntu's place (autotools-dev);
   # melon's are automake's
   local f a; a=$(ls -d /usr/share/automake-* 2>/dev/null | tail -1 || true)

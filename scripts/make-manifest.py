@@ -88,6 +88,7 @@ URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA
     'itstool-2.0.7.tar.gz': 'https://github.com/itstool/itstool/archive/2.0.7/itstool-2.0.7.tar.gz',
     'mako-1.4.3.tar.gz': 'https://files.pythonhosted.org/packages/5a/09/e07c4b5579a79f4b16f8d4f29f6c54514ac787c4ad506b8c4f28a0e6b0bf/mako-1.4.3.tar.gz',
     'markupsafe-3.0.3.tar.gz': 'https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz',
+    'jinja2-3.1.6.tar.gz': 'https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz',
     'pyyaml-6.0.3.tar.gz': 'https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz',
     'packaging-26.3.tar.gz': 'https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz',
     'pexpect-4.9.0.tar.gz': 'https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz',
@@ -97,10 +98,16 @@ URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA
     'go1.27.1.src.tar.gz': 'https://go.dev/dl/go1.27.1.src.tar.gz',
     'go1.27.1.linux-amd64.tar.gz': 'https://go.dev/dl/go1.27.1.linux-amd64.tar.gz',
     'qemu-11.1.1.tar.xz': 'https://download.qemu.org/qemu-11.1.1.tar.xz',
+    # QEMU's configure venv on a melon build machine (recipes/qemu): PyPI's wheels (PyPI's sha256, files identical to the
+    # sdists that Gentoo's Manifest and Debian's .dsc list; wheel's PyPI attestation from pypa/wheel)
+    'setuptools-84.0.0-py3-none-any.whl': 'https://files.pythonhosted.org/packages/95/9c/c510029fc6ef33a6275cd2c5d3cecd6613dfd6aa401d57c54f1c18852ccf/setuptools-84.0.0-py3-none-any.whl',
+    'wheel-0.45.1-py3-none-any.whl': 'https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl',
     # NVIDIA: linux-firmware (signed by its maintainer), NVIDIA's module source and driver (NVIDIA's sha256, Arch's sha512)
     'linux-firmware-20260916.tar.xz': 'https://cdn.kernel.org/pub/linux/kernel/firmware/linux-firmware-20260916.tar.xz',
     'NVIDIA-kernel-module-source-615.71.09.tar.xz': 'https://download.nvidia.com/XFree86/NVIDIA-kernel-module-source/NVIDIA-kernel-module-source-615.71.09.tar.xz',
-    'NVIDIA-Linux-x86_64-615.71.09.run': 'https://download.nvidia.com/XFree86/Linux-x86_64/615.71.09/NVIDIA-Linux-x86_64-615.71.09.run'}
+    'NVIDIA-Linux-x86_64-615.71.09.run': 'https://download.nvidia.com/XFree86/Linux-x86_64/615.71.09/NVIDIA-Linux-x86_64-615.71.09.run',
+    # rpcgen (open-vm-tools' build runs it); upstream publishes no checksum: Alpine's sha512 and Debian's sha256 match
+    'rpcsvc-proto-1.4.4.tar.xz': 'https://github.com/thkukuk/rpcsvc-proto/releases/download/v1.4.4/rpcsvc-proto-1.4.4.tar.xz'}
 
 rows, missing = [], []
 def add(path, method, arg):

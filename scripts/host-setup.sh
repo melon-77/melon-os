@@ -50,9 +50,9 @@ EOF
 melon_deps(){
   step "build dependencies (melon packages)"
   local pkgs="gcc g++ binutils make pkgconf patch perl bison flex texinfo bc gawk gperf m4 python3 python3-mako
-    python3-markupsafe python3-yaml python3-packaging python3-pexpect ninja cmake meson autoconf automake autoconf-archive libtool libtool-dev gettext gettext-dev
+    python3-markupsafe python3-jinja2 python3-yaml python3-packaging python3-pexpect ninja cmake meson autoconf automake autoconf-archive libtool libtool-dev gettext gettext-dev
     file xz zstd lz4 bzip2 rsync curl git ca-certificates xorriso mtools dosfstools xfsprogs squashfs-tools qemu ovmf
-    kmod dwarves scdoc tcl hwdata publicsuffix dtc glslang spirv-tools spirv-tools-dev libxslt libxml2 appstream itstool nasm bubblewrap
+    kmod dwarves scdoc tcl hwdata publicsuffix rpcsvc-proto dtc glslang spirv-tools spirv-tools-dev libxslt libxml2 appstream itstool nasm bubblewrap
     ntfs-3g linux-headers bsd-compat-headers llvm llvm-dev clang clang-dev libclc spirv-llvm-translator spirv-llvm-translator-dev
     spirv-headers openssl-dev zlib-dev zstd-dev elfutils-dev expat-dev libffi-dev sqlite-dev ncurses-dev readline-dev
     bzip2-dev xz-dev util-linux-dev libxml2-dev appstream-dev mesa-dev libxkbcommon-dev wayland wayland-dev
@@ -61,7 +61,9 @@ melon_deps(){
   # shellcheck disable=SC2086
   if ! apk add -q $pkgs; then   # one at a time, so one missing name doesn't stop the rest
     local p missing=
-    for p in $pkgs; do apk add -q "$p" >/dev/null 2>&1 || missing="$missing $p"; done
+    for p in $pkgs; do apk add -q "$p" >/dev/null 2>&1 || case $p in
+      python3-jinja2|rpcsvc-proto) ;;   # not published yet: built from sources/ further down
+      *) missing="$missing $p" ;; esac; done
     [ -z "$missing" ] || echo "warning: not in melon's repository (builds that need them will fail):$missing"
   fi
   # recipes copy a current config.sub/config.guess from /usr/share/misc (rule 40), Ubuntu's place (autotools-dev);
@@ -108,6 +110,19 @@ unset CC CXX CFLAGS CXXFLAGS LDFLAGS PKG_CONFIG_LIBDIR PKG_CONFIG_SYSROOT_DIR PK
 step "sources"
 $M/scripts/fetch-sources.sh
 
+# elogind's build runs tools/meson-render-jinja2.py with the build machine's python3 (`import jinja2`; Ubuntu has it).
+# melon_deps asks for python3-jinja2, but a new build machine can come before that package is in the online repository:
+# then Jinja2 comes from its sdist (pure Python, sha256 checked by fetch-sources.sh above), src/jinja2 copied to where
+# the package puts it in python3's site-packages. A later `apk add python3-jinja2` writes over it (apk replaces files no
+# package owns). gzip -dc | tar -xf -: on melon, tar is BusyBox's.
+if [ "$ID" = melon ] && ! python3 -c 'import jinja2' 2>/dev/null; then
+  step "Jinja2 3.1.6 for the build machine's python3 (python3-jinja2 isn't in melon's repository yet)"
+  gzip -dc $M/sources/jinja2-3.1.6.tar.gz | tar -xf - -C $W
+  pl=$(python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'); mkdir -p "$pl"
+  cp -r $W/jinja2-3.1.6/src/jinja2 "$pl/"
+  python3 -c 'import jinja2; print("jinja2", jinja2.__version__, "in", jinja2.__file__)' >>$LOG 2>&1
+fi
+
 step "host apk (signs and indexes packages)"
 if [ "$ID" = melon ] && apk --version 2>/dev/null | grep -q 'apk-tools 3\.'; then
   ln -sfn "$(command -v apk)" $M/hosttools/bin/apk   # melon's own apk is the same apk-tools 3
@@ -125,6 +140,16 @@ if ! /usr/local/bin/wayland-scanner --version 2>&1 | grep -q '1\.24' &&
   cd $W; tar xzf $M/sources/wayland-1.24.0.tar.gz; cd wayland-1.24.0
   meson setup build --prefix=/usr/local -Dlibraries=false -Ddocumentation=false -Dtests=false -Ddtd_validation=false >>$LOG 2>&1
   ninja -C build >>$LOG 2>&1; ninja -C build install >>$LOG 2>&1
+fi
+
+# rpcgen: open-vm-tools' configure needs the build machine's. Ubuntu's comes from rpcsvc-proto (ubuntu_deps), and melon_deps
+# installs melon's once the online repository has it; until then it is built here from recipes/rpcsvc-proto's tarball
+# into /usr/local/bin (on PATH under doas, like the dpkg-deb shim: doas.conf keeps the caller's PATH)
+if [ "$ID" = melon ] && ! command -v rpcgen >/dev/null && [ ! -x /usr/local/bin/rpcgen ]; then
+  step "rpcgen (melon's repository doesn't have rpcsvc-proto yet)"
+  cd $W; xz -dc $M/sources/rpcsvc-proto-1.4.4.tar.xz | tar -xf -; cd rpcsvc-proto-1.4.4
+  ./configure --prefix=/usr/local --disable-nls >>$LOG 2>&1
+  make -C rpcgen >>$LOG 2>&1; install -m755 rpcgen/rpcgen /usr/local/bin/rpcgen
 fi
 
 step "mesa_clc and vtn_bindgen2 for the Intel drivers (built against the host's LLVM: Ubuntu's 19, melon's 21)"

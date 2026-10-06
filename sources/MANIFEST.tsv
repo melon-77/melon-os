@@ -283,7 +283,6 @@ deb/pulseaudio_17.0+dfsg1.orig.tar.xz	24a25d3cf8fcede801f6b3d05ca6d22b0a43ad2f71
 deb/python3.14_3.14.4.orig.tar.xz	d923c51303e38e249136fc1bdf3568d56ecb03214efdef48516176d3d7faaef8	apt	python3.14=3.14.4-1ubuntu0.2
 deb/qca2_2.3.10.orig.tar.xz	1c5b722da93d559365719226bb121c726ec3c0dc4c67dea34f1e50e4e0d14a02	apt	qca2=2.3.10-2
 deb/qcoro_0.13.0.orig.tar.gz	4bff7513c5c8e301b66308df05795043b1792ed16381a484e5c990171b8ff19e	apt	qcoro=0.13.0-1ubuntu2
-deb/qemu_10.2.1+ds.orig.tar.xz	4f495c2a523f78f50cc83327cabf01e7e89c6b9a5d3d6cadd9e78de94b25c416	apt	qemu=1:10.2.1+ds-1ubuntu3.2
 deb/qpdf_12.3.2.orig.tar.gz	6cba2f9f2cd887d905faeb99e0e51a307b217920d1bbf3e9cfbb2e8178a2deda	apt	qpdf=12.3.2-1
 deb/qrencode_4.1.1.orig.tar.bz2	e455d9732f8041cf5b9c388e345a641fd15707860f928e94507b1961256a6923	apt	qrencode=4.1.1-2build1
 deb/qt6-5compat_6.10.2.orig.tar.xz	3fa418f0fac02eb9efc5f762fbe25f20647b0ebb7fa92faf07e6de85044161c2	apt	qt6-5compat=6.10.2-1
@@ -645,7 +644,6 @@ pulseaudio-17.0.tar.xz	-	link	deb/pulseaudio_17.0+dfsg1.orig.tar.xz
 pulseaudio-qt-1.7.0.tar.xz	-	link	deb/pulseaudio-qt_1.7.0.orig.tar.xz
 qca-2.3.10.tar.xz	-	link	deb/qca2_2.3.10.orig.tar.xz
 qcoro-0.13.0.tar.gz	-	link	deb/qcoro_0.13.0.orig.tar.gz
-qemu-10.2.1.tar.xz	-	link	deb/qemu_10.2.1+ds.orig.tar.xz
 qpdf-12.3.2.tar.gz	-	link	deb/qpdf_12.3.2.orig.tar.gz
 qrencode-4.1.1.tar.bz2	-	link	deb/qrencode_4.1.1.orig.tar.bz2
 qt6-qt5compat-6.10.2.tar.xz	-	link	deb/qt6-5compat_6.10.2.orig.tar.xz
@@ -747,6 +745,7 @@ scdoc-1.11.5.tar.gz	98780bbdf16c1bce89ef3a8c0f537ac6e4ea77087b609e7698857614488a
 itstool-2.0.7.tar.gz	fba78a37dc3535e4686c7f57407b97d03c676e3a57beac5fb2315162b0cc3176	url	https://github.com/itstool/itstool/archive/2.0.7/itstool-2.0.7.tar.gz
 mako-1.4.3.tar.gz	cd6537fe88d5fec315c55c2f8529bc4ce7a9a352ad7db3eeaa6a66e2dd4ec37a	url	https://files.pythonhosted.org/packages/5a/09/e07c4b5579a79f4b16f8d4f29f6c54514ac787c4ad506b8c4f28a0e6b0bf/mako-1.4.3.tar.gz
 markupsafe-3.0.3.tar.gz	722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698	url	https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz
+jinja2-3.1.6.tar.gz	0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d	url	https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz
 pyyaml-6.0.3.tar.gz	d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f	url	https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz
 packaging-26.3.tar.gz	94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79	url	https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz
 pexpect-4.9.0.tar.gz	ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f	url	https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz
@@ -762,3 +761,6 @@ spirv-llvm-translator-21.1.7.tar.gz	1a00e06eba69c24ded4ed5708ef3c55ad87862270172
 linux-firmware-20260916.tar.xz	f80dcb757a623deda62200c08e0e1a88c76fb6b54964f31b35fa74da1c90ccc5	url	https://cdn.kernel.org/pub/linux/kernel/firmware/linux-firmware-20260916.tar.xz
 NVIDIA-kernel-module-source-615.71.09.tar.xz	b038fe5d70e7c3209459a8121f231543939895145f0ad0d58d34f170e7eaf7e9	url	https://download.nvidia.com/XFree86/NVIDIA-kernel-module-source/NVIDIA-kernel-module-source-615.71.09.tar.xz
 NVIDIA-Linux-x86_64-615.71.09.run	cdceed22bbeb61248d1a6deabc2596673e3a6501698ee71ac8d2fdc28f3b70fe	url	https://download.nvidia.com/XFree86/Linux-x86_64/615.71.09/NVIDIA-Linux-x86_64-615.71.09.run
+rpcsvc-proto-1.4.4.tar.xz	81c3aa27edb5d8a18ef027081ebb984234d5b5860c65bd99d4ac8f03145a558b	url	https://github.com/thkukuk/rpcsvc-proto/releases/download/v1.4.4/rpcsvc-proto-1.4.4.tar.xz
+setuptools-84.0.0-py3-none-any.whl	51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670	url	https://files.pythonhosted.org/packages/95/9c/c510029fc6ef33a6275cd2c5d3cecd6613dfd6aa401d57c54f1c18852ccf/setuptools-84.0.0-py3-none-any.whl
+wheel-0.45.1-py3-none-any.whl	708e7481cc80179af0e556bbf0cc00b8444c7321e2700b8d8580231d13017248	url	https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl

@@ -164,8 +164,10 @@ if [ ${#makedepends[@]} -gt 0 ]; then msg "sysroot: ${makedepends[*]}"; sysroot_
 
 # ---------- fetch / unpack ----------
 # MELON_KEEP_SRC=1 resumes a failed build in the existing tree (no unpack, no patches, no prepare)
-# MELON_AUTO_RESUME=1 resumes by itself when an earlier run got past "prepare" (container restarts)
-[ "${MELON_AUTO_RESUME:-0}" = 1 ] && [ -f "$WORK/pkg/$name/.prepared" ] && MELON_KEEP_SRC=1
+# MELON_AUTO_RESUME=1 resumes by itself when an earlier run got past "prepare" (container restarts), but only with
+# the same recipe and patches: a fix pulled since then must unpack fresh, or its patches and prepare() never run
+recipe_sum=$(for f in "$startdir"/MELONBUILD "$startdir"/*.patch; do [ ! -f "$f" ] || cat "$f"; done | sha256sum | cut -d' ' -f1)
+[ "${MELON_AUTO_RESUME:-0}" = 1 ] && [ "$(cat "$WORK/pkg/$name/.prepared" 2>/dev/null)" = "$recipe_sum" ] && MELON_KEEP_SRC=1
 if [ "${MELON_KEEP_SRC:-0}" = 1 ] && [ -d "$srcdir" ]; then
   msg "reusing existing source tree"; rm -rf "$pkgbase"; mkdir -p "$pkgdir"; KEEP=1
 else
@@ -181,7 +183,7 @@ cd "$srcdir"; [ -d "$builddir" ] && cd "$builddir"
 # apply patches shipped with the recipe
 for p in "$startdir"/*.patch; do [ -f "$p" ] || continue; msg "patch $(basename $p)"; patch -p1 -s < "$p"; done
 msg prepare; prepare
-: > "$WORK/pkg/$name/.prepared"
+echo "$recipe_sum" > "$WORK/pkg/$name/.prepared"
 fi
 cd "$builddir" 2>/dev/null || cd "$srcdir"
 msg build; build

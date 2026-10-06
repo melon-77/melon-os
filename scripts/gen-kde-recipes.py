@@ -56,7 +56,7 @@ ORDER = [
  ('qca','qca2', KDE+' -DQT6=ON -DBUILD_TESTS=OFF -DBUILD_TOOLS=OFF -DWITH_botan_PLUGIN=no -DWITH_pkcs11_PLUGIN=no -DWITH_cyrus-sasl_PLUGIN=no', 'kde'),
 ]
 KF6 = ('kcoreaddons kconfig ki18n kwidgetsaddons kwindowsystem kguiaddons kcodecs kitemmodels kitemviews karchive '
-       'kdbusaddons kcrash kauth kcolorscheme kcompletion kconfigwidgets kglobalaccel kiconthemes breeze-icons '
+       'kdbusaddons kcrash kauth kcolorscheme kcompletion kconfigwidgets kglobalaccel breeze-icons kiconthemes '
        'kservice knotifications kjobwidgets solid sonnet ktextwidgets kxmlgui kbookmarks kpackage kidletime '
        'kstatusnotifieritem kwallet attica kirigami ksvg kdeclarative kded kio kcmutils knewstuff knotifyconfig '
        'kparts kpty kunitconversion krunner kquickcharts qqc2-desktop-style frameworkintegration kdesu '

@@ -39,13 +39,14 @@ ORDER = [
  ('qt6-qtpositioning','qt6-positioning', QT+' '+QTDIRS, 'qt'),
  ('qt6-qtlocation','qt6-location', QT+' '+QTDIRS, 'qt'),   # plasma-workspace needs QtLocation
  ('qt6-qtwebview','qt6-webview', QT+' '+QTDIRS, 'qt'),   # Discover; no QtWebEngine backend (a whole Chromium)
- ('qt6-qtspeech','qt6-speech', QT+' '+QTDIRS+' -DFEATURE_flite=ON -DFEATURE_speechd=OFF', 'qt'),   # speech through Flite, sound through Qt Multimedia
  ('qt6-qt5compat','qt6-5compat', QT+' '+QTDIRS, 'qt'),
  ('qt6-qttools','qt6-tools', QT+' '+QTDIRS+' -DFEATURE_assistant=OFF -DFEATURE_designer=OFF -DFEATURE_distancefieldgenerator=OFF '
    '-DFEATURE_pixeltool=OFF -DFEATURE_qtdiag=OFF -DFEATURE_clang=OFF -DFEATURE_qdoc=OFF -DFEATURE_linguist=ON', 'qt'),
  ('qt6-qttranslations','qt6-translations', QT+' '+QTDIRS, 'qt'),   # Qt's own strings (dialogs, shortcuts), via the host lrelease
  # playback through FFmpeg, sound through PulseAudio (PipeWire's pulse server)
  ('qt6-qtmultimedia','qt6-multimedia', QT+' '+QTDIRS+' -DFEATURE_ffmpeg=ON -DFEATURE_gstreamer=OFF -DFEATURE_pulseaudio=ON', 'qt'),
+ ('qt6-qtspeech','qt6-speech', QT+' '+QTDIRS+' -DFEATURE_flite=ON -DFEATURE_speechd=OFF', 'qt'),   # speech through Flite, sound through Qt Multimedia (after it: without
+ #   Qt Multimedia, qtspeech's CMake skips the whole build and only its install step fails)
  ('extra-cmake-modules','kf6-extra-cmake-modules', '-DBUILD_DOC=OFF', 'noarch-kde'),
  ('plasma-wayland-protocols','plasma-wayland-protocols', '', 'noarch-kde'),
  ('polkit-qt-1','polkit-qt-1', KDE, 'kde'),

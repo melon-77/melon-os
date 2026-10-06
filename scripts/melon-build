@@ -38,6 +38,10 @@ export CONFIG_SITE=$M/scripts/config.site
 # CMake 4 (melon's, on a melon build machine) refuses cmake_minimum_required below 3.5 (libjpeg-turbo, yaml-cpp); this
 # raises those to 3.5. CMake 3.x (Ubuntu's) ignores it.
 export CMAKE_POLICY_VERSION_MINIMUM=3.5
+# programs a build compiles for the build machine (CC_FOR_BUILD: flex's stage1flex, gnulib's rpl_malloc) get the C
+# dialect Ubuntu's GCC 13 defaults to: melon's GCC 15 defaults to C23, where old `void *malloc ();` is "no arguments"
+# (rule 40). Ubuntu builds keep autoconf's default.
+[ "$MELON_HOST" = melon ] && export CFLAGS_FOR_BUILD="-g -O2 -std=gnu17"
 # build systems that ask git for "their" revision (clang --version, Rust build scripts) must not find melon's own
 # checkout above the source tree: git stops looking at $WORK
 export GIT_CEILING_DIRECTORIES=$WORK

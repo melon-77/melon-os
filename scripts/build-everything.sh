@@ -53,8 +53,8 @@ STEP2="clang spirv-llvm-translator libclc libslirp qemu ovmf go github-cli"
 # NVIDIA: nouveau's firmware and NVK (Rust) for the open driver, and NVIDIA's own kernel modules (online installs)
 NVIDIA="linux-firmware-nvidia mesa-nvk nvidia-open"
 BUILDTOOLS2="lz4 ninja cmake meson git nasm tcl rsync
-  python3-markupsafe python3-mako python3-yaml python3-packaging python3-ptyprocess python3-pexpect python3-libxml2 itstool
-  xorriso mtools scdoc dtc dwarves publicsuffix"
+  python3-markupsafe python3-jinja2 python3-pyparsing python3-mako python3-yaml python3-packaging python3-ptyprocess python3-pexpect python3-libxml2 itstool
+  xorriso mtools scdoc dtc dwarves publicsuffix rpcsvc-proto"
 ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $DESKTOP_LIBS $STEP2 $NVIDIA $RUSTC $KDE $INSTALLERS | awk '!seen[$0]++')
 # recipes nobody listed yet go at the end
 EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))

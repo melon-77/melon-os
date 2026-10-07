@@ -40,15 +40,39 @@ land in `out/`. `scripts/publish-repo.sh` then puts the packages online for inst
 The build runs as root because packages are installed into `sysroot/` with their real owners and
 because an Ubuntu host needs `/lib/ld-musl-x86_64.so.1` (see AGENTS.md, rule 18).
 
+## Debian or Devuan as the build machine
+
+The Ubuntu steps above work on Debian 13 and Devuan 6 too (not yet tried on a real install). `host-setup.sh` takes
+Ubuntu's path there: it installs the same packages with apt, adds Ubuntu's archive key (`ubuntu-keyring`) because
+older melon sources still come from Ubuntu's source archive, and lists any package name your archive doesn't have
+instead of stopping (paste that warning line if you get one). Without `sudo`, run the commands as root (`su -`).
+
+**Moving from another build machine (melon, Ubuntu, WSL):** copy `keys/`, `sources/`, `repo/` and `sysroot/` into the
+new checkout, but not `tools/`, `hosttools/` or `work/`: they hold programs built for the old machine (melon's are linked
+against musl, Ubuntu's against another glibc). `host-setup.sh` rebuilds the host tools and `build-everything.sh` the
+cross toolchain before it carries on with the packages; finished packages in `repo/` are not built again.
+
 ## melon as the build machine
 
-melon builds itself. On a melon install (desktop or console profile, upgraded with `doas apk upgrade`), the same
-steps work: clone, `doas scripts/host-setup.sh`, put the key in place, `doas JOBS=16 scripts/build-everything.sh`.
-What's different:
+melon builds itself. On a melon install (desktop or console profile), starting with no checkout:
+
+1. `doas apk upgrade`, then `doas apk add git` (git is in the online repository, not on the ISOs).
+2. `git clone -b testing https://github.com/melon-77/melon-os ~/melon`, then `cd ~/melon`.
+3. If you are moving from an old build machine, copy its `keys/`, `sources/`, `repo/` and `sysroot/` into `~/melon`
+   (not `tools/` or `hosttools/`, see below). Otherwise put the signing key in `keys/` ("The signing key" below).
+4. `doas scripts/host-setup.sh` (it lists any build tool melon's repository doesn't have; if a step fails, it prints
+   the end of `logs/host-setup.log`, where the full output of its builds goes)
+5. `doas scripts/build-everything.sh` (it uses every core; for fewer, `doas env JOBS=10 scripts/build-everything.sh`:
+   doas doesn't take `NAME=value` before the command the way sudo does)
+
+What's different from an Ubuntu build machine:
 
 - `host-setup.sh` installs the build tools from melon's own package repository instead of Ubuntu's (it lists any name
-  it can't find), adds a small `dpkg-deb -x` replacement for the recipes that unpack `.deb` files, and uses melon's
-  own `apk` and `wayland-scanner`.
+  it can't find), adds a small `dpkg-deb -x` replacement for the recipes that unpack `.deb` files, uses melon's
+  own `apk` and `wayland-scanner`, and builds `rpcgen` into `/usr/local/bin` while the repository has no `rpcsvc-proto`
+  (Python's Jinja2 and pyparsing likewise come from their source tarballs until their packages are published).
+- A package that failed is unpacked fresh on the next run when its recipe changed since (after a `git pull` with a fix);
+  otherwise `build-everything.sh` carries on where it stopped.
 - **Moving from an Ubuntu or WSL build machine:** keep `keys/`, `sources/`, `repo/` and `sysroot/`, but delete
   `tools/` and `hosttools/` (except `hosttools/bin/apk`, which `host-setup.sh` replaces anyway): they hold programs
   built against Ubuntu's glibc, which melon doesn't have. `host-setup.sh` rebuilds the host tools, and

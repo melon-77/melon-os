@@ -18,6 +18,9 @@ build(){
   set_cfg CONFIG_FEATURE_MDEV_DAEMON y
   set_cfg CONFIG_FEATURE_INSTALLER y
   set_cfg CONFIG_EXTRA_CFLAGS "\"\""
+  # i686: the SHA-NI assembly isn't position-independent; in a PIE busybox it leaves text relocations, which musl's
+  # loader doesn't apply (every applet crashed at start). Alpine turns both off too.
+  if [ "$MUSL_ARCH" = i386 ]; then unset_cfg CONFIG_SHA1_HWACCEL; unset_cfg CONFIG_SHA256_HWACCEL; fi
   yes "" 2>/dev/null | make oldconfig CROSS_COMPILE=$TARGET- || [ -f .config ]
   make -j$JOBS CROSS_COMPILE=$TARGET- CC=$TARGET-gcc HOSTCC=gcc busybox
 }

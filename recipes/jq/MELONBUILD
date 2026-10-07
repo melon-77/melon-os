@@ -1,0 +1,14 @@
+pkgname=jq
+pkgver=1.8.1
+pkgrel=0
+pkgdesc="Command-line JSON processor"
+license=MIT
+url=https://jqlang.org
+# Ubuntu 26.04's copy of the upstream 1.8.1 tag (a git snapshot: configure is made here and the version is set by hand);
+# the patches are its upstream security fixes (6 CVEs)
+source=(jq-1.8.1.tar.gz)
+builddir=$srcdir/jq-jq-1.8.1
+makedepends=(oniguruma-dev)
+prepare(){ printf '#!/bin/sh\necho 1.8.1\n' > scripts/version; }   # the tag has no .git for scripts/version to ask
+build(){ autoreconf -fi >/dev/null; ./configure $conf_flags --disable-static --disable-docs --disable-maintainer-mode --with-oniguruma=yes; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man $pkgdir/usr/share/doc; }

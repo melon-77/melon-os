@@ -1,0 +1,12 @@
+pkgname=tmux
+pkgver=3.6a
+pkgrel=0
+pkgdesc="Terminal multiplexer"
+license=ISC
+url=https://github.com/tmux/tmux
+# Ubuntu 26.04's copy of upstream's 3.6a tag (a git snapshot, so configure is made here); the patch is its upstream security fix
+source=(tmux-3.6a.tar.gz)
+builddir=$srcdir/tmux-tmux-f222026
+makedepends=(libevent-dev ncurses-dev)
+build(){ autoreconf -fi >/dev/null; ./configure $conf_flags --enable-utf8proc=no YACC='bison -y'; make -j$JOBS; }   # melon's bison has no yacc command
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man; }

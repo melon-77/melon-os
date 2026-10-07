@@ -1,0 +1,6 @@
+#!/bin/sh
+exec 2>&1
+# first start: make this machine's host keys (rsa, ecdsa, ed25519)
+[ -f /etc/ssh/ssh_host_ed25519_key ] || ssh-keygen -A >/dev/null
+# -D: stay in the foreground for runit; -e: log to stderr, which log/run sends to /var/log/sshd
+exec /usr/bin/sshd -D -e

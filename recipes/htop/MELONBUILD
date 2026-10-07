@@ -1,0 +1,11 @@
+pkgname=htop
+pkgver=3.4.1
+pkgrel=0
+pkgdesc="Interactive process viewer"
+license=GPL-2.0-or-later
+url=https://htop.dev
+source=(htop-3.4.1.tar.gz)
+makedepends=(ncurses-dev)
+# the release tarball has no configure script
+build(){ autoreconf -fi >/dev/null; ./configure $conf_flags --enable-unicode --disable-hwloc --disable-sensors; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man; }

@@ -32,6 +32,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | gaming | Flatpak 1.16 + Flathub, GameMode | Steam is glibc-only, so it can't run natively on musl: `melon-first-boot` offers Steam (and Firefox, VLC, Prism Launcher) from Flathub on first login |
 | game library | SDL3 3.4 + SDL3_image + SDL3_ttf (`sdl3`, `sdl3-image`, `sdl3-ttf`) | for melon's own games; SDL dlopen()s its Wayland/X11/audio backends |
 | apps and games | NetHack 5.0 (both ISOs), melon pinball (desktop ISO; its own repo, a submodule), Cataclysm: DDA and GNU gettext (package repository only) | what goes on an ISO follows the size rule in "Contributing" |
+| everyday CLI tools | OpenSSH 10.2p1 (`openssh`; `openssh-server` = sshd as a runit service, off until `melon-svc enable sshd`), htop 3.4.1, tmux 3.6a (+ libevent 2.1.12), jq 1.8.1 (+ oniguruma 6.9.10), vim 9.1 (normal features, no GUI), pciutils 3.14, usbutils 019 (`CLITOOLS` in `build-everything.sh`) | package repository only; Ubuntu 26.04's copies of the upstream releases with the CVE patches Ubuntu ships for them (see Sources); `lspci`/`lsusb` read `pci.ids`/`usb.ids` from `hwdata` |
 
 Owner's config (`CONFIG_*` answers) lives in `docs/config.txt`. Don't change those choices without the owner's approval.
 
@@ -559,6 +560,13 @@ Ubuntu 26.04's `*.orig.tar.*` (the upstream tarballs, repacked by name only; met
 come from Ubuntu `.deb`s (method `pool`). That's no reason to keep pulling from Ubuntu: when you touch one of those
 recipes (a version bump, a fix), move its source to upstream. The build machine happens to run Ubuntu (BUILDING.md);
 that is the only place Ubuntu is still needed.
+
+**The everyday CLI tools** (openssh, htop, libevent, tmux, oniguruma, jq, vim, pciutils, usbutils) were added from a build
+container that could reach only Ubuntu's archive, so they use Ubuntu 26.04's `*.orig.tar.*` (method `apt`; sha256 checked
+against Ubuntu's `Sources` index). Ubuntu's security fixes for the version (`debian/patches/CVE-*.patch`, listed in `series`)
+are shipped in the recipe directories as `NN-CVE-*.patch` and applied in `series` order; without them the packages would
+be vulnerable. When you bump one, take the new tarball from upstream, and re-derive the patch list (or drop what the new
+version already contains).
 
 ## Roadmap
 

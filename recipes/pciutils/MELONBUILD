@@ -1,0 +1,21 @@
+pkgname=pciutils
+pkgver=3.14.0
+pkgrel=0
+pkgdesc="lspci and setpci: list and configure PCI devices"
+license=GPL-2.0-or-later
+url=https://mj.ucw.cz/sw/pciutils/
+# upstream's 3.14.0 release (Ubuntu 26.04's copy, signature checked against Martin Mares' key); the device names come from hwdata
+source=(pciutils-3.14.0.tar.gz)
+makedepends=()
+depends=(hwdata)
+subpackages=(pciutils-dev)
+build(){
+  # no configure script: make variables. Shared library, names from hwdata's pci.ids, no network lookups, no uncompressed copy of pci.ids
+  make -j$JOBS CC="$CC" AR="$AR" RANLIB="$RANLIB" STRIP= PREFIX=/usr SBINDIR=/usr/bin SHARED=yes ZLIB=no DNS=no HWDB=no LIBKMOD=no \
+    IDSDIR=/usr/share/hwdata OPT="$CFLAGS" LDFLAGS="$LDFLAGS" all
+}
+package(){
+  make DESTDIR=$pkgdir PREFIX=/usr SBINDIR=/usr/bin SHARED=yes ZLIB=no DNS=no HWDB=no LIBKMOD=no IDSDIR=/usr/share/hwdata \
+    STRIP= install install-lib
+  rm -rf $pkgdir/usr/share/man $pkgdir/usr/share/hwdata $pkgdir/usr/bin/update-pciids
+}

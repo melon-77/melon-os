@@ -1,0 +1,14 @@
+pkgname=libevent
+pkgver=2.1.12
+pkgrel=0
+pkgdesc="Event notification library (tmux uses it)"
+license=BSD-3-Clause
+url=https://libevent.org
+# Ubuntu 26.04's copy of the upstream 2.1.12-stable release; the patches are its upstream security fixes (8 CVEs)
+source=(libevent-2.1.12.tar.gz)
+builddir=$srcdir/libevent-2.1.12-stable
+makedepends=()
+subpackages=(libevent-dev)
+# no OpenSSL support (tmux needs none; it keeps libevent small) and no sample programs
+build(){ ./configure $conf_flags --disable-static --disable-openssl --disable-samples --disable-libevent-regress; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man $pkgdir/usr/share/doc; }

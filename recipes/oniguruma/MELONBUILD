@@ -1,0 +1,12 @@
+pkgname=oniguruma
+pkgver=6.9.10
+pkgrel=0
+pkgdesc="Regular expression library (jq's regex functions)"
+license=BSD-2-Clause
+url=https://github.com/kkos/oniguruma
+# Ubuntu 26.04's copy of the upstream 6.9.10 tag (a git snapshot, so configure is made here)
+source=(oniguruma-6.9.10.tar.gz)
+makedepends=()
+subpackages=(oniguruma-dev)
+build(){ autoreconf -fi >/dev/null; ./configure $conf_flags --disable-static; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; }

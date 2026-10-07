@@ -45,6 +45,8 @@ cmd = ['qemu-system-i386' if i686 else 'qemu-system-x86_64', '-m', '1024' if i68
 # hardware acceleration when the build host has it (WSL2 and most PCs do; the original build container didn't)
 if os.access('/dev/kvm', os.R_OK | os.W_OK) and not i686:
     cmd += ['-enable-kvm', '-cpu', 'host']
+elif i686:
+    cmd += ['-cpu', 'n270']   # the Intel Atom N270 of the netbooks the 32-bit edition is for (MSI Wind U100): SSE2/SSSE3, no 64-bit
 if uefi:
     cmd += ['-bios', '/usr/share/ovmf/OVMF.fd']
 if vmware:

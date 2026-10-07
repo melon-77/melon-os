@@ -1,0 +1,15 @@
+# sshd on melon (see sshd_config(5)). Everything not set here has OpenSSH's default.
+# The service is off until you turn it on:  doas melon-svc enable sshd
+Include /etc/ssh/sshd_config.d/*.conf
+
+# root may log in with a key but not with a password
+PermitRootLogin prohibit-password
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+# melon's PAM stack (/etc/pam.d/sshd) checks passwords, locked accounts and /etc/nologin
+UsePAM yes
+PasswordAuthentication yes
+KbdInteractiveAuthentication no
+
+# file transfers (sftp, scp)
+Subsystem sftp /usr/libexec/sftp-server

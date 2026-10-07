@@ -1,0 +1,11 @@
+pkgname=usbutils
+pkgver=019
+pkgrel=0
+pkgdesc="lsusb: list USB devices"
+license=GPL-2.0-only
+url=https://github.com/gregkh/usbutils
+# upstream's 019 release as Ubuntu 26.04 ships it; lsusb takes the device names from udev's hardware database (eudev)
+source=(usbutils-019.tar.xz)
+makedepends=(libusb-dev eudev-dev)
+build(){ meson_setup build; ninja -C build; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/man; }

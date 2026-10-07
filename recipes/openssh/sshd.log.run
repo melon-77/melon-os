@@ -1,0 +1,4 @@
+#!/bin/sh
+# keep service output off the console: it goes to /var/log/sshd/current
+mkdir -p /var/log/sshd
+exec svlogd -tt /var/log/sshd

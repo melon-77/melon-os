@@ -85,6 +85,19 @@ curl -fsSL https://claude.ai/install.sh | bash
 echo 'export USE_BUILTIN_RIPGREP=0' >> ~/.bashrc    # Claude Code then searches with melon's ripgrep
 ```
 
+## Everyday command-line tools
+
+These come from the package repository (not on the ISOs) and are built from Ubuntu 26.04's copies of the upstream
+releases, with the security fixes Ubuntu ships for them applied:
+
+```sh
+sudo apk add openssh                   # ssh, scp, sftp, ssh-keygen, ssh-agent
+sudo apk add openssh-server            # sshd as a runit service; off until you turn it on:
+sudo melon-svc enable sshd             #   (host keys are made on its first start)
+sudo apk add htop tmux jq vim          # process viewer, terminal multiplexer, JSON processor, editor
+sudo apk add pciutils usbutils         # lspci, setpci, lsusb, usb-devices
+```
+
 **NVIDIA graphics:** on a computer with an NVIDIA card (GTX 16/RTX 20 and newer), `melon-first-boot` offers the open
 driver (`sudo apk add linux-firmware-nvidia mesa-nvk`: nouveau with NVK, the desktop and games use the card) or NVIDIA's
 own kernel driver (`sudo apk add nvidia-open`: Flatpak games get NVIDIA's libraries from Flathub; the desktop can't use

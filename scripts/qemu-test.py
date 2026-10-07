@@ -71,7 +71,7 @@ if mode == 'desktop':
                                                  '-drive', f'if=none,id=stick,format=raw,file={usb}', '-device', 'usb-storage,bus=xhci.0,drive=stick']
 elif mode == 'desktop-install':
     iso, disk = args
-    base = cmd + ['-m', '4096']
+    base = cmd + ['-m', '2048' if i686 else '4096']   # 32-bit: what the netbooks it is for can hold
     cmd = base + ['-cdrom', iso] + disk_args(disk) + ['-boot', 'd']
 elif mode == 'dualboot':
     import subprocess, hashlib
@@ -280,14 +280,20 @@ if mode == 'desktop-install':
         mon(f'sendkey {ch}'); time.sleep(0.15)
     mon('sendkey ret'); step('typed the password into the greeter')
     time.sleep(3); mon(f'screendump {M}/logs/qemu-desktop-splash.ppm')   # Plasma's loading screen
-    shell = "ps -o user,comm | awk '$1==\"jcole\" && $2==\"plasmashell\"' | wc -l"
+    # the desktop's shell: Plasma's plasmashell, or on the 32-bit edition LXQt's panel (on labwc)
+    desk = 'lxqt-panel' if i686 else 'plasmashell'
+    shell = f"ps -o user,comm | awk '$1==\"jcole\" && $2==\"{desk}\"' | wc -l"
     for _ in range(60):
         if count(shell): break
         time.sleep(3)
     time.sleep(20)                                  # let the desktop finish drawing
     sess = count("loginctl list-sessions --no-legend | awk '$3==\"jcole\" && $6==\"active\"' | wc -l")
     up = count(shell) == 1 and sess == 1; ok &= up
-    step(f'Plasma for jcole after 20 s: plasmashell={count(shell)} active sessions={sess}')
+    if i686:
+        lab = count("ps -o user,comm | awk '$1==\"jcole\" && $2==\"labwc\"' | wc -l"); up &= lab == 1; ok &= lab == 1
+        step(f'LXQt for jcole after 20 s: lxqt-panel={count(shell)} labwc={lab} active sessions={sess}')
+    else:
+        step(f'Plasma for jcole after 20 s: plasmashell={count(shell)} active sessions={sess}')
     mime = count('[ -s /usr/share/mime/mime.cache ] && echo 1 || echo 0') == 1; ok &= mime
     # a service runit keeps restarting shows as "down: 1s, normally up, want up" (polkitd did, raced by D-Bus activation)
     flapping = sh('sv status /var/service/* 2>&1 | grep "want up" | cut -d: -f2 | xargs echo FLAP=')
@@ -295,8 +301,9 @@ if mode == 'desktop-install':
     ok &= flap == ''; step('services: ' + ('none restarting in a loop' if flap == '' else f'RESTARTING: {flap}'))
     step('MIME cache: ' + ('present' if mime else 'MISSING'))
     # Flatpak must hand X11 apps (Steam, VLC's interface) an Xauthority cookie, or they never open a window
-    xau = count('ldd /usr/bin/flatpak | grep -c libXau')
-    ok &= xau == 1; step('flatpak: ' + ('X11 authorization for sandboxed apps' if xau == 1 else 'BUILT WITHOUT libXau (X11 apps cannot open windows)'))
+    if not i686:                                    # no Flatpak on the 32-bit edition
+        xau = count('ldd /usr/bin/flatpak | grep -c libXau')
+        ok &= xau == 1; step('flatpak: ' + ('X11 authorization for sandboxed apps' if xau == 1 else 'BUILT WITHOUT libXau (X11 apps cannot open windows)'))
     # packaged files owned by the build machine's account arrive as nobody's (rule 45)
     nob = count('find /usr /etc -xdev \\( -user 65534 -o -group 65534 \\) | wc -l')
     ok &= nob == 0; step('system files owned by nobody: ' + ('none' if nob == 0 else f'{nob} FOUND'))
@@ -311,17 +318,19 @@ if mode == 'desktop-install':
              '$(grep -qx "Current=melon-gold" /etc/sddm.conf.d/20-survivor.conf && [ -s /usr/share/sddm/themes/melon-gold/Main.qml ] && echo sddm)')
     rew = 'REW=badge3certgoldsddm' in out; ok &= rew
     step('gauntlet rewards: ' + ('badge, 3 survivor wallpapers, certificate, gold boot menu, gold login screen' if rew else f'MISSING {out[-300:]!r}'))
-    # the gold look in jcole's running session (what a survivor's first login runs), read back from jcole's config
-    sh("pid=$(ps -o pid,user,comm | awk '$2==\"jcole\" && $3==\"plasmashell\"{print $1}' | head -1)")
-    sh("e=$(tr '\\0' '\\n' < /proc/$pid/environ | grep -E '^(DBUS_SESSION_BUS_ADDRESS|WAYLAND_DISPLAY|XDG_RUNTIME_DIR)=' | tr '\\n' ' ')")
-    look = sh('su -s /bin/sh jcole -c "env $e /usr/libexec/melon/melon-survivor-look"; echo LOOK=$?; '
-              'su -s /bin/sh jcole -c \'kreadconfig6 --file kdeglobals --group General --key ColorScheme; '
-              'kreadconfig6 --file plasmarc --group Theme --key name; '
-              'kreadconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile; '
-              'kreadconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image --group General --key Image\' '
-              '| tr "\\n" " " | sed "s/^/GOLD=/"')
-    gold = 'LOOK=0' in look and 'GOLD=MelonGold melon-gold MelonGold.profile /usr/share/wallpapers/melon-survivor-gold/' in look
-    ok &= gold; step('gold look in the session: ' + ('colours, Plasma style, Konsole, lock screen, wallpaper' if gold else f'MISSING {look[-300:]!r}'))
+    # the gold look in jcole's running session (what a survivor's first login runs), read back from jcole's config;
+    # it is Plasma's look (colours, Plasma style, Konsole), so not on the 32-bit LXQt edition
+    if not i686:
+        sh("pid=$(ps -o pid,user,comm | awk '$2==\"jcole\" && $3==\"plasmashell\"{print $1}' | head -1)")
+        sh("e=$(tr '\\0' '\\n' < /proc/$pid/environ | grep -E '^(DBUS_SESSION_BUS_ADDRESS|WAYLAND_DISPLAY|XDG_RUNTIME_DIR)=' | tr '\\n' ' ')")
+        look = sh('su -s /bin/sh jcole -c "env $e /usr/libexec/melon/melon-survivor-look"; echo LOOK=$?; '
+                  'su -s /bin/sh jcole -c \'kreadconfig6 --file kdeglobals --group General --key ColorScheme; '
+                  'kreadconfig6 --file plasmarc --group Theme --key name; '
+                  'kreadconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile; '
+                  'kreadconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image --group General --key Image\' '
+                  '| tr "\\n" " " | sed "s/^/GOLD=/"')
+        gold = 'LOOK=0' in look and 'GOLD=MelonGold melon-gold MelonGold.profile /usr/share/wallpapers/melon-survivor-gold/' in look
+        ok &= gold; step('gold look in the session: ' + ('colours, Plasma style, Konsole, lock screen, wallpaper' if gold else f'MISSING {look[-300:]!r}'))
     time.sleep(10); mon(f'screendump {M}/logs/qemu-desktop-installed.ppm'); time.sleep(3)
     # the gold login screen: back to the greeter (this ends jcole's session)
     sh('sv restart sddm')

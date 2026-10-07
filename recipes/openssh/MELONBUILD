@@ -1,0 +1,35 @@
+pkgname=openssh
+pkgver=10.2_p1
+pkgrel=0
+pkgdesc="OpenSSH client: ssh, scp, sftp, ssh-keygen, ssh-agent"
+license="SSH-OpenSSH"
+url=https://www.openssh.com
+# Ubuntu 26.04's copy of the upstream 10.2p1 release; 10-26 below are the upstream security fixes it ships for it (18 CVEs,
+# Ubuntu's debian/patches/CVE-*.patch, in their order). Left out: the documentation-only one (CVE-2026-59998) and the
+# GSSAPI part of CVE-2026-60001, because melon builds neither GSSAPI nor the man page's caveat.
+source=(openssh-10.2p1.tar.gz)
+builddir=$srcdir/openssh-10.2p1
+makedepends=(openssl-dev zlib-dev linux-pam-dev)
+subpackages=(openssh-server)
+depends_openssh_server=(openssh)
+pkgdesc_openssh_server="OpenSSH server: sshd and sftp-server, as a runit service that is off until you enable it"
+options=(keepdirs)
+build(){
+  ./configure $conf_flags --sysconfdir=/etc/ssh --with-privsep-path=/var/empty --with-privsep-user=sshd --with-pid-dir=/run \
+    --with-pam --with-default-path=/usr/local/bin:/usr/bin --with-mantype=man --disable-strip --without-libedit
+  make -j$JOBS
+}
+package(){
+  # install-nokeys: the host keys are made on the machine itself (the sshd service does it on its first start)
+  make DESTDIR=$pkgdir install-nokeys
+  rm -rf $pkgdir/usr/share/man $pkgdir/usr/share/doc
+  install -d -m755 $pkgdir/var/empty
+  install -Dm644 $startdir/sshd_config $pkgdir/etc/ssh/sshd_config
+  install -Dm644 $startdir/pam.d-sshd $pkgdir/etc/pam.d/sshd
+  mkdir -p $pkgdir/etc/sv/sshd/log
+  install -m755 $startdir/sshd.run $pkgdir/etc/sv/sshd/run
+  install -m755 $startdir/sshd.log.run $pkgdir/etc/sv/sshd/log/run
+}
+pkg_server(){
+  amove usr/bin/sshd usr/libexec/sshd-session usr/libexec/sshd-auth usr/libexec/sftp-server etc/ssh/sshd_config etc/pam.d/sshd etc/sv var/empty
+}

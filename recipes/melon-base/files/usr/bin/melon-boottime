@@ -1,0 +1,28 @@
+#!/bin/sh
+# melon-boottime: where this boot's time went (seconds since the kernel started).
+# Stage 1 writes a line per milestone to /run/melon-boot-times; services show how long they have been up in `sv status`.
+# Firmware (BIOS/UEFI) and the GRUB menu run before the kernel and aren't counted here.
+export PATH=/usr/bin
+[ -r /run/melon-boot-times ] || { echo "no boot timeline in /run/melon-boot-times (booted before melon-base 0.1-r33?)" >&2; exit 1; }
+read now _ < /proc/uptime
+awk -v now="$now" '
+  { t[$1] = $2; order[++n] = $1 }
+  END {
+    prev = 0
+    printf "%-16s %8s %8s\n", "milestone", "at (s)", "took (s)"
+    for (i = 1; i <= n; i++) {
+      k = order[i]; printf "%-16s %8.2f %8.2f\n", k, t[k], t[k] - prev; prev = t[k]
+    }
+    printf "%-16s %8.2f\n", "now", now
+  }' /run/melon-boot-times
+echo
+echo "services (when they last started):"
+SVDIR=${SVDIR:-/var/service}
+for d in dbus elogind polkitd udevd NetworkManager sddm; do
+  [ -d "$SVDIR/$d" ] || continue
+  sv status "$SVDIR/$d" 2>/dev/null
+done | awk -v now="$now" '
+  /^run:/ { n = $1; for (i = 1; i <= NF; i++) if ($i ~ /^[0-9]+s[;,]?$/) { s = $i; sub(/s[;,]?$/, "", s); break }
+            name = $2; sub(/:$/, "", name); sub(/.*\//, "", name)
+            printf "  %-16s started at %8.2f s\n", name, now - s; next }
+  { print "  " $0 }'

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chroot /opt/melonroot:*)",
+      "Bash(install -m600 /root/.claude/uploads/*)",
+      "Bash(git push:*)"
+    ]
+  }
+}

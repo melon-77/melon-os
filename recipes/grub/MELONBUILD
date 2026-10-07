@@ -1,13 +1,15 @@
 pkgname=grub
 pkgver=2.14
-pkgrel=1
+pkgrel=2
 pkgdesc="GNU GRUB bootloader (BIOS and UEFI)"
 license=GPL-3.0-or-later
 url=https://www.gnu.org/software/grub/
 source=(grub-2.14.tar.xz)
 makedepends=(util-linux-dev bsd-compat-headers)
 depends=(busybox)
-_common="--disable-werror --disable-nls --disable-grub-mkfont --disable-device-mapper --disable-liblzma --disable-libzfs --disable-grub-emu-sdl --disable-grub-mount --disable-efiemu"
+# GRUB 2.14 links its images with --image-base when the linker takes it (ld 2.44 and newer: Debian, Devuan, melon), which puts
+# the ELF headers in front of i386-pc's kernel.img: "start address is 0x9074 instead of 0x9000", no BIOS boot. -Ttext as before.
+_common="ax_cv_check_ldflags___Wl___image_base_0x400000=no --disable-werror --disable-nls --disable-grub-mkfont --disable-device-mapper --disable-liblzma --disable-libzfs --disable-grub-emu-sdl --disable-grub-mount --disable-efiemu"
 # firmware-side code is freestanding and is compiled with the build host's gcc; the userland tools with the melon toolchain
 _tgt="CFLAGS= LDFLAGS= CXXFLAGS= HOST_CFLAGS=-O2 TARGET_CFLAGS=-Os TARGET_CC=gcc TARGET_OBJCOPY=objcopy TARGET_STRIP=strip TARGET_NM=nm TARGET_RANLIB=ranlib BUILD_CC=gcc"
 build(){

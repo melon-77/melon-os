@@ -18,6 +18,7 @@ A from-scratch, rolling x86_64 distribution:
 | root fs | XFS (FAT32 `/boot`) |
 | shell | bash 5.3 |
 | desktop | KDE Plasma 6 on Wayland; Flatpak for Steam and other glibc apps; more desktops as online installs |
+| 32-bit edition | i686 (Pentium M, Pentium 4, Atom netbooks such as the MSI Wind U100) with LXQt on Wayland (labwc) |
 
 ## Layout
 
@@ -55,6 +56,16 @@ Packages are signed with `keys/melon-signing.rsa` (not committed; generate your 
 
 Boot the ISO. The graphical installer (desktop ISO) is Calamares. There is also a quick console
 installer for people who know its name.
+
+## 32-bit edition (old netbooks)
+
+melon also builds for 32-bit PCs with SSE2 (Pentium M, Pentium 4, Intel Atom: the MSI Wind U100 and similar netbooks).
+Its desktop is **LXQt** on Wayland with the labwc compositor, lighter than Plasma and comfortable in 1–2 GB of RAM,
+with zram swap, Intel GMA graphics (Mesa's i915) and the common netbook Wi-Fi chips (Atheros, Ralink, Realtek). It
+uses the same installers (Calamares with the gauntlet, the console installer). Flatpak and the NVIDIA drivers are
+64-bit only. Build it with `MELON_ARCH=x86` (`BUILDING.md`); the ISOs are `melon-*-i686.iso` and
+`melon-desktop-*-i686.iso`. Status: the console ISO installs and boots on an emulated Atom N270; the LXQt desktop is
+being built and tested.
 
 ## Developer tools
 

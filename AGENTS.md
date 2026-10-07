@@ -522,6 +522,21 @@ is marked Latest (the website's download button points at `releases/latest`), ca
 has notes written for users (what's new, which file to download, `doas apk upgrade` for installed systems), and the
 release it replaces is retitled "(superseded)" with a link to the new one.
 
+**When meaningful changes land, new ISOs follow (the owner's rule, 7 October 2026):** a change that reaches users in the images
+(packages in the ISO's system, the installers, boot, the kernel, the size) gets both ISOs rebuilt (`scripts/mkiso.sh`,
+`MELON_EDITION=desktop scripts/mkiso.sh`), tested (`qemu-test.py`, see "Testing"), added to a GitHub release with `SHA256SUMS`,
+and the website (`site/`) is updated to match: the ISO names, sizes and checksums, and the release link. Only the machine that
+holds the real `keys/melon-signing.rsa` can do the signed build, and release assets can't be uploaded from a cloud container
+(its proxy only allows JSON request bodies). A change made there says so in its pull request and leaves the exact commands for
+the owner's machine:
+
+```sh
+MELON_SKIP_BUILT=1 scripts/build-everything.sh        # builds only what the merged change touched, signs with the real key
+scripts/publish-repo.sh                               # the online package repository
+scripts/mkiso.sh && MELON_EDITION=desktop scripts/mkiso.sh
+# run the qemu-test.py commands from "Testing", then upload out/melon-*.iso and out/SHA256SUMS to the new release, and edit site/index.html
+```
+
 ## Signing keys and rotation
 
 Installed systems trust two keys, both shipped in `/etc/apk/keys` by `apk-tools` (and in `keys/trusted/`):

@@ -608,7 +608,7 @@ that is the only place Ubuntu is still needed.
   N270 CPU model: the console ISO (`qemu-test.py live|disk --i686`) and the LXQt desktop ISO
   (`desktop-install --i686`, 2 GB of RAM: install through Calamares, SDDM's greeter on labwc, the LXQt session,
   printing, the gauntlet's rewards). Not yet on 32-bit: NetHack (its source wasn't reachable from the test machine),
-  the QEMU guest agent. Signed with melon's key and published (8 October 2026): `repo/x86` is on the `packages` branch
+  the QEMU guest agent. Signed with melon's key and published (7 October 2026): `repo/x86` is on the `packages` branch
   next to `x86_64` (publish-repo.sh replaces the whole branch, so a machine that built only one architecture must start
   from the branch's current contents); both ISOs rebuilt from scratch on a new build container and retested (the desktop
   test waits 90 s before typing when there is no KVM: the greeter ignores keys for a while on an emulated CPU). When

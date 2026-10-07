@@ -8,5 +8,18 @@ source=(libfm-1.3.2.tar.xz)
 builddir=$srcdir/libfm-1.3.2
 subpackages=(libfm-extra-dev)
 makedepends=(glib-dev)
-build(){ ./configure $conf_flags --with-extra-only --with-gtk=no --disable-static --disable-gtk-doc; make -j$JOBS; }
+# configure insists on intltool (and Perl's XML::Parser), which the GTK-free part never runs: where the build machine
+# has no intltool (melon), stand-ins answer configure's version checks and fail loudly if anything really calls them
+build(){
+  local it=
+  if ! command -v intltool-update >/dev/null; then
+    it=$srcdir/intltool-stub; mkdir -p $it
+    printf '#!/bin/sh\necho "intltool-update (intltool) 0.51.0"\n' > $it/intltool-update
+    printf '#!/bin/sh\necho "$0: intltool is not installed" >&2; exit 1\n' > $it/intltool-merge
+    cp $it/intltool-merge $it/intltool-extract; printf '#!/bin/sh\nexit 0\n' > $it/perl; chmod +x $it/*
+    local -x PATH=$it:$PATH INTLTOOL_PERL=$it/perl
+  fi
+  ./configure $conf_flags --with-extra-only --with-gtk=no --disable-static \
+    --disable-gtk-doc --disable-nls
+  make -j$JOBS; }
 package(){ make DESTDIR=$pkgdir install; }

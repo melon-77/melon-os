@@ -6,7 +6,5 @@ license=custom
 source=(libfyaml-0.9.4.tar.gz)
 builddir=$srcdir/pantoniou-libfyaml-deb1ec7
 subpackages=(libfyaml-dev)
-# i686: its BLAKE3 SIMD assembly is x86-64 only (it picks it for any x86), so use the portable C code there
-_portable=; [ "$MUSL_ARCH" != i386 ] || _portable=-DENABLE_PORTABLE_TARGET=ON
-build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DENABLE_NETWORK=OFF -DBUILD_TESTING=OFF $_portable; ninja -C build; }
+build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DENABLE_NETWORK=OFF -DBUILD_TESTING=OFF $([ "$MUSL_ARCH" != i386 ] || echo -DENABLE_PORTABLE_TARGET=ON); ninja -C build; }
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

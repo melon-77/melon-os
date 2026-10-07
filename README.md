@@ -75,8 +75,9 @@ Its desktop is **LXQt** on Wayland with the labwc compositor, lighter than Plasm
 with zram swap, Intel GMA graphics (Mesa's i915) and the common netbook Wi-Fi chips (Atheros, Ralink, Realtek). It
 uses the same installers (Calamares with the gauntlet, the console installer). Flatpak and the NVIDIA drivers are
 64-bit only. Build it with `MELON_ARCH=x86` (`BUILDING.md`); the ISOs are `melon-*-i686.iso` and
-`melon-desktop-*-i686.iso`. Status: the console ISO installs and boots on an emulated Atom N270; the LXQt desktop is
-being built and tested.
+`melon-desktop-*-i686.iso`. Status (7 October 2026): both ISOs are built and pass their install tests on an emulated
+Atom N270 with 2 GB of RAM (LXQt logs in through SDDM, printing works); a test on a real U100 comes next. NetHack and
+the QEMU guest agent aren't in the 32-bit edition yet.
 
 ## Developer tools
 

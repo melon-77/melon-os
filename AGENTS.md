@@ -23,7 +23,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | disks | GPT: 1 MiB BIOS boot, 1 GiB FAT32 `/boot` (also the ESP), XFS `/` | kernel boots with `root=PARTUUID=...`; only encrypted (LUKS) installs have an initramfs (rule 28); dual boot next to Windows on UEFI (see Installers) |
 | filesystem | merged `/usr`: `/bin`, `/sbin`, `/usr/sbin` -> `usr/bin`, `/lib` -> `usr/lib` | packages must only ship files under `/usr`, `/etc`, `/var`, `/boot` |
 | desktop | KDE Plasma 6.6 on Wayland (KWin, Xwayland), Qt 6.10, SDDM | desktop ISO and desktop profile; list in `scripts/desktop-packages.txt` |
-| 32-bit edition | i686 (`MELON_ARCH=x86`, `-march=pentium-m -mfpmath=sse`: SSE2, as Qt 6 needs), LXQt 2.4 on Wayland with labwc 0.20 (wlroots), SDDM, Mesa without LLVM (i915, crocus, r300, softpipe) | the owner's decision (7 October 2026): LXQt is the 32-bit desktop, for netbooks such as the MSI Wind U100 (Atom N270, 1–2 GB); package list `scripts/desktop-packages-x86.txt`, recipes from `scripts/gen-lxqt-recipes.py` plus `recipes/melon-lxqt` (melon's LXQt defaults); no Plasma, Flatpak or NVIDIA there |
+| 32-bit edition | i686 (`MELON_ARCH=x86`, `-march=pentium-m -mfpmath=sse`: SSE2, as Qt 6 needs), LXQt 2.4 on Wayland with labwc 0.20 (wlroots), SDDM, Mesa with LLVM built for the X86 backend only (i915, crocus, r300, llvmpipe, softpipe) | the owner's decision (7 October 2026): LXQt is the 32-bit desktop, for netbooks such as the MSI Wind U100 (Atom N270, 1–2 GB); package list `scripts/desktop-packages-x86.txt`, recipes from `scripts/gen-lxqt-recipes.py` plus `recipes/melon-lxqt` (melon's LXQt defaults); no Plasma, Flatpak, NVIDIA or QEMU guest agent there (QEMU 11 doesn't build for 32-bit hosts) |
 | desktop plumbing | D-Bus, elogind, polkit, PipeWire + WirePlumber, NetworkManager, BlueZ, CUPS, UDisks2 | console profile keeps `dhcp` + wpa_supplicant |
 | graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe; zink (OpenGL on Vulkan) | |
 | developer tools | gcc 15.2 + g++, binutils 2.46, make 4.4.1, pkgconf, patch (`gcc`, `g++`, `binutils`, `make`, `pkgconf`, `patch`) | built cross-native with the cross toolchain's settings (PIE, SSP); in the package repository only, not on the ISOs; `melon-first-boot` offers them on first login (default no) |
@@ -349,6 +349,20 @@ Rebuilding the kernel takes about an hour on 2 cores.
     `-Wl,--image-base=0x400000`, which newer ld honours instead of `-Ttext`: `grub-mkimage` then stops with "kernel.img
     miscompiled ... start address is 0x9074 instead of 0x9000" (i386-pc). `recipes/grub` and `scripts/hostgrub.sh`
     preset `ax_cv_check_ldflags___Wl___image_base_0x400000=no`.
+57. **Generated recipes are edited in their generator.** `gen-simple-recipes.py`, `gen-kde-recipes.py` and
+    `gen-lxqt-recipes.py` rewrite their recipes at every `build-everything.sh` start, so an edit made only in
+    `recipes/<name>/MELONBUILD` is silently undone (qtdeclarative's "no PCH on x86" was). Change the generator, run it,
+    and commit both. Per-arch options go inside the arguments as `$([ "$APK_ARCH" != x86 ] || echo ...)`. On x86,
+    qt6-qtdeclarative builds without precompiled headers: with them its build tree passed 11 GB and filled the disk.
+58. **A failed package unpacks fresh on the next pass.** A CMake cache from a run that failed remembers what wasn't
+    there yet (Qt's `HAVE_EGL=false` before Mesa existed) and keeps failing after the dependency is built:
+    `build-everything.sh` deletes `work/pkg/<name>/.prepared` of each failed package between passes.
+59. **SDDM's greeter on labwc (melon-lxqt) is an xdg-shell window that labwc makes full screen.** With SDDM's
+    default layer-shell integration under labwc the greeter came up as a small box on a black screen.
+    `/etc/sddm.conf.d/15-lxqt.conf` sets `QT_WAYLAND_SHELL_INTEGRATION=xdg-shell` for the greeter and starts labwc with
+    `/usr/share/melon/sddm-labwc/rc.xml` (a window rule: no decorations, full screen). wlroots' Xwayland path must be
+    `/usr/bin/Xwayland` (recipes/wlroots), not the sysroot's, and labwc's own `labwc.desktop` session is removed so
+    SDDM starts LXQt.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but
@@ -581,11 +595,13 @@ that is the only place Ubuntu is still needed.
   KWin on Wayland, SDDM, PipeWire, NetworkManager, Bluetooth, printing, Calamares with the gauntlet, the desktop ISO
   and the desktop profile for both installers (`qemu-test.py desktop` and `desktop-install`). Open hardware work
   is tracked in GitHub issues: Intel SOF audio, newer linux-firmware, Broadcom Wi-Fi.
-- **32-bit (i686) edition with LXQt: in progress** (resumed by the owner, 7 October 2026, for an MSI Wind U100:
-  Atom N270, 2 GB). `MELON_ARCH=x86 scripts/build-everything.sh` builds the toolchain, the base system, Qt, LXQt and
-  labwc, then both ISOs (BUILDING.md). Done: the toolchain (rules 54 and 55), the base system and the console ISO,
-  which installs and boots in `qemu-test.py live|disk --i686` on QEMU's Atom N270 CPU model. In progress: the LXQt
-  desktop ISO and its test (`desktop-install --i686`): SDDM's greeter and the LXQt session on labwc.
+- **32-bit (i686) edition with LXQt: built and tested in QEMU, waiting for real hardware** (resumed by the owner,
+  7 October 2026, for an MSI Wind U100: Atom N270, 2 GB). `MELON_ARCH=x86 scripts/build-everything.sh` builds the
+  toolchain, the base system, Qt, LXQt and labwc, then both ISOs (BUILDING.md). Both pass their tests on QEMU's Atom
+  N270 CPU model: the console ISO (`qemu-test.py live|disk --i686`) and the LXQt desktop ISO
+  (`desktop-install --i686`, 2 GB of RAM: install through Calamares, SDDM's greeter on labwc, the LXQt session,
+  printing, the gauntlet's rewards). Not yet on 32-bit: NetHack (its source wasn't reachable from the test machine),
+  the QEMU guest agent. Next: a test on the owner's U100 (`sudo melon-hwreport` for Wi-Fi and graphics).
 - **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (`melon-flathub`), Steam, Firefox, VLC and
   Prism Launcher offered from Flathub on first login, GameMode. Still to do: gamepad and controller udev rules,
   MangoHud (`docs/stage2-plan.md`).

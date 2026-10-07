@@ -1,0 +1,67 @@
+{
+  "version": "0.2",
+  "name": "Bailan",
+  "date": "2026-09-29",
+  "tag": "melon-20260929.2",
+  "repo": "melon-77/melon-os",
+  "mirrors": [],
+  "editions": [
+    {
+      "id": "desktop",
+      "title": "melon desktop",
+      "variant": "x86_64",
+      "match": "melon-desktop-*-x86_64.iso",
+      "blurb": "KDE Plasma on Wayland. A live session you can try first, and the graphical installer. This is the one most people want.",
+      "desc": "KDE Plasma on Wayland, live session and graphical installer."
+    },
+    {
+      "id": "console",
+      "title": "melon console",
+      "variant": "x86_64",
+      "match": "melon-2*-x86_64.iso",
+      "blurb": "No desktop: a small system with a quick text installer, for servers, tinkerers and virtual machines.",
+      "desc": "No desktop, with a quick text installer."
+    },
+    {
+      "id": "x86-desktop",
+      "title": "melon 32-bit desktop",
+      "variant": "i686 · LXQt",
+      "match": "melon-desktop-*-i686.iso",
+      "blurb": "LXQt on Wayland for old netbooks and 32-bit laptops, with the same installers.",
+      "desc": "LXQt on Wayland for old netbooks and 32-bit laptops, live session and graphical installer.",
+      "coming_group": "x86"
+    },
+    {
+      "id": "x86-console",
+      "title": "melon 32-bit console",
+      "variant": "i686",
+      "match": "melon-2*-i686.iso",
+      "blurb": "No desktop, for 32-bit machines, with the quick text installer.",
+      "desc": "No desktop, for 32-bit machines, with the quick text installer.",
+      "coming_group": "x86"
+    }
+  ],
+  "coming_groups": {
+    "x86": {
+      "id": "x86",
+      "title": "melon 32-bit",
+      "variant": "i686 · LXQt",
+      "blurb": "For old netbooks and 32-bit laptops: LXQt on Wayland, with the same installers. Built and tested in QEMU on an emulated Atom N270 with 2 GB. Not published yet, because it still needs a signed build.",
+      "desc": "For old netbooks and 32-bit laptops. Not published yet: it still needs a signed build."
+    }
+  },
+  "files": {
+    "desktop": {
+      "file": "melon-desktop-20260929-x86_64.iso",
+      "size": 836601856,
+      "sha256": "fb4e37204a56fe73272915b093d22427d7a5147abb2fd3fb79044f4ddb981f5f",
+      "url": "https://github.com/melon-77/melon-os/releases/download/melon-20260929.2/melon-desktop-20260929-x86_64.iso"
+    },
+    "console": {
+      "file": "melon-20260929-x86_64.iso",
+      "size": 395522048,
+      "sha256": "35f07ab814fb281cc5221cafdc208d264e002c798312186f34d3ac52ac9a0449",
+      "url": "https://github.com/melon-77/melon-os/releases/download/melon-20260929.2/melon-20260929-x86_64.iso"
+    }
+  }
+}

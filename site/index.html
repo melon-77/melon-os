@@ -35,12 +35,12 @@
 
 <section class="hero">
   <div class="hero-text">
-    <p class="eyebrow">melon 0.2 &ldquo;Bailan&rdquo; &middot; 29 September 2026 &middot; x86_64</p>
+    <p class="eyebrow"><!-- release:eyebrow -->melon 0.2 &ldquo;Bailan&rdquo; &middot; 29 September 2026 &middot; x86_64<!-- /release:eyebrow --></p>
     <h1>A Linux you can read <span class="hl">end to end.</span></h1>
     <p class="lead">melon is a distribution made from scratch. The C library, the compiler, the kernel, even KDE Plasma are
       compiled from upstream source by scripts that live in one git repository, then signed and shipped as small apk packages.</p>
     <p class="actions">
-      <a class="btn" href="download/">Download melon 0.2</a>
+      <a class="btn" href="download/"><!-- release:btn -->Download melon 0.2<!-- /release:btn --></a>
       <a class="textlink" href="#recipes">or read how a package is made</a>
     </p>
   </div>
@@ -104,9 +104,9 @@
 
 <section id="isos" class="block">
   <h2><span class="num">03</span> Which ISO?</h2>
-  <ul class="isos">
+  <ul class="isos"><!-- release:isos -->
     <li>
-      <div class="iso-name"><b>melon desktop</b><span>x86_64 &middot; about 835 MB</span></div>
+      <div class="iso-name"><b>melon desktop</b><span>x86_64 &middot; about 837 MB</span></div>
       <p>KDE Plasma on Wayland. A live session you can try first, and the graphical installer. This is the one most people want.</p>
       <a class="btn small" href="download/#desktop">Get it</a>
     </li>
@@ -115,12 +115,12 @@
       <p>No desktop: a small system with a quick text installer, for servers, tinkerers and virtual machines.</p>
       <a class="btn small ghost" href="download/#console">Get it</a>
     </li>
-    <li>
-      <div class="iso-name"><b>melon 32-bit</b><span>i686 &middot; LXQt &middot; about 633 MB</span></div>
-      <p>For old netbooks and 32-bit laptops: LXQt on Wayland, with the same installers (a 379 MB console ISO is there too). Built and tested in QEMU on an emulated Atom N270 with 2 GB; not yet tried on a real netbook.</p>
-      <a class="btn small ghost" href="https://github.com/melon-77/melon-os/releases/tag/i686-20261007">Get it</a>
+    <li class="soon">
+      <div class="iso-name"><b>melon 32-bit</b><span>i686 &middot; LXQt</span></div>
+      <p>For old netbooks and 32-bit laptops: LXQt on Wayland, with the same installers. Built and tested in QEMU on an emulated Atom N270 with 2 GB. Not published yet, because it still needs a signed build.</p>
+      <span class="tag">coming</span>
     </li>
-  </ul>
+  <!-- /release:isos --></ul>
   <p class="note">Builds are test releases for now. Every file has its checksum on the <a href="download/">download page</a>.</p>
 </section>
 
@@ -212,7 +212,7 @@ doas apk upgrade</pre>
 <section id="download" class="block dl">
   <h2><span class="num">08</span> Take one</h2>
   <p class="actions">
-    <a class="btn" href="download/">Download melon 0.2</a>
+    <a class="btn" href="download/"><!-- release:btn2 -->Download melon 0.2<!-- /release:btn2 --></a>
     <a class="textlink" href="download/">sizes and checksums</a>
   </p>
   <p class="note">Not sure melon is your distro? Take the <a href="distro-finder/">200-question distro finder</a>.

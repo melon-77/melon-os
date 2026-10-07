@@ -58,7 +58,8 @@ recipes/<name>/*.patch      applied automatically with patch -p1, in name order
 recipes/<name>/<pkg>.post-install etc.   apk scripts for (sub)package <pkg>
 iso-files/init          live initramfs /init
 branding/               logo (transparent PNGs)
-site/                   the website: index.html, style.css, gauntlet.js (a demo of the installer's gauntlet), distro-finder/;
+site/                   the website: index.html, download/, style.css, gauntlet.js (a demo of the installer's gauntlet), distro-finder/,
+                        releases.json (the ISO facts, rendered into the pages by scripts/site-release.py);
                         scripts/publish-site.sh adds it as a commit on the gh-pages branch (what GitHub Pages serves)
 art/site.py             draws site/assets/melon-pixel.svg (melonfetch's melon) and net.svg
 recipes/calamares-melon/    graphical installer branding + gauntlet (stage 2)
@@ -525,8 +526,12 @@ The website is `site/`, published to the `gh-pages` branch by `scripts/publish-s
 by hand. Keep it dependency-free: hand-written HTML and CSS, the three fonts hosted in `site/fonts` (no Google Fonts or
 other third-party requests, which the footer promises), no trackers. Its facts must stay true to the repository:
 versions and sizes come from the latest release, and an edition that isn't published yet says so (the 32-bit LXQt one was "coming" until its signed build, 7 October 2026).
-The download page `site/download/` holds each ISO's size, SHA-256 and link: update it with every release (the numbers come from the release
-assets), and read `docs/iso-hosting.md` before moving the files to another host (`scripts/upload-isos.sh`).
+The ISO facts on the site (release name and date, each ISO's size, SHA-256 and link, which editions are still "coming") are data in
+`site/releases.json`, and `scripts/site-release.py` writes them into the marked regions (`<!-- release:... -->`) of `site/index.html` and
+`site/download/index.html`: never edit those regions by hand. After a release, `scripts/site-release.py update --tag <tag>` reads the
+release's assets from GitHub (sizes and SHA-256 come from there), fills `releases.json` and renders; `scripts/site-release.py check`
+fails when the pages are stale. The 32-bit pre-release is a second release in the same file (`update --tag i686-<date> --editions ...`). Read
+`docs/iso-hosting.md` before moving the files to another host (`scripts/upload-isos.sh`; other hosts go into `mirrors` in `releases.json`).
 `gauntlet.js` is only a taste of the real gauntlet, using easy questions that already appear in
 `recipes/calamares-melon/modules/gauntlet/questions.js`; never copy anything from `trial.js` (not even its questions) into the site, and keep
 the hidden owner commands out of it, as everywhere else. The pixel melon is generated from `melonfetch`'s own awk drawing
@@ -547,16 +552,28 @@ firmware is its own package for that reason). Publish after building packages pe
 Releases are named **melon <version> “<melon variety>”**, the varieties in alphabetical order: 0.1 “Antalya”,
 0.2 “Bailan”, then 0.3 “Cantaloupe”, 0.4 “Dudaim”, 0.5 “Esfahan”, 0.6 “Fukui”, 0.7 “Galia”, 0.8 “Honeydew”, … (the
 owner's choice, 29 September 2026). Tags are `v<version>` from 0.3 on (0.1 and 0.2 kept their date tags). A release
-is marked Latest (the website's download page `site/download/` links its assets, with their checksums, so update it too), carries both ISOs and `SHA256SUMS`,
+is marked Latest, carries every ISO and `SHA256SUMS`,
 has notes written for users (what's new, which file to download, `doas apk upgrade` for installed systems), and the
 release it replaces is retitled "(superseded)" with a link to the new one.
 
 The 32-bit edition has its own **pre-release**, not marked Latest, so the website's download button keeps pointing at
 the 64-bit release: tag `i686-<date>` (`i686-20261007`), title "melon 32-bit (i686) test build, <date>", both i686 ISOs and
-`SHA256SUMS`. The site's 32-bit entry links to that tag. When ISOs change meaningfully, build new ones, add them to a
-release and update the site (ISO list, sizes, links) in the same change. A cloud session can't create releases or upload
-assets (GitHub answers 403 "not permitted for this session type"): the ISOs go to the owner's machine (for example
-through `/mnt/project-files/releases/<tag>/`) and `gh release create` / `gh release upload` run there.
+`SHA256SUMS`. The download page lists it next to the 64-bit release (see "Website").
+
+**New ISOs for meaningful changes (the owner's rule, 7 October 2026).** When a change lands that alters what is on an ISO or how it
+installs or boots (kernel, drivers and firmware, installers, the desktop, base packages, boot, hardware support), new ISOs are built,
+tested (see Testing), added to a GitHub release, and **the website is updated in the same sitting**:
+
+1. Build and test the ISOs on a machine with the signing key (the owner's computer, or a cloud session the owner has given the key: it can
+   sign packages and push the package repo through git).
+2. Create the release (name, notes, every ISO and `SHA256SUMS`), mark it Latest, retitle the one it replaces. **A cloud session can't do
+   this step**: GitHub answers 403 "not permitted for this session type" for release creation and asset uploads, so the ISOs go to the
+   owner's computer (WSL, or through `/mnt/project-files/releases/<tag>/`) and `gh release create` / `gh release upload` run there.
+3. `scripts/site-release.py update --tag <tag>`, commit `site/`, open the pull request against `testing`, then `scripts/publish-site.sh`
+   (or a pull request into `gh-pages`) once it is merged. An edition with no ISO in the release stays "coming" on its own.
+4. If other file hosts are in use (`docs/iso-hosting.md`), upload with `scripts/upload-isos.sh` and add them to `mirrors` in `site/releases.json`.
+
+A change that touches only recipes in the online repository, docs or the site doesn't need new ISOs.
 
 ## Signing keys and rotation
 

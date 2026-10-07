@@ -38,13 +38,15 @@ This is a recommendation; the owner decides, and signing up is the owner's to do
   Logins come from the environment or the host tool's own config (the variables are listed at the top of the script); nothing secret is in
   the repository. `--dry-run` prints the commands. It needs the real accounts to run for real, so it is only dry-run tested.
 - **`site/download/`**, the download page: every file with its size, checksum and download link, how to check it and how to write it.
-  The site's buttons point there, not at GitHub, so moving the files is a change to this one page.
+  The site's buttons point there, not at GitHub, so moving the files is a change to this one page (generated from `site/releases.json` by
+  `scripts/site-release.py`).
 
 ## Adding a host to the site (when an account exists)
 
 1. Run `scripts/upload-isos.sh` for the host with the release's ISOs.
-2. In `site/download/index.html`, give each file a second link (the script prints the page address) and drop the sentence that says
-   the files are served from GitHub. Keep the SHA-256 lines.
+2. In `site/releases.json`, add the host to `mirrors` as `{"label": "SourceForge", "url": "https://.../{file}"}` (`{file}` becomes each
+   ISO's name; the script prints the page address), then run `scripts/site-release.py render`. Every download then shows "also from ...",
+   and the note about GitHub changes by itself.
 3. Put the same link in the release notes, update README and `docs/`, and open the pull request against `testing`
    (the site follows `AGENTS.md` "Website"; `scripts/publish-site.sh` publishes it).
 4. When the 32-bit editions are published, add their rows (size, SHA-256) at the same time: the `melon 32-bit` row on the download page

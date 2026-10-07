@@ -28,6 +28,8 @@ scripts/mkiso.sh       assembles the hybrid BIOS/UEFI live ISO from the repo
 recipes/<pkg>/MELONBUILD   package recipes (APKBUILD-like)
 iso-files/init         live initramfs init
 branding/              logo
+site/                  the website (published to the gh-pages branch by scripts/publish-site.sh)
+art/site.py            draws the website's pixel melon and netting
 recipes/calamares-melon/   graphical installer branding and the 200-question gauntlet
 ```
 
@@ -55,6 +57,15 @@ Packages are signed with `keys/melon-signing.rsa` (not committed; generate your 
 
 Boot the ISO. The graphical installer (desktop ISO) is Calamares. There is also a quick console
 installer for people who know its name.
+
+## Website
+
+[melon-77.github.io/melon-os](https://melon-77.github.io/melon-os/) is the `site/` folder, served from the `gh-pages` branch.
+It is plain HTML and CSS (fonts hosted in the folder, no trackers) plus a small demo of the installer's gauntlet. The big
+melon in the first screen is `melonfetch`'s own, redrawn by `art/site.py`. The site also hosts the
+[distro finder](https://melon-77.github.io/melon-os/distro-finder/), a quiz that scores more than a hundred Linux
+distros, melon included, against your answers. Change the site through a pull request to `testing` like everything else;
+after it is merged, `scripts/publish-site.sh` puts `site/` on `gh-pages`.
 
 ## Developer tools
 

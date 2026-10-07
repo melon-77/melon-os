@@ -57,6 +57,9 @@ recipes/<name>/*.patch      applied automatically with patch -p1, in name order
 recipes/<name>/<pkg>.post-install etc.   apk scripts for (sub)package <pkg>
 iso-files/init          live initramfs /init
 branding/               logo (transparent PNGs)
+site/                   the website: index.html, style.css, gauntlet.js (a demo of the installer's gauntlet), distro-finder/;
+                        scripts/publish-site.sh adds it as a commit on the gh-pages branch (what GitHub Pages serves)
+art/site.py             draws site/assets/melon-pixel.svg (melonfetch's melon) and net.svg
 recipes/calamares-melon/    graphical installer branding + gauntlet (stage 2)
 recipes/melon-pinball/      melon's own pinball game (C++/SDL3); the game is a submodule (game/ = melon-77/melon-pinball)
 ```
@@ -488,6 +491,18 @@ the serial port, so tests don't need a screen. The test also records the sound c
   (`melon-repo enable alpine`); apk only uses it for packages asked for as `name@alpine`. Void isn't
   offered (xbps, not apk). Never make a foreign repo untagged or on by default.
 
+## Website
+
+The website is `site/`, published to the `gh-pages` branch by `scripts/publish-site.sh` (GitHub Pages serves that branch at
+`https://melon-77.github.io/melon-os/`). Edit it here and open the pull request against `testing`; never edit `gh-pages`
+by hand. Keep it dependency-free: hand-written HTML and CSS, the three fonts hosted in `site/fonts` (no Google Fonts or
+other third-party requests, which the footer promises), no trackers. Its facts must stay true to the repository:
+versions and sizes come from the latest release, and an edition that isn't published yet (the 32-bit LXQt one) says so.
+`gauntlet.js` is only a taste of the real gauntlet, using easy questions that already appear in
+`recipes/calamares-melon/modules/gauntlet/questions.js`; never copy anything from `trial.js` (not even its questions) into the site, and keep
+the hidden owner commands out of it, as everywhere else. The pixel melon is generated from `melonfetch`'s own awk drawing
+(`art/site.py`), so change the melon there, not in the SVG.
+
 ## Package repository (online)
 
 `scripts/publish-repo.sh` puts `repo/<arch>/` on the `packages` branch of github.com/melon-77/melon-os (one
@@ -624,3 +639,5 @@ that is the only place Ubuntu is still needed.
 - Small, focused commits. The message says what changed and why.
 - Build outputs and downloaded sources are never committed.
 - If you change a recipe, bump `pkgrel` (or `pkgver`) in the same commit.
+- **Keep the docs true (the owner's rule, 7 October 2026):** when you find a bug or make a significant change, update every
+  `.md` file it touches (README, AGENTS, BUILDING, `docs/`) and the website (`site/`) in the same pull request, so nothing is out of date.

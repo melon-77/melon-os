@@ -27,7 +27,7 @@ scripts/melon-build    builds one recipe into signed .apk packages and reindexes
 scripts/mkiso.sh       assembles the hybrid BIOS/UEFI live ISO from the repo
 recipes/<pkg>/MELONBUILD   package recipes (APKBUILD-like)
 iso-files/init         live initramfs init
-branding/              logo
+branding/              logo, plus `branding/games/`: the icon of the melon games launcher (SVG + PNGs 16 to 512; `art/games.py` draws it)
 recipes/calamares-melon/   graphical installer branding and the 200-question gauntlet
 ```
 

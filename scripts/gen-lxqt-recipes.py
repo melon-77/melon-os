@@ -14,7 +14,10 @@ QT = '-DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/
 
 # (name, version, extra cmake args, has a -dev subpackage, pkgdesc)
 ORDER = [
- ('lxqt-build-tools', '2.4.0', '', False, 'CMake modules and tools LXQt builds with'),
+ # it looks Qt6CoreTools up directly, which in a cross build lives in the build machine's Qt; /etc/xdg is what it would
+ # ask that Qt's qtpaths for
+ ('lxqt-build-tools', '2.4.0', ' -DQt6CoreTools_DIR=$M/hosttools/qt6/lib/cmake/Qt6CoreTools -DLXQT_ETC_XDG_DIR=/etc/xdg', False,
+  'CMake modules and tools LXQt builds with'),
  ('libqtxdg', '4.4.0', ' -DBUILD_TESTS=OFF -DBUILD_DEV_UTILS=OFF', True, 'Qt implementation of the freedesktop.org XDG specifications'),
  ('qtxdg-tools', '4.4.0', '', True, 'qtxdg-mat, the command line tool for default applications'),
  ('lxqt-menu-data', '2.4.0', '', False, 'freedesktop.org application menu files for LXQt'),

@@ -276,6 +276,7 @@ if mode == 'desktop-install':
     stable = pid and count(greeter) == pid and count("loginctl list-sessions --no-legend | awk '$3==\"sddm\" && $6==\"active\"' | wc -l") == 1
     ok &= bool(stable); step('greeter after 20 s: ' + ('same process, active session' if stable else 'RESTARTED OR NO SESSION'))
     mon(f'screendump {M}/logs/qemu-desktop-greeter.ppm'); time.sleep(3)
+    if not os.access('/dev/kvm', os.R_OK | os.W_OK): time.sleep(90)   # emulated CPU: the greeter's password field takes a while to take keys
     for ch in 'melonuser':
         mon(f'sendkey {ch}'); time.sleep(0.15)
     mon('sendkey ret'); step('typed the password into the greeter')

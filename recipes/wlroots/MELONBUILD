@@ -1,0 +1,14 @@
+pkgname=wlroots
+pkgver=0.20.2
+pkgrel=0
+pkgdesc="Library for Wayland compositors (labwc)"
+license=MIT
+url=https://gitlab.freedesktop.org/wlroots/wlroots
+source=(wlroots-0.20.2.tar.bz2)
+subpackages=(wlroots-dev)
+makedepends=(wayland-dev wayland-protocols libdrm-dev mesa-dev libinput-dev libxkbcommon-dev pixman-dev seatd-dev
+  libdisplay-info-dev hwdata eudev-dev libxcb-dev xcb-util-wm-dev xcb-util-renderutil-dev xwayland)
+# OpenGL ES renderer (falls back to pixman, software, where GLES2 is missing: WLR_RENDERER=pixman), DRM and libinput
+build(){ meson_setup -Dexamples=false -Dxwayland=enabled -Dbackends=drm,libinput -Drenderers=gles2 -Dallocators=gbm \
+  -Dsession=enabled -Dcolor-management=disabled -Dlibliftoff=disabled -Dxcb-errors=disabled build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

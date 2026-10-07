@@ -4,4 +4,4 @@ Name=PipeWire PulseAudio
 Exec=pipewire-pulse
 NoDisplay=true
 X-KDE-autostart-phase=0
-OnlyShowIn=KDE;
+OnlyShowIn=KDE;LXQt;

@@ -1,0 +1,10 @@
+pkgname=qtermwidget
+pkgver=2.4.0
+pkgrel=0
+pkgdesc="Terminal widget for Qt (QTerminal)"
+license="LGPL-2.1-or-later (see sources)"
+url=https://lxqt-project.org
+source=(qtermwidget-2.4.0.tar.xz)
+subpackages=(qtermwidget-dev)
+build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake -DUPDATE_TRANSLATIONS=OFF; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

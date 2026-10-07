@@ -1,0 +1,21 @@
+pkgname=melon-lxqt
+pkgver=0.1
+pkgrel=0
+pkgdesc="melon's LXQt defaults: LXQt on labwc (Wayland), melon wallpaper, Breeze icons, SDDM greeter on labwc"
+license=MIT
+# the 32-bit edition's desktop (scripts/desktop-packages-x86.txt); on 64-bit an extra desktop from the online repository.
+# LXQt reads a settings file from the first XDG config directory that has one, so the /etc/xdg copies below are
+# LXQt's own defaults (from the sysroot) with melon's changes, not partial files.
+depends=(melon-desktop lxqt-session lxqt-wayland-session labwc)
+makedepends=(lxqt-session pcmanfm-qt)
+builddir=$srcdir
+package(){
+  cp -a $startdir/files/. $pkgdir/
+  install -d $pkgdir/etc/xdg/lxqt $pkgdir/etc/xdg/pcmanfm-qt/lxqt
+  # labwc as the compositor, so startlxqtwayland doesn't ask on the first login
+  sed 's/^\[General\]$/[General]\ncompositor=labwc\nwindow_manager=labwc/' $SYSROOT/usr/share/lxqt/session.conf > $pkgdir/etc/xdg/lxqt/session.conf
+  grep -q '^compositor=labwc' $pkgdir/etc/xdg/lxqt/session.conf
+  sed -e 's/^theme=.*/theme=dark/' -e 's/^icon_theme=.*/icon_theme=breeze-dark/' $SYSROOT/usr/share/lxqt/lxqt.conf > $pkgdir/etc/xdg/lxqt/lxqt.conf
+  sed -e 's|^Wallpaper=.*|Wallpaper=/usr/share/wallpapers/melon/contents/images/1920x1080.jpg|' -e 's/^WallpaperMode=.*/WallpaperMode=zoom/' \
+      -e 's/^IconThemeName=.*/IconThemeName=breeze-dark/' $SYSROOT/usr/share/pcmanfm-qt/lxqt/settings.conf > $pkgdir/etc/xdg/pcmanfm-qt/lxqt/settings.conf
+}

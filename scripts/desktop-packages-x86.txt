@@ -1,0 +1,27 @@
+# The desktop profile of the 32-bit (i686) edition: LXQt on labwc (Wayland), for old netbooks and laptops
+# (the owner, 7 October 2026). Installed on top of the base system by both installers; mkiso.sh reads
+# desktop-packages-<arch>.txt when it exists. The 64-bit list (Plasma) is scripts/desktop-packages.txt.
+# session plumbing
+eudev dbus elogind polkit linux-pam
+# graphics: Mesa without LLVM (i915 for Intel GMA, crocus, r300, software)
+mesa mesa-dri xwayland
+# LXQt on labwc
+melon-desktop melon-lxqt labwc lxqt-session lxqt-wayland-session lxqt-panel lxqt-runner lxqt-notificationd
+lxqt-policykit lxqt-powermanagement lxqt-config lxqt-globalkeys lxqt-qtplugin lxqt-themes lxqt-menu-data
+pcmanfm-qt qterminal pavucontrol-qt lximage-qt xdg-user-dirs kf6-breeze-icons sddm
+# apps
+nano
+# services
+pipewire wireplumber networkmanager bluez upower
+# runtime pieces nothing links against (loaded by name, QML imports, data files)
+xkeyboard-config qt6-qtwayland qt6-qt5compat qt6-qtimageformats qt6-qtsvg hwdata qt6-qttranslations
+# started over D-Bus when the file manager asks for drives (USB sticks, SD cards)
+udisks2
+# everyday tools the installer and users expect
+e2fsprogs xz bzip2
+# fonts
+melon-fonts hicolor-icon-theme shared-mime-info
+# disks
+cryptsetup dosfstools
+# running in a VM (each tool only starts under its own hypervisor)
+melon-vm-guest

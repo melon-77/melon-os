@@ -6,6 +6,9 @@ msg "Welcome to melon"
 mountpoint -q /proc || mount -t proc proc /proc -o nosuid,noexec,nodev
 mountpoint -q /sys  || mount -t sysfs sys /sys -o nosuid,noexec,nodev
 mountpoint -q /run  || mount -t tmpfs run /run -o mode=0755,nosuid,nodev
+# boot timeline for melon-boottime: seconds since the kernel started, one line per milestone
+mark(){ read up _ < /proc/uptime; echo "$1 $up" >> /run/melon-boot-times; }
+mark stage1
 mountpoint -q /dev  || mount -t devtmpfs dev /dev -o mode=0755,nosuid
 mkdir -p /dev/pts /dev/shm /run/lock
 mountpoint -q /dev/pts || mount -t devpts devpts /dev/pts -o mode=0620,gid=5,nosuid,noexec
@@ -20,10 +23,12 @@ if [ -x /usr/bin/udevd ]; then
   udevd --daemon
   udevadm trigger --action=add --type=subsystems
   udevadm trigger --action=add --type=devices
+  mark udev-started
   udevadm settle --timeout=20
   udevadm control --exit
 else
   msg "Starting devices"
+  mark udev-started
   mdev -s
   # coldplug: load drivers for hardware that is already present
   find /sys/devices -name modalias -type f -exec cat {} + 2>/dev/null | sort -u | xargs -r modprobe -a -b -q 2>/dev/null
@@ -38,6 +43,7 @@ cat /etc/modules-load.d/*.conf 2>/dev/null | grep -v -e '^#' -e '^$' | xargs -r 
 # point ALSA at the speakers rather than HDMI audio (sound codecs finish probing a moment later)
 ( sleep 4; melon-sound-default --write >/dev/null 2>&1 ) &
 
+mark devices-ready
 msg "Mounting filesystems"
 mount -o remount,rw / 2>/dev/null
 mount -a -t nosysfs,nonfs,noproc 2>/dev/null   # includes the /tmp tmpfs from fstab
@@ -55,5 +61,6 @@ dmesg -n 3
 install -m 0664 -g utmp /dev/null /run/utmp
 : > /var/log/wtmp 2>/dev/null
 touch /etc/runit/stopit /etc/runit/reboot 2>/dev/null; chmod 0 /etc/runit/stopit /etc/runit/reboot 2>/dev/null
+mark stage1-done
 msg "melon is up"
 exit 0

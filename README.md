@@ -85,6 +85,13 @@ curl -fsSL https://claude.ai/install.sh | bash
 echo 'export USE_BUILTIN_RIPGREP=0' >> ~/.bashrc    # Claude Code then searches with melon's ripgrep
 ```
 
+## Boot time
+
+An installed system that has no other operating system next to it skips its boot menu after 1 second (hold Shift or press Esc
+to open it; "safe graphics" is in there; `GRUB_TIMEOUT` and `GRUB_TIMEOUT_STYLE` in `/etc/default/grub` change this, and
+`sudo melon-update-grub` applies it). Next to Windows the menu still shows for 5 seconds. `melon-boottime` shows where a boot's
+time went: the milestones of stage 1 and when the main services started.
+
 **NVIDIA graphics:** on a computer with an NVIDIA card (GTX 16/RTX 20 and newer), `melon-first-boot` offers the open
 driver (`sudo apk add linux-firmware-nvidia mesa-nvk`: nouveau with NVK, the desktop and games use the card) or NVIDIA's
 own kernel driver (`sudo apk add nvidia-open`: Flatpak games get NVIDIA's libraries from Flathub; the desktop can't use

@@ -10,7 +10,9 @@ Prints the recipe names in build order.
 import os
 M = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-QT = '-DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake -DUPDATE_TRANSLATIONS=OFF'
+# LXQt looks Qt6LinguistTools (lrelease) up directly, which in a cross build lives in the build machine's Qt
+QT = ('-DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake -DUPDATE_TRANSLATIONS=OFF'
+      ' -DQt6LinguistTools_DIR=$M/hosttools/qt6/lib/cmake/Qt6LinguistTools')
 
 # (name, version, extra cmake args, has a -dev subpackage, pkgdesc)
 ORDER = [

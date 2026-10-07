@@ -5,5 +5,5 @@ pkgdesc="CMake modules and tools LXQt builds with"
 license="LGPL-2.1-or-later (see sources)"
 url=https://lxqt-project.org
 source=(lxqt-build-tools-2.4.0.tar.xz)
-build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake -DUPDATE_TRANSLATIONS=OFF -DQt6CoreTools_DIR=$M/hosttools/qt6/lib/cmake/Qt6CoreTools -DLXQT_ETC_XDG_DIR=/etc/xdg; ninja -C build -j$JOBS; }
+build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake -DUPDATE_TRANSLATIONS=OFF -DQt6LinguistTools_DIR=$M/hosttools/qt6/lib/cmake/Qt6LinguistTools -DQt6CoreTools_DIR=$M/hosttools/qt6/lib/cmake/Qt6CoreTools -DLXQT_ETC_XDG_DIR=/etc/xdg; ninja -C build -j$JOBS; }
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

@@ -803,3 +803,4 @@ xdg-user-dirs-0.19.tar.xz	-	link	deb/xdg-user-dirs_0.19.orig.tar.xz
 pango-1.57.0.tar.gz	-	git	https://github.com/GNOME/pango 1.57.0
 seatd-0.9.3.tar.gz	-	git	https://github.com/kennylevinsen/seatd 0.9.3
 labwc-0.20.2.tar.gz	-	git	https://github.com/labwc/labwc 0.20.2
+libXScrnSaver-1.2.3.tar.gz	4f74e7e412144591d8e0616db27f433cfc9f45aae6669c6c4bb03e6bf9be809a	url	https://www.x.org/releases/individual/lib/libXScrnSaver-1.2.3.tar.gz

@@ -98,6 +98,9 @@ for pass in 1 2 3; do
   [ -z "$failed" ] && break
   [ $pass -gt 1 ] && [ "$failed" = "$prev" ] && break     # no progress: needs a fix, not another pass
   prev=$failed
+  # the next pass unpacks them fresh: resuming would keep a configure cache that remembers what was missing
+  # (Qt's HAVE_EGL stayed false after Mesa arrived)
+  for f in $failed; do rm -f $WORK/pkg/$f/.prepared; done
 done
 
 step "ISOs"

@@ -81,7 +81,7 @@ PLASMA = [
  ('plasma-desktop',' -DBUILD_KCM_MOUSE_X11=OFF -DBUILD_KCM_TOUCHPAD_X11=OFF'), ('systemsettings',''), ('kscreen',''), ('powerdevil',''), ('plasma-nm',' -DDISABLE_MODEMMANAGER_SUPPORT=ON'),
  ('plasma-pa',''), ('print-manager',''), ('bluedevil',''), ('polkit-kde-agent-1',''), ('xdg-desktop-portal-kde',''), ('milou',''),
  ('kde-cli-tools',''), ('plasma-systemmonitor',''), ('kinfocenter',''), ('sddm-kcm',''),
- ('sddm',' -DENABLE_PAM=ON -DNO_SYSTEMD=ON -DUSE_ELOGIND=ON -DSDDM_INITIAL_VT=7 -DBUILD_MAN_PAGES=OFF -DRUNTIME_DIR=/run/sddm -DUID_MIN=1000 -DDBUS_CONFIG_DIR=/usr/share/dbus-1/system.d'),
+ ('sddm',' -DENABLE_PAM=ON -DNO_SYSTEMD=ON -DUSE_ELOGIND=ON -DSDDM_INITIAL_VT=7 -DBUILD_MAN_PAGES=OFF -DRUNTIME_DIR=/run/sddm -DUID_MIN=1000 -DUID_MAX=60000 -DDBUS_CONFIG_DIR=/usr/share/dbus-1/system.d'),
  ('dolphin',''), ('konsole',''), ('kde-spectacle',''), ('plasma-discover',' -DBUILD_PackageKitBackend=OFF -DBUILD_SnapBackend=OFF -DBUILD_FwupdBackend=OFF'),
 ]
 for n, extra in PLASMA:
@@ -99,7 +99,8 @@ PKGREL['qt6-qtspeech'] = 1   # Flite
 PKGREL['kf6-ktextwidgets'] = 1   # Speak Text
 PKGREL['qt6-qtmultimedia'] = 3   # 1: with its QML modules; 2: FFmpeg and PulseAudio backends; 3: no sysroot paths in its qmake module
 PKGREL['kwin'] = 1   # X11 on: in KWin 6.6 it also switches Xwayland support, which startplasma asks for
-PKGREL['sddm'] = 3   # 1: QML components back from the host Qt's qml dir; 2: PAM services; 3: greeter on VT 7, clear of getty-tty1
+PKGREL['sddm'] = 4   # 1: QML components back from the host Qt's qml dir; 2: PAM services; 3: greeter on VT 7, clear of getty-tty1;
+                    # 4: UID_MAX given (it read the build machine's /etc/login.defs, which melon doesn't have; 60000 as Ubuntu's)
 PKGREL['qcoro'] = 1   # shared libraries instead of static ones
 PKGREL['qca'] = 2   # relocatable CMake export (POST below)
 PKGREL['qt6-qtbase'] = 3   # 2: CUPS print support (xdg-desktop-portal-kde); 3: Vulkan (kinfocenter; Mesa has RADV/ANV)

@@ -4,16 +4,17 @@
 # Resumable: run it again after an interruption; finished packages are skipped and a package that was
 # interrupted mid-build continues where it stopped. Needs keys/melon-signing.rsa (see BUILDING.md).
 #   JOBS=16 scripts/build-everything.sh
+#   MELON_ARCH=x86 scripts/build-everything.sh    the 32-bit edition: LXQt on labwc instead of Plasma (X86 below)
 set -uo pipefail
 . "$(dirname "$(readlink -f "$0")")/env.sh"
 LOG=$M/logs; mkdir -p $LOG $REPO/$APK_ARCH
 step(){ printf '\033[1;35m== %s  %s\033[0m\n' "$(date +%H:%M)" "$*"; }
 [ -f $M/keys/melon-signing.rsa ] || { echo "keys/melon-signing.rsa is missing (see BUILDING.md)" >&2; exit 1; }
 
-if [ ! -x $TOOLS/bin/$TARGET-gcc ] || ! grep -q '^EXIT 0' $LOG/toolchain.log 2>/dev/null; then
+if [ ! -x $TOOLS/bin/$TARGET-gcc ] || ! grep -q '^EXIT 0' $LOG/toolchain$ARCH_SUFFIX.log 2>/dev/null; then
   step "cross toolchain ($TARGET)"
-  $M/scripts/toolchain.sh > $LOG/toolchain.log 2>&1; echo "EXIT $?" >> $LOG/toolchain.log
-  grep -q '^EXIT 0' $LOG/toolchain.log || { echo "toolchain failed, see logs/toolchain.log"; exit 1; }
+  $M/scripts/toolchain.sh > $LOG/toolchain$ARCH_SUFFIX.log 2>&1; echo "EXIT $?" >> $LOG/toolchain$ARCH_SUFFIX.log
+  grep -q '^EXIT 0' $LOG/toolchain$ARCH_SUFFIX.log || { echo "toolchain failed, see logs/toolchain$ARCH_SUFFIX.log"; exit 1; }
 fi
 [ -d $SYSROOT/lib/apk/db ] || $M/hosttools/bin/apk --root $SYSROOT --arch $APK_ARCH --initdb --keys-dir $M/keys/trusted \
   --repositories-file /dev/null add >/dev/null 2>&1 || true
@@ -55,10 +56,34 @@ NVIDIA="linux-firmware-nvidia mesa-nvk nvidia-open"
 BUILDTOOLS2="lz4 ninja cmake meson git nasm tcl rsync
   python3-markupsafe python3-jinja2 python3-pyparsing python3-mako python3-yaml python3-packaging python3-ptyprocess python3-pexpect python3-libxml2 itstool
   xorriso mtools scdoc dtc dwarves publicsuffix rpcsvc-proto"
-ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $DESKTOP_LIBS $STEP2 $NVIDIA $RUSTC $KDE $INSTALLERS | awk '!seen[$0]++')
-# recipes nobody listed yet go at the end
-EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))
-ALL="$ALL $EXTRA"
+# LXQt on labwc (wlroots): the 32-bit edition's desktop (X86 below); on 64-bit an extra desktop from the online repository
+# (scripts/gen-lxqt-recipes.py), with melon's LXQt defaults
+LXQT="fribidi cairo pango libsfdo seatd wlroots labwc libexif libfm-extra menu-cache xdg-user-dirs
+  $(python3 $M/scripts/gen-lxqt-recipes.py) melon-lxqt"
+ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $DESKTOP_LIBS $STEP2 $NVIDIA $RUSTC $KDE $INSTALLERS $LXQT | awk '!seen[$0]++')
+# The 32-bit (i686) edition, for old netbooks and laptops (the owner, 7 October 2026: LXQt as its desktop): the base
+# system, the libraries and services LXQt, SDDM and Calamares need, Mesa without LLVM, the Qt and KDE Frameworks parts
+# LXQt and the installer use, labwc (wlroots) as the Wayland compositor, LXQt. No Plasma, Flatpak, NVIDIA, Rust or
+# developer tools: those stay 64-bit.
+if [ "$APK_ARCH" = x86 ]; then
+  SKIP_X86="spirv-headers spirv-tools glslang libva libvdpau gstreamer gst-plugins-base npth libgpg-error libgcrypt libassuan
+    libksba gnupg gpgme gpgmepp bubblewrap xdg-dbus-proxy json-glib ostree libxmlb power-profiles-daemon libseccomp"
+  SIMPLE_X86=$(printf '%s\n' $SIMPLE | grep -vxF -f <(printf '%s\n' $SKIP_X86))
+  DESKTOP_LIBS_X86="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio mesa libepoxy xkbcomp xwayland libwebp
+    melon-fonts qemu-guest-agent open-vm-tools hvtools melon-vm-guest"
+  QT_X86="qt6-qtbase qt6-qtshadertools qt6-qtsvg qt6-qtimageformats qt6-qtdeclarative qt6-qtwayland qt6-qt5compat qt6-qttools
+    qt6-qttranslations"
+  KDE_X86="extra-cmake-modules plasma-wayland-protocols polkit-qt-1 kf6-kcoreaddons kf6-kconfig kf6-ki18n kf6-kwidgetsaddons
+    kf6-kwindowsystem kf6-kguiaddons kf6-kdbusaddons kf6-kcrash kf6-kidletime kf6-solid kf6-breeze-icons layer-shell-qt
+    libkscreen sddm"
+  ALL=$(printf '%s\n' $BASE $PLUMBING nethack $SIMPLE_X86 $DESKTOP_LIBS_X86 $QT_X86 $KDE_X86 $LXQT kpmcore calamares \
+    calamares-melon melon-desktop | awk '!seen[$0]++')
+fi
+# recipes nobody listed yet go at the end (64-bit only)
+if [ "$APK_ARCH" != x86 ]; then
+  EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))
+  ALL="$ALL $EXTRA"
+fi
 
 step "build order"
 $M/scripts/check-order.sh || { echo "   reorder the lists above first"; exit 1; }
@@ -66,8 +91,8 @@ $M/scripts/check-order.sh || { echo "   reorder the lists above first"; exit 1; 
 # a few passes: a package that failed because something it needs came later in the list gets another go
 for pass in 1 2 3; do
   step "packages, pass $pass"
-  MELON_AUTO_RESUME=1 MELON_SKIP_BUILT=1 MELON_KEEP_GOING=1 $M/scripts/build-all.sh $ALL > $LOG/everything-$pass.log 2>&1
-  failed=$(grep '^##### FAILED: ' $LOG/everything-$pass.log | sed 's/^##### FAILED: //')
+  MELON_AUTO_RESUME=1 MELON_SKIP_BUILT=1 MELON_KEEP_GOING=1 $M/scripts/build-all.sh $ALL > $LOG/everything$ARCH_SUFFIX-$pass.log 2>&1
+  failed=$(grep '^##### FAILED: ' $LOG/everything$ARCH_SUFFIX-$pass.log | sed 's/^##### FAILED: //')
   echo "   failed: ${failed:-none}"
   [ -z "$failed" ] && break
   [ $pass -gt 1 ] && [ "$failed" = "$prev" ] && break     # no progress: needs a fix, not another pass
@@ -75,6 +100,9 @@ for pass in 1 2 3; do
 done
 
 step "ISOs"
-$M/scripts/mkiso.sh > $LOG/mkiso.log 2>&1 && echo "   console ISO: $(ls $M/out/melon-2*.iso)"
-MELON_EDITION=desktop $M/scripts/mkiso.sh > $LOG/mkiso-desktop.log 2>&1 && echo "   desktop ISO: $(ls $M/out/melon-desktop-*.iso)"
+ISOARCH=$([ $APK_ARCH = x86 ] && echo i686 || echo x86_64)
+# grub-mkrescue for 32-bit ISOs (i386-pc + i386-efi); host-setup.sh made the 64-bit one
+[ -x $M/hosttools/grub$ARCH_SUFFIX/bin/grub-mkrescue ] || $M/scripts/hostgrub.sh > $LOG/hostgrub$ARCH_SUFFIX.log 2>&1
+$M/scripts/mkiso.sh > $LOG/mkiso$ARCH_SUFFIX.log 2>&1 && echo "   console ISO: $(ls $M/out/melon-2*-$ISOARCH.iso)"
+MELON_EDITION=desktop $M/scripts/mkiso.sh > $LOG/mkiso-desktop$ARCH_SUFFIX.log 2>&1 && echo "   desktop ISO: $(ls $M/out/melon-desktop-*-$ISOARCH.iso)"
 [ -z "${failed:-}" ] || { echo "packages that still fail: $failed (logs/pkg-<name>.log)"; exit 1; }

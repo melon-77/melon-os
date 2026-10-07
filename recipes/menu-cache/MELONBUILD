@@ -1,0 +1,12 @@
+pkgname=menu-cache
+pkgver=1.1.0
+pkgrel=0
+pkgdesc="Cache of the freedesktop.org application menus (LXQt's menu and file manager)"
+license=LGPL-2.1-or-later
+url=https://github.com/lxde/menu-cache
+source=(menu-cache-1.1.0.tar.xz)
+subpackages=(menu-cache-dev)
+makedepends=(glib-dev libfm-extra-dev)
+# gcc10-common.patch: from Alpine (Fedora's fix for -fno-common, merged upstream after 1.1.0)
+build(){ ./configure $conf_flags --disable-static --disable-gtk-doc; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; }

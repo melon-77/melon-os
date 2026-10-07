@@ -1,5 +1,5 @@
-# 32-bit (i686) additions: run on anything from a Pentium Pro/II up, use up to 4 GB of RAM without PAE
-# (PAE would rule out early Pentium M and some netbook CPUs)
+# 32-bit (i686) additions: use up to 4 GB of RAM without PAE (PAE would rule out early Pentium M and some netbook
+# CPUs); userland needs SSE2 (Pentium M, Pentium 4, Atom), see scripts/env.sh
 CONFIG_X86_32=y
 CONFIG_M686=y
 CONFIG_X86_GENERIC=y
@@ -27,6 +27,10 @@ CONFIG_ATH9K=m
 CONFIG_B43=m
 CONFIG_RT2X00=m
 CONFIG_RT2800USB=m
+# netbooks (MSI Wind U100 and friends): Ralink RT2860/RT2700E or Atheros AR5007 Wi-Fi, Realtek RTL8187 USB Wi-Fi
+CONFIG_RT2800PCI=m
+CONFIG_RTL8187=m
+CONFIG_RTL8180=m
 CONFIG_IPW2100=m
 CONFIG_IPW2200=m
 CONFIG_PATA_AMD=m

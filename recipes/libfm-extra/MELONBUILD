@@ -1,0 +1,12 @@
+pkgname=libfm-extra
+pkgver=1.3.2
+pkgrel=0
+pkgdesc="The GTK-free part of libfm, which menu-cache needs"
+license=LGPL-2.1-or-later
+url=https://github.com/lxde/libfm
+source=(libfm-1.3.2.tar.xz)
+builddir=$srcdir/libfm-1.3.2
+subpackages=(libfm-extra-dev)
+makedepends=(glib-dev)
+build(){ ./configure $conf_flags --with-extra-only --with-gtk=no --disable-static --disable-gtk-doc; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; }

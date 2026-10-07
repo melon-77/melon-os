@@ -1,6 +1,6 @@
 pkgname=mesa
 pkgver=26.0.8
-pkgrel=3
+pkgrel=4
 pkgdesc="OpenGL, EGL, GBM and Vulkan drivers (AMD, Intel, NVIDIA nouveau, virtual, software)"
 # with LLVM: llvmpipe (fast software rendering for VMs and GPUs without a driver) and radeonsi's LLVM paths;
 # MELON_MESA_LLVM=disabled builds without it (radeonsi then uses only ACO)
@@ -18,16 +18,17 @@ pkgdesc_mesa_dri="Mesa OpenGL drivers (radeonsi, r600, iris, crocus, nouveau, vi
 pkgdesc_mesa_vulkan="Mesa Vulkan drivers (RADV for AMD, ANV for Intel)"
 pkgdesc_mesa_va="Mesa VA-API video decode drivers"
 # 32-bit (x86): no Vulkan; i915 for Intel GMA 900/950/3100 netbooks (it needs LLVM for vertex shaders), crocus for
-# GMA X3000/X4500 and Atom Bay Trail, r300 for old Radeons, llvmpipe as the software fallback
+# GMA X3000/X4500 and Atom Bay Trail, r300 and r600 for old Radeons (up to HD 6000), nouveau for old GeForce cards,
+# llvmpipe as the software fallback
 _gallium=radeonsi,r600,iris,crocus,nouveau,softpipe,virgl,svga,zink$([ $_llvm = enabled ] && echo ,llvmpipe)
 _vulkan="-Dvulkan-drivers=amd,intel,intel_hasvk -Dvulkan-layers=device-select -Dgallium-va=enabled -Dvideo-codecs=all_free"
 if [ "$APK_ARCH" = x86 ]; then
-  _gallium=i915,crocus,r300,llvmpipe,softpipe,virgl,svga
+  _gallium=i915,crocus,r300,r600,nouveau,llvmpipe,softpipe,virgl,svga
   _vulkan="-Dvulkan-drivers= -Dvulkan-layers= -Dgallium-va=disabled -Dvideo-codecs="
   makedepends=(libdrm-dev wayland-dev wayland-protocols libx11-dev libxext-dev libxfixes-dev libxshmfence-dev libxxf86vm-dev
     libxrandr-dev libxcb-dev expat-dev zlib-dev zstd-dev eudev-dev xorgproto llvm-dev)
   subpackages=(mesa-dev mesa-dri)
-  pkgdesc_mesa_dri="Mesa OpenGL drivers (i915, crocus, r300, virgl and svga for VMs, software)"
+  pkgdesc_mesa_dri="Mesa OpenGL drivers (i915, crocus, r300, r600, nouveau, virgl and svga for VMs, software)"
 fi
 build(){
   # mesa_clc (OpenCL-C shader compiler used by the Intel drivers) runs on the build host; see hosttools/bin

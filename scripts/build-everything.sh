@@ -77,7 +77,7 @@ if [ "$APK_ARCH" = x86 ]; then
   KDE_X86="extra-cmake-modules plasma-wayland-protocols polkit-qt-1 kf6-kcoreaddons kf6-kconfig kf6-ki18n kf6-kwidgetsaddons
     kf6-kwindowsystem kf6-kguiaddons kf6-kdbusaddons kf6-kcrash kf6-kidletime kf6-solid kf6-breeze-icons layer-shell-qt
     libkscreen sddm"
-  ALL=$(printf '%s\n' $BASE $PLUMBING nethack $SIMPLE_X86 $DESKTOP_LIBS_X86 $QT_X86 $KDE_X86 $LXQT kpmcore calamares \
+  ALL=$(printf '%s\n' $BASE $PLUMBING nethack $SIMPLE_X86 efivar efibootmgr $DESKTOP_LIBS_X86 $QT_X86 $KDE_X86 $LXQT kpmcore calamares \
     calamares-melon melon-desktop | awk '!seen[$0]++' | grep -vx qemu-guest-agent)   # QEMU 11 has no 32-bit x86 hosts
 fi
 # recipes nobody listed yet go at the end (64-bit only)

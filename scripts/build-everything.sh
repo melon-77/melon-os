@@ -62,22 +62,22 @@ LXQT="fribidi cairo pango libsfdo seatd wlroots labwc libexif libfm-extra menu-c
   $(python3 $M/scripts/gen-lxqt-recipes.py) melon-lxqt"
 ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $DESKTOP_LIBS $STEP2 $NVIDIA $RUSTC $KDE $INSTALLERS $LXQT | awk '!seen[$0]++')
 # The 32-bit (i686) edition, for old netbooks and laptops (the owner, 7 October 2026: LXQt as its desktop): the base
-# system, the libraries and services LXQt, SDDM and Calamares need, Mesa without LLVM, the Qt and KDE Frameworks parts
+# system, the libraries and services LXQt, SDDM and Calamares need, LLVM and Mesa (no Vulkan), the Qt and KDE Frameworks parts
 # LXQt and the installer use, labwc (wlroots) as the Wayland compositor, LXQt. No Plasma, Flatpak, NVIDIA, Rust or
 # developer tools: those stay 64-bit.
 if [ "$APK_ARCH" = x86 ]; then
   SKIP_X86="spirv-headers spirv-tools glslang libva libvdpau gstreamer gst-plugins-base npth libgpg-error libgcrypt libassuan
     libksba gnupg gpgme gpgmepp bubblewrap xdg-dbus-proxy json-glib ostree libxmlb power-profiles-daemon libseccomp"
   SIMPLE_X86=$(printf '%s\n' $SIMPLE | grep -vxF -f <(printf '%s\n' $SKIP_X86))
-  DESKTOP_LIBS_X86="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio mesa libepoxy xkbcomp xwayland libwebp
-    melon-fonts qemu-guest-agent open-vm-tools hvtools melon-vm-guest"
+  DESKTOP_LIBS_X86="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio llvm mesa libepoxy xkbcomp xwayland libwebp
+    melon-fonts open-vm-tools hvtools melon-vm-guest"
   QT_X86="qt6-qtbase qt6-qtshadertools qt6-qtsvg qt6-qtimageformats qt6-qtdeclarative qt6-qtwayland qt6-qt5compat qt6-qttools
     qt6-qttranslations"
   KDE_X86="extra-cmake-modules plasma-wayland-protocols polkit-qt-1 kf6-kcoreaddons kf6-kconfig kf6-ki18n kf6-kwidgetsaddons
     kf6-kwindowsystem kf6-kguiaddons kf6-kdbusaddons kf6-kcrash kf6-kidletime kf6-solid kf6-breeze-icons layer-shell-qt
     libkscreen sddm"
   ALL=$(printf '%s\n' $BASE $PLUMBING nethack $SIMPLE_X86 $DESKTOP_LIBS_X86 $QT_X86 $KDE_X86 $LXQT kpmcore calamares \
-    calamares-melon melon-desktop | awk '!seen[$0]++')
+    calamares-melon melon-desktop | awk '!seen[$0]++' | grep -vx qemu-guest-agent)   # QEMU 11 has no 32-bit x86 hosts
 fi
 # recipes nobody listed yet go at the end (64-bit only)
 if [ "$APK_ARCH" != x86 ]; then

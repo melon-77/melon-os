@@ -639,3 +639,5 @@ that is the only place Ubuntu is still needed.
 - Small, focused commits. The message says what changed and why.
 - Build outputs and downloaded sources are never committed.
 - If you change a recipe, bump `pkgrel` (or `pkgver`) in the same commit.
+- **Keep the docs true (the owner's rule, 7 October 2026):** when you find a bug or make a significant change, update every
+  `.md` file it touches (README, AGENTS, BUILDING, `docs/`) and the website (`site/`) in the same pull request, so nothing is out of date.

@@ -3,7 +3,7 @@
 # desktop-packages-<arch>.txt when it exists. The 64-bit list (Plasma) is scripts/desktop-packages.txt.
 # session plumbing
 eudev dbus elogind polkit linux-pam
-# graphics: Mesa without LLVM (i915 for Intel GMA, crocus, r300, software)
+# graphics: Mesa with LLVM, no Vulkan (i915 for Intel GMA, crocus, r300, llvmpipe)
 mesa mesa-dri xwayland
 # LXQt on labwc
 melon-desktop melon-lxqt labwc lxqt-session lxqt-wayland-session lxqt-panel lxqt-runner lxqt-notificationd
@@ -19,6 +19,8 @@ xkeyboard-config qt6-qtwayland qt6-qt5compat qt6-qtimageformats qt6-qtsvg hwdata
 udisks2
 # everyday tools the installer and users expect
 e2fsprogs xz bzip2
+# printing (CUPS; driverless IPP printers through cups-filters)
+cups cups-filters avahi
 # fonts
 melon-fonts hicolor-icon-theme shared-mime-info
 # disks

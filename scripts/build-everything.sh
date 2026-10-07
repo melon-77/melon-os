@@ -69,7 +69,8 @@ if [ "$APK_ARCH" = x86 ]; then
   SKIP_X86="spirv-headers spirv-tools glslang libva libvdpau gstreamer gst-plugins-base npth libgpg-error libgcrypt libassuan
     libksba gnupg gpgme gpgmepp bubblewrap xdg-dbus-proxy json-glib ostree libxmlb power-profiles-daemon libseccomp"
   SIMPLE_X86=$(printf '%s\n' $SIMPLE | grep -vxF -f <(printf '%s\n' $SKIP_X86))
-  DESKTOP_LIBS_X86="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio llvm mesa libepoxy xkbcomp xwayland libwebp
+  DESKTOP_LIBS_X86="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio libdaemon avahi cups qpdf poppler
+    libcupsfilters libppd cups-filters llvm mesa libepoxy xkbcomp xwayland libwebp
     melon-fonts open-vm-tools hvtools melon-vm-guest"
   QT_X86="qt6-qtbase qt6-qtshadertools qt6-qtsvg qt6-qtimageformats qt6-qtdeclarative qt6-qtwayland qt6-qt5compat qt6-qttools
     qt6-qttranslations"

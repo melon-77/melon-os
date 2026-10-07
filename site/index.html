@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>melon Linux</title>
+<meta name="description" content="melon is a from-scratch Linux distribution: every package compiled from upstream source, KDE Plasma on Wayland, musl, runit and apk.">
+<meta property="og:title" content="melon Linux">
+<meta property="og:description" content="A Linux you can read end to end. Every package compiled from upstream source, KDE Plasma on Wayland, musl, runit and apk.">
+<meta property="og:image" content="https://melon-77.github.io/melon-os/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/favicon.png">
+<link rel="preload" href="fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="./"><img src="assets/logo.webp" alt="" width="28" height="28">melon</a>
+  <nav aria-label="Main">
+    <a href="#what">what</a>
+    <a href="#screens">screens</a>
+    <a href="#isos">isos</a>
+    <a href="#install">install</a>
+    <a href="#gauntlet">gauntlet</a>
+    <a href="#recipes">recipes</a>
+    <a href="distro-finder/">distro finder</a>
+    <a href="https://github.com/melon-77/melon-os">github</a>
+  </nav>
+</header>
+
+<main>
+
+<section class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">melon 0.2 &ldquo;Bailan&rdquo; &middot; 29 September 2026 &middot; x86_64</p>
+    <h1>A Linux you can read <span class="hl">end to end.</span></h1>
+    <p class="lead">melon is a distribution made from scratch. The C library, the compiler, the kernel, even KDE Plasma are
+      compiled from upstream source by scripts that live in one git repository, then signed and shipped as small apk packages.</p>
+    <p class="actions">
+      <a class="btn" href="https://github.com/melon-77/melon-os/releases/latest">Download melon 0.2</a>
+      <a class="textlink" href="#recipes">or read how a package is made</a>
+    </p>
+  </div>
+
+  <figure class="fetch">
+    <div class="term" role="img" aria-label="Output of melonfetch: a pixel-art melon with a slice cut out, next to system facts: melon, Linux 7.0, runit, musl 1.2.5, apk, bash 5.3">
+      <img class="pixel" src="assets/melon-pixel.svg" alt="" width="190" height="200">
+      <pre class="info"><span class="p">you</span><b>@</b><span class="p">melon</span>   <b class="o">m e l o n</b>
+<span class="dim">───────────────────</span>
+<span class="p">os     </span> melon <span class="dim">x86_64</span>
+<span class="p">kernel </span> Linux 7.0
+<span class="p">init   </span> runit
+<span class="p">libc   </span> musl 1.2.5
+<span class="p">pkgs   </span> apk 3
+<span class="p">shell  </span> bash 5.3
+<span class="p">desktop</span> Plasma 6.6
+<span class="p">badge  </span> <span class="o">&#9733; survivor</span></pre>
+    </div>
+    <figcaption>What <code>melonfetch</code> shows, give or take. That is its own melon, redrawn here pixel for pixel.</figcaption>
+    <p class="stickers" aria-label="Facts about melon">
+      <span class="sticker s1">no systemd</span>
+      <span class="sticker s2">musl, not glibc</span>
+      <span class="sticker s3">BIOS and UEFI</span>
+      <span class="sticker s4">dual boots with Windows</span>
+    </p>
+  </figure>
+</section>
+
+<section id="what" class="block">
+  <h2><span class="num">01</span> What you get</h2>
+  <dl class="ledger">
+    <div><dt>from source</dt><dd>Every package is cross-compiled from the project&rsquo;s own release by a recipe in the repository: more than 400 of them.
+      The packages are signed, and <code>doas apk upgrade</code> keeps a rolling system current.</dd></div>
+    <div><dt>small parts</dt><dd>musl instead of glibc, BusyBox, runit instead of systemd. A service is a few lines of shell that you can open and read.</dd></div>
+    <div><dt>a real desktop</dt><dd>KDE Plasma 6.6 on Wayland with melon&rsquo;s own look: login screen, boot menu, Plasma style, Konsole colours, lock screen.
+      On first login it offers Firefox, VLC, Steam and Prism Launcher from Flathub, and asks before installing any of them.</dd></div>
+    <div><dt>real hardware</dt><dd>Touchpads, Wi-Fi (Intel, Realtek, MediaTek, Qualcomm), Bluetooth, webcams, USB drives, printers.
+      If something doesn&rsquo;t work, <code>sudo melon-hwreport</code> writes one file you can attach to an issue.</dd></div>
+    <div><dt>graphics</dt><dd>Mesa with LLVM: radeonsi and RADV for AMD, iris and ANV for Intel, nouveau and NVK for NVIDIA, llvmpipe when there is nothing else.
+      NVIDIA&rsquo;s own driver is an option too.</dd></div>
+    <div><dt>disks</dt><dd>XFS on GPT. One installer question gives you LUKS2 encryption. It also installs next to Windows without touching it
+      and adds Windows to the boot menu.</dd></div>
+    <div><dt>tools</dt><dd>gcc, clang, Go, Rust, cmake, meson, git and QEMU are in the package repository, built for melon.
+      They are not on the ISOs, and the welcome window offers the basic ones.</dd></div>
+    <div><dt>games</dt><dd>Steam through Flatpak, GameMode, SDL3 and melon&rsquo;s own pinball. <a href="#games">More below.</a></dd></div>
+  </dl>
+</section>
+
+<section id="screens" class="block">
+  <h2><span class="num">02</span> It looks like this</h2>
+  <p class="note">Screenshots from melon&rsquo;s own automated tests, taken in a virtual machine.</p>
+  <div class="shots">
+    <figure class="s-main"><img src="assets/desktop.webp" alt="The melon desktop with the welcome window offering Firefox, VLC, Steam and Prism Launcher" width="1280" height="800" loading="lazy">
+      <figcaption><b>fig. 1</b> first login: the welcome window offers apps from Flathub</figcaption></figure>
+    <figure class="s-a"><img src="assets/login.webp" alt="The melon login screen" width="1280" height="800" loading="lazy">
+      <figcaption><b>fig. 2</b> the login screen</figcaption></figure>
+    <figure class="s-b"><img src="assets/live.webp" alt="The live session with the Install melon icon" width="1280" height="800" loading="lazy">
+      <figcaption><b>fig. 3</b> the live session, ready to try or install</figcaption></figure>
+  </div>
+</section>
+
+<section id="isos" class="block">
+  <h2><span class="num">03</span> Which ISO?</h2>
+  <ul class="isos">
+    <li>
+      <div class="iso-name"><b>melon desktop</b><span>x86_64 &middot; about 835 MB</span></div>
+      <p>KDE Plasma on Wayland. A live session you can try first, and the graphical installer. This is the one most people want.</p>
+      <a class="btn small" href="https://github.com/melon-77/melon-os/releases/latest">Get it</a>
+    </li>
+    <li>
+      <div class="iso-name"><b>melon console</b><span>x86_64</span></div>
+      <p>No desktop: a small system with a quick text installer, for servers, tinkerers and virtual machines.</p>
+      <a class="btn small ghost" href="https://github.com/melon-77/melon-os/releases/latest">Get it</a>
+    </li>
+    <li class="soon">
+      <div class="iso-name"><b>melon 32-bit</b><span>i686 &middot; LXQt</span></div>
+      <p>For old netbooks and 32-bit laptops: LXQt on Wayland, with the same installers. Built and tested in QEMU on an emulated Atom N270 with 2 GB.
+        Not published yet, because it still needs a signed build.</p>
+      <span class="tag">coming</span>
+    </li>
+  </ul>
+  <p class="note">Builds are test releases for now. Check your download against <code>SHA256SUMS</code> on the release page.</p>
+</section>
+
+<section id="install" class="block">
+  <h2><span class="num">04</span> Installing</h2>
+  <ol class="steps">
+    <li>Download the ISO and write it to a USB stick with <a href="https://rufus.ie">Rufus</a>, <a href="https://etcher.balena.io">balenaEtcher</a>,
+      <a href="https://www.ventoy.net">Ventoy</a> or <code>dd</code>.</li>
+    <li>Boot from the stick. The live session starts Plasma by itself, so you can try melon before you commit.</li>
+    <li>Keeping Windows? Shrink it first in Disk Management (right-click C: &rarr; Shrink Volume) and leave at least 20 GB unallocated.
+      melon goes into that space and adds itself to the boot menu. GRUB lists Windows too.</li>
+    <li>Double-click <b>Install melon</b> and follow the installer. Then answer a few questions. About two hundred of them. See below.</li>
+  </ol>
+  <p class="note">Needs: a 64-bit Intel or AMD processor, 4 GB of memory (8 GB is better), 20 GB of disk, UEFI or legacy BIOS.</p>
+</section>
+
+<section id="gauntlet" class="gauntlet">
+  <div class="g-in">
+    <img class="mascot" src="assets/mascot.webp" alt="The melon installer mascot, a smiling melon in leaves" width="192" height="192" loading="lazy">
+    <div class="g-text">
+      <h2><span class="num">05</span> The gauntlet</h2>
+      <p>Before melon installs, the installer asks you 200 very easy questions, one per screen, shuffled every time. The Next button
+        waits a few seconds. A wrong answer sends you back ten questions. It is slow on purpose, to put off anyone who is only there for status.</p>
+      <p>After the last one you can try the <b>final trial</b>: 50 real questions, 90 seconds each, and in the last 20 any mistake restarts the finale.
+        Walking away still installs melon. Passing earns <b>melon in gold</b>: a gold login screen, colours and boot menu, three survivor wallpapers,
+        a certificate and a badge in <code>melonfetch</code>.</p>
+      <p class="dim">The page after the questions also has a checkbox that removes everything built with Rust. It has no safeguards, and it earns its own wallpaper.</p>
+    </div>
+  </div>
+
+  <div class="demo" id="demo" hidden>
+    <p class="demo-head"><span>Try five of them</span><span id="d-pos" aria-live="polite"></span></p>
+    <p class="q" id="d-q"></p>
+    <div class="opts" id="d-opts" role="group" aria-labelledby="d-q"></div>
+    <p class="d-msg" id="d-msg" aria-live="polite"></p>
+    <button class="btn gold" id="d-next" type="button" disabled>Next question</button>
+  </div>
+  <noscript><p class="demo-head">Turn JavaScript on to try a few of the questions here.</p></noscript>
+</section>
+
+<section id="recipes" class="block">
+  <h2><span class="num">06</span> Read a package</h2>
+  <p class="lead small">This is a whole package: <code>recipes/zlib/MELONBUILD</code>, as it is in the repository. The builder fetches the source, checks its hash,
+    runs the two functions with the cross compiler, splits out the <code>-dev</code> files, signs the result and adds it to the repository index.</p>
+<pre class="code"><span class="c"># recipes/zlib/MELONBUILD</span>
+pkgname=zlib
+pkgver=1.3.1
+pkgdesc=<span class="s">"A compression/decompression library"</span>
+license=Zlib
+url=https://zlib.net
+source=(zlib-1.3.1.tar.gz)
+subpackages=(zlib-dev)
+<span class="k">build</span>(){ ./configure --prefix=/usr --libdir=/usr/lib --shared; make -j$JOBS; }
+<span class="k">package</span>(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/man; }</pre>
+  <p class="lead small">Services are as plain. This one turns on compressed swap in memory (<code>/etc/sv/zram/run</code>), and runit keeps it running:</p>
+<pre class="code"><span class="c">#!/bin/sh</span>
+<span class="k">exec</span> 2&gt;&amp;1
+modprobe zram 2&gt;/dev/null
+[ -e /sys/block/zram0/disksize ] || { sleep 3600; exit 0; }
+<span class="k">if</span> ! grep -q <span class="s">"^/dev/zram0"</span> /proc/swaps; <span class="k">then</span>
+  mem=$(awk <span class="s">"/MemTotal/{print \$2}"</span> /proc/meminfo)
+  echo zstd &gt; /sys/block/zram0/comp_algorithm 2&gt;/dev/null
+  echo $((mem / 2))K &gt; /sys/block/zram0/disksize
+  mkswap /dev/zram0 &gt;/dev/null &amp;&amp; swapon -p 100 /dev/zram0
+<span class="k">fi</span>
+<span class="k">exec</span> sleep 2147483647</pre>
+  <p class="lead small">And on an installed system, packages are one command:</p>
+<pre class="code"><span class="c"># more software, from melon's signed repository</span>
+doas apk add gcc g++ make pkgconf
+doas apk add clang go cmake meson git
+doas apk add rust cargo ripgrep
+<span class="c"># keep everything current</span>
+doas apk upgrade</pre>
+</section>
+
+<section id="games" class="block games">
+  <h2><span class="num">07</span> Games</h2>
+  <div class="g-row">
+    <img src="assets/games.webp" alt="The melon games icon: a game controller in melon rind with a stem and a leaf" width="128" height="128" loading="lazy">
+    <div>
+      <p><b>melon pinball</b> is melon&rsquo;s own pinball game, set on the melon planet, with real ball physics, missions and Harvest runs, in its own repository
+        (<a href="https://github.com/melon-77/melon-pinball">melon-pinball</a>). It is on the desktop ISO.</p>
+      <p><b>NetHack</b> 5.0 is on both ISOs. <b>Cataclysm: Dark Days Ahead</b> is one command away (<code>doas apk add cataclysm-dda</code>).
+        Steam, which needs glibc, comes from Flathub. A launcher for melon&rsquo;s own games is on the way, and the icon above is its.</p>
+    </div>
+  </div>
+</section>
+
+<section id="download" class="block dl">
+  <h2><span class="num">08</span> Take one</h2>
+  <p class="actions">
+    <a class="btn" href="https://github.com/melon-77/melon-os/releases/latest">Download melon 0.2</a>
+    <a class="textlink" href="https://github.com/melon-77/melon-os/releases">all releases</a>
+  </p>
+  <p class="note">Not sure melon is your distro? Take the <a href="distro-finder/">200-question distro finder</a>.
+    It scores more than a hundred Linux distributions, melon included, against your answers.</p>
+</section>
+
+</main>
+
+<footer>
+  <p><b>melon</b> &middot; free and open source &middot; <a href="https://github.com/melon-77/melon-os">source</a> &middot;
+    <a href="https://github.com/melon-77/melon-os/releases">releases</a> &middot;
+    <a href="https://github.com/melon-77/melon-os/issues">issues</a> &middot;
+    <a href="distro-finder/">distro finder</a></p>
+  <p class="dim">This site is one HTML file, one stylesheet and a little JavaScript for the gauntlet above. The fonts live here too. No trackers, no cookies.
+    The melon at the top is <code>melonfetch</code>&rsquo;s.</p>
+</footer>
+
+<script src="gauntlet.js" defer></script>
+</body>
+</html>

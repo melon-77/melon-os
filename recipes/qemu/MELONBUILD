@@ -1,18 +1,24 @@
 pkgname=qemu
 pkgver=11.1.1
-pkgrel=0
+pkgrel=1
 pkgdesc="QEMU: PC emulator and virtualizer with KVM (x86_64 and i386 guests; qemu-img)"
 license=GPL-2.0-only
 url=https://www.qemu.org
-source=(qemu-11.1.1.tar.xz)
+source=(qemu-11.1.1.tar.xz setuptools-84.0.0-py3-none-any.whl wheel-0.45.1-py3-none-any.whl)
 makedepends=(glib-dev pixman-dev zlib-dev zstd-dev libslirp-dev ncurses-dev libpng-dev libjpeg-turbo-dev libseccomp-dev
   pipewire-dev linux-headers)
 # Headless and VNC displays plus curses (no SDL2 or GTK in melon); sound through PipeWire, or to a .wav file (the
 # tests). melon's own QEMU tests need KVM, user networking (libslirp), the VMware/virtio/USB devices and the ROMs
 # QEMU ships (SeaBIOS, option ROMs). UEFI firmware is the ovmf package.
+# configure makes a Python venv (python/scripts/mkvenv.py) and installs meson and its "tooling" group into it from
+# python/wheels, offline. On a melon build machine python3 has neither pip nor ensurepip (AGENTS.md rule 53): the venv
+# comes from the host Python (scripts/host-python.sh, which keeps ensurepip), and setuptools and wheel, which "tooling"
+# wants and Ubuntu's python3 has, go next to QEMU's own wheels.
+prepare(){ [ "$MELON_HOST" != melon ] || cp $srcdir/*.whl python/wheels/; }
 build(){
+  local py=/usr/bin/python3; [ "$MELON_HOST" != melon ] || py=$M/hosttools/python/bin/python3.14
   PKG_CONFIG=pkg-config ./configure --cross-prefix=$TARGET- --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
-    --libexecdir=/usr/libexec --python=/usr/bin/python3 --target-list=x86_64-softmmu,i386-softmmu \
+    --libexecdir=/usr/libexec --python=$py --target-list=x86_64-softmmu,i386-softmmu \
     --enable-kvm --enable-slirp --enable-vnc --enable-vnc-jpeg --enable-png --enable-curses --enable-seccomp \
     --enable-pixman --enable-zstd --audio-drv-list=pipewire --enable-tools --disable-guest-agent \
     --disable-gtk --disable-sdl --disable-opengl --disable-spice --disable-xen --disable-docs --disable-werror \

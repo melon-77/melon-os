@@ -1,17 +1,21 @@
 pkgname=qemu-guest-agent
-pkgver=10.2.1
-pkgrel=1
+pkgver=11.1.1
+pkgrel=0
 pkgdesc="QEMU guest agent: lets KVM/QEMU hosts (virt-manager, Proxmox, GNOME Boxes) shut down, freeze and query the VM"
 license=GPL-2.0-or-later
 url=https://www.qemu.org
-source=(qemu-10.2.1.tar.xz)
-builddir=$srcdir/qemu-10.2.1
+source=(qemu-11.1.1.tar.xz setuptools-84.0.0-py3-none-any.whl wheel-0.45.1-py3-none-any.whl)
+builddir=$srcdir/qemu-11.1.1
 makedepends=(glib-dev linux-headers)
-# only the guest agent: no emulators, no tools, no optional features
+# only the guest agent: no emulators, no tools, no optional features. From the upstream tarball recipes/qemu uses:
+# Ubuntu's +ds repack leaves out python/wheels/*.whl, where configure gets meson when the build machine's Python has
+# none (melon). The Python, the extra wheels and --disable-download (no PyPI, no subproject downloads) as in recipes/qemu.
+prepare(){ [ "$MELON_HOST" != melon ] || cp $srcdir/*.whl python/wheels/; }
 build(){
+  local py=/usr/bin/python3; [ "$MELON_HOST" != melon ] || py=$M/hosttools/python/bin/python3.14
   PKG_CONFIG=pkg-config ./configure --cross-prefix=$TARGET- --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libexecdir=/usr/libexec \
-    --without-default-features --disable-system --disable-user --disable-linux-user --disable-tools --disable-docs \
-    --disable-werror --disable-install-blobs --enable-guest-agent --disable-debug-info --target-list=
+    --python=$py --without-default-features --disable-system --disable-user --disable-linux-user --disable-tools --disable-docs \
+    --disable-werror --disable-install-blobs --enable-guest-agent --disable-debug-info --target-list= --disable-download
   make -j$JOBS qemu-ga; }
 package(){ install -Dm755 build/qga/qemu-ga $pkgdir/usr/bin/qemu-ga
   mkdir -p $pkgdir/etc/sv/qemu-ga

@@ -1,0 +1,10 @@
+pkgname=python3-jinja2
+pkgver=3.1.6
+pkgrel=0
+pkgdesc="Jinja2 templates for Python (elogind's build renders files with it)"
+license=BSD-3-Clause
+url=https://palletsprojects.com/p/jinja/
+source=(jinja2-3.1.6.tar.gz)
+builddir=$srcdir/jinja2-3.1.6
+depends=(python3 python3-markupsafe)
+package(){ py_install Jinja2 src/jinja2; }

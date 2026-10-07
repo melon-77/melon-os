@@ -1,6 +1,6 @@
 pkgname=rust
 pkgver=1.98.1
-pkgrel=1
+pkgrel=2
 pkgdesc="The Rust compiler (rustc, rustdoc) and standard library, for building Rust programs on melon"
 license="MIT OR Apache-2.0"
 url=https://www.rust-lang.org
@@ -27,7 +27,7 @@ prepare(){
   # stage 0: upstream's musl-hosted rustc, cargo and standard library, unpacked next to the sources
   local c
   for c in rustc-1.98.1-x86_64-unknown-linux-musl cargo-1.98.1-x86_64-unknown-linux-musl rust-std-1.98.1-x86_64-unknown-linux-musl; do
-    tar xJf $SRC/$c.tar.xz -C $srcdir
+    untar $SRC/$c.tar.xz $srcdir
     $srcdir/$c/install.sh --prefix=$srcdir/stage0 --disable-ldconfig --without=rust-docs >/dev/null
   done
   # llvm-config reports /usr/lib and /usr/include, which are the build machine's; point them at the sysroot

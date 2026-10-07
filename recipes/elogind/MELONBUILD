@@ -1,6 +1,6 @@
 pkgname=elogind
 pkgver=255.24
-pkgrel=4
+pkgrel=5
 pkgdesc="Session, seat and power management (logind without systemd)"
 license="LGPL-2.1-or-later"
 url=https://github.com/elogind/elogind

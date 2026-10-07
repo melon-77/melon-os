@@ -1,5 +1,6 @@
 pkgname=kmod
 pkgver=34.2
+pkgrel=1
 pkgdesc="Linux kernel module tools (modprobe, depmod, lsmod) and libkmod"
 license="GPL-2.0-or-later AND LGPL-2.1-or-later"
 url=https://git.kernel.org/pub/scm/utils/kernel/kmod/kmod.git
@@ -8,6 +9,9 @@ makedepends=(zlib-dev zstd-dev openssl-dev)
 subpackages=(kmod-dev kmod-libs)
 depends=(kmod-libs)
 pkgdesc_kmod_libs="libkmod library"
+# meson's install links the tools to kmod with `ln -sfr`, and BusyBox ln (a melon build machine) has no -r: link them
+# by name instead, the same relative links package() makes (sbindir is bindir)
+prepare(){ sed -i 's|ln -sfr "$DESTDIR@0@/kmod"|ln -sf kmod|' meson.build; }
 build(){ meson_setup -Dmanpages=false -Ddocs=false -Dxz=disabled -Dzstd=enabled -Dzlib=enabled -Dopenssl=enabled \
     -Dbashcompletiondir=no -Dfishcompletiondir=no -Dzshcompletiondir=no -Dmoduledir=/usr/lib/modules build
   ninja -C build; }

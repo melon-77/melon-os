@@ -44,9 +44,9 @@ for p in melon-layout linux-headers musl gcc-runtime zlib zstd openssl apk-tools
 scripts/mkiso.sh
 ```
 
-The build machine can be Ubuntu 24.04 (or WSL2) or **melon itself**: `scripts/host-setup.sh` notices which one it
-runs on and installs the build tools with `apt` or with melon's own `apk`. `BUILDING.md` has both, including what to
-keep and what to rebuild when moving a build machine from Ubuntu to melon.
+The build machine can be Ubuntu 24.04 (or WSL2), Debian or Devuan, or **melon itself**: `scripts/host-setup.sh`
+notices which one it runs on and installs the build tools with `apt` or with melon's own `apk`. `BUILDING.md` has
+them all, including what to keep and what to rebuild when moving a build machine.
 
 Packages are signed with `keys/melon-signing.rsa` (not committed; generate your own with
 `openssl genrsa -out keys/melon-signing.rsa 4096` and put the public half in `keys/`).

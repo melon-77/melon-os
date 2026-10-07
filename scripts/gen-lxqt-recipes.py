@@ -28,13 +28,15 @@ ORDER = [
  ('lxqt-globalkeys', '2.4.0', '', True, 'Global keyboard shortcuts for LXQt'),
  ('libsysstat', '1.1.0', '', True, 'System statistics for the LXQt panel'),
  ('libfm-qt', '2.4.0', '', True, 'File management library for LXQt (PCManFM-Qt, file dialogs)'),
- # the network monitor needs libstatgrab, which melon doesn't have
- ('lxqt-panel', '2.4.0', ' -DNETWORKMONITOR_PLUGIN=OFF', True, 'The LXQt panel'),
+ # the network monitor and CPU load plugins need libstatgrab, which melon doesn't have (the system statistics plugin
+ # shows CPU and network load with libsysstat)
+ ('lxqt-panel', '2.4.0', ' -DNETWORKMONITOR_PLUGIN=OFF -DCPULOAD_PLUGIN=OFF', True, 'The LXQt panel'),
  ('pcmanfm-qt', '2.4.0', '', False, 'PCManFM-Qt, the LXQt file manager and desktop'),
  ('lxqt-qtplugin', '2.4.0', '', False, 'Qt platform theme that makes Qt programs follow LXQt settings'),
  ('lxqt-themes', '2.4.0', '', False, 'Themes, graphics and icons of LXQt'),
+ # libproc2: procps-ng's library, built without its programs (BusyBox's stay)
  ('lxqt-session', '2.4.0', ' -DWITH_LIBUDEV=ON', False, 'The LXQt session manager'),
- # the calculator needs muparser and the VirtualBox runner is for VirtualBox hosts: neither in melon
+ # the calculator needs muparser and the VirtualBox runner is for VirtualBox hosts: neither in melon (no-math.patch)
  ('lxqt-runner', '2.4.0', ' -DRUNNER_MATH=OFF -DRUNNER_VBOX=OFF', False, 'LXQt application launcher (Alt+F2)'),
  ('lxqt-notificationd', '2.4.0', '', False, 'LXQt notification daemon'),
  ('lxqt-policykit', '2.4.0', '', False, 'LXQt PolicyKit agent (asks for passwords)'),

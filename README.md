@@ -72,7 +72,7 @@ after it is merged, `scripts/publish-site.sh` puts `site/` on `gh-pages`.
 
 melon also builds for 32-bit PCs with SSE2 (Pentium M, Pentium 4, Intel Atom: the MSI Wind U100 and similar netbooks).
 Its desktop is **LXQt** on Wayland with the labwc compositor, lighter than Plasma and comfortable in 1–2 GB of RAM,
-with zram swap, Intel GMA graphics (Mesa's i915) and the common netbook Wi-Fi chips (Atheros, Ralink, Realtek). It
+with zram swap and drivers for every graphics and network chip an old 32-bit netbook or laptop is likely to have: Intel GMA, old Radeon (r300, r600) and GeForce (nouveau) graphics; Atheros, Ralink, Realtek, Intel 3945/4965 and Broadcom Wi-Fi, USB Wi-Fi sticks and the usual wired chips; the MSI Wind's Fn keys and radio switch (msi-laptop). It
 uses the same installers (Calamares with the gauntlet, the console installer). Flatpak and the NVIDIA drivers are
 64-bit only. Build it with `MELON_ARCH=x86` (`BUILDING.md`); the ISOs are `melon-*-i686.iso` and
 `melon-desktop-*-i686.iso`. Status (7 October 2026): both ISOs are built and pass their install tests on an emulated

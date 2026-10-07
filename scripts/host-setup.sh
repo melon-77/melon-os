@@ -1,16 +1,17 @@
 #!/bin/bash
-# host-setup.sh: prepare a fresh Ubuntu 24.04 machine (or WSL2 Ubuntu 24.04), or a melon system, to build melon.
+# host-setup.sh: prepare a fresh Ubuntu 24.04 machine (or WSL2 Ubuntu 24.04), Debian or Devuan (the same apt path),
+# or a melon system, to build melon.
 # Run as root (sudo scripts/host-setup.sh). Safe to run again.
 #
-#  1. build dependencies (from Ubuntu, or melon's own packages on melon)
-#  2. Ubuntu only: the Ubuntu 26.04 ("resolute") source archive, where older melon sources come from
+#  1. build dependencies (from Ubuntu, Debian or Devuan, or melon's own packages on melon)
+#  2. not on melon: the Ubuntu 26.04 ("resolute") source archive, where older melon sources come from
 #  3. let the build host run melon's musl binaries (build-time generators from earlier packages)
 #  4. host tools the cross builds need: apk, wayland-scanner 1.24, Mesa's mesa_clc, GRUB, Python, Rust, Qt
 set -euo pipefail
 M=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
 [ "$(id -u)" = 0 ] || { echo "run as root: sudo $0" >&2; exit 1; }
 . /etc/os-release
-[ "$ID" = melon ] || [ "$VERSION_ID" = 24.04 ] || echo "warning: tested on Ubuntu 24.04 and melon, this is $PRETTY_NAME"
+[ "$ID" = melon ] || [ "$VERSION_ID" = 24.04 ] || echo "warning: tested on Ubuntu 24.04 and melon, this is $PRETTY_NAME (Debian and Devuan take Ubuntu's path)"
 # build output goes to logs/host-setup.log; a failing step prints its end instead of stopping without a word
 mkdir -p "$M/logs"; export LOG=$M/logs/host-setup.log; : > "$LOG"
 set -E; trap 'rc=$?; echo "host-setup.sh failed (line $LINENO, exit $rc). End of $LOG:" >&2; tail -n 40 "$LOG" >&2; exit $rc' ERR
@@ -20,7 +21,9 @@ ubuntu_deps(){
   step "build dependencies"
   export DEBIAN_FRONTEND=noninteractive
   apt-get update -q
-  apt-get install -y -q build-essential bison flex texinfo bc gawk gperf m4 python3 python3-pip python3-venv \
+  # Debian and Devuan: one name their archive lacks must not stop the rest (they're listed at the end), and the
+  # Ubuntu source archive below needs Ubuntu's archive key (Debian's ubuntu-keyring package)
+  local p pkgs="build-essential bison flex texinfo bc gawk gperf m4 python3 python3-pip python3-venv \
     ninja-build cmake pkg-config autoconf automake autopoint libtool libltdl-dev gettext patch file \
     xz-utils zstd lz4 bzip2 cpio rsync unzip wget curl git ca-certificates dpkg-dev \
     xorriso mtools dosfstools xfsprogs squashfs-tools qemu-system-x86 ovmf \
@@ -30,7 +33,14 @@ ubuntu_deps(){
     libexpat1-dev libffi-dev libsqlite3-dev libncurses-dev libreadline-dev libbz2-dev liblzma-dev uuid-dev \
     libgl-dev libegl-dev libxkbcommon-dev libwayland-dev wayland-protocols libfontconfig-dev libfreetype-dev \
     libdbus-1-dev libglib2.0-dev libpng-dev libdrm-dev libx11-dev libxext-dev libxcb1-dev libxrender-dev \
-    python3-mako python3-yaml python3-pexpect python3-pil libxml2-utils appstream libappstream-dev itstool nasm bubblewrap autoconf-archive ntfs-3g
+    python3-mako python3-yaml python3-pexpect python3-pil libxml2-utils appstream libappstream-dev itstool nasm bubblewrap autoconf-archive ntfs-3g"
+  [ "$ID" = ubuntu ] || pkgs="$pkgs ubuntu-keyring"
+  # shellcheck disable=SC2086
+  if ! apt-get install -y -q $pkgs; then
+    local missing=
+    for p in $pkgs; do apt-get install -y -q "$p" >/dev/null 2>&1 || missing="$missing $p"; done
+    [ -z "$missing" ] || echo "warning: not in this system's package archive (builds that need them will fail):$missing"
+  fi
   # newer meson than Ubuntu's (Mesa 26 needs it), plus Python modules some builds import
   pip install -q --break-system-packages meson==1.12.1 mako pyyaml shtab pycotap==1.3.1 packaging pexpect pillow
 

@@ -35,9 +35,9 @@ source by our own scripts and shipped as a signed apk v3 package.
 
 Owner's config (`CONFIG_*` answers) lives in `docs/config.txt`. Don't change those choices without the owner's approval.
 
-To build on another machine (Ubuntu 24.04 or WSL2), follow `BUILDING.md`: `scripts/host-setup.sh`, then
-`scripts/build-everything.sh`. Scripts find the repo from their own location; recipes use `$M`. Never write
-a machine's absolute path into a script or recipe.
+To build on another machine (Ubuntu 24.04 or WSL2, Debian or Devuan through the same apt path, or melon), follow
+`BUILDING.md`: `scripts/host-setup.sh`, then `scripts/build-everything.sh`. Scripts find the repo from their own
+location; recipes use `$M`. Never write a machine's absolute path into a script or recipe.
 
 ## Repository layout
 

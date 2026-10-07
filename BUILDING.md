@@ -40,6 +40,18 @@ land in `out/`. `scripts/publish-repo.sh` then puts the packages online for inst
 The build runs as root because packages are installed into `sysroot/` with their real owners and
 because an Ubuntu host needs `/lib/ld-musl-x86_64.so.1` (see AGENTS.md, rule 18).
 
+## Debian or Devuan as the build machine
+
+The Ubuntu steps above work on Debian 13 and Devuan 6 too (not yet tried on a real install). `host-setup.sh` takes
+Ubuntu's path there: it installs the same packages with apt, adds Ubuntu's archive key (`ubuntu-keyring`) because
+older melon sources still come from Ubuntu's source archive, and lists any package name your archive doesn't have
+instead of stopping (paste that warning line if you get one). Without `sudo`, run the commands as root (`su -`).
+
+**Moving from another build machine (melon, Ubuntu, WSL):** copy `keys/`, `sources/`, `repo/` and `sysroot/` into the
+new checkout, but not `tools/`, `hosttools/` or `work/`: they hold programs built for the old machine (melon's are linked
+against musl, Ubuntu's against another glibc). `host-setup.sh` rebuilds the host tools and `build-everything.sh` the
+cross toolchain before it carries on with the packages; finished packages in `repo/` are not built again.
+
 ## melon as the build machine
 
 melon builds itself. On a melon install (desktop or console profile), starting with no checkout:

@@ -1,6 +1,6 @@
 pkgname=melon-lxqt
 pkgver=0.1
-pkgrel=0
+pkgrel=1
 pkgdesc="melon's LXQt defaults: LXQt on labwc (Wayland), melon wallpaper, Breeze icons, SDDM greeter on labwc"
 license=MIT
 # the 32-bit edition's desktop (scripts/desktop-packages-x86.txt); on 64-bit an extra desktop from the online repository.

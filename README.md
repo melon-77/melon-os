@@ -75,8 +75,9 @@ Its desktop is **LXQt** on Wayland with the labwc compositor, lighter than Plasm
 with zram swap and drivers for every graphics and network chip an old 32-bit netbook or laptop is likely to have: Intel GMA, old Radeon (r300, r600) and GeForce (nouveau) graphics; Atheros, Ralink, Realtek, Intel 3945/4965 and Broadcom Wi-Fi, USB Wi-Fi sticks and the usual wired chips; the MSI Wind's Fn keys and radio switch (msi-laptop). It
 uses the same installers (Calamares with the gauntlet, the console installer). Flatpak and the NVIDIA drivers are
 64-bit only. Build it with `MELON_ARCH=x86` (`BUILDING.md`); the ISOs are `melon-*-i686.iso` and
-`melon-desktop-*-i686.iso`. Status (7 October 2026): both ISOs are built and pass their install tests on an emulated
-Atom N270 with 2 GB of RAM (LXQt logs in through SDDM, printing works); a test on a real U100 comes next. NetHack and
+`melon-desktop-*-i686.iso`. Status (8 October 2026): both ISOs are built, signed with melon's key and pass their install tests on an emulated
+Atom N270 with 2 GB of RAM (LXQt logs in through SDDM, printing works); the 32-bit packages are in the online
+repository (`packages/x86`); the ISOs are on the pre-release `i686-20261007`; a test on a real U100 comes next. NetHack and
 the QEMU guest agent aren't in the 32-bit edition yet.
 
 ## Developer tools

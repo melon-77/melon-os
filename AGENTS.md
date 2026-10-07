@@ -524,7 +524,7 @@ The website is `site/`, published to the `gh-pages` branch by `scripts/publish-s
 `https://melon-77.github.io/melon-os/`). Edit it here and open the pull request against `testing`; never edit `gh-pages`
 by hand. Keep it dependency-free: hand-written HTML and CSS, the three fonts hosted in `site/fonts` (no Google Fonts or
 other third-party requests, which the footer promises), no trackers. Its facts must stay true to the repository:
-versions and sizes come from the latest release, and an edition that isn't published yet (the 32-bit LXQt one) says so.
+versions and sizes come from the latest release, and an edition that isn't published yet says so (the 32-bit LXQt one was "coming" until its signed build, 7 October 2026).
 `gauntlet.js` is only a taste of the real gauntlet, using easy questions that already appear in
 `recipes/calamares-melon/modules/gauntlet/questions.js`; never copy anything from `trial.js` (not even its questions) into the site, and keep
 the hidden owner commands out of it, as everywhere else. The pixel melon is generated from `melonfetch`'s own awk drawing
@@ -548,6 +548,13 @@ owner's choice, 29 September 2026). Tags are `v<version>` from 0.3 on (0.1 and 0
 is marked Latest (the website's download button points at `releases/latest`), carries both ISOs and `SHA256SUMS`,
 has notes written for users (what's new, which file to download, `doas apk upgrade` for installed systems), and the
 release it replaces is retitled "(superseded)" with a link to the new one.
+
+The 32-bit edition has its own **pre-release**, not marked Latest, so the website's download button keeps pointing at
+the 64-bit release: tag `i686-<date>` (`i686-20261007`), title "melon 32-bit (i686) test build, <date>", both i686 ISOs and
+`SHA256SUMS`. The site's 32-bit entry links to that tag. When ISOs change meaningfully, build new ones, add them to a
+release and update the site (ISO list, sizes, links) in the same change. A cloud session can't create releases or upload
+assets (GitHub answers 403 "not permitted for this session type"): the ISOs go to the owner's machine (for example
+through `/mnt/project-files/releases/<tag>/`) and `gh release create` / `gh release upload` run there.
 
 ## Signing keys and rotation
 
@@ -595,13 +602,18 @@ that is the only place Ubuntu is still needed.
   KWin on Wayland, SDDM, PipeWire, NetworkManager, Bluetooth, printing, Calamares with the gauntlet, the desktop ISO
   and the desktop profile for both installers (`qemu-test.py desktop` and `desktop-install`). Open hardware work
   is tracked in GitHub issues: Intel SOF audio, newer linux-firmware, Broadcom Wi-Fi.
-- **32-bit (i686) edition with LXQt: built and tested in QEMU, waiting for real hardware** (resumed by the owner,
+- **32-bit (i686) edition with LXQt: built, signed and published, waiting for real hardware** (resumed by the owner,
   7 October 2026, for an MSI Wind U100: Atom N270, 2 GB). `MELON_ARCH=x86 scripts/build-everything.sh` builds the
   toolchain, the base system, Qt, LXQt and labwc, then both ISOs (BUILDING.md). Both pass their tests on QEMU's Atom
   N270 CPU model: the console ISO (`qemu-test.py live|disk --i686`) and the LXQt desktop ISO
   (`desktop-install --i686`, 2 GB of RAM: install through Calamares, SDDM's greeter on labwc, the LXQt session,
   printing, the gauntlet's rewards). Not yet on 32-bit: NetHack (its source wasn't reachable from the test machine),
-  the QEMU guest agent. Next: a test on the owner's U100 (`sudo melon-hwreport` for Wi-Fi and graphics).
+  the QEMU guest agent. Signed with melon's key and published (8 October 2026): `repo/x86` is on the `packages` branch
+  next to `x86_64` (publish-repo.sh replaces the whole branch, so a machine that built only one architecture must start
+  from the branch's current contents); both ISOs rebuilt from scratch on a new build container and retested (the desktop
+  test waits 90 s before typing when there is no KVM: the greeter ignores keys for a while on an emulated CPU). When
+  Ubuntu's source tool can't find an old version, its `orig` tarballs are still in `archive.ubuntu.com/ubuntu/pool/`
+  (same sha256 as the manifest). Next: a test on the owner's U100 (`sudo melon-hwreport` for Wi-Fi and graphics).
 - **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (`melon-flathub`), Steam, Firefox, VLC and
   Prism Launcher offered from Flathub on first login, GameMode. Still to do: gamepad and controller udev rules,
   MangoHud (`docs/stage2-plan.md`).

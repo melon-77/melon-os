@@ -503,6 +503,24 @@ versions and sizes come from the latest release, and an edition that isn't publi
 the hidden owner commands out of it, as everywhere else. The pixel melon is generated from `melonfetch`'s own awk drawing
 (`art/site.py`), so change the melon there, not in the SVG.
 
+## Smaller images
+
+Measured on the desktop ISO's system image (7 October 2026): `linux-firmware` was the biggest single item, and most of its
+blobs can never load on melon.
+
+- **`recipes/linux-firmware/prune-firmware.py`** (run by the recipe's `package()`) leaves out firmware for drivers
+  `config-melon` doesn't build (server NICs, pro audio, DSL modems), for Arm system-on-chips, for Wi-Fi on router and
+  phone SoCs, and old iwlwifi API versions (the newest 3 of each chip family stay; the driver asks for its newest known
+  version and falls back downwards). About 82 MB less. **When melon's kernel gains one of those drivers, take its name out
+  of `DROP`.** The firmware files are `.zst` already, so the squashfs can't win this back. Untested on real hardware: a
+  contributor with an old iwlwifi card should boot an installed system and check `dmesg | grep iwlwifi`.
+- **`mksquashfs ... -b 524288 -Xcompression-level 19`** for `rootfs.sqfs`: the block size gives nearly all of the gain
+  (128 KiB at level 15: 787.1 MB, 256 KiB: 770.2 MB, 512 KiB: 757.6 MB, 1 MiB: 745.4 MB at level 19 on the same tree). 512 KiB
+  is the compromise; 1 MiB reads more per random access on the live system.
+- **No second `.ice`**: the live layer only installs the installer music when `melon-sounds` isn't already in the system image.
+
+Ideas not done yet: a newer linux-firmware, dropping KDE apps nobody needs, fewer wallpapers.
+
 ## Package repository (online)
 
 `scripts/publish-repo.sh` puts `repo/<arch>/` on the `packages` branch of github.com/melon-77/melon-os (one

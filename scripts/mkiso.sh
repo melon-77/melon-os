@@ -85,7 +85,9 @@ else
   for s in getty-tty1 getty-tty2 getty-tty3 getty-ttyS0 mdevd syslogd klogd dhcp; do ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
 fi
 { echo "$(cat $ROOT/usr/share/melon/repo-url)/$APK_ARCH/Packages.adb"; echo "/media/melon/melon/repo/$APK_ARCH/Packages.adb"; } > $LIVE/etc/apk/repositories
-install -m644 $M/recipes/melon-sounds/ice.mp3 $LIVE/usr/share/melon/.ice
+# the console installer's music (7 MB of mp3, which doesn't compress): the desktop image already has it from melon-sounds
+# (calamares-melon depends on it), and a second copy in the live layer would cost 7 MB on the ISO
+[ -f $ROOT/usr/share/melon/.ice ] || install -m644 $M/recipes/melon-sounds/ice.mp3 $LIVE/usr/share/melon/.ice
 cat > $LIVE/etc/motd <<'MOTD'
 
   Welcome to the melon live system.
@@ -99,7 +101,9 @@ cat > $LIVE/etc/motd <<'MOTD'
 MOTD
 
 step "squashfs"
-mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet
+# 512 KiB blocks and level 19: 3.7% smaller than 128 KiB blocks at level 15 on the desktop image (the block size gives
+# nearly all of it), for about two minutes more build time; decompression speed doesn't depend on the level
+mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -b 524288 -Xcompression-level 19 -noappend -quiet
 mksquashfs $LIVE $ISO/melon/live.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet   # built as root; /home/live keeps its owner
 
 step "package repository (extras only; the base system comes from rootfs.sqfs)"

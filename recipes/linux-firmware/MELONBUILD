@@ -1,6 +1,6 @@
 pkgname=linux-firmware
 pkgver=20240318
-pkgrel=1
+pkgrel=2
 pkgdesc="Firmware blobs for Linux drivers (meta package)"
 license="custom:redistributable"
 url=https://gitlab.com/kernel-firmware/linux-firmware
@@ -23,6 +23,9 @@ package(){
     mkdir -p $pkgbase/linux-firmware-$sub/usr/lib
     mv x-$sub/lib/firmware $pkgbase/linux-firmware-$sub/usr/lib/firmware
   done
+  # leave out firmware no melon kernel can load: drivers config-melon doesn't build, Arm-only chips, old iwlwifi versions
+  # (about 80 MB less on the ISO and on every install; AGENTS.md, "Smaller images")
+  python3 $startdir/prune-firmware.py $pkgbase/linux-firmware-*/usr/lib/firmware
   # Intel Bluetooth firmware in its own package (keeps every package under GitHub's 100 MB file limit)
   mkdir -p $pkgbase/linux-firmware-intel-bt/usr/lib/firmware/intel
   mv $pkgbase/linux-firmware-intel-wifi/usr/lib/firmware/intel/ibt-* $pkgbase/linux-firmware-intel-bt/usr/lib/firmware/intel/

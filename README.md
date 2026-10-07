@@ -85,6 +85,12 @@ curl -fsSL https://claude.ai/install.sh | bash
 echo 'export USE_BUILTIN_RIPGREP=0' >> ~/.bashrc    # Claude Code then searches with melon's ripgrep
 ```
 
+## Smaller images
+
+The ISOs and installed systems got smaller (details in `AGENTS.md`, "Smaller images"): `linux-firmware` no longer ships
+firmware that no melon kernel can load (about 80 MB less on every system), the desktop image's `rootfs.sqfs` uses
+512 KiB blocks (3.7% smaller), and the live layer no longer carries a second copy of the installer music.
+
 **NVIDIA graphics:** on a computer with an NVIDIA card (GTX 16/RTX 20 and newer), `melon-first-boot` offers the open
 driver (`sudo apk add linux-firmware-nvidia mesa-nvk`: nouveau with NVK, the desktop and games use the card) or NVIDIA's
 own kernel driver (`sudo apk add nvidia-open`: Flatpak games get NVIDIA's libraries from Flathub; the desktop can't use

@@ -58,7 +58,7 @@ BUILDTOOLS2="lz4 ninja cmake meson git nasm tcl rsync
   xorriso mtools scdoc dtc dwarves publicsuffix rpcsvc-proto"
 # LXQt on labwc (wlroots): the 32-bit edition's desktop (X86 below); on 64-bit an extra desktop from the online repository
 # (scripts/gen-lxqt-recipes.py), with melon's LXQt defaults
-LXQT="fribidi cairo pango libsfdo seatd wlroots labwc libexif libfm-extra menu-cache xdg-user-dirs libxscrnsaver
+LXQT="fribidi cairo pango libsfdo seatd wlroots labwc libexif libfm-extra menu-cache xdg-user-dirs libxscrnsaver libproc2
   $(python3 $M/scripts/gen-lxqt-recipes.py) melon-lxqt"
 ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $DESKTOP_LIBS $STEP2 $NVIDIA $RUSTC $KDE $INSTALLERS $LXQT | awk '!seen[$0]++')
 # The 32-bit (i686) edition, for old netbooks and laptops (the owner, 7 October 2026: LXQt as its desktop): the base

@@ -100,6 +100,8 @@ URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA
     # X.Org's own tarball (liblxqt needs it); x.org was out of reach from the build container, so the copy there came from
     # Ubuntu's pool (libxss_1.2.3.orig.tar.gz, the same file), checked against the sha256 in Ubuntu's libxss_1.2.3-1build4.dsc
     'libXScrnSaver-1.2.3.tar.gz': 'https://www.x.org/releases/individual/lib/libXScrnSaver-1.2.3.tar.gz',
+    # procps-ng: SourceForge's release, checked against Alpine's sha512 (main/procps-ng, 4.0.7)
+    'procps-ng-4.0.7.tar.xz': 'https://downloads.sourceforge.net/project/procps-ng/Production/procps-ng-4.0.7.tar.xz',
     'libexif-0.6.26.tar.bz2': 'https://github.com/libexif/libexif/releases/download/v0.6.26/libexif-0.6.26.tar.bz2',
     'libfm-1.3.2.tar.xz': 'https://downloads.sourceforge.net/pcmanfm/libfm-1.3.2.tar.xz',
     'libfm-qt-2.4.0.tar.xz': 'https://github.com/lxqt/libfm-qt/releases/download/2.4.0/libfm-qt-2.4.0.tar.xz',

@@ -525,6 +525,8 @@ The website is `site/`, published to the `gh-pages` branch by `scripts/publish-s
 by hand. Keep it dependency-free: hand-written HTML and CSS, the three fonts hosted in `site/fonts` (no Google Fonts or
 other third-party requests, which the footer promises), no trackers. Its facts must stay true to the repository:
 versions and sizes come from the latest release, and an edition that isn't published yet says so (the 32-bit LXQt one was "coming" until its signed build, 7 October 2026).
+The download page `site/download/` holds each ISO's size, SHA-256 and link: update it with every release (the numbers come from the release
+assets), and read `docs/iso-hosting.md` before moving the files to another host (`scripts/upload-isos.sh`).
 `gauntlet.js` is only a taste of the real gauntlet, using easy questions that already appear in
 `recipes/calamares-melon/modules/gauntlet/questions.js`; never copy anything from `trial.js` (not even its questions) into the site, and keep
 the hidden owner commands out of it, as everywhere else. The pixel melon is generated from `melonfetch`'s own awk drawing
@@ -545,7 +547,7 @@ firmware is its own package for that reason). Publish after building packages pe
 Releases are named **melon <version> “<melon variety>”**, the varieties in alphabetical order: 0.1 “Antalya”,
 0.2 “Bailan”, then 0.3 “Cantaloupe”, 0.4 “Dudaim”, 0.5 “Esfahan”, 0.6 “Fukui”, 0.7 “Galia”, 0.8 “Honeydew”, … (the
 owner's choice, 29 September 2026). Tags are `v<version>` from 0.3 on (0.1 and 0.2 kept their date tags). A release
-is marked Latest (the website's download button points at `releases/latest`), carries both ISOs and `SHA256SUMS`,
+is marked Latest (the website's download page `site/download/` links its assets, with their checksums, so update it too), carries both ISOs and `SHA256SUMS`,
 has notes written for users (what's new, which file to download, `doas apk upgrade` for installed systems), and the
 release it replaces is retitled "(superseded)" with a link to the new one.
 

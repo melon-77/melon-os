@@ -66,7 +66,9 @@ It is plain HTML and CSS (fonts hosted in the folder, no trackers) plus a small 
 melon in the first screen is `melonfetch`'s own, redrawn by `art/site.py`. The site also hosts the
 [distro finder](https://melon-77.github.io/melon-os/distro-finder/), a quiz that scores more than a hundred Linux
 distros, melon included, against your answers. Change the site through a pull request to `testing` like everything else;
-after it is merged, `scripts/publish-site.sh` puts `site/` on `gh-pages`.
+after it is merged, `scripts/publish-site.sh` puts `site/` on `gh-pages`. The site's download page lists each ISO with its
+size and SHA-256; `docs/iso-hosting.md` compares free file hosts for the ISOs (SourceForge, Internet Archive, Cloudflare R2) and
+`scripts/upload-isos.sh` uploads to them.
 
 ## 32-bit edition (old netbooks)
 

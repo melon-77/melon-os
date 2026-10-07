@@ -60,4 +60,4 @@ cp $L/libgcc.a $L/libgcc_eh.a $L/crtbegin.o $L/crtbeginS.o $L/crtbeginT.o $L/crt
 cd ..
 
 step "musl + final gcc"
-exec "$(dirname "$(readlink -f "$0")")/toolchain-finish.sh"   # also when started as scripts/toolchain.sh
+exec $M/scripts/toolchain-finish.sh   # $M, not $0: a relative $0 no longer resolves after the cd above

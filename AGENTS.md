@@ -506,7 +506,7 @@ the hidden owner commands out of it, as everywhere else. The pixel melon is gene
 ## Boot time
 
 Where the time goes after the firmware: GRUB (the live ISO's menu waits 5 s; an installed melon-only system's is hidden and
-skipped after 1 s, `GRUB_TIMEOUT` and `GRUB_TIMEOUT_STYLE` in `/etc/default/grub` change that), the kernel, stage 1 (`/etc/runit/1`:
+skipped after 1 s, `GRUB_TIMEOUT` and `GRUB_TIMEOUT_STYLE` in `/etc/default/grub` change that; the `grub` package's own `/etc/default/grub` must not set `GRUB_TIMEOUT`, or it wins over `melon-update-grub`'s default: it did, until `grub` pkgrel 2), the kernel, stage 1 (`/etc/runit/1`:
 mounts, udev coldplug and `udevadm settle`, filesystems), then stage 2 (runsvdir starts every service at once; services that need
 another wait for it with `sv check`, which polls for up to 7 s). Stage 1 writes a timeline to `/run/melon-boot-times` and
 **`melon-boottime`** prints it with the start times of the main services: run it on a real machine before and after changing

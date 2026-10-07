@@ -6,25 +6,23 @@
 <meta name="description" content="A 200-question quiz that scores 110 Linux distros against your answers.">
 <link rel="icon" href="../assets/favicon.png">
 <title>200-Question Distro Finder</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../fonts.css">
 <style>
 /* Layout: question card left, live "top"-style standings rail right; stacks to one column on phones */
 :root{
-  --bg:#ECEFF3; --surface:#FFFFFF; --sunk:#E2E7ED; --ink:#141C26; --muted:#5A6775; --line:#D3DAE2;
-  --accent:#2350C8; --accent-ink:#FFFFFF; --accent-soft:#DCE5FB; --cursor:#C9821F; --good:#1F8A5B; --bad:#B8433A;
+  --bg:#F5F0DE; --surface:#FBF8EC; --sunk:#ECE5CB; --ink:#18221A; --muted:#5B6551; --line:#CDC6A8;
+  --accent:#3C7A2B; --accent-ink:#FFFAF0; --accent-soft:#DFE8C6; --cursor:#C8661E; --good:#3C7A2B; --bad:#B8433A;
   --f-display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --f-body:"Instrument Sans", "Helvetica Neue", Arial, system-ui, sans-serif;
   --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   --r:10px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0E141C; --surface:#161F2A; --sunk:#1D2835; --ink:#E5EBF1; --muted:#8E9BA9; --line:#273443;
-  --accent:#86A6FF; --accent-ink:#0B1220; --accent-soft:#1F2C4A; --cursor:#EDB25A; --good:#4FC48F; --bad:#F07A6E; color-scheme:dark}}
+  --bg:#0D130E; --surface:#131C14; --sunk:#1A261B; --ink:#EFE8D2; --muted:#A3AB93; --line:#2B3B2C;
+  --accent:#8BCA5E; --accent-ink:#0D130E; --accent-soft:#1F3322; --cursor:#F2A35E; --good:#8BCA5E; --bad:#F07A6E; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0E141C; --surface:#161F2A; --sunk:#1D2835; --ink:#E5EBF1; --muted:#8E9BA9; --line:#273443;
-  --accent:#86A6FF; --accent-ink:#0B1220; --accent-soft:#1F2C4A; --cursor:#EDB25A; --good:#4FC48F; --bad:#F07A6E; color-scheme:dark}
+  --bg:#0D130E; --surface:#131C14; --sunk:#1A261B; --ink:#EFE8D2; --muted:#A3AB93; --line:#2B3B2C;
+  --accent:#8BCA5E; --accent-ink:#0D130E; --accent-soft:#1F3322; --cursor:#F2A35E; --good:#8BCA5E; --bad:#F07A6E; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
 .wrap{max-width:1160px;margin:0 auto;padding-inline:20px;padding-block:28px 64px}

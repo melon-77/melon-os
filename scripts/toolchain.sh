@@ -24,6 +24,8 @@ make -C linux-7.0 ARCH=$KARCH INSTALL_HDR_PATH=$SYSROOT/usr headers_install >/de
 
 step gcc sources
 tar xf $SRC/gcc-15.2.0.tar.xz; cd gcc-15.2.0
+# i686: link musl's libssp_nonshared.a (toolchain-finish.sh builds it), as Alpine does; x86_64 doesn't need it
+[ "$MUSL_ARCH" != i386 ] || patch -p1 -s < $M/patches/gcc-i686/ssp-nonshared.patch
 tar xf $SRC/gmp-6.3.0.tar.xz && mv gmp-6.3.0+dfsg gmp
 # the Debian dfsg tarball drops the docs; stop GMP from expecting them
 sed -i "s| doc/Makefile||" gmp/configure; sed -i "s/^SUBDIRS = \(.*\) doc$/SUBDIRS = \1/" gmp/Makefile.in
@@ -41,7 +43,7 @@ GCC_CONF="$TOOLCHAIN_HOST_FLAGS --target=$TARGET --prefix=$TOOLS --with-sysroot=
   --disable-libsanitizer --disable-libssp --disable-libquadmath --disable-libgomp-offload
   --enable-default-pie --enable-default-ssp --enable-tls --enable-initfini-array
   --enable-libstdcxx-time --enable-__cxa_atexit --enable-threads=posix --enable-shared
-  --with-pkgversion=melon --disable-symvers --disable-fixed-point --with-arch=$GCC_ARCH --with-tune=generic"
+  --with-pkgversion=melon --disable-symvers --disable-fixed-point --with-arch=$GCC_ARCH ${GCC_FPMATH:+--with-fpmath=$GCC_FPMATH} --with-tune=generic"
 
 step gcc stage1
 mkdir b-gcc; cd b-gcc

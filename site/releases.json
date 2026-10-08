@@ -4,7 +4,14 @@
   "date": "2026-09-29",
   "tag": "melon-20260929.2",
   "repo": "melon-77/melon-os",
-  "mirrors": [],
+  "mirrors": [
+    {
+      "label": "SourceForge",
+      "tags": {
+        "i686-20261007": "https://sourceforge.net/projects/melonl/files/i686-20261007/{file}/download"
+      }
+    }
+  ],
   "editions": [
     {
       "id": "desktop",

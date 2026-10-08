@@ -1,5 +1,6 @@
 pkgname=melon-sounds
 pkgver=1.0
+pkgrel=1
 pkgdesc="melon sounds"
 license=custom
 depends=(mpg123 alsa-utils)

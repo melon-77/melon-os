@@ -507,6 +507,11 @@ the serial port, so tests don't need a screen. The test also records the sound c
   - if you need to run it in a test, call `/usr/libexec/melon/.cold` directly.
   It asks base or desktop and installs exactly what the desktop ISO installs. It plays
   `/usr/share/melon/.ice` (from the `melon-sounds` package, live ISO only) at 30% volume while it runs.
+  On 8 October 2026 the owner gave it a new name (only its hash is in `zz-melon.sh`; the old name no longer works) and
+  a new song, which also plays under the graphical installer (`melon-install-gui`). The song is `recipes/melon-sounds/ice.mp3`:
+  the owner's file, re-encoded as 128 kb/s MP3 and set to about -12 LUFS so that it is as loud as the old track at the same
+  30% (the original was 10 dB quieter). The file names `.cold` and `.ice` stay as they are, so nothing in the repo spells
+  the name. A new name means a new hash: `printf %s <name> | sha256sum | cut -c1-16`.
 - **Dual boot.** On UEFI, when the chosen disk already has an EFI system partition and at least 20 GiB unallocated
   (Windows' Disk Management "Shrink Volume" makes that), the console installer offers `alongside` (the default
   then; `MELON_MODE=alongside|erase`): a 1 GiB FAT32 `/boot` (extended boot loader type) and `/` go into the free

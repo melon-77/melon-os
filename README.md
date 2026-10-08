@@ -89,8 +89,11 @@ echo 'export USE_BUILTIN_RIPGREP=0' >> ~/.bashrc    # Claude Code then searches 
 
 An installed system that has no other operating system next to it skips its boot menu after 1 second (hold Shift or press Esc
 to open it; "safe graphics" is in there; `GRUB_TIMEOUT` and `GRUB_TIMEOUT_STYLE` in `/etc/default/grub` change this, and
-`sudo melon-update-grub` applies it). Next to Windows the menu still shows for 5 seconds. `melon-boottime` shows where a boot's
-time went: the milestones of stage 1 and when the main services started.
+`sudo melon-update-grub` applies it). Next to Windows the menu still shows for 5 seconds. Startup no longer waits for every
+device to be probed: it mounts as soon as the disks are there and lets the graphics driver, Wi-Fi and sound finish while the
+services start (`melon.udev=sync` on the kernel command line brings the old, slower order back if a machine misbehaves), and
+services that wait for each other check every 20 ms instead of every 0.42 s. `melon-boottime` shows where a boot's time went:
+the milestones of stage 1 and when the main daemons started, to 10 ms.
 
 **NVIDIA graphics:** on a computer with an NVIDIA card (GTX 16/RTX 20 and newer), `melon-first-boot` offers the open
 driver (`sudo apk add linux-firmware-nvidia mesa-nvk`: nouveau with NVK, the desktop and games use the card) or NVIDIA's

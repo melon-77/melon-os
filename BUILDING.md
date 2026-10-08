@@ -84,6 +84,22 @@ What's different from an Ubuntu build machine:
   just built until they pass the QEMU tests: a broken gcc or musl on the build machine stops it from fixing itself.
   Keep a melon live USB around for that case.
 
+## The 32-bit (i686) edition
+
+The same checkout builds the 32-bit edition next to the 64-bit one; its files go to `tools-x86/`, `sysroot-x86/`,
+`work-x86/` and `repo/x86/`, so the two never mix:
+
+    sudo MELON_ARCH=x86 JOBS=16 scripts/build-everything.sh
+
+(on melon: `doas env MELON_ARCH=x86 scripts/build-everything.sh`). It builds the i686 cross toolchain, the base
+system, Qt and the LXQt desktop (not Plasma, Flatpak or the NVIDIA drivers), then `out/melon-*-i686.iso` and
+`out/melon-desktop-*-i686.iso`. Logs carry `-x86` in their names (`logs/everything-x86-1.log`). Test with
+`scripts/qemu-test.py ... --i686`: it runs `qemu-system-i386` with an Atom N270 CPU. The build machine runs i686
+programs from the sysroot during the build, so its kernel needs 32-bit support (`CONFIG_IA32_EMULATION`, on in
+Ubuntu, Debian, Devuan and melon); `host-setup.sh` points `/lib/ld-musl-i386.so.1` at `sysroot-x86`. Disk: the
+finished 32-bit tree takes about 6 GB (toolchain, sysroot, packages, work), more while LLVM and Qt build; keep
+20 GB free.
+
 ## The signing key
 
 Packages and the repository index are signed with `keys/melon-signing.rsa`. It is deliberately not in

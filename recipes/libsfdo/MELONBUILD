@@ -1,0 +1,10 @@
+pkgname=libsfdo
+pkgver=0.1.4
+pkgrel=0
+pkgdesc="freedesktop.org desktop entries and icon themes (labwc's window icons)"
+license=BSD-2-Clause
+url=https://gitlab.freedesktop.org/vyivel/libsfdo
+source=(libsfdo-0.1.4.tar.xz)
+subpackages=(libsfdo-dev)
+build(){ meson_setup -Dexamples=false -Dtests=false build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

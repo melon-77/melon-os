@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!-- labwc for SDDM's login screen (/etc/sddm.conf.d/15-lxqt.conf): every window full screen, no title bar -->
+<labwc_config>
+  <windowRules>
+    <windowRule identifier="*" serverDecoration="no">
+      <action name="ToggleFullscreen"/>
+    </windowRule>
+  </windowRules>
+</labwc_config>

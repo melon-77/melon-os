@@ -18,6 +18,7 @@ A from-scratch, rolling x86_64 distribution:
 | root fs | XFS (FAT32 `/boot`) |
 | shell | bash 5.3 |
 | desktop | KDE Plasma 6 on Wayland; Flatpak for Steam and other glibc apps; more desktops as online installs |
+| 32-bit edition | i686 (Pentium M, Pentium 4, Atom netbooks such as the MSI Wind U100) with LXQt on Wayland (labwc) |
 
 ## Layout
 
@@ -66,6 +67,18 @@ melon in the first screen is `melonfetch`'s own, redrawn by `art/site.py`. The s
 [distro finder](https://melon-77.github.io/melon-os/distro-finder/), a quiz that scores more than a hundred Linux
 distros, melon included, against your answers. Change the site through a pull request to `testing` like everything else;
 after it is merged, `scripts/publish-site.sh` puts `site/` on `gh-pages`.
+
+## 32-bit edition (old netbooks)
+
+melon also builds for 32-bit PCs with SSE2 (Pentium M, Pentium 4, Intel Atom: the MSI Wind U100 and similar netbooks).
+Its desktop is **LXQt** on Wayland with the labwc compositor, lighter than Plasma and comfortable in 1–2 GB of RAM,
+with zram swap and drivers for every graphics and network chip an old 32-bit netbook or laptop is likely to have: Intel GMA, old Radeon (r300, r600) and GeForce (nouveau) graphics; Atheros, Ralink, Realtek, Intel 3945/4965 and Broadcom Wi-Fi, USB Wi-Fi sticks and the usual wired chips; the MSI Wind's Fn keys and radio switch (msi-laptop). It
+uses the same installers (Calamares with the gauntlet, the console installer). Flatpak and the NVIDIA drivers are
+64-bit only. Build it with `MELON_ARCH=x86` (`BUILDING.md`); the ISOs are `melon-*-i686.iso` and
+`melon-desktop-*-i686.iso`. Status (7 October 2026): both ISOs are built, signed with melon's key and pass their install tests on an emulated
+Atom N270 with 2 GB of RAM (LXQt logs in through SDDM, printing works); the 32-bit packages are in the online
+repository (`packages/x86`); the ISOs are on the pre-release `i686-20261007`; a test on a real U100 comes next. NetHack and
+the QEMU guest agent aren't in the 32-bit edition yet.
 
 ## Developer tools
 

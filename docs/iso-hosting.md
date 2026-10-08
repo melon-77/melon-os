@@ -58,8 +58,9 @@ This is a recommendation; the owner decides, and signing up is the owner's to do
 - **SourceForge** project `melonl` (account `melaboton`), files at `https://sourceforge.net/projects/melonl/files/<release folder>/`. Uploads run
   from the owner's computer in WSL with an ed25519 key made for this (`~/.ssh/id_ed25519_sourceforge`, public half on the SourceForge account):
   `SF_USER=melaboton SF_PROJECT=melonl scripts/upload-isos.sh sourceforge <release folder> <iso>...`.
-- On SourceForge now: `i686-20261007` (both 32-bit ISOs and `SHA256SUMS`, the same files as the GitHub pre-release; the download page lists them
-  as the download buttons). The 0.2 ISOs follow, and every later release gets its own folder named after its tag.
+- On SourceForge now: `i686-20261007` (both 32-bit ISOs and `SHA256SUMS`, the same files as the GitHub pre-release) and `melon-20260929.2`
+  (the two 64-bit 0.2 ISOs and `SHA256SUMS`, downloaded from the GitHub release, checked against its checksums and uploaded on 8 October 2026).
+  The download page lists them as the download buttons. Every later release gets its own folder named after its tag.
 - Not set up yet: the Internet Archive and Cloudflare R2.
 - SourceForge is the **primary** host (`"primary": true` on its `mirrors` entry in `site/releases.json`, the owner's decision of 8 October 2026): the
   download buttons and the `SHA256SUMS` links go there. The owner asked for GitHub's links to stay as well (`"keep_github": true` at the top of

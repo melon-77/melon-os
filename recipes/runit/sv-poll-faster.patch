@@ -1,0 +1,15 @@
+sv checks a service only every 0.42 s while it waits. Run scripts use 'sv check dbus' and 'sv check elogind' to wait for
+the service they need, so each step of dbus -> elogind -> sddm could start up to 0.42 s after the service it waited for
+was ready, and shutdown ('sv -w 10 force-stop') lost the same time while services stopped. Poll every 20 ms instead: a
+check is one fork and a stat or two.
+--- a/sv.c
++++ b/sv.c
+@@ -401,7 +401,7 @@
+           fatal("unable to change to original directory");
+       }
+       if (done) break;
+-      sleep_microseconds(420000);
++      sleep_microseconds(20000);
+       taia_now(&tnow);
+     }
+   return(rc > 99 ? 99 : rc);

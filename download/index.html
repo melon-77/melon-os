@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Download melon</title>
+<meta name="description" content="Download melon: the ISOs with their sizes and SHA-256 checksums, and how to check and write them.">
+<link rel="icon" href="../assets/favicon.png">
+<link rel="preload" href="../fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../fonts.css">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="sub">
+
+<header class="top">
+  <a class="brand" href="../"><img src="../assets/logo.webp" alt="" width="28" height="28">melon</a>
+  <nav aria-label="Main">
+    <a href="../#what">what</a>
+    <a href="../#isos">isos</a>
+    <a href="../#install">install</a>
+    <a href="../#gauntlet">gauntlet</a>
+    <a href="../distro-finder/">distro finder</a>
+    <a href="https://github.com/melon-77/melon-os">github</a>
+  </nav>
+</header>
+
+<main>
+<section class="block first">
+  <p class="eyebrow"><!-- release:eyebrow -->melon 0.2 &ldquo;Bailan&rdquo; &middot; 29 September 2026<!-- /release:eyebrow --></p>
+  <h1 class="page-h">Download melon</h1>
+  <p class="lead small">Pick a file, write it to a USB stick, boot it. The desktop ISO is a live session and installer in one, so you can try melon before you install it.
+    Builds are test releases for now.</p>
+
+  <ul class="isos files"><!-- release:files -->
+    <li id="desktop">
+      <div class="iso-name"><b>melon desktop</b><span>x86_64 &middot; 836,601,856 bytes (about 837 MB)</span></div>
+      <p>KDE Plasma on Wayland, live session and graphical installer. <code>melon-desktop-20260929-x86_64.iso</code><br>
+        <span class="sum">SHA-256 <code>fb4e37204a56fe73272915b093d22427d7a5147abb2fd3fb79044f4ddb981f5f</code></span></p>
+      <a class="btn small" href="https://github.com/melon-77/melon-os/releases/download/melon-20260929.2/melon-desktop-20260929-x86_64.iso" download>Download</a>
+    </li>
+    <li id="console">
+      <div class="iso-name"><b>melon console</b><span>x86_64 &middot; 395,522,048 bytes (about 396 MB)</span></div>
+      <p>No desktop, with a quick text installer. <code>melon-20260929-x86_64.iso</code><br>
+        <span class="sum">SHA-256 <code>35f07ab814fb281cc5221cafdc208d264e002c798312186f34d3ac52ac9a0449</code></span></p>
+      <a class="btn small ghost" href="https://github.com/melon-77/melon-os/releases/download/melon-20260929.2/melon-20260929-x86_64.iso" download>Download</a>
+    </li>
+    <li id="x86-desktop">
+      <div class="iso-name"><b>melon 32-bit desktop</b><span>i686 &middot; LXQt &middot; test build &middot; 632,825,856 bytes (about 633 MB)</span></div>
+      <p>LXQt on Wayland for old netbooks and 32-bit laptops, live session and graphical installer. Tested in QEMU only so far. <code>melon-desktop-20261007-i686.iso</code><br>
+        <span class="sum">SHA-256 <code>4854ffad6b51f9c86e94874c6f6a7d7fc11c4a91578a20801a6cfd4c1d423b9b</code></span></p>
+      <a class="btn small ghost" href="https://sourceforge.net/projects/melonl/files/i686-20261007/melon-desktop-20261007-i686.iso/download" download>Download</a>
+    </li>
+    <li id="x86-console">
+      <div class="iso-name"><b>melon 32-bit console</b><span>i686 &middot; test build &middot; 378,738,688 bytes (about 379 MB)</span></div>
+      <p>No desktop, for 32-bit machines, with the quick text installer. Tested in QEMU only so far. <code>melon-20261007-i686.iso</code><br>
+        <span class="sum">SHA-256 <code>d0501153f56181675b59c6c267feb2bf5b24fb5f331448d520daf05ec1c50f86</code></span></p>
+      <a class="btn small ghost" href="https://sourceforge.net/projects/melonl/files/i686-20261007/melon-20261007-i686.iso/download" download>Download</a>
+    </li>
+  <!-- /release:files --></ul>
+  <p class="note"><!-- release:note -->Most of these files are downloaded from SourceForge; the rest are still on GitHub for now. The checksum is the same wherever you get a file. The checksums are also in <a href="https://github.com/melon-77/melon-os/releases/download/melon-20260929.2/SHA256SUMS"><code>SHA256SUMS</code></a> (melon 0.2), <a href="https://sourceforge.net/projects/melonl/files/i686-20261007/SHA256SUMS/download"><code>SHA256SUMS</code></a> (i686-20261007).<!-- /release:note --></p>
+</section>
+
+<section class="block">
+  <h2>Check it</h2>
+  <p class="lead small">A download can break on the way, and a checksum tells you whether yours is whole. Compare the result with the SHA-256 above.</p>
+<pre class="code"><span class="c"># Linux and macOS</span>
+sha256sum <!-- release:file1 -->melon-desktop-20260929-x86_64.iso<!-- /release:file1 -->
+<span class="c"># or, with SHA256SUMS next to the files</span>
+sha256sum -c --ignore-missing SHA256SUMS
+
+<span class="c"># Windows (PowerShell)</span>
+Get-FileHash <!-- release:file2 -->melon-desktop-20260929-x86_64.iso<!-- /release:file2 --> -Algorithm SHA256</pre>
+</section>
+
+<section class="block">
+  <h2>Write it to a USB stick</h2>
+  <p class="lead small">Use <a href="https://rufus.ie">Rufus</a>, <a href="https://etcher.balena.io">balenaEtcher</a> or <a href="https://www.ventoy.net">Ventoy</a>, or on Linux:</p>
+<pre class="code"><span class="c"># replace sdX with your stick, and check with lsblk first: dd overwrites it</span>
+doas dd if=<!-- release:file3 -->melon-desktop-20260929-x86_64.iso<!-- /release:file3 --> of=/dev/sdX bs=4M status=progress conv=fsync</pre>
+  <p class="note">Keeping Windows? Shrink it first and leave at least 20 GB free: <a href="../#install">the install steps</a>. Older releases are on the
+    <a href="https://github.com/melon-77/melon-os/releases">releases page</a>.</p>
+</section>
+</main>
+
+<footer>
+  <p><b>melon</b> &middot; free and open source &middot; <a href="https://github.com/melon-77/melon-os">source</a> &middot;
+    <a href="https://github.com/melon-77/melon-os/releases">releases</a> &middot;
+    <a href="https://github.com/melon-77/melon-os/issues">issues</a> &middot;
+    <a href="../distro-finder/">distro finder</a></p>
+</footer>
+</body>
+</html>

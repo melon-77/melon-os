@@ -52,3 +52,12 @@ This is a recommendation; the owner decides, and signing up is the owner's to do
    (the site follows `AGENTS.md` "Website"; `scripts/publish-site.sh` publishes it).
 4. The 32-bit editions are in their own GitHub pre-release (`i686-<date>`). They are filled with
    `scripts/site-release.py update --tag i686-<date> --editions x86-desktop,x86-console`, which also marks them "test build" on the site.
+
+## Current setup (8 October 2026)
+
+- **SourceForge** project `melonl` (account `melaboton`), files at `https://sourceforge.net/projects/melonl/files/<release folder>/`. Uploads run
+  from the owner's computer in WSL with an ed25519 key made for this (`~/.ssh/id_ed25519_sourceforge`, public half on the SourceForge account):
+  `SF_USER=melaboton SF_PROJECT=melonl scripts/upload-isos.sh sourceforge <release folder> <iso>...`.
+- On SourceForge now: `i686-20261007` (both 32-bit ISOs and `SHA256SUMS`, the same files as the GitHub pre-release; the download page lists them
+  as "also from SourceForge"). The 0.2 ISOs follow, and every later release gets its own folder named after its tag.
+- Not set up yet: the Internet Archive and Cloudflare R2.

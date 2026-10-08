@@ -682,6 +682,10 @@ that is the only place Ubuntu is still needed.
   request (`testing` -> `main`, merge commit), after which `testing` is fast-forwarded to `main` again.
 - **Rebase, don't merge.** When `testing` moves, rebase your branch; no "Merge testing into ..." commits. PRs are
   squash-merged. No test/webhook commits and no personal email addresses in history (use GitHub's noreply address).
+- **Delete a branch once its PR is merged or closed.** GitHub's "delete branch on merge" is off, so branches pile up. Before deleting
+  one, check that no open PR, open issue or running thread still uses it, and write its name and last commit down so it can be restored.
+  A squash merge leaves the branch's own commits looking unmerged, so compare file contents with `testing`, not commit counts.
+  Keep `main`, `testing`, `gh-pages` and `packages`. (11 merged branches were cleaned up on 8 October 2026.)
 - **The build machine reviews PRs** about every 20 minutes. Its comments start with "Automated check from the melon
   build machine:" or "Automated reply ...". It reads the diff, builds every changed recipe, installs and runs the
   packages on a scratch melon root, runs the QEMU install tests when ISOs or installers change, and then requests

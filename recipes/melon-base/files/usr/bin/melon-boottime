@@ -1,28 +1,29 @@
 #!/bin/sh
 # melon-boottime: where this boot's time went (seconds since the kernel started).
-# Stage 1 writes a line per milestone to /run/melon-boot-times; services show how long they have been up in `sv status`.
+# Stage 1 writes a line per milestone to /run/melon-boot-times; the daemons' start times come from their processes.
 # Firmware (BIOS/UEFI) and the GRUB menu run before the kernel and aren't counted here.
+# udev-settled is when udev finished the whole coldplug (the GPU driver, Wi-Fi firmware and so on); stage 1 doesn't wait
+# for it, so it can come after stage1-done.
 export PATH=/usr/bin
 [ -r /run/melon-boot-times ] || { echo "no boot timeline in /run/melon-boot-times (booted before melon-base 0.1-r33?)" >&2; exit 1; }
 read now _ < /proc/uptime
-awk -v now="$now" '
-  { t[$1] = $2; order[++n] = $1 }
+sort -k2 -n /run/melon-boot-times | awk -v now="$now" '
+  { name[++n] = $1; t[n] = $2 }
   END {
     prev = 0
     printf "%-16s %8s %8s\n", "milestone", "at (s)", "took (s)"
-    for (i = 1; i <= n; i++) {
-      k = order[i]; printf "%-16s %8.2f %8.2f\n", k, t[k], t[k] - prev; prev = t[k]
-    }
+    for (i = 1; i <= n; i++) { printf "%-16s %8.2f %8.2f\n", name[i], t[i], t[i] - prev; prev = t[i] }
     printf "%-16s %8.2f\n", "now", now
-  }' /run/melon-boot-times
+  }'
 echo
-echo "services (when they last started):"
-SVDIR=${SVDIR:-/var/service}
-for d in dbus elogind polkitd udevd NetworkManager sddm; do
-  [ -d "$SVDIR/$d" ] || continue
-  sv status "$SVDIR/$d" 2>/dev/null
-done | awk -v now="$now" '
-  /^run:/ { n = $1; for (i = 1; i <= NF; i++) if ($i ~ /^[0-9]+s[;,]?$/) { s = $i; sub(/s[;,]?$/, "", s); break }
-            name = $2; sub(/:$/, "", name); sub(/.*\//, "", name)
-            printf "  %-16s started at %8.2f s\n", name, now - s; next }
-  { print "  " $0 }'
+echo "daemons (when their process started; the first of each name):"
+for d in /proc/[0-9]*; do
+  read -r line < "$d/stat" 2>/dev/null || continue
+  comm=${line#*(}; comm=${comm%%)*}
+  case $comm in
+    udevd|dbus-daemon|elogind|polkitd|NetworkManager|bluetoothd|sddm|sddm-helper|sddm-greeter*|kwin_wayland|plasma_session|plasmashell) ;;
+    *) continue ;;
+  esac
+  set -- ${line#*) }
+  echo "${20} $comm"        # field 22 of /proc/PID/stat: start time in clock ticks (100 per second) since boot
+done | sort -n | awk '!seen[$2]++ { printf "  %-16s started at %8.2f s\n", $2, $1 / 100 }'

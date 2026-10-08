@@ -17,15 +17,43 @@ mountpoint -q /sys/fs/cgroup || mount -t cgroup2 -o nsdelegate cgroup2 /sys/fs/c
 [ -d /sys/firmware/efi/efivars ] && { mountpoint -q /sys/firmware/efi/efivars || mount -t efivarfs efivarfs /sys/firmware/efi/efivars 2>/dev/null; }
 ln -sf /proc/self/fd /dev/fd; ln -sf fd/0 /dev/stdin; ln -sf fd/1 /dev/stdout; ln -sf fd/2 /dev/stderr
 
+# wait until the devices /etc/fstab names exist (udev makes their /dev/disk links): the only thing stage 1 needs from udev
+wait_fstab_devices(){
+  waited=0
+  [ -r /etc/fstab ] || return 0
+  while read -r dev _ _ opts _; do
+    case $dev in ''|'#'*) continue ;; esac
+    case ,$opts, in *,noauto,*|*,nofail,*) continue ;; esac
+    case $dev in
+      UUID=*)      node=/dev/disk/by-uuid/${dev#UUID=} ;;
+      PARTUUID=*)  node=/dev/disk/by-partuuid/${dev#PARTUUID=} ;;
+      LABEL=*)     node=/dev/disk/by-label/${dev#LABEL=} ;;
+      PARTLABEL=*) node=/dev/disk/by-partlabel/${dev#PARTLABEL=} ;;
+      /dev/*)      node=$dev ;;
+      *)           continue ;;
+    esac
+    while [ ! -e "$node" ] && [ $waited -lt 400 ]; do sleep 0.05; waited=$((waited + 1)); done   # at most 20 s in all
+  done < /etc/fstab
+}
+
 if [ -x /usr/bin/udevd ]; then
-  # desktop systems: eudev handles devices; the udevd service takes over once stage 2 starts
+  # desktop systems: eudev handles devices
   msg "Starting devices (udev)"
   udevd --daemon
   udevadm trigger --action=add --type=subsystems
   udevadm trigger --action=add --type=devices
   mark udev-started
-  udevadm settle --timeout=20
-  udevadm control --exit
+  if grep -q 'melon\.udev=sync' /proc/cmdline; then
+    # the old way (kernel option melon.udev=sync): wait for every device, stop udevd; the udevd service starts a new one
+    udevadm settle --timeout=20
+    udevadm control --exit
+  else
+    # Stage 1 needs only the devices in /etc/fstab. udevd keeps running and works through the rest of the coldplug (the
+    # GPU's driver and firmware, Wi-Fi, sound) while the services start; the udevd service adopts it, so udev never
+    # restarts and no event is lost. Services that need a device wait for it themselves (SDDM waits until elogind says seat0 is graphical).
+    wait_fstab_devices
+    ( udevadm settle --timeout=60; mark udev-settled ) &
+  fi
 else
   msg "Starting devices"
   mark udev-started

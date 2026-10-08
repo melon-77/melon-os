@@ -1,6 +1,6 @@
 pkgname=eudev
 pkgver=3.2.14
-pkgrel=1
+pkgrel=2
 pkgdesc="Device manager (udev without systemd)"
 license=GPL-2.0-only
 url=https://github.com/eudev-project/eudev

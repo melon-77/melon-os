@@ -62,6 +62,7 @@ This is a recommendation; the owner decides, and signing up is the owner's to do
   as the download buttons). The 0.2 ISOs follow, and every later release gets its own folder named after its tag.
 - Not set up yet: the Internet Archive and Cloudflare R2.
 - SourceForge is the **primary** host (`"primary": true` on its `mirrors` entry in `site/releases.json`, the owner's decision of 8 October 2026): the
-  download buttons and the `SHA256SUMS` links go there, and GitHub's download link is dropped for every file SourceForge carries. A file
-  SourceForge doesn't carry yet keeps its GitHub link, so no button is ever dead; add a release's folder to the entry's `tags` as soon as it is uploaded.
-  The GitHub releases stay as the release notes and the source of the checksums the site reads.
+  download buttons and the `SHA256SUMS` links go there. The owner asked for GitHub's links to stay as well (`"keep_github": true` at the top of
+  `releases.json`), so each file shows "also from GitHub"; without that setting GitHub's link is dropped for every file SourceForge carries.
+  A file SourceForge doesn't carry yet keeps its GitHub link as the button, so no button is ever dead; add a release's folder to the
+  entry's `tags` as soon as it is uploaded. The GitHub releases stay as the release notes and the source of the checksums the site reads.

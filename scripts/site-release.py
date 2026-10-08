@@ -15,8 +15,9 @@ shown as "coming" (the 32-bit editions, until their ISOs are in a release). Size
 (GitHub records both); set GITHUB_TOKEN if the API rate limit bites. To list other file hosts next to the files, put them in
 "mirrors" in releases.json as {"label": "SourceForge", "url": "https://.../{file}"} ({tag} works too), or, for a host that only
 has some releases, {"label": "SourceForge", "tags": {"i686-20261007": "https://.../i686-20261007/{file}/download"}}.
-Add "primary": true to make a mirror the download button and drop GitHub's link for the files it carries (the page then also links that
-host's SHA256SUMS: {file} is replaced by SHA256SUMS).
+Add "primary": true to make a mirror the download button (the page then also links that host's SHA256SUMS: {file} is replaced by
+SHA256SUMS). GitHub's link is dropped for the files a primary mirror carries unless "keep_github" is true at the top of releases.json,
+in which case it follows as "also from GitHub".
 
 A second release (the 32-bit pre-release) goes in the same file; name the editions it carries:
 
@@ -76,13 +77,15 @@ def mirror_url(m, f):
 
 def links(data, f):
     """-> [(label, url)], the first one being the download button. A mirror marked "primary" that carries the file comes first and
-    takes the place of GitHub, which is then not offered for that file; files the primary host doesn't carry (yet) keep GitHub."""
+    takes the place of GitHub (unless "keep_github" is set, then GitHub follows it); files the primary host doesn't carry (yet) keep GitHub."""
     gh = [("GitHub" if "github.com" in f["url"] else "download", f["url"])]
     mirrors = [(m, mirror_url(m, f)) for m in data.get("mirrors", [])]
     mirrors = [(m, u) for m, u in mirrors if u]
     prim = [(m["label"], u) for m, u in mirrors if m.get("primary")]
     rest = [(m["label"], u) for m, u in mirrors if not m.get("primary")]
-    return prim + rest if prim else gh + rest
+    if not prim:
+        return gh + rest
+    return prim + (gh if data.get("keep_github") else []) + rest
 
 
 def variant(ed):
@@ -151,7 +154,11 @@ def render_note(data):
     others = [m["label"] for m in data.get("mirrors", []) if not m.get("primary") and any(mirror_url(m, f) for f in files)]
     if prim:
         everywhere = all(any(mirror_url(m, f) for m in data["mirrors"] if m.get("primary")) for f in files)
-        head = "These files are downloaded from %s." % prim[0] if everywhere else "Most of these files are downloaded from %s; the rest are still on GitHub for now." % prim[0]
+        gh = data.get("keep_github")
+        if everywhere:
+            head = "These files are downloaded from %s%s." % (prim[0], ", and every file is also on GitHub" if gh else "")
+        else:
+            head = "Most of these files are downloaded from %s%s." % (prim[0], "; the rest are on GitHub for now, and every file is also there" if gh else "; the rest are still on GitHub for now")
         tail = " Files are also on %s." % " and ".join(others) if others else ""
         return head + tail + " The checksum is the same wherever you get a file. " + base
     if not others:

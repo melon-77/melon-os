@@ -34,7 +34,9 @@ ORDER = [
  ('qt6-qtshadertools','qt6-shadertools', QT+' '+QTDIRS, 'qt'),
  ('qt6-qtsvg','qt6-svg', QT+' '+QTDIRS, 'qt'),
  ('qt6-qtimageformats','qt6-imageformats', QT+' '+QTDIRS, 'qt'),
- ('qt6-qtdeclarative','qt6-declarative', QT+' '+QTDIRS+' -DFEATURE_qml_debug=OFF', 'qt'),
+ # 32-bit: no precompiled headers; with them the build tree passes 11 GB (a header per QML target), and the 32-bit
+ # edition usually shares the disk with the 64-bit build
+ ('qt6-qtdeclarative','qt6-declarative', QT+' '+QTDIRS+' -DFEATURE_qml_debug=OFF $([ "$APK_ARCH" != x86 ] || echo -DBUILD_WITH_PCH=OFF)', 'qt'),
  ('qt6-qtwayland','qt6-wayland', QT+' '+QTDIRS, 'qt'),
  ('qt6-qtpositioning','qt6-positioning', QT+' '+QTDIRS, 'qt'),
  ('qt6-qtlocation','qt6-location', QT+' '+QTDIRS, 'qt'),   # plasma-workspace needs QtLocation

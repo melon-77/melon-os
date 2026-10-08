@@ -115,6 +115,10 @@ if [ "$ID" = melon ]; then melon_deps; else ubuntu_deps
   ln -sfn $M/sysroot/usr/lib/libc.so /lib/ld-musl-x86_64.so.1
   echo $M/sysroot/usr/lib > /etc/ld-musl-x86_64.path
 fi
+# the 32-bit edition (MELON_ARCH=x86): no build machine has an i386 musl of its own, so its loader is always the
+# 32-bit sysroot's (melon's and Ubuntu's kernels run 32-bit programs)
+ln -sfn $M/sysroot-x86/usr/lib/libc.so /lib/ld-musl-i386.so.1
+echo $M/sysroot-x86/usr/lib > /etc/ld-musl-i386.path
 
 W=$M/work/host-setup; rm -rf $W; mkdir -p $W $M/hosttools/bin
 unset CC CXX CFLAGS CXXFLAGS LDFLAGS PKG_CONFIG_LIBDIR PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH

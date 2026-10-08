@@ -1,0 +1,12 @@
+pkgname=libxscrnsaver
+pkgver=1.2.3
+pkgrel=0
+pkgdesc="X11 Screen Saver extension library (liblxqt's idle detection in X sessions)"
+license=MIT
+url=https://www.x.org
+source=(libXScrnSaver-1.2.3.tar.gz)
+builddir=$srcdir/libXScrnSaver-1.2.3
+makedepends=(libx11-dev libxext-dev xorgproto)
+subpackages=(libxscrnsaver-dev)
+build(){ ./configure $conf_flags --disable-static --enable-malloc0returnsnull=no; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

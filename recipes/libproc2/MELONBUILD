@@ -1,0 +1,20 @@
+pkgname=libproc2
+pkgver=4.0.7
+pkgrel=0
+pkgdesc="procps-ng's process library (lxqt-session reads the process table with it)"
+license=LGPL-2.1-or-later
+url=https://gitlab.com/procps-ng/procps
+source=(procps-ng-4.0.7.tar.xz)
+builddir=$srcdir/procps-ng-4.0.7
+subpackages=(libproc2-dev)
+makedepends=(ncurses-dev)
+# only the library: BusyBox provides ps, top, free, kill and friends on melon, and their links must stay its own
+build(){ ./configure $conf_flags --disable-static --disable-nls --without-systemd --without-ncurses --disable-kill \
+  --disable-pidof --disable-w --disable-modern-top; make -j$JOBS; }
+package(){
+  make DESTDIR=$srcdir/stage install >/dev/null
+  install -d $pkgdir/usr/lib/pkgconfig $pkgdir/usr/include
+  cp -a $srcdir/stage/usr/lib/libproc2.so* $pkgdir/usr/lib/
+  cp -a $srcdir/stage/usr/lib/pkgconfig/libproc2.pc $pkgdir/usr/lib/pkgconfig/
+  cp -a $srcdir/stage/usr/include/libproc2 $pkgdir/usr/include/
+}

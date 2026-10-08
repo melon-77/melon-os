@@ -4,6 +4,9 @@ pkgrel=0
 pkgdesc="Guest tools for running melon in a VM: QEMU/KVM agent, VMware tools, Hyper-V daemons (each only starts in its own hypervisor)"
 license=MIT
 depends=(qemu-guest-agent open-vm-tools hvtools)
+_svcs="qemu-ga vmtoolsd hv_kvp_daemon hv_vss_daemon hv_fcopy_uio_daemon"
+# 32-bit: QEMU 11 no longer builds for 32-bit x86 hosts, its guest agent included
+[ "$APK_ARCH" != x86 ] || { depends=(open-vm-tools hvtools); _svcs=${_svcs#qemu-ga }; }
 builddir=$srcdir
 package(){ mkdir -p $pkgdir/usr/share/melon
-  echo "qemu-ga vmtoolsd hv_kvp_daemon hv_vss_daemon hv_fcopy_uio_daemon" > $pkgdir/usr/share/melon/vm-guest.services; }
+  echo "$_svcs" > $pkgdir/usr/share/melon/vm-guest.services; }

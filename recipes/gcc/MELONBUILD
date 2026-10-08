@@ -9,6 +9,8 @@ url=https://gcc.gnu.org
 # libgomp) stay in the libgcc/libstdc++ packages (gcc-runtime), so this package leaves them out.
 source=(gcc-15.2.0.tar.xz)
 makedepends=(gmp-dev mpfr-dev mpc-dev zlib-dev zstd-dev)
+# i686: link musl's libssp_nonshared.a like the cross toolchain (scripts/toolchain.sh)
+prepare(){ [ "$MUSL_ARCH" != i386 ] || patch -p1 -s < $M/patches/gcc-i686/ssp-nonshared.patch; }
 depends=(binutils musl-dev libgcc libatomic libgomp)
 subpackages=(g++)
 depends_g__="gcc libstdc++-dev"
@@ -24,7 +26,7 @@ build(){
     --disable-libsanitizer --disable-libssp --disable-libquadmath --disable-libgomp-offload \
     --enable-default-pie --enable-default-ssp --enable-tls --enable-initfini-array \
     --enable-libstdcxx-time --enable-__cxa_atexit --enable-threads=posix --enable-shared \
-    --with-pkgversion=melon --disable-symvers --disable-fixed-point --with-arch=$GCC_ARCH --with-tune=generic \
+    --with-pkgversion=melon --disable-symvers --disable-fixed-point --with-arch=$GCC_ARCH ${GCC_FPMATH:+--with-fpmath=$GCC_FPMATH} --with-tune=generic \
     --with-system-zlib --with-zstd --with-gmp=$SYSROOT/usr --with-mpfr=$SYSROOT/usr --with-mpc=$SYSROOT/usr
   make -j$JOBS
 }

@@ -23,6 +23,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | disks | GPT: 1 MiB BIOS boot, 1 GiB FAT32 `/boot` (also the ESP), XFS `/` | kernel boots with `root=PARTUUID=...`; only encrypted (LUKS) installs have an initramfs (rule 28); dual boot next to Windows on UEFI (see Installers) |
 | filesystem | merged `/usr`: `/bin`, `/sbin`, `/usr/sbin` -> `usr/bin`, `/lib` -> `usr/lib` | packages must only ship files under `/usr`, `/etc`, `/var`, `/boot` |
 | desktop | KDE Plasma 6.6 on Wayland (KWin, Xwayland), Qt 6.10, SDDM | desktop ISO and desktop profile; list in `scripts/desktop-packages.txt` |
+| 32-bit edition | i686 (`MELON_ARCH=x86`, `-march=pentium-m -mfpmath=sse`: SSE2, as Qt 6 needs), LXQt 2.4 on Wayland with labwc 0.20 (wlroots), SDDM, Mesa with LLVM built for the X86 backend only (i915, crocus, r300, r600, nouveau, llvmpipe, softpipe) | the owner's decision (7 October 2026): LXQt is the 32-bit desktop, for netbooks such as the MSI Wind U100 (Atom N270, 1–2 GB); drivers for every netbook-era Wi-Fi, Ethernet, graphics and laptop chip in `recipes/linux-melon/config-melon-x86` (the owner: "it should just work"; Broadcom b43 cards still need firmware nobody may redistribute); package list `scripts/desktop-packages-x86.txt`, recipes from `scripts/gen-lxqt-recipes.py` plus `recipes/melon-lxqt` (melon's LXQt defaults); no Plasma, Flatpak, NVIDIA or QEMU guest agent there (QEMU 11 doesn't build for 32-bit hosts) |
 | desktop plumbing | D-Bus, elogind, polkit, PipeWire + WirePlumber, NetworkManager, BlueZ, CUPS, UDisks2 | console profile keeps `dhcp` + wpa_supplicant |
 | graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe; zink (OpenGL on Vulkan) | |
 | developer tools | gcc 15.2 + g++, binutils 2.46, make 4.4.1, pkgconf, patch (`gcc`, `g++`, `binutils`, `make`, `pkgconf`, `patch`) | built cross-native with the cross toolchain's settings (PIE, SSP); in the package repository only, not on the ISOs; `melon-first-boot` offers them on first login (default no) |
@@ -336,6 +337,32 @@ Rebuilding the kernel takes about an hour on 2 cores.
     recipes/qemu and qemu-guest-agent use the host Python (`hosttools/python` keeps ensurepip) and put setuptools
     and wheel (PyPI wheels in `sources/`) next to QEMU's own in `python/wheels`, where its offline "tooling" group
     looks for them.
+54. **i686 needs SSE2 and `libssp_nonshared.a`.** The 32-bit toolchain targets `-march=pentium-m -mfpmath=sse`
+    (`GCC_ARCH`/`GCC_FPMATH` in `env.sh`): Qt 6 refuses to build without SSE2, and Alpine's x86 does the same. With
+    `--enable-default-ssp`, position-independent i386 code calls the hidden `__stack_chk_fail_local`, which musl
+    doesn't provide: `toolchain-finish.sh` and the musl recipe build `libssp_nonshared.a`, and
+    `patches/gcc-i686/ssp-nonshared.patch` makes gcc link it (Alpine's way). Without it libatomic's configure fails.
+55. **No text relocations on i686.** BusyBox's SHA-NI assembly (`CONFIG_SHA1_HWACCEL`, `CONFIG_SHA256_HWACCEL`) isn't
+    position-independent on i386: the PIE BusyBox got a TEXTREL and every applet segfaulted at start. The recipe
+    switches those off on i386. After a new 32-bit package, check `readelf -d` for `TEXTREL`.
+56. **GRUB 2.14 with binutils 2.44 or newer links its kernel at the wrong address.** Its configure picks
+    `-Wl,--image-base=0x400000`, which newer ld honours instead of `-Ttext`: `grub-mkimage` then stops with "kernel.img
+    miscompiled ... start address is 0x9074 instead of 0x9000" (i386-pc). `recipes/grub` and `scripts/hostgrub.sh`
+    preset `ax_cv_check_ldflags___Wl___image_base_0x400000=no`.
+57. **Generated recipes are edited in their generator.** `gen-simple-recipes.py`, `gen-kde-recipes.py` and
+    `gen-lxqt-recipes.py` rewrite their recipes at every `build-everything.sh` start, so an edit made only in
+    `recipes/<name>/MELONBUILD` is silently undone (qtdeclarative's "no PCH on x86" was). Change the generator, run it,
+    and commit both. Per-arch options go inside the arguments as `$([ "$APK_ARCH" != x86 ] || echo ...)`. On x86,
+    qt6-qtdeclarative builds without precompiled headers: with them its build tree passed 11 GB and filled the disk.
+58. **A failed package unpacks fresh on the next pass.** A CMake cache from a run that failed remembers what wasn't
+    there yet (Qt's `HAVE_EGL=false` before Mesa existed) and keeps failing after the dependency is built:
+    `build-everything.sh` deletes `work/pkg/<name>/.prepared` of each failed package between passes.
+59. **SDDM's greeter on labwc (melon-lxqt) is an xdg-shell window that labwc makes full screen.** With SDDM's
+    default layer-shell integration under labwc the greeter came up as a small box on a black screen.
+    `/etc/sddm.conf.d/15-lxqt.conf` sets `QT_WAYLAND_SHELL_INTEGRATION=xdg-shell` for the greeter and starts labwc with
+    `/usr/share/melon/sddm-labwc/rc.xml` (a window rule: no decorations, full screen). wlroots' Xwayland path must be
+    `/usr/bin/Xwayland` (recipes/wlroots), not the sysroot's, and labwc's own `labwc.desktop` session is removed so
+    SDDM starts LXQt.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but
@@ -497,7 +524,7 @@ The website is `site/`, published to the `gh-pages` branch by `scripts/publish-s
 `https://melon-77.github.io/melon-os/`). Edit it here and open the pull request against `testing`; never edit `gh-pages`
 by hand. Keep it dependency-free: hand-written HTML and CSS, the three fonts hosted in `site/fonts` (no Google Fonts or
 other third-party requests, which the footer promises), no trackers. Its facts must stay true to the repository:
-versions and sizes come from the latest release, and an edition that isn't published yet (the 32-bit LXQt one) says so.
+versions and sizes come from the latest release, and an edition that isn't published yet says so (the 32-bit LXQt one was "coming" until its signed build, 7 October 2026).
 `gauntlet.js` is only a taste of the real gauntlet, using easy questions that already appear in
 `recipes/calamares-melon/modules/gauntlet/questions.js`; never copy anything from `trial.js` (not even its questions) into the site, and keep
 the hidden owner commands out of it, as everywhere else. The pixel melon is generated from `melonfetch`'s own awk drawing
@@ -521,6 +548,13 @@ owner's choice, 29 September 2026). Tags are `v<version>` from 0.3 on (0.1 and 0
 is marked Latest (the website's download button points at `releases/latest`), carries both ISOs and `SHA256SUMS`,
 has notes written for users (what's new, which file to download, `doas apk upgrade` for installed systems), and the
 release it replaces is retitled "(superseded)" with a link to the new one.
+
+The 32-bit edition has its own **pre-release**, not marked Latest, so the website's download button keeps pointing at
+the 64-bit release: tag `i686-<date>` (`i686-20261007`), title "melon 32-bit (i686) test build, <date>", both i686 ISOs and
+`SHA256SUMS`. The site's 32-bit entry links to that tag. When ISOs change meaningfully, build new ones, add them to a
+release and update the site (ISO list, sizes, links) in the same change. A cloud session can't create releases or upload
+assets (GitHub answers 403 "not permitted for this session type"): the ISOs go to the owner's machine (for example
+through `/mnt/project-files/releases/<tag>/`) and `gh release create` / `gh release upload` run there.
 
 ## Signing keys and rotation
 
@@ -568,11 +602,18 @@ that is the only place Ubuntu is still needed.
   KWin on Wayland, SDDM, PipeWire, NetworkManager, Bluetooth, printing, Calamares with the gauntlet, the desktop ISO
   and the desktop profile for both installers (`qemu-test.py desktop` and `desktop-install`). Open hardware work
   is tracked in GitHub issues: Intel SOF audio, newer linux-firmware, Broadcom Wi-Fi.
-- **32-bit (i686) console edition: paused by the owner** (resume later). Everything is arch-aware
-  (`MELON_ARCH=x86`), but the i686 toolchain doesn't finish yet: GCC's final build fails in libatomic's
-  configure because `--enable-default-ssp` on i386 needs `__stack_chk_fail_local`, which comes from a
-  `libssp_nonshared.a` (Alpine builds one in its musl package). Add that to the musl build (or drop
-  default SSP for i686), then run `scripts/queue-2.sh`'s 32-bit part.
+- **32-bit (i686) edition with LXQt: built, signed and published, waiting for real hardware** (resumed by the owner,
+  7 October 2026, for an MSI Wind U100: Atom N270, 2 GB). `MELON_ARCH=x86 scripts/build-everything.sh` builds the
+  toolchain, the base system, Qt, LXQt and labwc, then both ISOs (BUILDING.md). Both pass their tests on QEMU's Atom
+  N270 CPU model: the console ISO (`qemu-test.py live|disk --i686`) and the LXQt desktop ISO
+  (`desktop-install --i686`, 2 GB of RAM: install through Calamares, SDDM's greeter on labwc, the LXQt session,
+  printing, the gauntlet's rewards). Not yet on 32-bit: NetHack (its source wasn't reachable from the test machine),
+  the QEMU guest agent. Signed with melon's key and published (7 October 2026): `repo/x86` is on the `packages` branch
+  next to `x86_64` (publish-repo.sh replaces the whole branch, so a machine that built only one architecture must start
+  from the branch's current contents); both ISOs rebuilt from scratch on a new build container and retested (the desktop
+  test waits 90 s before typing when there is no KVM: the greeter ignores keys for a while on an emulated CPU). When
+  Ubuntu's source tool can't find an old version, its `orig` tarballs are still in `archive.ubuntu.com/ubuntu/pool/`
+  (same sha256 as the manifest). Next: a test on the owner's U100 (`sudo melon-hwreport` for Wi-Fi and graphics).
 - **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (`melon-flathub`), Steam, Firefox, VLC and
   Prism Launcher offered from Flathub on first login, GameMode. Still to do: gamepad and controller udev rules,
   MangoHud (`docs/stage2-plan.md`).
@@ -629,7 +670,9 @@ that is the only place Ubuntu is still needed.
   to a contributor's branch. The owner answers on PRs or on the pinned issue #17 ("Owner <-> build machine").
 - **What goes on an ISO (the owner's size rule):** small packages, below about 45 MB, may go on the ISOs; anything
   bigger is an online install from the package repository (gcc and friends, Cataclysm: DDA). **Extra desktops are
-  always online installs, whatever their size**: Plasma stays the only desktop on the ISO (issue #18, niri + Noctalia).
+  always online installs, whatever their size**: Plasma stays the only desktop on the 64-bit ISO (issue #18, niri +
+  Noctalia). The 32-bit desktop ISO carries LXQt instead of Plasma (the owner's decision); LXQt is in the 64-bit
+  package repository too, as an online install.
 - **Decided, don't re-propose:** Nix is available but off by default (not on the ISOs, no service, only root trusted);
   foreign repos stay opt-in and tagged; the gauntlet's rewards are only for people who pass its final trial; melon's
   own games may live in their own melon-77 repositories as submodules.

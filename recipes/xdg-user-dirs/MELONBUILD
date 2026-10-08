@@ -1,0 +1,9 @@
+pkgname=xdg-user-dirs
+pkgver=0.19
+pkgrel=0
+pkgdesc="Creates the Desktop, Documents, Downloads, ... folders in the user's language"
+license=GPL-2.0-or-later
+url=https://www.freedesktop.org/wiki/Software/xdg-user-dirs/
+source=(xdg-user-dirs-0.19.tar.xz)
+build(){ meson_setup -Ddocs=false build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

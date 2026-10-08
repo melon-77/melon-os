@@ -27,18 +27,22 @@
       "title": "melon 32-bit desktop",
       "variant": "i686 · LXQt",
       "match": "melon-desktop-*-i686.iso",
-      "blurb": "LXQt on Wayland for old netbooks and 32-bit laptops, with the same installers.",
-      "desc": "LXQt on Wayland for old netbooks and 32-bit laptops, live session and graphical installer.",
-      "coming_group": "x86"
+      "blurb": "LXQt on Wayland for old netbooks and 32-bit laptops, with the same installers. Tested in QEMU on an emulated Atom N270 with 2 GB; not yet tried on a real netbook.",
+      "desc": "LXQt on Wayland for old netbooks and 32-bit laptops, live session and graphical installer. Tested in QEMU only so far.",
+      "coming_group": "x86",
+      "tag": "i686-20261007",
+      "prerelease": true
     },
     {
       "id": "x86-console",
       "title": "melon 32-bit console",
       "variant": "i686",
       "match": "melon-2*-i686.iso",
-      "blurb": "No desktop, for 32-bit machines, with the quick text installer.",
-      "desc": "No desktop, for 32-bit machines, with the quick text installer.",
-      "coming_group": "x86"
+      "blurb": "No desktop, for 32-bit machines, with the quick text installer. Tested in QEMU only so far.",
+      "desc": "No desktop, for 32-bit machines, with the quick text installer. Tested in QEMU only so far.",
+      "coming_group": "x86",
+      "tag": "i686-20261007",
+      "prerelease": true
     }
   ],
   "coming_groups": {
@@ -46,8 +50,8 @@
       "id": "x86",
       "title": "melon 32-bit",
       "variant": "i686 · LXQt",
-      "blurb": "For old netbooks and 32-bit laptops: LXQt on Wayland, with the same installers. Built and tested in QEMU on an emulated Atom N270 with 2 GB. Not published yet, because it still needs a signed build.",
-      "desc": "For old netbooks and 32-bit laptops. Not published yet: it still needs a signed build."
+      "blurb": "For old netbooks and 32-bit laptops: LXQt on Wayland, with the same installers. Not published yet.",
+      "desc": "For old netbooks and 32-bit laptops. Not published yet."
     }
   },
   "files": {
@@ -55,13 +59,29 @@
       "file": "melon-desktop-20260929-x86_64.iso",
       "size": 836601856,
       "sha256": "fb4e37204a56fe73272915b093d22427d7a5147abb2fd3fb79044f4ddb981f5f",
+      "tag": "melon-20260929.2",
       "url": "https://github.com/melon-77/melon-os/releases/download/melon-20260929.2/melon-desktop-20260929-x86_64.iso"
     },
     "console": {
       "file": "melon-20260929-x86_64.iso",
       "size": 395522048,
       "sha256": "35f07ab814fb281cc5221cafdc208d264e002c798312186f34d3ac52ac9a0449",
+      "tag": "melon-20260929.2",
       "url": "https://github.com/melon-77/melon-os/releases/download/melon-20260929.2/melon-20260929-x86_64.iso"
+    },
+    "x86-desktop": {
+      "file": "melon-desktop-20261007-i686.iso",
+      "size": 632825856,
+      "sha256": "4854ffad6b51f9c86e94874c6f6a7d7fc11c4a91578a20801a6cfd4c1d423b9b",
+      "tag": "i686-20261007",
+      "url": "https://github.com/melon-77/melon-os/releases/download/i686-20261007/melon-desktop-20261007-i686.iso"
+    },
+    "x86-console": {
+      "file": "melon-20261007-i686.iso",
+      "size": 378738688,
+      "sha256": "d0501153f56181675b59c6c267feb2bf5b24fb5f331448d520daf05ec1c50f86",
+      "tag": "i686-20261007",
+      "url": "https://github.com/melon-77/melon-os/releases/download/i686-20261007/melon-20261007-i686.iso"
     }
   }
 }

@@ -45,9 +45,10 @@ This is a recommendation; the owner decides, and signing up is the owner's to do
 
 1. Run `scripts/upload-isos.sh` for the host with the release's ISOs.
 2. In `site/releases.json`, add the host to `mirrors` as `{"label": "SourceForge", "url": "https://.../{file}"}` (`{file}` becomes each
-   ISO's name; the script prints the page address), then run `scripts/site-release.py render`. Every download then shows "also from ...",
-   and the note about GitHub changes by itself.
+   ISO's name, `{tag}` the GitHub release's tag). A host that only has some releases lists them:
+   `{"label": "SourceForge", "tags": {"i686-20261007": "https://sourceforge.net/projects/<project>/files/i686-20261007/{file}/download"}}`.
+   Then run `scripts/site-release.py render`. Every file the host carries then shows "also from ...", and the note about GitHub changes by itself.
 3. Put the same link in the release notes, update README and `docs/`, and open the pull request against `testing`
    (the site follows `AGENTS.md` "Website"; `scripts/publish-site.sh` publishes it).
-4. When the 32-bit editions are published, add their rows (size, SHA-256) at the same time: the `melon 32-bit` row on the download page
-   and in the ISO list on the home page says "coming" until then.
+4. The 32-bit editions are in their own GitHub pre-release (`i686-<date>`). They are filled with
+   `scripts/site-release.py update --tag i686-<date> --editions x86-desktop,x86-console`, which also marks them "test build" on the site.

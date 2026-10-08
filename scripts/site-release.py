@@ -12,8 +12,16 @@ site/download/index.html, so a new release is two commands and no HTML:
 `update` takes the version, name and date from the release itself ("melon 0.3 “Cantaloupe”") unless you pass --version, --name
 and --date. It matches the release's assets to the editions in releases.json by file name pattern; an edition with no asset is
 shown as "coming" (the 32-bit editions, until their ISOs are in a release). Sizes and SHA-256 come from the release assets
-(GitHub records both); set GITHUB_TOKEN if the API rate limit bites. To list other file hosts next to every file, put them in
-"mirrors" in releases.json as {"label": "SourceForge", "url": "https://.../{file}"}.
+(GitHub records both); set GITHUB_TOKEN if the API rate limit bites. To list other file hosts next to the files, put them in
+"mirrors" in releases.json as {"label": "SourceForge", "url": "https://.../{file}"} ({tag} works too), or, for a host that only
+has some releases, {"label": "SourceForge", "tags": {"i686-20261007": "https://.../i686-20261007/{file}/download"}}.
+
+A second release (the 32-bit pre-release) goes in the same file; name the editions it carries:
+
+    scripts/site-release.py update --tag i686-20261007 --editions x86-desktop,x86-console
+
+That fills only those editions (each remembers its tag, and a pre-release is shown as a "test build") and leaves the release's
+name, version and date, and the other editions, alone. A plain `update --tag <tag>` leaves editions that have their own tag alone too.
 
 Then commit site/ and open the pull request against testing; scripts/publish-site.sh publishes it. Standard library only.
 """
@@ -58,18 +66,30 @@ def split_editions(data):
     return rows
 
 
+def mirror_url(m, f):
+    """-> the mirror's link for file f, or None when the mirror doesn't carry f's release."""
+    tpl = m["tags"].get(f.get("tag")) if "tags" in m else m.get("url")
+    return tpl.replace("{file}", f["file"]).replace("{tag}", f.get("tag", "")) if tpl else None
+
+
 def links(data, f):
     out = [("GitHub" if "github.com" in f["url"] else "download", f["url"])]
     for m in data.get("mirrors", []):
-        out.append((m["label"], m["url"].replace("{file}", f["file"])))
+        u = mirror_url(m, f)
+        if u:
+            out.append((m["label"], u))
     return out
+
+
+def variant(ed):
+    return esc(ed["variant"]).replace(" · ", " &middot; ") + (" &middot; test build" if ed.get("prerelease") else "")
 
 
 def render_home_isos(data):
     li = []
     for kind, ed, f in split_editions(data):
         size = "" if kind == "coming" or not f else " &middot; " + mb(f["size"])
-        name = '<div class="iso-name"><b>%s</b><span>%s%s</span></div>' % (esc(ed["title"]), esc(ed["variant"]).replace(" · ", " &middot; "), size)
+        name = '<div class="iso-name"><b>%s</b><span>%s%s</span></div>' % (esc(ed["title"]), variant(ed) if kind == "file" else esc(ed["variant"]).replace(" · ", " &middot; "), size)
         if kind == "file":
             primary = ed["id"] == data["editions"][0]["id"]
             li.append('    <li>\n      %s\n      <p>%s</p>\n      <a class="btn small%s" href="download/#%s">Get it</a>\n    </li>'
@@ -94,7 +114,7 @@ def render_files(data):
                 '      <a class="btn small%s" href="%s" download>Download</a>\n    </li>'
                 .replace("{size:,}", format(f["size"], ","))
                 .replace("{mb}", mb(f["size"]))
-                % (esc(ed["id"]), esc(ed["title"]), esc(ed["variant"]).replace(" · ", " &middot; "), esc(ed["desc"]), esc(f["file"]), esc(f["sha256"]),
+                % (esc(ed["id"]), esc(ed["title"]), variant(ed), esc(ed["desc"]), esc(f["file"]), esc(f["sha256"]),
                    also, "" if primary else " ghost", esc(ls[0][1])))
         else:
             li.append('    <li class="soon" id="%s">\n      <div class="iso-name"><b>%s</b><span>%s</span></div>\n      <p>%s</p>\n      <span class="tag">coming</span>\n    </li>'
@@ -103,12 +123,20 @@ def render_files(data):
 
 
 def render_note(data):
-    hosts = ["GitHub"] + [m["label"] for m in data.get("mirrors", [])]
-    base = 'The checksums are also in <a href="https://github.com/%s/releases/download/%s/SHA256SUMS"><code>SHA256SUMS</code></a>.' % (data["repo"], data["tag"])
+    files = list(data["files"].values())
+    hosts = ["GitHub"] + [m["label"] for m in data.get("mirrors", []) if any(mirror_url(m, f) for f in files)]
+    tags = []
+    for f in files:
+        tag = f.get("tag", data["tag"])
+        if tag not in tags:
+            tags.append(tag)
+    sums = ", ".join('<a href="https://github.com/%s/releases/download/%s/SHA256SUMS"><code>SHA256SUMS</code></a>%s'
+                     % (data["repo"], tg, " (melon %s)" % esc(data["version"]) if tg == data["tag"] else " (%s)" % esc(tg)) for tg in tags or [data["tag"]])
+    base = "The checksums are also in %s." % sums
     if len(hosts) == 1:
         return ("These files are served from GitHub for now. When melon moves its downloads to other file hosts, this page lists them next to each file, "
                 "and the checksums stay the same wherever you get a file. " + base)
-    return "Every file is on %s; the checksum is the same wherever you get it. %s" % (" and ".join([", ".join(hosts[:-1]), hosts[-1]]) if len(hosts) > 2 else " and ".join(hosts), base)
+    return "Every file is on GitHub; some are also on %s. The checksum is the same wherever you get a file. %s" % (" and ".join([", ".join(hosts[1:-1]), hosts[-1]]) if len(hosts) > 2 else hosts[1], base)
 
 
 def regions(data):
@@ -165,11 +193,21 @@ def update(a):
     data = json.load(open(DATA))
     repo = a.repo or data["repo"]
     rel = json.loads(fetch("https://api.github.com/repos/%s/releases/tags/%s" % (repo, a.tag)))
-    m = re.match(r"melon (\d+(?:\.\d+)*) .(.+).", rel.get("name") or "")
-    data["repo"], data["tag"] = repo, a.tag
-    data["version"] = a.version or (m.group(1) if m else sys.exit("can't read the version from the release name %r: pass --version, --name and --date" % rel.get("name")))
-    data["name"] = a.name or (m.group(2) if m else sys.exit("pass --name"))
-    data["date"] = a.date or rel["published_at"][:10]
+    only = a.editions.split(",") if a.editions else None
+    known = [e["id"] for e in data["editions"]]
+    for i in only or []:
+        if i not in known:
+            sys.exit("no edition %r in releases.json (editions: %s)" % (i, ", ".join(known)))
+    if only is None:
+        m = re.match(r"melon (\d+(?:\.\d+)*) .(.+).", rel.get("name") or "")
+        data["repo"], data["tag"] = repo, a.tag
+        data["version"] = a.version or (m.group(1) if m else sys.exit("can't read the version from the release name %r: pass --version, --name and --date" % rel.get("name")))
+        data["name"] = a.name or (m.group(2) if m else sys.exit("pass --name"))
+        data["date"] = a.date or rel["published_at"][:10]
+        # editions with a release of their own (the 32-bit pre-release) are filled by `--editions`, not by this
+        take = [e for e in data["editions"] if "tag" not in e]
+    else:
+        take = [e for e in data["editions"] if e["id"] in only]
     sums = {}
     for asset in rel["assets"]:
         if asset["name"] == "SHA256SUMS":
@@ -177,11 +215,17 @@ def update(a):
                 p = line.split()
                 if len(p) == 2:
                     sums[p[1].lstrip("*")] = p[0]
-    data["files"] = {}
-    for ed in data["editions"]:
+    for ed in take:
+        data["files"].pop(ed["id"], None)
         hits = [x for x in rel["assets"] if fnmatch.fnmatch(x["name"], ed["match"])]
         if len(hits) > 1:
             sys.exit("%d assets match %s for %s: %s" % (len(hits), ed["match"], ed["id"], ", ".join(x["name"] for x in hits)))
+        if only is not None:
+            ed["tag"] = a.tag
+            if rel.get("prerelease"):
+                ed["prerelease"] = True
+            else:
+                ed.pop("prerelease", None)
         if hits:
             x = hits[0]
             digest = (x.get("digest") or "").removeprefix("sha256:") or sums.get(x["name"])
@@ -189,7 +233,9 @@ def update(a):
                 sys.exit("no SHA-256 for %s (no digest on the asset, no SHA256SUMS line)" % x["name"])
             if x["name"] in sums and sums[x["name"]] != digest:
                 sys.exit("SHA256SUMS and GitHub's digest disagree for %s" % x["name"])
-            data["files"][ed["id"]] = {"file": x["name"], "size": x["size"], "sha256": digest, "url": x["browser_download_url"]}
+            data["files"][ed["id"]] = {"file": x["name"], "size": x["size"], "sha256": digest, "tag": a.tag, "url": x["browser_download_url"]}
+    # keep the files in edition order
+    data["files"] = {e["id"]: data["files"][e["id"]] for e in data["editions"] if e["id"] in data["files"]}
     json.dump(data, open(DATA, "w"), indent=2, ensure_ascii=False)
     open(DATA, "a").write("\n")
     print("releases.json: melon %s “%s” %s, published: %s; coming: %s" % (
@@ -205,6 +251,7 @@ def main():
     u = sub.add_parser("update")
     u.add_argument("--tag", required=True)
     u.add_argument("--repo")
+    u.add_argument("--editions", help="comma-separated edition ids this release carries (a second release, e.g. the 32-bit pre-release)")
     u.add_argument("--version")
     u.add_argument("--name")
     u.add_argument("--date")

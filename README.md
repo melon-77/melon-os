@@ -57,7 +57,7 @@ Packages are signed with `keys/melon-signing.rsa` (not committed; generate your 
 ## Installing
 
 Boot the ISO. The graphical installer (desktop ISO) is Calamares. There is also a quick console
-installer for people who know its name.
+installer for people who know its name (it got a new name and a new song on 8 October 2026; the old name no longer works).
 
 ## Website
 

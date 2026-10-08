@@ -508,7 +508,9 @@ the serial port, so tests don't need a screen. The test also records the sound c
   It asks base or desktop and installs exactly what the desktop ISO installs. It plays
   `/usr/share/melon/.ice` (from the `melon-sounds` package, live ISO only) at 30% volume while it runs.
   On 8 October 2026 the owner gave it a new name (only its hash is in `zz-melon.sh`; the old name no longer works) and
-  a new song, which also plays under the graphical installer (`melon-install-gui`). The song is `recipes/melon-sounds/ice.mp3`:
+  a new song, which also plays under the graphical installer (`melon-install-gui`), and a new intro: `/usr/share/melon/.fall`
+  (replaces the diamond glove) draws a melon rolling off a cliff at dusk in true-colour half blocks, then the title from a 5x7
+  pixel font, so the name is in glyph rows, never as text. Original art, in the mood the owner asked for. The song is `recipes/melon-sounds/ice.mp3`:
   the owner's file, re-encoded as 128 kb/s MP3 and set to about -12 LUFS so that it is as loud as the old track at the same
   30% (the original was 10 dB quieter). The file names `.cold` and `.ice` stay as they are, so nothing in the repo spells
   the name. A new name means a new hash: `printf %s <name> | sha256sum | cut -c1-16`.

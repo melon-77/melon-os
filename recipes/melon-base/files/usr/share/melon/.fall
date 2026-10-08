@@ -1,0 +1,87 @@
+#!/bin/sh
+# intro: a melon rolling off a cliff at dusk, pixel art in true colour, stars twinkling, then the title.
+# Original art; the title is drawn from a 5x7 pixel font, so no file in the repo spells it.
+[ -t 1 ] || exit 0
+E=$(printf '\033')
+cols=$(stty size 2>/dev/null | cut -d' ' -f2); [ -n "$cols" ] || cols=80
+printf '%s[2J%s[?25l' "$E" "$E"
+awk -v E="$E" -v COLS="$cols" '
+function mix(r1,g1,b1,r2,g2,b2,a){ pr=r1+(r2-r1)*a; pg=g1+(g2-g1)*a; pb=b1+(b2-b1)*a }
+function h(a,b,c,  v){ v=sin(a*12.9898+b*78.233+c*37.719)*43758.5453; v=v-int(v); if(v<0) v+=1; return int(v*1000) }
+function mx(t){ return 16 + 28*t }                     # the melon leaves the ledge and falls in an arc
+function my(t){ return 4 + 40*t*t }
+function sky(x,y,  g){                                  # dusk: near black above, a rose-gold glow near the ground
+  g=(y<0?0:y)/26; if(g>1) g=1; g=g*g
+  mix(7,8,14, 74,44,46, g) }
+function bg(x,y,f,   i,d){
+  sky(x,y)
+  if(y>=27){ mix(pr,pg,pb, 9,9,13, 0.55+0.05*((x+y)%3)) }          # the drop: fog and dark
+  d=sqrt((x-51)^2+(y-6)^2)                                           # a pale moon, with a halo
+  if(d<=3.2) mix(pr,pg,pb, 214,208,196, 0.9)
+  else if(d<=5.5) mix(pr,pg,pb, 120,112,110, 0.22*(5.5-d)/2.3)
+  if(y<19 && d>6 && h(x,y,0)<14 && ((f+h(x,y,1))%6)<4) mix(pr,pg,pb, 235,230,215, 0.5+0.4*((h(x,y,2)%3)/2))  # stars
+}
+function cliff(x,y,  edge){                           # 1 = rock, 2 = lit edge; the top edge rounds off over the drop
+  if(y<9) return 0
+  edge=21.4-(y>=9?(y-9)*0.5:0); if(edge<19.5) edge=19.5
+  if(y==9 && x<=21) return 2
+  if(y>9 && y<=13 && x<=edge && x>edge-1.4) return 2
+  if(y>9 && x<=edge) return 1
+  return 0 }
+function melon(x,y,t,a,   cx,cy,dx,dy,d,u,v,l,net,sh){ # returns 1 and sets pr,pg,pb when the pixel is on the melon
+  cx=mx(t); cy=my(t); dx=x-cx; dy=y-cy; d=sqrt(dx*dx+dy*dy)
+  if(d>5.1) return 0
+  u=cos(a)*dx+sin(a)*dy; v=-sin(a)*dx+cos(a)*dy
+  net=((u+20)%2.4<0.7) || ((v+20)%2.4<0.7)
+  sh=1-0.55*((dx*0.6+dy*0.8+5)/10)                       # light from the upper left
+  if(sh<0.35) sh=0.35
+  if(net) { pr=150*sh+50; pg=170*sh+45; pb=110*sh+20 } else { pr=70*sh+10; pg=118*sh+8; pb=64*sh+8 }
+  if(d>4.0 && dx+dy>1.5) mix(pr,pg,pb, 215,160,70, 0.55)  # a gold rim where the glow hits it
+  return 1 }
+function frame(f,   row,x,y,half,line,out,r1,g1,b1,r2,g2,b2,i,ct,tt,k,br,bg_,bb,r,rows){
+  out=E "[H"
+  for(row=0;row<16;row++){
+    line=pad
+    for(x=0;x<60;x++){
+      for(half=0;half<2;half++){ y=2*row+half
+        bg(x,y,f); br=pr; bg_=pg; bb=pb
+        k=cliff(x,y)
+        if(k==2) mix(br,bg_,bb, 150,120,104, 0.9); else if(k==1) mix(br,bg_,bb, 15,12,16, 0.92)
+        br=pr; bg_=pg; bb=pb
+        for(i=0;i<3;i++){ tt=T*(1+i*0.35); if(int(22+i*1.5)==x && int(9+tt*34-i)==y && T>0.05) { mix(br,bg_,bb, 120,100,92, 0.9); br=pr; bg_=pg; bb=pb } }
+        for(i=4;i>=1;i--){ ct=T-i*0.07; if(ct<0) continue
+          if(melon(x,y,ct,ct*14)){ mix(br,bg_,bb, pr,pg,pb, 0.45*(5-i)/4); br=pr; bg_=pg; bb=pb } }
+        if(melon(x,y,T,T*14)){ br=pr; bg_=pg; bb=pb }
+        if(half==0){ r1=br; g1=bg_; b1=bb } else { r2=br; g2=bg_; b2=bb } }
+      line=line E "[0;38;2;" int(r1) ";" int(g1) ";" int(b1) ";48;2;" int(r2) ";" int(g2) ";" int(b2) "m\342\226\200" }
+    out=out line E "[0m" E "[K\n" }
+  for(r=0;r<4;r++) out=out title[r] E "[K\n"
+  out=out "\n" pad "         " E "[38;2;200;170;120mthe melon console installer" E "[0m" E "[K\n"
+  out=out pad "         " E "[38;2;105;95;100mquick, no questions you do not need" E "[0m" E "[K\n"
+  printf "%s", out; fflush() }
+BEGIN{
+  pad=""; if(COLS>64) for(i=0;i<int((COLS-60)/2);i++) pad=pad " "
+  # 5x7 pixel font, drawn with half blocks in a bone-to-gold gradient (glyphs in display order)
+  G[1]="11111 00100 00100 00100 00100 00100 11111"
+  G[2]="10001 11001 10101 10011 10001 10001 10001"
+  G[3]="11111 10000 10000 11110 10000 10000 11111"
+  G[4]="10001 10001 10001 10001 01010 01010 00100"
+  G[5]="11111 00100 00100 00100 00100 00100 00100"
+  G[6]="01110 10001 10001 11111 10001 10001 10001"
+  G[7]="11110 10001 10001 11110 10001 10001 11110"
+  G[8]="10000 10000 10000 10000 10000 10000 11111"
+  split("1 2 3 4 1 5 6 7 8 3", order, " ")
+  for(r=0;r<8;r++) for(c=0;c<60;c++) P[r,c]=0
+  for(gi=1;gi<=10;gi++){ split(G[order[gi]],rows," "); for(r=1;r<=7;r++) for(c=1;c<=5;c++) if(substr(rows[r],c,1)=="1"){ P[r-1,(gi-1)*6+c-1]=1 } }
+  for(tr=0;tr<4;tr++){ s=pad
+    for(c=0;c<60;c++){ a=P[2*tr,c]; b=(2*tr+1<7)?P[2*tr+1,c]:0
+      ca=(236-12*(2*tr)) ";" (226-18*(2*tr)) ";" (205-20*(2*tr)); cb=(236-12*(2*tr+1)) ";" (226-18*(2*tr+1)) ";" (205-20*(2*tr+1))
+      if(a && b) s=s E "[0;38;2;" ca ";48;2;" cb "m\342\226\200"
+      else if(a) s=s E "[0;38;2;" ca "m\342\226\200"
+      else if(b) s=s E "[0;38;2;" cb "m\342\226\204"
+      else s=s E "[0m " }
+    title[tr]=s E "[0m" }
+  for(f=0;f<16;f++){ T=0.7*(f<14?f:14)/14; frame(f); system("sleep 0.09") }
+  T=0.7; frame(99)
+}'
+printf '%s[?25h\n' "$E"

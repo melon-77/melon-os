@@ -21,8 +21,9 @@ ln -sf /proc/self/fd /dev/fd; ln -sf fd/0 /dev/stdin; ln -sf fd/1 /dev/stdout; l
 wait_fstab_devices(){
   waited=0
   [ -r /etc/fstab ] || return 0
-  while read -r dev _ _ opts _; do
+  while read -r dev mp _ opts _; do
     case $dev in ''|'#'*) continue ;; esac
+    [ "$mp" = / ] && continue        # already mounted (by the initramfs or the live init)
     case ,$opts, in *,noauto,*|*,nofail,*) continue ;; esac
     case $dev in
       UUID=*)      node=/dev/disk/by-uuid/${dev#UUID=} ;;

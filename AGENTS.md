@@ -19,7 +19,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | devices | eudev 3.2 on the desktop profile (`udevd` service), BusyBox mdev (`mdevd` service) on the console profile | the desktop profile swaps `mdevd` for `udevd`; see rule 44 |
 | packages | apk-tools 3.0.8 | repo index `Packages.adb`, signed with `keys/melon-signing.rsa` |
 | kernel | Linux 7.0, `linux-melon` (generic) | config = `x86_64_defconfig` + `recipes/linux-melon/config-melon` |
-| boot | GRUB 2.14, both `i386-pc` and `x86_64-efi` | ISO and installs boot on BIOS **and** UEFI |
+| boot | GRUB 2.14, both `i386-pc` and `x86_64-efi` | ISO and installs boot on BIOS **and** UEFI; the installed system's boot menu is hidden (skipped after 1 s, Shift or Esc opens it) unless another system is found, then it shows for 5 s |
 | disks | GPT: 1 MiB BIOS boot, 1 GiB FAT32 `/boot` (also the ESP), XFS `/` | kernel boots with `root=PARTUUID=...`; only encrypted (LUKS) installs have an initramfs (rule 28); dual boot next to Windows on UEFI (see Installers) |
 | filesystem | merged `/usr`: `/bin`, `/sbin`, `/usr/sbin` -> `usr/bin`, `/lib` -> `usr/lib` | packages must only ship files under `/usr`, `/etc`, `/var`, `/boot` |
 | desktop | KDE Plasma 6.6 on Wayland (KWin, Xwayland), Qt 6.10, SDDM | desktop ISO and desktop profile; list in `scripts/desktop-packages.txt` |
@@ -529,6 +529,22 @@ versions and sizes come from the latest release, and an edition that isn't publi
 `recipes/calamares-melon/modules/gauntlet/questions.js`; never copy anything from `trial.js` (not even its questions) into the site, and keep
 the hidden owner commands out of it, as everywhere else. The pixel melon is generated from `melonfetch`'s own awk drawing
 (`art/site.py`), so change the melon there, not in the SVG.
+
+## Boot time
+
+Where the time goes after the firmware: GRUB (the live ISO's menu waits 5 s; an installed melon-only system's is hidden and
+skipped after 1 s, `GRUB_TIMEOUT` and `GRUB_TIMEOUT_STYLE` in `/etc/default/grub` change that; the `grub` package's own `/etc/default/grub` must not set `GRUB_TIMEOUT`, or it wins over `melon-update-grub`'s default: it did, until `grub` pkgrel 2), the kernel, stage 1 (`/etc/runit/1`:
+mounts, udev coldplug and `udevadm settle`, filesystems), then stage 2 (runsvdir starts every service at once; services that need
+another wait for it with `sv check`, which polls for up to 7 s). Stage 1 writes a timeline to `/run/melon-boot-times` and
+**`melon-boottime`** prints it with the start times of the main services: run it on a real machine before and after changing
+anything that touches boot, and quote its numbers in the PR.
+
+Measured on 7 October 2026 with the 29 September desktop ISO in QEMU **without KVM** (software emulation on 4 cores, so every
+CPU-bound step is several times slower than on real hardware; read the proportions, not the seconds): kernel to `/init` 2.4 s,
+initramfs 0.5 s, stage 1 6.5 s of which the udev coldplug and settle took 4.2 s, stage 2 to a login prompt 3 s. Nothing in
+stage 1 or 2 sleeps or waits on a timeout in that run. Not measured yet: real hardware (a GPU's firmware load blocks
+`udevadm settle`, so stage 1 may be longer there) and the installed system. Ideas, not done: start the filesystem mounts while
+the coldplug runs; keep stage 1's udevd running into stage 2 (it would remove rule 44's gap and the second udevd start).
 
 ## Package repository (online)
 

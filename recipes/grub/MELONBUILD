@@ -24,8 +24,8 @@ package(){
   install -Dm644 $startdir/unicode.pf2 $pkgdir/usr/share/grub/unicode.pf2
   mkdir -p $pkgdir/etc/default
   cat > $pkgdir/etc/default/grub <<'CFG'
+# no GRUB_TIMEOUT here: melon-update-grub picks it (hidden menu on a melon-only computer, 5 s menu next to another system)
 GRUB_DISTRIBUTOR="melon"
-GRUB_TIMEOUT=3
 GRUB_CMDLINE_LINUX_DEFAULT="quiet"
 CFG
 }

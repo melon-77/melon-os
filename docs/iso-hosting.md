@@ -59,5 +59,9 @@ This is a recommendation; the owner decides, and signing up is the owner's to do
   from the owner's computer in WSL with an ed25519 key made for this (`~/.ssh/id_ed25519_sourceforge`, public half on the SourceForge account):
   `SF_USER=melaboton SF_PROJECT=melonl scripts/upload-isos.sh sourceforge <release folder> <iso>...`.
 - On SourceForge now: `i686-20261007` (both 32-bit ISOs and `SHA256SUMS`, the same files as the GitHub pre-release; the download page lists them
-  as "also from SourceForge"). The 0.2 ISOs follow, and every later release gets its own folder named after its tag.
+  as the download buttons). The 0.2 ISOs follow, and every later release gets its own folder named after its tag.
 - Not set up yet: the Internet Archive and Cloudflare R2.
+- SourceForge is the **primary** host (`"primary": true` on its `mirrors` entry in `site/releases.json`, the owner's decision of 8 October 2026): the
+  download buttons and the `SHA256SUMS` links go there, and GitHub's download link is dropped for every file SourceForge carries. A file
+  SourceForge doesn't carry yet keeps its GitHub link, so no button is ever dead; add a release's folder to the entry's `tags` as soon as it is uploaded.
+  The GitHub releases stay as the release notes and the source of the checksums the site reads.

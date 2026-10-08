@@ -15,6 +15,8 @@ shown as "coming" (the 32-bit editions, until their ISOs are in a release). Size
 (GitHub records both); set GITHUB_TOKEN if the API rate limit bites. To list other file hosts next to the files, put them in
 "mirrors" in releases.json as {"label": "SourceForge", "url": "https://.../{file}"} ({tag} works too), or, for a host that only
 has some releases, {"label": "SourceForge", "tags": {"i686-20261007": "https://.../i686-20261007/{file}/download"}}.
+Add "primary": true to make a mirror the download button and drop GitHub's link for the files it carries (the page then also links that
+host's SHA256SUMS: {file} is replaced by SHA256SUMS).
 
 A second release (the 32-bit pre-release) goes in the same file; name the editions it carries:
 
@@ -73,12 +75,14 @@ def mirror_url(m, f):
 
 
 def links(data, f):
-    out = [("GitHub" if "github.com" in f["url"] else "download", f["url"])]
-    for m in data.get("mirrors", []):
-        u = mirror_url(m, f)
-        if u:
-            out.append((m["label"], u))
-    return out
+    """-> [(label, url)], the first one being the download button. A mirror marked "primary" that carries the file comes first and
+    takes the place of GitHub, which is then not offered for that file; files the primary host doesn't carry (yet) keep GitHub."""
+    gh = [("GitHub" if "github.com" in f["url"] else "download", f["url"])]
+    mirrors = [(m, mirror_url(m, f)) for m in data.get("mirrors", [])]
+    mirrors = [(m, u) for m, u in mirrors if u]
+    prim = [(m["label"], u) for m, u in mirrors if m.get("primary")]
+    rest = [(m["label"], u) for m, u in mirrors if not m.get("primary")]
+    return prim + rest if prim else gh + rest
 
 
 def variant(ed):
@@ -122,21 +126,38 @@ def render_files(data):
     return "\n" + "\n".join(li) + "\n  "
 
 
+def sums_link(data, tag, files):
+    """The SHA256SUMS link for a release: the primary host's copy when it carries that release, else GitHub's."""
+    for m in data.get("mirrors", []):
+        if m.get("primary"):
+            f = next((x for x in files if x.get("tag", data["tag"]) == tag), None)
+            u = mirror_url(m, dict(f, file="SHA256SUMS")) if f else None
+            if u:
+                return u
+    return "https://github.com/%s/releases/download/%s/SHA256SUMS" % (data["repo"], tag)
+
+
 def render_note(data):
     files = list(data["files"].values())
-    hosts = ["GitHub"] + [m["label"] for m in data.get("mirrors", []) if any(mirror_url(m, f) for f in files)]
     tags = []
     for f in files:
         tag = f.get("tag", data["tag"])
         if tag not in tags:
             tags.append(tag)
-    sums = ", ".join('<a href="https://github.com/%s/releases/download/%s/SHA256SUMS"><code>SHA256SUMS</code></a>%s'
-                     % (data["repo"], tg, " (melon %s)" % esc(data["version"]) if tg == data["tag"] else " (%s)" % esc(tg)) for tg in tags or [data["tag"]])
+    sums = ", ".join('<a href="%s"><code>SHA256SUMS</code></a>%s'
+                     % (esc(sums_link(data, tg, files)), " (melon %s)" % esc(data["version"]) if tg == data["tag"] else " (%s)" % esc(tg)) for tg in tags or [data["tag"]])
     base = "The checksums are also in %s." % sums
-    if len(hosts) == 1:
+    prim = [m["label"] for m in data.get("mirrors", []) if m.get("primary") and any(mirror_url(m, f) for f in files)]
+    others = [m["label"] for m in data.get("mirrors", []) if not m.get("primary") and any(mirror_url(m, f) for f in files)]
+    if prim:
+        everywhere = all(any(mirror_url(m, f) for m in data["mirrors"] if m.get("primary")) for f in files)
+        head = "These files are downloaded from %s." % prim[0] if everywhere else "Most of these files are downloaded from %s; the rest are still on GitHub for now." % prim[0]
+        tail = " Files are also on %s." % " and ".join(others) if others else ""
+        return head + tail + " The checksum is the same wherever you get a file. " + base
+    if not others:
         return ("These files are served from GitHub for now. When melon moves its downloads to other file hosts, this page lists them next to each file, "
                 "and the checksums stay the same wherever you get a file. " + base)
-    return "Every file is on GitHub; some are also on %s. The checksum is the same wherever you get a file. %s" % (" and ".join([", ".join(hosts[1:-1]), hosts[-1]]) if len(hosts) > 2 else hosts[1], base)
+    return "Every file is on GitHub; some are also on %s. The checksum is the same wherever you get a file. %s" % (" and ".join([", ".join(others[:-1]), others[-1]]) if len(others) > 1 else others[0], base)
 
 
 def regions(data):

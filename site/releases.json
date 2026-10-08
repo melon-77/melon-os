@@ -91,5 +91,6 @@
       "tag": "i686-20261007",
       "url": "https://github.com/melon-77/melon-os/releases/download/i686-20261007/melon-20261007-i686.iso"
     }
-  }
+  },
+  "keep_github": true
 }

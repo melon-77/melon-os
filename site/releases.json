@@ -1,13 +1,14 @@
 {
-  "version": "0.2",
-  "name": "Bailan",
-  "date": "2026-09-29",
-  "tag": "melon-20260929.2",
+  "version": "0.3",
+  "name": "Cantaloupe",
+  "date": "2026-10-09",
+  "tag": "v0.3",
   "repo": "melon-77/melon-os",
   "mirrors": [
     {
       "label": "SourceForge",
       "tags": {
+        "v0.3": "https://sourceforge.net/projects/melonl/files/v0.3/{file}/download",
         "melon-20260929.2": "https://sourceforge.net/projects/melonl/files/melon-20260929.2/{file}/download",
         "i686-20261007": "https://sourceforge.net/projects/melonl/files/i686-20261007/{file}/download"
       },
@@ -65,18 +66,18 @@
   },
   "files": {
     "desktop": {
-      "file": "melon-desktop-20260929-x86_64.iso",
-      "size": 836601856,
-      "sha256": "fb4e37204a56fe73272915b093d22427d7a5147abb2fd3fb79044f4ddb981f5f",
-      "tag": "melon-20260929.2",
-      "url": "https://github.com/melon-77/melon-os/releases/download/melon-20260929.2/melon-desktop-20260929-x86_64.iso"
+      "file": "melon-desktop-20261008-x86_64.iso",
+      "size": 802871296,
+      "sha256": "738fc4f75386731e1d3c32e2c234465e49c5cd6538a5a9f686379311afa9d782",
+      "tag": "v0.3",
+      "url": "https://github.com/melon-77/melon-os/releases/download/v0.3/melon-desktop-20261008-x86_64.iso"
     },
     "console": {
-      "file": "melon-20260929-x86_64.iso",
-      "size": 395522048,
-      "sha256": "35f07ab814fb281cc5221cafdc208d264e002c798312186f34d3ac52ac9a0449",
-      "tag": "melon-20260929.2",
-      "url": "https://github.com/melon-77/melon-os/releases/download/melon-20260929.2/melon-20260929-x86_64.iso"
+      "file": "melon-20261008-x86_64.iso",
+      "size": 384931840,
+      "sha256": "bdabbd1ebce973c8baa45687cac010e720e73f5f9731599f10d2085d87ff9b62",
+      "tag": "v0.3",
+      "url": "https://github.com/melon-77/melon-os/releases/download/v0.3/melon-20261008-x86_64.iso"
     },
     "x86-desktop": {
       "file": "melon-desktop-20261007-i686.iso",

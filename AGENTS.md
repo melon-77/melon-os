@@ -38,7 +38,12 @@ Owner's config (`CONFIG_*` answers) lives in `docs/config.txt`. Don't change tho
 
 To build on another machine (Ubuntu 24.04 or WSL2, Debian or Devuan through the same apt path, or melon), follow
 `BUILDING.md`: `scripts/host-setup.sh`, then `scripts/build-everything.sh`. Scripts find the repo from their own
-location; recipes use `$M`. Never write a machine's absolute path into a script or recipe.
+location; recipes use `$M`. Never write a machine's absolute path into a script or recipe. A checkout's `tools/` and
+`sysroot/` are tied to its path (the cross compiler has `--with-sysroot=<checkout>/sysroot` built in): **two sessions must
+not share one checkout** (one switching branches under the other's build). Give each its own `git worktree` with its own
+toolchain, sysroot and `repo/` ("Windows + WSL2 build machine" in `BUILDING.md` says how). Run scripts by their absolute path:
+`toolchain.sh` changes directory and then looks for `toolchain-finish.sh` next to `$0`. The signing key can stay where it is:
+`MELON_SIGN_KEY=/path/to/melon-signing.rsa` is honoured by `melon-build` and `mkiso.sh`.
 
 ## Repository layout
 
@@ -419,8 +424,13 @@ can come to rest off the flippers is a trap). Harvest's melons, grafts, pests an
 their effects are in `game.cpp` (`applyMachine` for the physics, `add` and `currentMult` for the scoring). Unlocks
 are variety only (no permanent power) and live in the player's `~/.local/share/melon/pinball/unlocks.txt`.
 
-Logs go to `logs/qemu-*.log`. The tests use KVM when `/dev/kvm` is usable (WSL2 has it); without it QEMU runs in
-software emulation and everything is slow. Use generous timeouts. The ISO's GRUB and the installed system both use
+Logs go to `logs/qemu-*.log`. The tests use KVM when it really works (`qemu-test.py` asks the kernel with the
+`KVM_GET_API_VERSION` ioctl: WSL2 on Windows 11 does, WSL2 on **Windows 10, or on a CPU Windows can't nest on, creates a
+`/dev/kvm` that QEMU can't use**, "failed to initialize kvm: No such device"); without it QEMU runs in software emulation
+(`-accel tcg,thread=multi -cpu max`) and everything is slow. Measured on a Ryzen 7 5800U under Windows 10 (4 vCPUs, no KVM, 9 October 2026):
+the console `live` install takes 77 s, `disk` and `disk --uefi` about 40 s each, and the desktop ISO boots and takes a login on
+the serial console in 25 s, but the Plasma desktop tests (`desktop`, `desktop-install`) were not usable there (another session saw
+Plasma not start in 15 minutes): run those on a machine with KVM. Use generous timeouts. The ISO's GRUB and the installed system both use
 the serial port, so tests don't need a screen. The test also records the sound card output to
 `logs/audio-capture.wav`, which lets you check that the installer music really plays.
 

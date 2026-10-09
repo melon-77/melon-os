@@ -53,7 +53,7 @@ This is a recommendation; the owner decides, and signing up is the owner's to do
 4. The 32-bit editions are in their own GitHub pre-release (`i686-<date>`). They are filled with
    `scripts/site-release.py update --tag i686-<date> --editions x86-desktop,x86-console`, which also marks them "test build" on the site.
 
-## Current setup (8 October 2026)
+## Current setup (9 October 2026)
 
 - **SourceForge** project `melonl` (account `melaboton`), files at `https://sourceforge.net/projects/melonl/files/<release folder>/`. Uploads run
   from the owner's computer in WSL with an ed25519 key made for this (`~/.ssh/id_ed25519_sourceforge`, public half on the SourceForge account):
@@ -67,4 +67,5 @@ This is a recommendation; the owner decides, and signing up is the owner's to do
   `releases.json`), so each file shows "also from GitHub"; without that setting GitHub's link is dropped for every file SourceForge carries.
   A file SourceForge doesn't carry yet keeps its GitHub link as the button, so no button is ever dead; add a release's folder to the
   entry's `tags` as soon as it is uploaded. The GitHub releases stay as the release notes and the source of the checksums the site reads.
-- **melon 0.3 “Cantaloupe”** (9 October 2026, GitHub release `v0.3`, Latest; SourceForge folder `v0.3`: both ISOs and `SHA256SUMS`, same checksums as GitHub): the main download on the site (`scripts/site-release.py update --tag v0.3`, `v0.3` in the SourceForge entry's `tags`). It was first listed as a test build next to 0.2 until the desktop ISO was confirmed to boot on real hardware.
+- **melon 0.4 “Dudaim”** (9 October 2026, GitHub release `v0.4`, Latest; SourceForge folder `v0.4`: both ISOs and `SHA256SUMS`, same checksums as GitHub): the main download on the site (`scripts/site-release.py update --tag v0.4`, `v0.4` in the SourceForge entry's `tags`). Pass only the ISOs to `upload-isos.sh`: it writes `SHA256SUMS` itself, and naming it too adds a line for the file itself that `sha256sum -c` then fails on.
+- **melon 0.3 “Cantaloupe”** (9 October 2026, GitHub release `v0.3`, superseded by 0.4; SourceForge folder `v0.3`: both ISOs and `SHA256SUMS`, same checksums as GitHub): the main download on the site until 0.4 (`scripts/site-release.py update --tag v0.3`, `v0.3` in the SourceForge entry's `tags`). It was first listed as a test build next to 0.2 until the desktop ISO was confirmed to boot on real hardware.

@@ -47,7 +47,7 @@ for p in melon-layout linux-headers musl gcc-runtime zlib zstd openssl apk-tools
 scripts/mkiso.sh
 ```
 
-The build machine can be Ubuntu 24.04 (or WSL2), Debian or Devuan, or **melon itself**: `scripts/host-setup.sh`
+The build machine can be Ubuntu 24.04 (or WSL2, also on Windows 10: see BUILDING.md for its traps), Debian or Devuan, or **melon itself**: `scripts/host-setup.sh`
 notices which one it runs on and installs the build tools with `apt` or with melon's own `apk`. `BUILDING.md` has
 them all, including what to keep and what to rebuild when moving a build machine.
 

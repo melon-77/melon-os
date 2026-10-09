@@ -90,6 +90,10 @@ CONFIG_UDF_FS=m
 CONFIG_SQUASHFS=y
 CONFIG_SQUASHFS_XZ=y
 CONFIG_SQUASHFS_ZSTD=y
+# the live system and the installers read the system image through squashfs: decompress straight into the page cache with
+# one decompressor per CPU. The defaults (one decompressor, one shared cache) make every concurrent reader wait for the others.
+CONFIG_SQUASHFS_FILE_DIRECT=y
+CONFIG_SQUASHFS_COMPILE_DECOMP_MULTI_PERCPU=y
 CONFIG_OVERLAY_FS=y
 CONFIG_FUSE_FS=m
 CONFIG_TMPFS=y

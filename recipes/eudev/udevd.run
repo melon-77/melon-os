@@ -1,9 +1,18 @@
 #!/bin/sh
 exec 2>&1
-# Stage 1 runs a udevd of its own for the boot coldplug and stops it before this service starts. Devices that
-# register in between send their events to nobody: a Wi-Fi card's interface only appears once its firmware has
-# loaded (MT7921, iwlwifi, ath11k), so udev never named it and NetworkManager left it "unmanaged". Once this udevd
-# runs, replay the events of the device kinds that register late.
+# Stage 1 starts a udevd for the boot coldplug and, unless the kernel option melon.udev=sync is set, leaves it running
+# while the services start: GPU, Wi-Fi and sound drivers finish loading later. Adopt it instead of starting a second one,
+# so udev never restarts and no event is lost. This service stays up as long as that udevd does; stopping or restarting
+# the service (TERM) stops the udevd, and the next run starts a fresh one.
+if pidof udevd >/dev/null; then
+  trap 'udevadm control --exit; for i in $(seq 50); do pidof udevd >/dev/null || break; sleep 0.1; done; exit 0' TERM INT
+  while pidof udevd >/dev/null; do sleep 1; done
+  # it exited: start a new one below
+fi
+# Starting after the coldplug (the sync path, or the adopted udevd gone): devices that registered in between sent their
+# events to nobody. A Wi-Fi card's interface only appears once its firmware has loaded (MT7921, iwlwifi, ath11k), so
+# udev never named it and NetworkManager left it "unmanaged". Once this udevd runs, replay the events of the device
+# kinds that register late.
 (
   for i in $(seq 100); do pidof udevd >/dev/null && break; sleep 0.1; done
   sleep 1

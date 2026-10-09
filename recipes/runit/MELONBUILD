@@ -1,5 +1,6 @@
 pkgname=runit
 pkgver=2.3.0
+pkgrel=1
 pkgdesc="UNIX init scheme with service supervision"
 license=BSD-3-Clause
 url=https://smarden.org/runit/

@@ -19,7 +19,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | devices | eudev 3.2 on the desktop profile (`udevd` service), BusyBox mdev (`mdevd` service) on the console profile | the desktop profile swaps `mdevd` for `udevd`; see rule 44 |
 | packages | apk-tools 3.0.8 | repo index `Packages.adb`, signed with `keys/melon-signing.rsa` |
 | kernel | Linux 7.0, `linux-melon` (generic) | config = `x86_64_defconfig` + `recipes/linux-melon/config-melon` |
-| boot | GRUB 2.14, both `i386-pc` and `x86_64-efi` | ISO and installs boot on BIOS **and** UEFI |
+| boot | GRUB 2.14, both `i386-pc` and `x86_64-efi` | ISO and installs boot on BIOS **and** UEFI; the installed system's boot menu is hidden (skipped after 1 s, Shift or Esc opens it) unless another system is found, then it shows for 5 s |
 | disks | GPT: 1 MiB BIOS boot, 1 GiB FAT32 `/boot` (also the ESP), XFS `/` | kernel boots with `root=PARTUUID=...`; only encrypted (LUKS) installs have an initramfs (rule 28); dual boot next to Windows on UEFI (see Installers) |
 | filesystem | merged `/usr`: `/bin`, `/sbin`, `/usr/sbin` -> `usr/bin`, `/lib` -> `usr/lib` | packages must only ship files under `/usr`, `/etc`, `/var`, `/boot` |
 | desktop | KDE Plasma 6.6 on Wayland (KWin, Xwayland), Qt 6.10, SDDM | desktop ISO and desktop profile; list in `scripts/desktop-packages.txt` |
@@ -249,11 +249,16 @@ Rebuilding the kernel takes about an hour on 2 cores.
     devices that got none, graphics, network, sound, Bluetooth, power and service state, and the kernel's firmware
     messages; map IDs to modules with `modprobe -R <modalias>` against the built kernel. (`scripts/melon-diag.sh`, the
     old `curl | sh` tool, is now a wrapper that prints the same report.)
-44. **Device events between stage 1's udevd and the udevd service are lost.** Stage 1 runs a udevd for the boot
-    coldplug and stops it; the runit service starts a new one a moment later. A Wi-Fi card's interface appears only
-    after its firmware loads (MT7921, iwlwifi, ath11k), often in that gap: udev never processed it, so it kept the
-    kernel name `wlan0` and NetworkManager left it "unmanaged" (the ProBook's MT7921). The service replays the "add"
-    events for net, ieee80211, rfkill and bluetooth devices once it runs (`recipes/eudev/udevd.run`).
+44. **Never restart udevd while devices are still appearing: events in the gap are lost.** Stage 1 runs a udevd for the boot
+    coldplug. It used to stop it and let the runit service start a new one a moment later; a Wi-Fi card's interface
+    appears only after its firmware loads (MT7921, iwlwifi, ath11k), often in that gap, so udev never processed it, kept the
+    kernel name `wlan0` and NetworkManager left it "unmanaged" (the ProBook's MT7921). Now stage 1 leaves its udevd
+    running and the `udevd` service adopts it (`recipes/eudev/udevd.run`: it waits for that process and stops it on
+    TERM), so udev never restarts at boot. The service still replays the "add" events for net, ieee80211, rfkill and
+    bluetooth devices when it has to start a fresh udevd (`sv restart udevd`, or the kernel option `melon.udev=sync`,
+    which brings back the old stop-and-restart; `qemu-test.py desktop` covers that path).
+    Stage 1 no longer waits for udev to finish: it waits only for the devices in `/etc/fstab`, so **a service or a
+    stage 1 step that needs a device other than a mounted disk must wait for it itself** (SDDM waits until elogind reports seat0 graphical, i.e. until the GPU driver is up).
 45. **Packaged files must not keep the builder's account.** `cp -a $startdir/files/.` keeps the checkout's owner;
     apk records that account's name, and on a melon system without it the files become `nobody`'s. Service run
     scripts, `/etc/profile.d` and the installer's helpers were writable by `nobody`, then run by root. `melon-build`
@@ -569,6 +574,67 @@ video. Re-record it when the installer's questions or intro change. The graphica
 yet: Plasma doesn't finish starting in QEMU's software emulation (no KVM under Windows 10's WSL2), so it needs a
 machine with KVM. The pixel melon is generated from `melonfetch`'s own awk drawing
 (`art/site.py`), so change the melon there, not in the SVG.
+
+## Boot time
+
+Where the time goes after the firmware: GRUB (the live ISO's menu waits 5 s; an installed melon-only system's is hidden and
+skipped after 1 s, `GRUB_TIMEOUT` and `GRUB_TIMEOUT_STYLE` in `/etc/default/grub` change that; the `grub` package's own `/etc/default/grub` must not set `GRUB_TIMEOUT`, or it wins over `melon-update-grub`'s default: it did, until `grub` pkgrel 2), the kernel, stage 1 (`/etc/runit/1`:
+mounts, udev coldplug, filesystems), then stage 2 (runsvdir starts every service at once; services that need another
+wait for it with `sv check`, which polls for up to 7 s, every 20 ms since `runit` pkgrel 1; it was every 0.42 s). Stage 1 writes a
+timeline to `/run/melon-boot-times` and **`melon-boottime`** prints it with the start times of the main daemons (read from
+their processes, so to 10 ms): run it on a real machine before and after changing anything that touches boot, and quote its
+numbers in the PR.
+
+**Stage 1 doesn't wait for udev to finish** (`melon-base` pkgrel 34). It starts udevd, triggers the coldplug, and waits only
+for the devices named in `/etc/fstab` (their `/dev/disk/by-*` links, at most 20 s in all; `noauto` and `nofail` entries don't
+count) before it mounts. The rest of the coldplug (the GPU's driver and firmware, Wi-Fi, sound) goes on in the background while
+stage 2 starts the services, and `melon-boottime` shows when it ended as `udev-settled`. The `udevd` service adopts the udevd
+stage 1 started instead of replacing it (rule 44). Services that need a device wait for it themselves: SDDM waits until elogind
+reports seat0 graphical, NetworkManager and BlueZ handle devices that appear later. The kernel option `melon.udev=sync` (add it
+in GRUB's editor, or to `GRUB_CMDLINE_LINUX_DEFAULT`) brings back the old behaviour (wait for everything, stop udevd, let
+the service start a new one) if a machine misbehaves: an issue report with and without it is the first thing to ask for.
+
+**The live system and the installers read `rootfs.sqfs` through squashfs.** The kernel's defaults were one decompressor and one
+shared cache (`SQUASHFS_DECOMP_SINGLE`, `SQUASHFS_FILE_CACHE`), so every program the live desktop starts waited for the
+others' reads to decompress. `config-melon` now asks for `SQUASHFS_COMPILE_DECOMP_MULTI_PERCPU` and `SQUASHFS_FILE_DIRECT`
+(one decompressor per CPU, straight into the page cache; `linux-melon` pkgrel 5, and `nvidia-open` pkgrel 1 with it, rule 51).
+Installed systems don't use squashfs, so only the ISO sessions and installs gain.
+
+Measured on 7 and 8 October 2026 with the 29 September desktop image in QEMU **without KVM** (software emulation on 4 vCPUs, so
+every CPU-bound step is several times slower than on real hardware; read the proportions, not the seconds). Seconds counted
+from the start of stage 1, one boot each except the old order, which ran twice:
+
+| | old order | new order (`melon.udev=sync` gives the old one back) |
+|---|---|---|
+| udev coldplug + settle in stage 1 | 3.9 to 4.8 s | 0 (finishes 3.8 s after stage 1, in parallel with the services) |
+| stage 1 lasted | 6.5 to 7.3 s | 4.2 s |
+| SDDM started | 7.5 to 7.9 s | 4.9 s |
+| SDDM's session helper started | 13.2 to 13.5 s | 11.8 s |
+
+Kernel to `/init` was 2.4 s and the initramfs 0.5 s in all of them. The squashfs options (new kernel) moved the live
+desktop's `plasma_session` from 30.3 s to 27.1 s after stage 1 in one run each, which is inside the run-to-run noise (about 3 s)
+of this setup; the gain is real on a machine that reads from the ISO on several cores, but this container can't size it.
+The 20 ms `sv` poll can't be seen in these numbers either (the services start within 0.4 s of each other). Not measured yet:
+real hardware (a GPU's firmware load blocks `udevadm settle`, so the gain should be larger there) and the installed system, where
+`melon-boottime` is the tool. Ideas, not done: shutdown spends a fixed 1 s between TERM and KILL (`/etc/runit/3`); a smaller
+kernel config and built-in drivers for the boot disk.
+
+## Smaller images, second round
+
+Measured on the 29 September desktop image with `mksquashfs` (zstd, 512 KiB blocks), 8 October 2026:
+
+- **`grub` pkgrel 3 drops the build leftovers in `/usr/lib/grub/*/`**: `*.module`, `kernel.exec`, `gdb_grub`, `gdb_helper.py`. Nothing
+  reads them on a running system: `grub-install` copies only `.mod`, `.lst`, `.img`, `.efi`, `modinfo.sh` and the efiemu
+  objects (`util/grub-install-common.c`), and `grub-mkimage` reads `.mod` and `kernel.img`; a `core.img` for `i386-pc` and
+  for `x86_64-efi` made with and without them is byte-identical. 36 MB less on disk, 11 MB less in the compressed image.
+- **`breeze` pkgrel 1 drops two sizes of the default "Next" wallpaper** (in `scripts/gen-kde-recipes.py`: the recipe is generated, rule 57) (`7680x2160` for 32:9 screens and `1440x2960` for
+  phones, light and dark: 24 MB of PNG, which doesn't compress). 16:9 and 16:10 screens use the `5120x2880` one, and Plasma
+  scales it on the others.
+- Left alone on purpose: translations (49 MB compressed: dropping languages is a product decision), the Mesa and LLVM
+  libraries, the kernel modules, firmware (see "Smaller images" if #49 has landed).
+
+Not rebuilt in a container: both recipes only `rm` files in `package()`, so the check was on the extracted image. A new ISO
+shows the real sizes.
 
 ## Package repository (online)
 

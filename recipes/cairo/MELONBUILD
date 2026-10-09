@@ -1,0 +1,15 @@
+pkgname=cairo
+pkgver=1.18.4
+pkgrel=0
+pkgdesc="2D graphics library (labwc draws its window decorations and menus with it)"
+license="LGPL-2.1-only OR MPL-1.1"
+url=https://www.cairographics.org
+source=(cairo-1.18.4.tar.xz)
+subpackages=(cairo-dev)
+makedepends=(pixman-dev libpng-dev freetype-dev fontconfig-dev glib-dev zlib-dev)
+# image surfaces and fonts only: nothing in melon draws through cairo on X11
+# (musl-stacksize.patch, from Alpine: two large stack arrays become thread-local, musl's threads have small stacks)
+build(){ meson_setup -Dxlib=disabled -Dxcb=disabled -Dpng=enabled -Dfreetype=enabled -Dfontconfig=enabled -Dglib=enabled \
+  -Dzlib=enabled -Dtee=enabled -Dtests=disabled -Dgtk_doc=false -Dspectre=disabled -Dsymbol-lookup=disabled -Dlzo=disabled build
+  ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

@@ -1,0 +1,15 @@
+Build without the calculator (RUNNER_MATH=OFF): MathItem only exists with MATH_ENABLED.
+--- a/dialog.cpp
++++ b/dialog.cpp
+@@ -671,7 +671,10 @@
+     {
+         hide();
+         if (mClearOnRunning
+-            && !qobject_cast<const MathItem*>(command)) // don't clear math results
++#ifdef MATH_ENABLED
++            && !qobject_cast<const MathItem*>(command) // don't clear math results
++#endif
++           )
+         {
+             ui->commandEd->clear();
+         }

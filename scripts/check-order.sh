@@ -4,7 +4,8 @@
 # leaves features out (libxkbcommon without libxml2 has no xkbregistry).
 M=$(cd "$(dirname "$0")/.." && pwd)
 cd $M
-ALL=$(M=$M bash -c 'eval "$(sed -n "/^BASE=/,/^ALL=/p" "$M/scripts/build-everything.sh")"; printf "%s\n" $ALL')
+# (MELON_ARCH=x86: the 32-bit list at the end of that block)
+ALL=$(M=$M bash -c 'eval "$(sed -n "/^BASE=/,/^# recipes nobody listed/p" "$M/scripts/build-everything.sh")"; printf "%s\n" $ALL')
 declare -A pos origin
 i=0; for r in $ALL; do pos[$r]=$i; i=$((i+1)); done
 # which recipe makes which package: the recipe itself and its subpackages

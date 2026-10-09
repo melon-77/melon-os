@@ -1,0 +1,10 @@
+pkgname=libexif
+pkgver=0.6.26
+pkgrel=0
+pkgdesc="Reads and writes EXIF data in photos (LXQt's file manager and image viewer)"
+license=LGPL-2.1-or-later
+url=https://libexif.github.io
+source=(libexif-0.6.26.tar.bz2)
+subpackages=(libexif-dev)
+build(){ ./configure $conf_flags --disable-static --disable-docs ac_cv_path_DOXYGEN=false; make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install; rm -rf $pkgdir/usr/share/doc; }

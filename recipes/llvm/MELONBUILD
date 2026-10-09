@@ -10,6 +10,9 @@ makedepends=(zlib-dev zstd-dev)
 subpackages=(llvm-dev llvm-libs)
 depends=(llvm-libs)
 pkgdesc_llvm_libs="LLVM shared library"
+# 32-bit (i686): only the X86 backend (Mesa's i915 and llvmpipe compile shaders with it; no AMDGPU there)
+_targets="X86;AMDGPU" _triple=x86_64-melon-linux-musl
+[ "$APK_ARCH" != x86 ] || { _targets=X86 _triple=$TARGET; }
 build(){
   # Configured as a native build: melon binaries run on the build host, so the freshly built
   # llvm-tblgen can be used directly instead of building a second, host copy of it.
@@ -18,12 +21,12 @@ build(){
     -DCMAKE_FIND_ROOT_PATH=$SYSROOT -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
     -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
     -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
-    -DLLVM_TARGETS_TO_BUILD="X86;AMDGPU" -DLLVM_BUILD_LLVM_DYLIB=ON -DLLVM_LINK_LLVM_DYLIB=ON \
+    -DLLVM_TARGETS_TO_BUILD="$_targets" -DLLVM_BUILD_LLVM_DYLIB=ON -DLLVM_LINK_LLVM_DYLIB=ON \
     -DLLVM_ENABLE_RTTI=ON -DLLVM_ENABLE_ASSERTIONS=OFF -DLLVM_ENABLE_ZLIB=ON -DLLVM_ENABLE_ZSTD=ON \
     -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_FFI=OFF -DLLVM_ENABLE_TERMINFO=OFF \
     -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_BENCHMARKS=OFF -DLLVM_INCLUDE_DOCS=OFF \
     -DLLVM_BUILD_TOOLS=ON -DLLVM_INSTALL_UTILS=OFF -DLLVM_ENABLE_BINDINGS=OFF \
-    -DLLVM_HOST_TRIPLE=x86_64-melon-linux-musl -DLLVM_DEFAULT_TARGET_TRIPLE=x86_64-melon-linux-musl \
+    -DLLVM_HOST_TRIPLE=$_triple -DLLVM_DEFAULT_TARGET_TRIPLE=$_triple \
     -DLLVM_PARALLEL_LINK_JOBS=1
   ninja -C build -j$JOBS
 }

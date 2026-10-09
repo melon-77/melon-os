@@ -18,6 +18,7 @@ A from-scratch, rolling x86_64 distribution:
 | root fs | XFS (FAT32 `/boot`) |
 | shell | bash 5.3 |
 | desktop | KDE Plasma 6 on Wayland; Flatpak for Steam and other glibc apps; more desktops as online installs |
+| 32-bit edition | i686 (Pentium M, Pentium 4, Atom netbooks such as the MSI Wind U100) with LXQt on Wayland (labwc) |
 
 ## Layout
 
@@ -46,7 +47,7 @@ for p in melon-layout linux-headers musl gcc-runtime zlib zstd openssl apk-tools
 scripts/mkiso.sh
 ```
 
-The build machine can be Ubuntu 24.04 (or WSL2), Debian or Devuan, or **melon itself**: `scripts/host-setup.sh`
+The build machine can be Ubuntu 24.04 (or WSL2, also on Windows 10: see BUILDING.md for its traps), Debian or Devuan, or **melon itself**: `scripts/host-setup.sh`
 notices which one it runs on and installs the build tools with `apt` or with melon's own `apk`. `BUILDING.md` has
 them all, including what to keep and what to rebuild when moving a build machine.
 
@@ -56,7 +57,7 @@ Packages are signed with `keys/melon-signing.rsa` (not committed; generate your 
 ## Installing
 
 Boot the ISO. The graphical installer (desktop ISO) is Calamares. There is also a quick console
-installer for people who know its name.
+installer for people who know its name (it got a new name, song and intro art on 8 October 2026; the old name no longer works).
 
 ## Website
 
@@ -65,7 +66,21 @@ It is plain HTML and CSS (fonts hosted in the folder, no trackers) plus a small 
 melon in the first screen is `melonfetch`'s own, redrawn by `art/site.py`. The site also hosts the
 [distro finder](https://melon-77.github.io/melon-os/distro-finder/), a quiz that scores more than a hundred Linux
 distros, melon included, against your answers. Change the site through a pull request to `testing` like everything else;
-after it is merged, `scripts/publish-site.sh` puts `site/` on `gh-pages`.
+after it is merged, `scripts/publish-site.sh` puts `site/` on `gh-pages`. The site's download page lists each ISO with its
+size and SHA-256, read from `site/releases.json`: after a release, `scripts/site-release.py update --tag <tag>` refreshes it (the 32-bit pre-release too: `update --tag i686-<date> --editions x86-desktop,x86-console`); `docs/iso-hosting.md` compares free file hosts for the ISOs (SourceForge, Internet Archive, Cloudflare R2) and
+`scripts/upload-isos.sh` uploads to them. The download buttons point to SourceForge (project `melonl`).
+
+## 32-bit edition (old netbooks)
+
+melon also builds for 32-bit PCs with SSE2 (Pentium M, Pentium 4, Intel Atom: the MSI Wind U100 and similar netbooks).
+Its desktop is **LXQt** on Wayland with the labwc compositor, lighter than Plasma and comfortable in 1–2 GB of RAM,
+with zram swap and drivers for every graphics and network chip an old 32-bit netbook or laptop is likely to have: Intel GMA, old Radeon (r300, r600) and GeForce (nouveau) graphics; Atheros, Ralink, Realtek, Intel 3945/4965 and Broadcom Wi-Fi, USB Wi-Fi sticks and the usual wired chips; the MSI Wind's Fn keys and radio switch (msi-laptop). It
+uses the same installers (Calamares with the gauntlet, the console installer). Flatpak and the NVIDIA drivers are
+64-bit only. Build it with `MELON_ARCH=x86` (`BUILDING.md`); the ISOs are `melon-*-i686.iso` and
+`melon-desktop-*-i686.iso`. Status (7 October 2026): both ISOs are built, signed with melon's key and pass their install tests on an emulated
+Atom N270 with 2 GB of RAM (LXQt logs in through SDDM, printing works); the 32-bit packages are in the online
+repository (`packages/x86`); the ISOs are on the pre-release `i686-20261007`; a test on a real U100 comes next. NetHack and
+the QEMU guest agent aren't in the 32-bit edition yet.
 
 ## Developer tools
 

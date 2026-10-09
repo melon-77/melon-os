@@ -50,6 +50,7 @@ export CHOST CBUILD
 conf_flags="--host=$CHOST --build=$CBUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --mandir=/usr/share/man --infodir=/usr/share/info --libdir=/usr/lib --bindir=/usr/bin --sbindir=/usr/bin --libexecdir=/usr/libexec"
 
 # meson cross file
+mkdir -p "$WORK"   # a fresh checkout has no work/ yet
 MESON_CROSS=$WORK/meson-cross.ini
 cat > $MESON_CROSS <<EOF
 [binaries]

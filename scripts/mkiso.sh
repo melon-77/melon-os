@@ -10,7 +10,7 @@ set -euo pipefail
 . "$(dirname "$(readlink -f "$0")")/env.sh"
 APK=$M/hosttools/bin/apk
 ROOT=$WORK/liveroot LIVE=$WORK/livelayer ISO=$WORK/iso INITRD=$WORK/initrd
-DATE=$(date +%Y%m%d)
+DATE=$(date -u +%Y%m%d)   # UTC: WSL keeps Windows' time zone, which gave ISOs the day before's date
 ISOARCH=$([ $MELON_ARCH = x86 ] && echo i686 || echo x86_64)
 OUTISO=$M/out/melon-$DATE-$ISOARCH.iso
 PKGS=${PKGS:-"melon-base linux-melon linux-firmware wpa_supplicant xfsprogs grub zstd openssl ca-certificates cryptsetup ncurses-terminfo musl-utils alsa-utils mpg123 kmod efibootmgr nethack"}

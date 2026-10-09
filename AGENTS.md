@@ -257,6 +257,11 @@ Rebuilding the kernel takes about an hour on 2 cores.
     TERM), so udev never restarts at boot. The service still replays the "add" events for net, ieee80211, rfkill and
     bluetooth devices when it has to start a fresh udevd (`sv restart udevd`, or the kernel option `melon.udev=sync`,
     which brings back the old stop-and-restart; `qemu-test.py desktop` covers that path).
+    The two halves are in different packages, stage 1 in melon-base (`/etc/runit/1`) and the adoption in eudev
+    (`udevd.run`), and melon-base doesn't pin eudev's version: **publish melon-base 0.1-r36 or later online only together
+    with eudev 3.2.14-r2 or later.** With an older eudev the service starts a second udevd next to stage 1's, which can't
+    start, so runit restarts it every second. The other mix is safe: a newer eudev with an older melon-base finds no udevd
+    running and starts its own.
     Stage 1 no longer waits for udev to finish: it waits only for the devices in `/etc/fstab`, so **a service or a
     stage 1 step that needs a device other than a mounted disk must wait for it itself** (SDDM waits until elogind reports seat0 graphical, i.e. until the GPU driver is up).
 45. **Packaged files must not keep the builder's account.** `cp -a $startdir/files/.` keeps the checkout's owner;

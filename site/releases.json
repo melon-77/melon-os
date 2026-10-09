@@ -1,8 +1,8 @@
 {
-  "version": "0.3",
-  "name": "Cantaloupe",
+  "version": "0.4",
+  "name": "Dudaim",
   "date": "2026-10-09",
-  "tag": "v0.3",
+  "tag": "v0.4",
   "repo": "melon-77/melon-os",
   "mirrors": [
     {
@@ -10,7 +10,8 @@
       "tags": {
         "melon-20260929.2": "https://sourceforge.net/projects/melonl/files/melon-20260929.2/{file}/download",
         "i686-20261007": "https://sourceforge.net/projects/melonl/files/i686-20261007/{file}/download",
-        "v0.3": "https://sourceforge.net/projects/melonl/files/v0.3/{file}/download"
+        "v0.3": "https://sourceforge.net/projects/melonl/files/v0.3/{file}/download",
+        "v0.4": "https://sourceforge.net/projects/melonl/files/v0.4/{file}/download"
       },
       "primary": true
     }
@@ -66,18 +67,18 @@
   },
   "files": {
     "desktop": {
-      "file": "melon-desktop-20261008-x86_64.iso",
-      "size": 802871296,
-      "sha256": "738fc4f75386731e1d3c32e2c234465e49c5cd6538a5a9f686379311afa9d782",
-      "tag": "v0.3",
-      "url": "https://github.com/melon-77/melon-os/releases/download/v0.3/melon-desktop-20261008-x86_64.iso"
+      "file": "melon-desktop-20261009-x86_64.iso",
+      "size": 793604096,
+      "sha256": "ef5ed5223a2e16b1fb9f448db1edfb7380afd844b67c3bb16022dff42fe47d16",
+      "tag": "v0.4",
+      "url": "https://github.com/melon-77/melon-os/releases/download/v0.4/melon-desktop-20261009-x86_64.iso"
     },
     "console": {
-      "file": "melon-20261008-x86_64.iso",
-      "size": 384931840,
-      "sha256": "bdabbd1ebce973c8baa45687cac010e720e73f5f9731599f10d2085d87ff9b62",
-      "tag": "v0.3",
-      "url": "https://github.com/melon-77/melon-os/releases/download/v0.3/melon-20261008-x86_64.iso"
+      "file": "melon-20261009-x86_64.iso",
+      "size": 380301312,
+      "sha256": "870d04794b07ce21a968dff22f924281ffafc5f5587f8d2e899ea907db710cbf",
+      "tag": "v0.4",
+      "url": "https://github.com/melon-77/melon-os/releases/download/v0.4/melon-20261009-x86_64.iso"
     },
     "x86-desktop": {
       "file": "melon-desktop-20261007-i686.iso",

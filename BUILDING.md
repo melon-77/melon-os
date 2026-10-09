@@ -86,6 +86,13 @@ build 19041 or newer.
    `/home/hi/melon/sysroot/usr/include`: "includes non-existent path"). Until you have rebuilt those packages yourself, let the
    path resolve: `mkdir -p /home/hi/melon && ln -s ~/melon-r2/sysroot /home/hi/melon/sysroot && ln -s ~/melon/hosttools /home/hi/melon/hosttools`.
 
+   A worktree that only rebuilds packages with nothing to compile (`melon-base`, `melon-sounds`) and installs the rest from
+   `repo/` can skip the toolchain (the 0.4 ISOs were made that way, with the round-2 packages copied in from the worktree that
+   built them). Then nothing creates the sysroot's merged `/usr`: make `sysroot/usr/lib` and `sysroot/usr/bin` and the `lib`, `bin`
+   and `sbin` links to them **before** `apk --initdb`, or apk makes `lib/` a real directory for its database and the first install
+   fails with `melon-layout-1.0-r0: failed to commit lib: Is a directory`. WSL also keeps Windows' time zone; `mkiso.sh` dates
+   the ISOs in UTC so they aren't named after the day before.
+
 Measured on that laptop (12 jobs): `host-setup.sh` about 35 minutes for apt and the 2 GB of sources, a few minutes for GRUB, Python and Rust,
 then 50 minutes for the host Qt; cross toolchain 14 to 21 minutes; `linux-melon` 22 minutes; `grub` 3 minutes; small recipes seconds;
 the console ISO 14 seconds and the desktop ISO about a minute (they install the published packages from `repo/`).

@@ -105,7 +105,9 @@ cat > $LIVE/etc/motd <<'MOTD'
 MOTD
 
 step "squashfs"
-mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet
+# zstd level 19 with 512 KiB blocks: about 20 MB smaller than level 15 with 128 KiB blocks on the desktop image (measured on
+# the 0.4 contents; 1 MiB blocks save 5 MB more but make every small read decompress more), the same speed to read
+mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 19 -b 512K -noappend -quiet
 mksquashfs $LIVE $ISO/melon/live.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet   # built as root; /home/live keeps its owner
 
 step "package repository (extras only; the base system comes from rootfs.sqfs)"
@@ -114,9 +116,15 @@ mkdir -p $ISO/melon/repo/$APK_ARCH
 # a second copy cost about 460 MB on the ISO and on every installed system; anything else comes from the online repo)
 # always carry the small, commonly wanted extras so an offline install can still add them
 extras="melon-base bash busybox musl apk-tools"
-# guest tools, which the installers add when they run inside a VM
-ls $M/repo/$APK_ARCH/melon-vm-guest-[0-9]*.apk >/dev/null 2>&1 && extras="$extras melon-vm-guest"
+# guest tools, which the installers add when they run inside a VM. The desktop image has them in rootfs.sqfs already, so only
+# the package itself goes in the index (the installers still run `apk add melon-vm-guest`); a second copy of its dependencies
+# (glib, OpenSSL, ...) cost 11 MB
+vmg=
+if ls $M/repo/$APK_ARCH/melon-vm-guest-[0-9]*.apk >/dev/null 2>&1; then
+  case " $PKGS $DESKTOP_PKGS " in *" melon-vm-guest "*) vmg=melon-vm-guest ;; *) extras="$extras melon-vm-guest" ;; esac
+fi
 apkx fetch --recursive --output $ISO/melon/repo/$APK_ARCH $extras >/dev/null
+[ -z "$vmg" ] || apkx fetch --output $ISO/melon/repo/$APK_ARCH $vmg >/dev/null
 ( cd $ISO/melon/repo/$APK_ARCH && $APK --keys-dir $M/keys/trusted --sign-key "${MELON_SIGN_KEY:-$M/keys/melon-signing.rsa}" mkndx -d "melon $DATE" -o Packages.adb *.apk )
 
 step "initramfs"

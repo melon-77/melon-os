@@ -58,6 +58,7 @@ scripts/mkiso.sh        live/installer ISO: rootfs.sqfs (pristine apk-installed 
                         installers) + live.sqfs (small live-session layer) + a small repo of extras (VM guest tools,
                         a few base packages; never a second copy of what rootfs.sqfs already holds)
 scripts/qemu-test.py    headless boot + install + reboot test over the serial console
+scripts/record-installer.py  records the console installer in QEMU as the website's video (blacks out the intro's title)
 recipes/<name>/MELONBUILD   one directory per recipe (see below)
 recipes/<name>/*.patch      applied automatically with patch -p1, in name order
 recipes/<name>/<pkg>.post-install etc.   apk scripts for (sub)package <pkg>
@@ -439,7 +440,7 @@ the console `live` install takes 77 s, `disk` and `disk --uefi` about 40 s each,
 the serial console in 25 s, but the Plasma desktop tests (`desktop`, `desktop-install`) were not usable there (another session saw
 Plasma not start in 15 minutes): run those on a machine with KVM. Use generous timeouts. The ISO's GRUB and the installed system both use
 the serial port, so tests don't need a screen. The test also records the sound card output to
-`logs/audio-capture.wav`, which lets you check that the installer music really plays.
+`logs/audio-capture.wav`, which lets you check that the installer music really plays. The build PC (Windows 10 LTSC, AMD Ryzen) has `/dev/kvm` in WSL2 but QEMU gets "No such device": WSL2 there cannot nest virtualization, so every test runs in software (the live ISO reaches its shell in about 20 seconds, the console install takes about 45, Plasma had not started after 15 minutes). WSL2 on Windows 10 also stops all background processes when the last `wsl.exe` session closes: run long jobs from a foreground `wsl.exe` call.
 
 ## Running melon in a VM
 
@@ -560,7 +561,13 @@ fails when the pages are stale. The 32-bit pre-release is a second release in th
 `docs/iso-hosting.md` before moving the files to another host (`scripts/upload-isos.sh`; other hosts go into `mirrors` in `releases.json`).
 `gauntlet.js` is only a taste of the real gauntlet, using easy questions that already appear in
 `recipes/calamares-melon/modules/gauntlet/questions.js`; never copy anything from `trial.js` (not even its questions) into the site, and keep
-the hidden owner commands out of it, as everywhere else. The pixel melon is generated from `melonfetch`'s own awk drawing
+the hidden owner commands out of it, as everywhere else. The install section has a video of the console installer
+(`site/assets/installer-console.mp4` with its poster), recorded from the ISO in QEMU by `scripts/record-installer.py`
+(`record`, then `build`). **The intro spells the installer's name in big letters, so `build` blacks out those rows in
+every frame, and only the built file may go into the repo or the site**: never commit the raw screenshots or the unmasked
+video. Re-record it when the installer's questions or intro change. The graphical (Calamares) installer has no video
+yet: Plasma doesn't finish starting in QEMU's software emulation (no KVM under Windows 10's WSL2), so it needs a
+machine with KVM. The pixel melon is generated from `melonfetch`'s own awk drawing
 (`art/site.py`), so change the melon there, not in the SVG.
 
 ## Package repository (online)

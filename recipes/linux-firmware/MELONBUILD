@@ -1,6 +1,6 @@
 pkgname=linux-firmware
 pkgver=20240318
-pkgrel=1
+pkgrel=2
 pkgdesc="Firmware blobs for Linux drivers (meta package)"
 license="custom:redistributable"
 url=https://gitlab.com/kernel-firmware/linux-firmware
@@ -13,7 +13,7 @@ source=(linux-firmware-amd-graphics_20240318.git3b128b60-0ubuntu3.3_all.deb
         linux-firmware-qualcomm-wireless_20240318.git3b128b60-0ubuntu3.1_all.deb
         linux-firmware-misc_20240318.git3b128b60-0ubuntu3.1_all.deb
         wireless-regdb-2026.05.30.tar.gz)
-subpackages=(linux-firmware-amdgpu linux-firmware-realtek linux-firmware-intel-wifi linux-firmware-intel-bt linux-firmware-intel-gpu linux-firmware-mediatek linux-firmware-atheros linux-firmware-other wireless-regdb)
+subpackages=(linux-firmware-amdgpu linux-firmware-realtek linux-firmware-intel-wifi linux-firmware-intel-bt linux-firmware-intel-gpu linux-firmware-mediatek linux-firmware-atheros linux-firmware-other linux-firmware-extra wireless-regdb)
 depends=(linux-firmware-amdgpu linux-firmware-realtek linux-firmware-intel-wifi linux-firmware-intel-bt linux-firmware-intel-gpu linux-firmware-mediatek linux-firmware-atheros linux-firmware-other wireless-regdb)
 builddir=$srcdir
 pkgdesc_wireless_regdb="Wireless regulatory database"
@@ -27,6 +27,29 @@ package(){
   mkdir -p $pkgbase/linux-firmware-intel-bt/usr/lib/firmware/intel
   mv $pkgbase/linux-firmware-intel-wifi/usr/lib/firmware/intel/ibt-* $pkgbase/linux-firmware-intel-bt/usr/lib/firmware/intel/
   for l in $pkgbase/linux-firmware-intel-wifi/usr/lib/firmware/ibt-*; do if [ -L "$l" ]; then mv "$l" $pkgbase/linux-firmware-intel-bt/usr/lib/firmware/; fi; done
+  # Intel Wi-Fi: the kernel loads the highest API version of a device's firmware that it finds, so older versions are never used
+  # (the "-c101" style core versions are kept as they are). The compatibility links at the top that pointed to them go too.
+  _iwl=$pkgbase/linux-firmware-intel-wifi/usr/lib/firmware
+  ( cd $_iwl/intel/iwlwifi
+    ls | sed -n 's/^\(iwlwifi-.*\)-\([0-9][0-9]*\)\.ucode\.zst$/\1 \2/p' | sort -k1,1 -k2,2n \
+      | awk '{ if ($1 == prev) print prevf; prev = $1; prevf = $1 "-" $2 ".ucode.zst" }' | while read -r f; do rm -f "$f"; done )
+  for l in $_iwl/iwlwifi-*; do if [ -L "$l" ] && [ ! -e "$l" ]; then rm -f "$l"; fi; done
+  # firmware for hardware that is not in PCs and laptops (SoCs, phone and router Wi-Fi, server network cards, ADSL modems)
+  # goes to linux-firmware-extra, which the ISOs leave out (`apk add linux-firmware-extra` brings it back)
+  _extra=$pkgbase/linux-firmware-extra/usr/lib/firmware
+  _xmove() { _s=$1; shift
+    ( cd $pkgbase/linux-firmware-$_s/usr/lib/firmware || exit 0
+      for p in "$@"; do if [ -e "$p" ] || [ -L "$p" ]; then mkdir -p "$_extra/$(dirname "$p")"; mv "$p" "$_extra/$p"; fi; done ); }
+  mkdir -p $_extra
+  _xmove other dpaa2 ti-connectivity amlogic meson rockchip imx cnm amphion powervr arm sun cadence nxp mrvl airoha wfx \
+    s5p-mfc* rcar* r8a* cxgb4 cxgb3 bnx2x liquidio vxge acenic cavium slicoss tehuti 3com ueagle-atm asihpi tigon myri10ge*
+  _xmove atheros ath11k/WCN6750 ath11k/IPQ8074 ath11k/IPQ6018 ath11k/IPQ5018 ath11k/QCN9074 ath12k/QCN9274 ath10k/WCN3990
+  _xmove mediatek mediatek/mt7996 mediatek/mt8* mediatek/mt798* mediatek/mt7622*
+  # links that pointed into what just moved (the SoC directories under qcom/) go along
+  for d in $pkgbase/linux-firmware-*/usr/lib/firmware; do
+    [ "$d" = "$_extra" ] && continue
+    ( cd $d; find . -type l | while read -r l; do if [ ! -e "$l" ]; then mkdir -p "$_extra/$(dirname "$l")"; mv "$l" "$_extra/$l"; fi; done )
+  done
   install -Dm644 wireless-regdb-*/regulatory.db $pkgbase/wireless-regdb/usr/lib/firmware/regulatory.db
   install -Dm644 wireless-regdb-*/regulatory.db.p7s $pkgbase/wireless-regdb/usr/lib/firmware/regulatory.db.p7s
   mkdir -p $pkgdir/usr/share/licenses/linux-firmware; echo "See https://gitlab.com/kernel-firmware/linux-firmware WHENCE" > $pkgdir/usr/share/licenses/linux-firmware/README
@@ -40,3 +63,4 @@ pkgdesc_linux_firmware_intel_gpu="Firmware for intel-gpu devices"
 pkgdesc_linux_firmware_mediatek="Firmware for mediatek devices"
 pkgdesc_linux_firmware_atheros="Firmware for atheros devices"
 pkgdesc_linux_firmware_other="Firmware for other devices"
+pkgdesc_linux_firmware_extra="Firmware for hardware not found in PCs: SoCs, phone and router Wi-Fi, server network cards, ADSL modems"

@@ -110,6 +110,14 @@ services start (`melon.udev=sync` on the kernel command line brings the old, slo
 services that wait for each other check every 20 ms instead of every 0.42 s. `melon-boottime` shows where a boot's time went:
 the milestones of stage 1 and when the main daemons started, to 10 ms.
 
+## Smaller ISOs
+
+The desktop ISO is being slimmed from 794 MB to a goal of 500 MB (details and measurements in AGENTS.md, "Desktop ISO size goal").
+The first step already in the repository: the Intel Wi-Fi firmware keeps the one version the kernel loads, and firmware for hardware
+that is not in PCs and laptops (SoC boards, phone and router Wi-Fi chips, server network cards, ADSL modems) moves to its own package,
+`linux-firmware-extra`, which is not on the ISOs: if you use such hardware, `sudo apk add linux-firmware-extra`. The ISOs are also
+squashed with zstd level 19 and carry no second copy of the VM guest tools' libraries.
+
 **NVIDIA graphics:** on a computer with an NVIDIA card (GTX 16/RTX 20 and newer), `melon-first-boot` offers the open
 driver (`sudo apk add linux-firmware-nvidia mesa-nvk`: nouveau with NVK, the desktop and games use the card) or NVIDIA's
 own kernel driver (`sudo apk add nvidia-open`: Flatpak games get NVIDIA's libraries from Flathub; the desktop can't use

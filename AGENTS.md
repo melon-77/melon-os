@@ -643,6 +643,31 @@ Measured on the 29 September desktop image with `mksquashfs` (zstd, 512 KiB bloc
 Not rebuilt in a container: both recipes only `rm` files in `package()`, so the check was on the extracted image. A new ISO
 shows the real sizes.
 
+## Desktop ISO size goal: 500 MB (the owner, 9 October 2026)
+
+The 0.4 desktop ISO is 793.6 MB (rootfs.sqfs 749 MB of it); the goal is **500 MB**. Where the bytes were, measured on the published 0.4
+image (zstd as squashfs does it, MiB): firmware 259, shared libraries 258 (libLLVM 35, Mesa's Gallium and Vulkan 23), translations
+(145 languages) 54, binaries 40, kernel modules 24 plus the kernel 12 (and a second copy of the kernel in `/boot` of the ISO), wallpapers
+16 (Breeze 8.9 and the rewards), icons 13, fonts 12 (the colour emoji font is 9), `usr/share/melon` 12, the extras repository 11.6.
+
+Steps, in the order they ship. Each step is measured before it is called done, and the console ISO gains from the first two as well.
+
+1. **Done (pkgrel bumps in this PR, ISOs not rebuilt yet):** `linux-firmware` pkgrel 2 keeps one version of each Intel Wi-Fi firmware
+   (about 62 MB: for every device the kernel loads the highest API version it finds, and kernel 7.0's `cfg/*.c` accepts exactly the
+   one that stays: `MIN` = `MAX` 77 for the 22000 family, 89 for AX210, `-c101` core releases for BE200/Bz and Sc; the `-c` files stay
+   whole), and moves firmware for hardware that is not in PCs and laptops (SoCs, phone and router Wi-Fi, server network cards, ADSL
+   modems: about 56 MB) to `linux-firmware-extra`, which the ISOs leave out and `apk add linux-firmware-extra` brings back. TI's
+   `tas2781` laptop amplifier firmware stays. `mkiso.sh` squashes with zstd 19 and 512 KiB blocks (about 20 MB less than level 15 with
+   128 KiB blocks; 1 MiB blocks would save 5 MB more) and, on the desktop ISO, carries only the `melon-vm-guest` package in the extras
+   repo, not a second copy of its dependencies (11 MB).
+2. **Needs the owner's OK (a card is open in the thread):** only English and about twelve big languages on the ISO (the rest
+   installable online: needs a language-package split in `melon-build`), the Breeze and reward wallpapers as high-quality JPEG, no
+   text-to-speech (`qt6-qtspeech` without flite) and no OpenCV in Spectacle's image editor, a trimmed ICU data file and kernel driver
+   set, the kernel stored once on the ISO (installers copy `/boot/vmlinuz` from it), a smaller emoji font.
+
+Estimates for the whole list reach about 500 MB; `scripts/mkiso.sh` and the measurements above are the place to re-check after every step.
+**Never trade away Wi-Fi, graphics or audio drivers for a PC to save bytes**; whatever leaves the ISO must stay one `apk add` away.
+
 ## Package repository (online)
 
 `scripts/publish-repo.sh` puts `repo/<arch>/` on the `packages` branch of github.com/melon-77/melon-os (one

@@ -4,25 +4,96 @@ Everything melon ships is built by the scripts in this repo, so any x86_64 machi
 can build it. On an 8-core/16-thread CPU a full build (toolchain, base system, Plasma desktop, ISOs)
 takes roughly 8–12 hours; on 2 cores it takes days.
 
-## Windows 11: WSL2
+## Windows + WSL2 build machine
 
-1. Install Ubuntu 24.04 in WSL2 (PowerShell as administrator):
+Set up and used for the round-2 ISOs on a Windows 10 IoT Enterprise LTSC 2021 laptop (build 19044, Ryzen 7 5800U, 16 threads,
+32 GB RAM, no Microsoft Store). Windows 11 is the same without the workarounds marked *(Windows 10)*. WSL2 needs Windows 10
+build 19041 or newer.
 
-       wsl --install -d Ubuntu-24.04
+1. Turn WSL2 on. This needs an **administrator** PowerShell and a **reboot**:
 
-2. Give WSL enough memory. Qt and KWin need about 1 GB per compile job, and WSL only gets half the
+       wsl --install --no-distribution
+
+   *(Windows 10 without the Store)* if that isn't available, `dism /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart`
+   and the same for `VirtualMachinePlatform`. After the reboot, still as administrator, get the current WSL (the inbox
+   `wsl.exe` is old and only lists "Ubuntu"): `wsl --update --web-download`. The new program is
+   `C:\Program Files\WSL\wsl.exe`; use that path in a shell that started before the update.
+
+2. Install Ubuntu 24.04 (no Store needed with `--web-download`; `--no-launch` skips the first-run user prompt, the build runs as root anyway):
+
+       wsl --install -d Ubuntu-24.04 --web-download --no-launch
+
+3. Give WSL enough memory and never let it idle out. Qt and KWin need about 1 GB per compile job, and WSL only gets half the
    RAM by default. Create `%UserProfile%\.wslconfig`:
 
        [wsl2]
-       memory=12GB        # leave Windows ~4 GB
+       memory=24GB        # 32 GB machine: leave Windows ~8 GB (use 12GB on 16 GB)
        swap=16GB
        processors=16
+       vmIdleTimeout=-1
 
-   then `wsl --shutdown` and open Ubuntu again. With 16 GB of RAM or less, build with `JOBS=10`.
+   then `wsl --shutdown`. Use `JOBS=12` for builds on 16 threads; with 16 GB of RAM or less, `JOBS=10`.
 
-3. Build inside the Linux file system (`~/melon`), not under `/mnt/c`: it is many times faster.
+4. Inside Ubuntu, `/etc/wsl.conf` (the `[boot]` part is already there). **`appendWindowsPath=false` is required**: WSL appends the
+   Windows `PATH`, which has entries with spaces (`/mnt/c/Program Files/...`), and a build step that expands `$PATH`
+   unquoted breaks on them (`host-rust.sh` did: `env: 'Files/GnuPG/bin:...': No such file`, exit 127; fixed, other scripts may follow):
 
-4. Keep the laptop plugged in and stop it from sleeping (Settings → System → Power) while it builds.
+       [boot]
+       systemd=true
+       [interop]
+       appendWindowsPath=false
+
+   Also keep scripts that you write on Windows with LF line endings (Windows tools write CRLF, and `bash` then fails on the last line).
+
+5. Build inside the Linux file system (`~/melon`), not under `/mnt/c`: it is many times faster, and keep the helper scripts there too. Start long builds detached (`setsid nohup script >log 2>&1 < /dev/null &`) and keep one
+   `wsl.exe -d Ubuntu-24.04 -- sleep infinity` open, so WSL keeps its VM while no terminal is attached.
+
+6. **Do not let Windows sleep.** Modern/connected standby freezes the WSL2 VM: after it wakes, every new `wsl` command hangs
+   (even `wsl --shutdown` and `wsl --exec /bin/true`) and the builds inside do not progress, although `wsl -l -v` says
+   "Running". This happened twice on AC power. Keep the machine plugged in, don't close the lid, set sleep to "never"
+   (Settings → System → Power), or run something that holds a "system required" request while it builds. To recover
+   without rebooting, in an administrator PowerShell: kill `wsl`, `wslhost`, `wslrelay`, `wslservice`, `vmwp` and `vmmem`
+   with `Stop-Process -Force`, then `Start-Service WslService`. The Linux disk is intact; builds are resumable (below).
+
+7. **There is no KVM on Windows 10, or on a CPU Windows can't nest on.** `/dev/kvm` may exist and QEMU still says
+   "failed to initialize kvm: No such device" (`wsl` itself prints "Nested virtualization is not supported on this machine").
+   `qemu-test.py` then uses software emulation (AGENTS.md, "Testing"): the console install and boot tests pass in about a minute,
+   the Plasma desktop tests were not usable on that laptop.
+
+8. A USB stick (or any drive Windows doesn't auto-mount in WSL) needs a mount: `D: /mnt/d drvfs defaults,nofail 0 0` in `/etc/fstab`.
+   The signing key can stay on it and be used in place (`MELON_SIGN_KEY`, "The signing key" below). Keep the offline **backup** key
+   (AGENTS.md, "Signing keys and rotation") off any drive that is plugged into the build machine.
+
+9. **Two sessions on one machine: one checkout each.** A checkout's `tools/` and `sysroot/` are tied to its path, and a
+   second session switching branches under a running build breaks both. Give each its own worktree:
+
+       git -C ~/melon worktree add ~/melon-r2 <branch>
+       cd ~/melon-r2
+       for e in ~/melon/sources/*; do [ "${e##*/}" = MANIFEST.tsv ] || ln -sfn "$e" sources/; done   # shared downloads
+       ln -sfn ~/melon/hosttools hosttools                                                            # shared host tools
+       git --git-dir=$HOME/melon/.git archive origin/packages x86_64 | tar -x -C repo                 # its own copy of the online repo
+       echo ~/melon-r2/sysroot/usr/lib >> /etc/ld-musl-x86_64.path                                    # rule 18: the loader must find this tree's libraries
+       /root/melon-r2/scripts/toolchain.sh      # its own cross toolchain (about 15 minutes with 12 jobs); absolute path
+
+   Then `melon-build` the recipes you changed: it installs their `makedepends` from `repo/x86_64`, but a dev package's
+   private requires (kmod-dev needs zlib, zstd, xz, openssl) are not apk dependencies, so first `apk add` the base and
+   plumbing packages of `build-everything.sh` and their `-dev` packages into `sysroot/` (see `BASE` and `PLUMBING` there).
+   A KDE recipe (`breeze`) has no `makedepends` at all: the full build relies on every earlier package being in the sysroot.
+   So `apk add` (with `--root sysroot --keys-dir keys/trusted --repository repo/x86_64/Packages.adb`) the Qt and KDE packages
+   that `python3 scripts/gen-kde-recipes.py` lists before it, their `-dev` packages, and the X11 and XCB client libraries
+   (`libx*`, `xcb*`; KF6 WindowSystem's CMake config needs X11). The packages in the online repository were built on a
+   machine whose checkout was `/home/hi/melon`, and some of their CMake files name that path (`KF6::WindowSystem` includes
+   `/home/hi/melon/sysroot/usr/include`: "includes non-existent path"). Until you have rebuilt those packages yourself, let the
+   path resolve: `mkdir -p /home/hi/melon && ln -s ~/melon-r2/sysroot /home/hi/melon/sysroot && ln -s ~/melon/hosttools /home/hi/melon/hosttools`.
+
+Measured on that laptop (12 jobs): `host-setup.sh` about 35 minutes for apt and the 2 GB of sources, a few minutes for GRUB, Python and Rust,
+then 50 minutes for the host Qt; cross toolchain 14 to 21 minutes; `linux-melon` 22 minutes; `grub` 3 minutes; small recipes seconds;
+the console ISO 14 seconds and the desktop ISO about a minute (they install the published packages from `repo/`).
+
+Sources that failed here and what worked: `ftp.gnu.org` did not answer at all (`https://mirrors.kernel.org/gnu/<project>/<file>` did;
+check the sha256 against `sources/MANIFEST.tsv` before using a file from a mirror), and a pinned Ubuntu `.deb` that had left the archive
+pool (`ovmf-generic_2025.11-3ubuntu7.2_all.deb`) was still on `https://launchpad.net/ubuntu/+archive/primary/+files/<name>`.
+`apt` prints "Job for systemd-binfmt.service failed" in WSL: harmless.
 
 ## Steps (Ubuntu 24.04 or WSL2)
 

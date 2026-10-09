@@ -42,11 +42,25 @@ cmd = ['qemu-system-i386' if i686 else 'qemu-system-x86_64', '-m', '1024' if i68
        '-device', 'virtio-serial', '-chardev', 'socket,path=/tmp/melon-qga.sock,server=on,wait=off,id=qga0',
        '-device', 'virtserialport,chardev=qga0,name=org.qemu.guest_agent.0',
        '-monitor', 'unix:/tmp/melon-qmon.sock,server,nowait']
-# hardware acceleration when the build host has it (WSL2 and most PCs do; the original build container didn't)
-if os.access('/dev/kvm', os.R_OK | os.W_OK) and not i686:
+def kvm_works():
+    # /dev/kvm can exist and still be unusable (WSL2 on Windows 10 or on an AMD CPU without nesting: QEMU says
+    # "failed to initialize kvm: No such device"), so ask the kernel: KVM_GET_API_VERSION must answer 12
+    try:
+        import fcntl
+        fd = os.open('/dev/kvm', os.O_RDWR)
+        try: return fcntl.ioctl(fd, 0xAE00) == 12
+        finally: os.close(fd)
+    except OSError:
+        return False
+# hardware acceleration when the build host has it (WSL2 on Windows 11 and most PCs do; the original build container didn't)
+HAVE_KVM = kvm_works() and not i686
+if HAVE_KVM:
     cmd += ['-enable-kvm', '-cpu', 'host']
 elif i686:
     cmd += ['-cpu', 'n270']   # the Intel Atom N270 of the netbooks the 32-bit edition is for (MSI Wind U100): SSE2/SSSE3, no 64-bit
+else:
+    # software emulation: one thread per virtual CPU, and every CPU feature TCG has (Mesa and Qt want the newer ones)
+    cmd += ['-accel', 'tcg,thread=multi', '-cpu', 'max']
 if uefi:
     cmd += ['-bios', '/usr/share/ovmf/OVMF.fd']
 if vmware:
@@ -276,7 +290,7 @@ if mode == 'desktop-install':
     stable = pid and count(greeter) == pid and count("loginctl list-sessions --no-legend | awk '$3==\"sddm\" && $6==\"active\"' | wc -l") == 1
     ok &= bool(stable); step('greeter after 20 s: ' + ('same process, active session' if stable else 'RESTARTED OR NO SESSION'))
     mon(f'screendump {M}/logs/qemu-desktop-greeter.ppm'); time.sleep(3)
-    if not os.access('/dev/kvm', os.R_OK | os.W_OK): time.sleep(90)   # emulated CPU: the greeter's password field takes a while to take keys
+    if not HAVE_KVM: time.sleep(90)   # emulated CPU: the greeter's password field takes a while to take keys
     for ch in 'melonuser':
         mon(f'sendkey {ch}'); time.sleep(0.15)
     mon('sendkey ret'); step('typed the password into the greeter')

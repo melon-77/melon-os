@@ -15,7 +15,7 @@ HT=x86_64-unknown-linux-gnu; [ -e /lib/ld-musl-x86_64.so.1 ] && ! [ -e /lib64/ld
 # dynamic to load libclang ("Dynamic loading not supported"). Ubuntu's glibc build is dynamic anyway.
 RF=; [ $HT = x86_64-unknown-linux-musl ] && RF="-C target-feature=-crt-static"
 _inst(){ local e=(); [ -n "$RF" ] && e=(RUSTFLAGS="$RF")
-  env "${e[@]}" PATH=$H/bin:$PATH CARGO_HOME=$M/sources/cargo $H/bin/cargo install --quiet --locked --force --root $H "$@"; }
+  env "${e[@]}" PATH="$H/bin:$PATH" CARGO_HOME=$M/sources/cargo $H/bin/cargo install --quiet --locked --force --root $H "$@"; }
 _dynamic(){ readelf -l "$1" 2>/dev/null | grep -q 'program interpreter'; }   # a static bindgen from before this fix: rebuild
 bindgen(){ { $H/bin/bindgen --version 2>/dev/null | grep -q " $BG$" && _dynamic $H/bin/bindgen; } || _inst bindgen-cli@$BG
   $H/bin/cbindgen --version 2>/dev/null | grep -q " $CB$" || _inst cbindgen@$CB

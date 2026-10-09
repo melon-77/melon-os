@@ -117,7 +117,7 @@ extras="melon-base bash busybox musl apk-tools"
 # guest tools, which the installers add when they run inside a VM
 ls $M/repo/$APK_ARCH/melon-vm-guest-[0-9]*.apk >/dev/null 2>&1 && extras="$extras melon-vm-guest"
 apkx fetch --recursive --output $ISO/melon/repo/$APK_ARCH $extras >/dev/null
-( cd $ISO/melon/repo/$APK_ARCH && $APK --keys-dir $M/keys/trusted --sign-key $M/keys/melon-signing.rsa mkndx -d "melon $DATE" -o Packages.adb *.apk )
+( cd $ISO/melon/repo/$APK_ARCH && $APK --keys-dir $M/keys/trusted --sign-key "${MELON_SIGN_KEY:-$M/keys/melon-signing.rsa}" mkndx -d "melon $DATE" -o Packages.adb *.apk )
 
 step "initramfs"
 mkdir -p $INITRD/bin $INITRD/lib $INITRD/dev

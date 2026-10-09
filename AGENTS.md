@@ -440,7 +440,7 @@ the console `live` install takes 77 s, `disk` and `disk --uefi` about 40 s each,
 the serial console in 25 s, but the Plasma desktop tests (`desktop`, `desktop-install`) were not usable there (another session saw
 Plasma not start in 15 minutes): run those on a machine with KVM. Use generous timeouts. The ISO's GRUB and the installed system both use
 the serial port, so tests don't need a screen. The test also records the sound card output to
-`logs/audio-capture.wav`, which lets you check that the installer music really plays. The build PC (Windows 10 LTSC, AMD Ryzen) has `/dev/kvm` in WSL2 but QEMU gets "No such device": WSL2 there cannot nest virtualization, so every test runs in software (the live ISO reaches its shell in about 20 seconds, the console install takes about 45, Plasma had not started after 15 minutes). WSL2 on Windows 10 also stops all background processes when the last `wsl.exe` session closes: run long jobs from a foreground `wsl.exe` call.
+`logs/audio-capture.wav`, which lets you check that the installer music really plays.
 
 ## Running melon in a VM
 

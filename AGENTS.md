@@ -560,7 +560,7 @@ Measured on the 29 September desktop image with `mksquashfs` (zstd, 512 KiB bloc
   reads them on a running system: `grub-install` copies only `.mod`, `.lst`, `.img`, `.efi`, `modinfo.sh` and the efiemu
   objects (`util/grub-install-common.c`), and `grub-mkimage` reads `.mod` and `kernel.img`; a `core.img` for `i386-pc` and
   for `x86_64-efi` made with and without them is byte-identical. 36 MB less on disk, 11 MB less in the compressed image.
-- **`breeze` pkgrel 1 drops two sizes of the default "Next" wallpaper** (`7680x2160` for 32:9 screens and `1440x2960` for
+- **`breeze` pkgrel 1 drops two sizes of the default "Next" wallpaper** (in `scripts/gen-kde-recipes.py`: the recipe is generated, rule 57) (`7680x2160` for 32:9 screens and `1440x2960` for
   phones, light and dark: 24 MB of PNG, which doesn't compress). 16:9 and 16:10 screens use the `5120x2880` one, and Plasma
   scales it on the others.
 - Left alone on purpose: translations (49 MB compressed: dropping languages is a product decision), the Mesa and LLVM

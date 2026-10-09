@@ -1,0 +1,14 @@
+pkgname=labwc
+pkgver=0.20.2
+pkgrel=1
+pkgdesc="labwc, a light stacking Wayland compositor (the window manager of melon's LXQt session)"
+license=GPL-2.0-only
+url=https://labwc.github.io
+source=(labwc-0.20.2.tar.gz)
+makedepends=(wlroots-dev cairo-dev pango-dev glib-dev libxml2-dev libinput-dev libpng-dev libsfdo-dev wayland-protocols xwayland)
+depends=(xwayland)
+# no SVG button icons: librsvg is Rust, and the theme's buttons are XBM/PNG
+build(){ meson_setup -Dman-pages=disabled -Dsvg=disabled -Dicon=enabled -Dxwayland=enabled -Dnls=enabled build; ninja -C build -j$JOBS; }
+# no bare labwc login session: SDDM listed it first and logged into an empty labwc instead of LXQt (LXQt starts
+# labwc itself, startlxqtwayland)
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/wayland-sessions; }

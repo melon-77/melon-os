@@ -59,7 +59,7 @@ fi
 stop_ice(){ [ -n "$ICE_PID" ] && kill "$ICE_PID" 2>/dev/null; ICE_PID=; }
 trap stop_ice EXIT
 trap 'stop_ice; exit 130' INT TERM
-[ -t 1 ] && [ -z "${MELON_YES:-}" ] && sh /usr/share/melon/.glove
+[ -t 1 ] && [ -z "${MELON_YES:-}" ] && sh /usr/share/melon/.fall
 cat <<EOF
   This puts melon on a whole disk, erasing it, or next to Windows or another system in the disk's
   unallocated space (shrink Windows first, in Windows' Disk Management).

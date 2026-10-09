@@ -1,0 +1,13 @@
+pkgname=seatd
+pkgver=0.9.3
+pkgrel=0
+pkgdesc="libseat: lets a Wayland compositor (labwc) open the screen and input devices through elogind"
+license=MIT
+url=https://git.sr.ht/~kennylevinsen/seatd
+source=(seatd-0.9.3.tar.gz)
+subpackages=(seatd-dev)
+makedepends=(elogind-dev)
+# only libseat's elogind backend: SDDM's sessions are elogind sessions, so no seatd daemon is needed
+build(){ meson_setup -Dlibseat-logind=elogind -Dlibseat-seatd=disabled -Dlibseat-builtin=disabled -Dserver=disabled \
+  -Dexamples=disabled -Dman-pages=disabled build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

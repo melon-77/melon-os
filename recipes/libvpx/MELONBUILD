@@ -1,11 +1,13 @@
 pkgname=libvpx
 pkgver=1.16.0
-pkgrel=0
+pkgrel=1
 pkgdesc="VP8/VP9 video codec library (screen recording to WebM)"
 license=BSD-3-Clause
 url=https://www.webmproject.org/
 source=(libvpx-1.16.0.tar.gz)
 subpackages=(libvpx-dev)
+# configure only checks that diff exists, with GNU diff's --version (BusyBox's has none; its diff does the real work)
+prepare(){ sed -i 's|if ! diff --version >/dev/null|if ! diff /dev/null /dev/null >/dev/null|' configure; }
 # its own configure: CROSS is the tool prefix; nasm assembles the x86 code, CPU features are picked at run time
 build(){ CROSS=$TARGET- ./configure --target=x86_64-linux-gcc --prefix=/usr --libdir=/usr/lib --enable-shared --disable-static \
            --enable-pic --disable-examples --disable-tools --disable-docs --disable-unit-tests --enable-vp8 --enable-vp9 \

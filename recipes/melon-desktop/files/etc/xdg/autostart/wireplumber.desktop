@@ -4,4 +4,4 @@ Name=WirePlumber
 Exec=wireplumber
 NoDisplay=true
 X-KDE-autostart-phase=0
-OnlyShowIn=KDE;
+OnlyShowIn=KDE;LXQt;

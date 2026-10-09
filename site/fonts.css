@@ -1,0 +1,4 @@
+/* the three typefaces, hosted here (OFL: Bricolage Grotesque, Instrument Sans, JetBrains Mono) */
+@font-face { font-family: "Bricolage Grotesque"; src: url(fonts/bricolage-grotesque.woff2) format("woff2"); font-weight: 500 800; font-display: swap; }
+@font-face { font-family: "Instrument Sans"; src: url(fonts/instrument-sans.woff2) format("woff2"); font-weight: 400 600; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url(fonts/jetbrains-mono.woff2) format("woff2"); font-weight: 400 700; font-display: swap; }

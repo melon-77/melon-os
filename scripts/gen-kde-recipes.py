@@ -34,18 +34,21 @@ ORDER = [
  ('qt6-qtshadertools','qt6-shadertools', QT+' '+QTDIRS, 'qt'),
  ('qt6-qtsvg','qt6-svg', QT+' '+QTDIRS, 'qt'),
  ('qt6-qtimageformats','qt6-imageformats', QT+' '+QTDIRS, 'qt'),
- ('qt6-qtdeclarative','qt6-declarative', QT+' '+QTDIRS+' -DFEATURE_qml_debug=OFF', 'qt'),
+ # 32-bit: no precompiled headers; with them the build tree passes 11 GB (a header per QML target), and the 32-bit
+ # edition usually shares the disk with the 64-bit build
+ ('qt6-qtdeclarative','qt6-declarative', QT+' '+QTDIRS+' -DFEATURE_qml_debug=OFF $([ "$APK_ARCH" != x86 ] || echo -DBUILD_WITH_PCH=OFF)', 'qt'),
  ('qt6-qtwayland','qt6-wayland', QT+' '+QTDIRS, 'qt'),
  ('qt6-qtpositioning','qt6-positioning', QT+' '+QTDIRS, 'qt'),
  ('qt6-qtlocation','qt6-location', QT+' '+QTDIRS, 'qt'),   # plasma-workspace needs QtLocation
  ('qt6-qtwebview','qt6-webview', QT+' '+QTDIRS, 'qt'),   # Discover; no QtWebEngine backend (a whole Chromium)
- ('qt6-qtspeech','qt6-speech', QT+' '+QTDIRS+' -DFEATURE_flite=ON -DFEATURE_speechd=OFF', 'qt'),   # speech through Flite, sound through Qt Multimedia
  ('qt6-qt5compat','qt6-5compat', QT+' '+QTDIRS, 'qt'),
  ('qt6-qttools','qt6-tools', QT+' '+QTDIRS+' -DFEATURE_assistant=OFF -DFEATURE_designer=OFF -DFEATURE_distancefieldgenerator=OFF '
    '-DFEATURE_pixeltool=OFF -DFEATURE_qtdiag=OFF -DFEATURE_clang=OFF -DFEATURE_qdoc=OFF -DFEATURE_linguist=ON', 'qt'),
  ('qt6-qttranslations','qt6-translations', QT+' '+QTDIRS, 'qt'),   # Qt's own strings (dialogs, shortcuts), via the host lrelease
  # playback through FFmpeg, sound through PulseAudio (PipeWire's pulse server)
  ('qt6-qtmultimedia','qt6-multimedia', QT+' '+QTDIRS+' -DFEATURE_ffmpeg=ON -DFEATURE_gstreamer=OFF -DFEATURE_pulseaudio=ON', 'qt'),
+ ('qt6-qtspeech','qt6-speech', QT+' '+QTDIRS+' -DFEATURE_flite=ON -DFEATURE_speechd=OFF', 'qt'),   # speech through Flite, sound through Qt Multimedia (after it: without
+ #   Qt Multimedia, qtspeech's CMake skips the whole build and only its install step fails)
  ('extra-cmake-modules','kf6-extra-cmake-modules', '-DBUILD_DOC=OFF', 'noarch-kde'),
  ('plasma-wayland-protocols','plasma-wayland-protocols', '', 'noarch-kde'),
  ('polkit-qt-1','polkit-qt-1', KDE, 'kde'),
@@ -55,7 +58,7 @@ ORDER = [
  ('qca','qca2', KDE+' -DQT6=ON -DBUILD_TESTS=OFF -DBUILD_TOOLS=OFF -DWITH_botan_PLUGIN=no -DWITH_pkcs11_PLUGIN=no -DWITH_cyrus-sasl_PLUGIN=no', 'kde'),
 ]
 KF6 = ('kcoreaddons kconfig ki18n kwidgetsaddons kwindowsystem kguiaddons kcodecs kitemmodels kitemviews karchive '
-       'kdbusaddons kcrash kauth kcolorscheme kcompletion kconfigwidgets kglobalaccel kiconthemes breeze-icons '
+       'kdbusaddons kcrash kauth kcolorscheme kcompletion kconfigwidgets kglobalaccel breeze-icons kiconthemes '
        'kservice knotifications kjobwidgets solid sonnet ktextwidgets kxmlgui kbookmarks kpackage kidletime '
        'kstatusnotifieritem kwallet attica kirigami ksvg kdeclarative kded kio kcmutils knewstuff knotifyconfig '
        'kparts kpty kunitconversion krunner kquickcharts qqc2-desktop-style frameworkintegration kdesu '
@@ -80,7 +83,7 @@ PLASMA = [
  ('plasma-desktop',' -DBUILD_KCM_MOUSE_X11=OFF -DBUILD_KCM_TOUCHPAD_X11=OFF'), ('systemsettings',''), ('kscreen',''), ('powerdevil',''), ('plasma-nm',' -DDISABLE_MODEMMANAGER_SUPPORT=ON'),
  ('plasma-pa',''), ('print-manager',''), ('bluedevil',''), ('polkit-kde-agent-1',''), ('xdg-desktop-portal-kde',''), ('milou',''),
  ('kde-cli-tools',''), ('plasma-systemmonitor',''), ('kinfocenter',''), ('sddm-kcm',''),
- ('sddm',' -DENABLE_PAM=ON -DNO_SYSTEMD=ON -DUSE_ELOGIND=ON -DSDDM_INITIAL_VT=7 -DBUILD_MAN_PAGES=OFF -DRUNTIME_DIR=/run/sddm -DUID_MIN=1000 -DDBUS_CONFIG_DIR=/usr/share/dbus-1/system.d'),
+ ('sddm',' -DENABLE_PAM=ON -DNO_SYSTEMD=ON -DUSE_ELOGIND=ON -DSDDM_INITIAL_VT=7 -DBUILD_MAN_PAGES=OFF -DRUNTIME_DIR=/run/sddm -DUID_MIN=1000 -DUID_MAX=60000 -DDBUS_CONFIG_DIR=/usr/share/dbus-1/system.d'),
  ('dolphin',''), ('konsole',''), ('kde-spectacle',''), ('plasma-discover',' -DBUILD_PackageKitBackend=OFF -DBUILD_SnapBackend=OFF -DBUILD_FwupdBackend=OFF'),
 ]
 for n, extra in PLASMA:
@@ -98,9 +101,11 @@ PKGREL['qt6-qtspeech'] = 1   # Flite
 PKGREL['kf6-ktextwidgets'] = 1   # Speak Text
 PKGREL['qt6-qtmultimedia'] = 3   # 1: with its QML modules; 2: FFmpeg and PulseAudio backends; 3: no sysroot paths in its qmake module
 PKGREL['kwin'] = 1   # X11 on: in KWin 6.6 it also switches Xwayland support, which startplasma asks for
-PKGREL['sddm'] = 3   # 1: QML components back from the host Qt's qml dir; 2: PAM services; 3: greeter on VT 7, clear of getty-tty1
+PKGREL['sddm'] = 4   # 1: QML components back from the host Qt's qml dir; 2: PAM services; 3: greeter on VT 7, clear of getty-tty1;
+                    # 4: UID_MAX given (it read the build machine's /etc/login.defs, which melon doesn't have; 60000 as Ubuntu's)
 PKGREL['qcoro'] = 1   # shared libraries instead of static ones
 PKGREL['qca'] = 2   # relocatable CMake export (POST below)
+PKGREL['breeze'] = 1   # drops two unused sizes of the default "Next" wallpaper (POST below)
 PKGREL['qt6-qtbase'] = 3   # 2: CUPS print support (xdg-desktop-portal-kde); 3: Vulkan (kinfocenter; Mesa has RADV/ANV)
 
 # extra build() steps, run before configuring
@@ -129,6 +134,10 @@ POST = {
             " printf 'auth\\trequired\\tpam_permit.so\\naccount\\trequired\\tpam_permit.so\\npassword\\trequired\\tpam_deny.so\\nsession\\trequired\\tpam_unix.so\\n-session\\toptional\\tpam_elogind.so\\n' > $pkgdir/etc/pam.d/sddm-greeter;",
     # its qmake module lists the include/library directories pkg-config found, with the sysroot in front (rule 32)
     'qt6-qtmultimedia': ' sed -i "s|$SYSROOT||g" $pkgdir/usr/lib/qt6/mkspecs/modules/qt_lib_multimedia_private.pri;',
+    # the default "Next" wallpaper ships 7680x2160 (32:9 screens) and 1440x2960 (phones), light and dark: 24 MB of PNG that
+    # doesn't compress; 16:9 and 16:10 screens use the 5120x2880 one and Plasma scales it on the others
+    'breeze': ' rm -f $pkgdir/usr/share/wallpapers/Next/contents/images*/7680x2160.png'
+              ' $pkgdir/usr/share/wallpapers/Next/contents/images*/1440x2960.png;',
     # QCA exports absolute /usr paths in its CMake targets; make them relative so they resolve inside the sysroot too
     'qca': " sed -i 's|\"/usr/|\"${_IMPORT_PREFIX}/|g' $pkgdir/usr/lib/cmake/Qca-qt6/Qca-qt6Targets*.cmake;"
            " sed -i 's|^set(_IMPORT_PREFIX \"/usr\")$|get_filename_component(_IMPORT_PREFIX \"${CMAKE_CURRENT_LIST_DIR}/../../..\" ABSOLUTE)|'"

@@ -1,10 +1,10 @@
 pkgname=sddm
 pkgver=0.21.0
-pkgrel=3
+pkgrel=4
 pkgdesc="sddm"
 license="LGPL-2.1-or-later OR GPL-2.0-or-later (see sources)"
 source=(sddm-0.21.0+git20250502.4fe234b.tar.gz)
 builddir=$srcdir/sddm-0.21.0+git20250502.4fe234b
 subpackages=(sddm-dev)
-build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_QTPLUGINDIR=lib/qt6/plugins -DKDE_INSTALL_QMLDIR=lib/qt6/qml -DKDE_INSTALL_LIBEXECDIR=libexec -DKF_IGNORE_PLATFORM_CHECK=ON -DBUILD_WITH_QT6=ON -DQT_MAJOR_VERSION=6 -DBUILD_DOC=OFF -DENABLE_PAM=ON -DNO_SYSTEMD=ON -DUSE_ELOGIND=ON -DSDDM_INITIAL_VT=7 -DBUILD_MAN_PAGES=OFF -DRUNTIME_DIR=/run/sddm -DUID_MIN=1000 -DDBUS_CONFIG_DIR=/usr/share/dbus-1/system.d; ninja -C build -j$JOBS; }
+build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake -DBUILD_QCH=OFF -DBUILD_PYTHON_BINDINGS=OFF -DKDE_INSTALL_QTPLUGINDIR=lib/qt6/plugins -DKDE_INSTALL_QMLDIR=lib/qt6/qml -DKDE_INSTALL_LIBEXECDIR=libexec -DKF_IGNORE_PLATFORM_CHECK=ON -DBUILD_WITH_QT6=ON -DQT_MAJOR_VERSION=6 -DBUILD_DOC=OFF -DENABLE_PAM=ON -DNO_SYSTEMD=ON -DUSE_ELOGIND=ON -DSDDM_INITIAL_VT=7 -DBUILD_MAN_PAGES=OFF -DRUNTIME_DIR=/run/sddm -DUID_MIN=1000 -DUID_MAX=60000 -DDBUS_CONFIG_DIR=/usr/share/dbus-1/system.d; ninja -C build -j$JOBS; }
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; install -d $pkgdir/etc/pam.d; printf 'auth\tinclude\tbase-auth\naccount\tinclude\tbase-account\npassword\tinclude\tbase-password\nsession\tinclude\tbase-session\n' > $pkgdir/etc/pam.d/sddm; printf 'auth\trequired\tpam_permit.so\naccount\tinclude\tbase-account\npassword\trequired\tpam_deny.so\nsession\tinclude\tbase-session\n' > $pkgdir/etc/pam.d/sddm-autologin; printf 'auth\trequired\tpam_permit.so\naccount\trequired\tpam_permit.so\npassword\trequired\tpam_deny.so\nsession\trequired\tpam_unix.so\n-session\toptional\tpam_elogind.so\n' > $pkgdir/etc/pam.d/sddm-greeter; }

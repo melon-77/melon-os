@@ -19,14 +19,15 @@ source by our own scripts and shipped as a signed apk v3 package.
 | devices | eudev 3.2 on the desktop profile (`udevd` service), BusyBox mdev (`mdevd` service) on the console profile | the desktop profile swaps `mdevd` for `udevd`; see rule 44 |
 | packages | apk-tools 3.0.8 | repo index `Packages.adb`, signed with `keys/melon-signing.rsa` |
 | kernel | Linux 7.0, `linux-melon` (generic) | config = `x86_64_defconfig` + `recipes/linux-melon/config-melon` |
-| boot | GRUB 2.14, both `i386-pc` and `x86_64-efi` | ISO and installs boot on BIOS **and** UEFI |
+| boot | GRUB 2.14, both `i386-pc` and `x86_64-efi` | ISO and installs boot on BIOS **and** UEFI; the installed system's boot menu is hidden (skipped after 1 s, Shift or Esc opens it) unless another system is found, then it shows for 5 s |
 | disks | GPT: 1 MiB BIOS boot, 1 GiB FAT32 `/boot` (also the ESP), XFS `/` | kernel boots with `root=PARTUUID=...`; only encrypted (LUKS) installs have an initramfs (rule 28); dual boot next to Windows on UEFI (see Installers) |
 | filesystem | merged `/usr`: `/bin`, `/sbin`, `/usr/sbin` -> `usr/bin`, `/lib` -> `usr/lib` | packages must only ship files under `/usr`, `/etc`, `/var`, `/boot` |
 | desktop | KDE Plasma 6.6 on Wayland (KWin, Xwayland), Qt 6.10, SDDM | desktop ISO and desktop profile; list in `scripts/desktop-packages.txt` |
+| 32-bit edition | i686 (`MELON_ARCH=x86`, `-march=pentium-m -mfpmath=sse`: SSE2, as Qt 6 needs), LXQt 2.4 on Wayland with labwc 0.20 (wlroots), SDDM, Mesa with LLVM built for the X86 backend only (i915, crocus, r300, r600, nouveau, llvmpipe, softpipe) | the owner's decision (7 October 2026): LXQt is the 32-bit desktop, for netbooks such as the MSI Wind U100 (Atom N270, 1–2 GB); drivers for every netbook-era Wi-Fi, Ethernet, graphics and laptop chip in `recipes/linux-melon/config-melon-x86` (the owner: "it should just work"; Broadcom b43 cards still need firmware nobody may redistribute); package list `scripts/desktop-packages-x86.txt`, recipes from `scripts/gen-lxqt-recipes.py` plus `recipes/melon-lxqt` (melon's LXQt defaults); no Plasma, Flatpak, NVIDIA or QEMU guest agent there (QEMU 11 doesn't build for 32-bit hosts) |
 | desktop plumbing | D-Bus, elogind, polkit, PipeWire + WirePlumber, NetworkManager, BlueZ, CUPS, UDisks2 | console profile keeps `dhcp` + wpa_supplicant |
 | graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe; zink (OpenGL on Vulkan) | |
 | developer tools | gcc 15.2 + g++, binutils 2.46, make 4.4.1, pkgconf, patch (`gcc`, `g++`, `binutils`, `make`, `pkgconf`, `patch`) | built cross-native with the cross toolchain's settings (PIE, SSP); in the package repository only, not on the ISOs; `melon-first-boot` offers them on first login (default no) |
-| build tools | perl 5.44, m4, bison, flex, gawk, gperf, GNU bc, texinfo, autoconf 2.73, automake 1.19, autoconf-archive, file; cmake 4.4, meson 1.12, ninja 1.13, git 2.56, nasm 3.01, tcl 8.6, rsync 3.5, lz4; xorriso, mtools, scdoc, itstool, dtc, pahole (`dwarves`), the Public Suffix List, Python's mako, PyYAML, packaging, pexpect and libxml2 bindings (`python3-*`) (`BUILDTOOLS`, `BUILDTOOLS2` in `build-everything.sh`) | what melon's recipes need to build on melon itself (self-hosting, see Roadmap); package repository only. gawk and GNU bc take over BusyBox's `awk`/`bc`/`dc` links; BusyBox's `/usr/bin` trigger puts them back when those packages go |
+| build tools | perl 5.44, m4, bison, flex, gawk, gperf, GNU bc, texinfo, autoconf 2.73, automake 1.19, autoconf-archive, file; cmake 4.4, meson 1.12, ninja 1.13, git 2.56, nasm 3.01, tcl 8.6, rsync 3.5, lz4; xorriso, mtools, scdoc, itstool, dtc, pahole (`dwarves`), rpcgen (`rpcsvc-proto`), the Public Suffix List, Python's mako, Jinja2, pyparsing, PyYAML, packaging, pexpect and libxml2 bindings (`python3-*`) (`BUILDTOOLS`, `BUILDTOOLS2` in `build-everything.sh`) | what melon's recipes need to build on melon itself (self-hosting, see Roadmap); package repository only. gawk and GNU bc take over BusyBox's `awk`/`bc`/`dc` links; BusyBox's `/usr/bin` trigger puts them back when those packages go |
 | compilers, VMs | clang 21 (+ `libclc`, `spirv-llvm-translator`), Go 1.27, gh (`github-cli`), QEMU 11.1 + OVMF (`qemu`, `ovmf`) (`STEP2` in `build-everything.sh`) | package repository only. clang: Mesa's OpenCL C shader compiler on melon; QEMU + OVMF run melon's own install tests on melon; OVMF is Ubuntu 26.04's prebuilt `ovmf-generic` at Ubuntu's paths |
 | NVIDIA | the open driver: nouveau + `linux-firmware-nvidia` (GSP 570.144 from upstream linux-firmware) + NVK (`mesa-nvk`), with zink for OpenGL; or NVIDIA's own kernel driver: `nvidia-open` 615 (open modules + NVIDIA's firmware) | package repository only; `melon-first-boot` asks which one on computers with an NVIDIA card (GTX 16/RTX 20 and newer). NVIDIA's userspace needs glibc: with `nvidia-open` only Flatpak apps (Steam) get NVIDIA's libraries, from Flathub |
 | gaming | Flatpak 1.16 + Flathub, GameMode | Steam is glibc-only, so it can't run natively on musl: `melon-first-boot` offers Steam (and Firefox, VLC, Prism Launcher) from Flathub on first login |
@@ -35,9 +36,14 @@ source by our own scripts and shipped as a signed apk v3 package.
 
 Owner's config (`CONFIG_*` answers) lives in `docs/config.txt`. Don't change those choices without the owner's approval.
 
-To build on another machine (Ubuntu 24.04 or WSL2), follow `BUILDING.md`: `scripts/host-setup.sh`, then
-`scripts/build-everything.sh`. Scripts find the repo from their own location; recipes use `$M`. Never write
-a machine's absolute path into a script or recipe.
+To build on another machine (Ubuntu 24.04 or WSL2, Debian or Devuan through the same apt path, or melon), follow
+`BUILDING.md`: `scripts/host-setup.sh`, then `scripts/build-everything.sh`. Scripts find the repo from their own
+location; recipes use `$M`. Never write a machine's absolute path into a script or recipe. A checkout's `tools/` and
+`sysroot/` are tied to its path (the cross compiler has `--with-sysroot=<checkout>/sysroot` built in): **two sessions must
+not share one checkout** (one switching branches under the other's build). Give each its own `git worktree` with its own
+toolchain, sysroot and `repo/` ("Windows + WSL2 build machine" in `BUILDING.md` says how). Run scripts by their absolute path:
+`toolchain.sh` changes directory and then looks for `toolchain-finish.sh` next to `$0`. The signing key can stay where it is:
+`MELON_SIGN_KEY=/path/to/melon-signing.rsa` is honoured by `melon-build` and `mkiso.sh`.
 
 ## Repository layout
 
@@ -52,11 +58,16 @@ scripts/mkiso.sh        live/installer ISO: rootfs.sqfs (pristine apk-installed 
                         installers) + live.sqfs (small live-session layer) + a small repo of extras (VM guest tools,
                         a few base packages; never a second copy of what rootfs.sqfs already holds)
 scripts/qemu-test.py    headless boot + install + reboot test over the serial console
+scripts/record-installer.py  records the console installer in QEMU as a video (blacks out the intro's title; not on the site)
 recipes/<name>/MELONBUILD   one directory per recipe (see below)
 recipes/<name>/*.patch      applied automatically with patch -p1, in name order
 recipes/<name>/<pkg>.post-install etc.   apk scripts for (sub)package <pkg>
 iso-files/init          live initramfs /init
 branding/               logo (transparent PNGs)
+site/                   the website: index.html, download/, style.css, gauntlet.js (a demo of the installer's gauntlet), distro-finder/,
+                        releases.json (the ISO facts, rendered into the pages by scripts/site-release.py);
+                        scripts/publish-site.sh adds it as a commit on the gh-pages branch (what GitHub Pages serves)
+art/site.py             draws site/assets/melon-pixel.svg (melonfetch's melon) and net.svg
 recipes/calamares-melon/    graphical installer branding + gauntlet (stage 2)
 recipes/melon-pinball/      melon's own pinball game (C++/SDL3); the game is a submodule (game/ = melon-77/melon-pinball)
 ```
@@ -150,6 +161,9 @@ Rebuilding the kernel takes about an hour on 2 cores.
     and `/etc/ld-musl-x86_64.path` lists `sysroot/usr/lib` (same for `i386` in 32-bit builds), so
     build-time generators from earlier packages (glib-compile-resources, kconfig_compiler, ...) just run.
     Meson's cross file sets `needs_exe_wrapper=false` for the same reason.
+    **On a melon build machine, never do this:** there the loader is the system's own musl, and pointing it at the
+    sysroot swaps libc under every program. `host-setup.sh` only writes `/etc/ld-musl-x86_64.path` with the system's
+    directories first and `sysroot/usr/lib` last (BUILDING.md, "melon as the build machine").
 19. **`meson_setup` drops `-D` options the project doesn't have** (`scripts/meson-filter-opts.py`) and
     unsets the `PKG_CONFIG_*` variables for native lookups. Upstream renames options often; a stale
     option must not fail the whole build.
@@ -235,11 +249,16 @@ Rebuilding the kernel takes about an hour on 2 cores.
     devices that got none, graphics, network, sound, Bluetooth, power and service state, and the kernel's firmware
     messages; map IDs to modules with `modprobe -R <modalias>` against the built kernel. (`scripts/melon-diag.sh`, the
     old `curl | sh` tool, is now a wrapper that prints the same report.)
-44. **Device events between stage 1's udevd and the udevd service are lost.** Stage 1 runs a udevd for the boot
-    coldplug and stops it; the runit service starts a new one a moment later. A Wi-Fi card's interface appears only
-    after its firmware loads (MT7921, iwlwifi, ath11k), often in that gap: udev never processed it, so it kept the
-    kernel name `wlan0` and NetworkManager left it "unmanaged" (the ProBook's MT7921). The service replays the "add"
-    events for net, ieee80211, rfkill and bluetooth devices once it runs (`recipes/eudev/udevd.run`).
+44. **Never restart udevd while devices are still appearing: events in the gap are lost.** Stage 1 runs a udevd for the boot
+    coldplug. It used to stop it and let the runit service start a new one a moment later; a Wi-Fi card's interface
+    appears only after its firmware loads (MT7921, iwlwifi, ath11k), often in that gap, so udev never processed it, kept the
+    kernel name `wlan0` and NetworkManager left it "unmanaged" (the ProBook's MT7921). Now stage 1 leaves its udevd
+    running and the `udevd` service adopts it (`recipes/eudev/udevd.run`: it waits for that process and stops it on
+    TERM), so udev never restarts at boot. The service still replays the "add" events for net, ieee80211, rfkill and
+    bluetooth devices when it has to start a fresh udevd (`sv restart udevd`, or the kernel option `melon.udev=sync`,
+    which brings back the old stop-and-restart; `qemu-test.py desktop` covers that path).
+    Stage 1 no longer waits for udev to finish: it waits only for the devices in `/etc/fstab`, so **a service or a
+    stage 1 step that needs a device other than a mounted disk must wait for it itself** (SDDM waits until elogind reports seat0 graphical, i.e. until the GPU driver is up).
 45. **Packaged files must not keep the builder's account.** `cp -a $startdir/files/.` keeps the checkout's owner;
     apk records that account's name, and on a melon system without it the files become `nobody`'s. Service run
     scripts, `/etc/profile.d` and the installer's helpers were writable by `nobody`, then run by root. `melon-build`
@@ -297,8 +316,77 @@ Rebuilding the kernel takes about an hour on 2 cores.
     `-resource-dir` to find its own headers (`BINDGEN_EXTRA_CLANG_ARGS`). Mesa's Rust crates come through its meson wraps
     (pinned by hash) into `sources/mesa-packagecache`.
 
+53. **On melon, the build machine's triple is not melon's.** `gcc -dumpmachine` on melon prints `x86_64-melon-linux-musl`,
+    the cross toolchain's own target, so binutils and gcc would configure themselves as native compilers and autoconf
+    would see `--build` equal to `--host`. `env.sh` sets `BUILD_TRIPLE` (`x86_64-pc-linux-musl` on melon, gcc's own
+    answer elsewhere): `melon-build` passes it as `--build`, and `toolchain.sh` gives binutils and gcc
+    `--build`/`--host` from `TOOLCHAIN_HOST_FLAGS` (empty on Ubuntu, so Ubuntu builds don't change). Programs built
+    for the Ubuntu host (`tools/`, `hosttools/`) don't run on melon (no glibc): rebuild them there. Host Rust is
+    upstream's musl-hosted build on melon (`host-rust.sh`); there the build machine's Rust triple equals
+    `$RUST_TARGET`, so build scripts' C parts use melon's cross gcc too, and they still run because the build machine
+    is melon. Recipes must not assume Ubuntu paths (`/usr/lib/llvm-*`): look for melon's (`/usr/lib`) as well.
+    melon's `tar` is BusyBox's, whose xz decoder stops at a 64 MiB dictionary (Rust's tarballs use 128 MiB: "tar: corrupted
+    data"): unpack `.xz` with `untar` (melon-build) or `xz -dc | tar -xf -`, never `tar xJf`. Host Rust programs that dlopen()
+    (bindgen loads libclang) must be built with `-C target-feature=-crt-static` there: a static musl program can't dlopen.
+    melon's `/usr/include` lacks `sys/cdefs.h` without `bsd-compat-headers` (rule 5), and its python3 has no pip.
+    `find`, `grep` and `realpath` are BusyBox's too: no `find -uid/-gid` or size suffixes beyond `k`, no `grep --exclude`,
+    no `realpath` options, no `ln -r`, no `diff --version` (libvpx's configure asks), and `sed` isn't GNU sed; melon's bison has no `yacc` command (`YACC="bison -y"`).
+    Scripts and recipes use what both have (or python3). The build machine's gcc is GCC 15 (C23 by default,
+    rule 40: the cross toolchain's in-tree GMP gets `-std=gnu17`), and its cmake is CMake 4
+    (`CMAKE_POLICY_VERSION_MINIMUM=3.5` in melon-build for projects asking for less than 3.5). host-setup.sh links
+    automake's `config.sub`/`config.guess` into `/usr/share/misc` and installs `libtool-dev` and `gettext-dev`
+    (libtool.m4, autopoint) for autoreconf. Python modules a build imports on the build machine are melon packages too
+    (no pip): elogind's build imports Jinja2 and flatpak's pyparsing, so host-setup.sh asks for `python3-jinja2` and
+    `python3-pyparsing` and, while the online repository doesn't have them, copies each module from its sdist in
+    `sources/` (a new recipe's package is online only once the owner publishes it, so whatever the build machine itself
+    needs must also work before that). The same goes for tools: `rpcgen`
+    (open-vm-tools' configure; melon's libtirpc has none) is built from `sources/` into `/usr/local/bin` until
+    `rpcsvc-proto` is published.
+    melon's `-dev` packages don't pull in the `-dev` packages their `.pc` files require, so a native pkg-config lookup
+    on melon fails unless host-setup.sh asks for those too (`pcre2-dev` for glib-2.0, `xorgproto` and the libXau, Xdmcp,
+    Xfixes and Xxf86vm `-dev` packages for x11 and gl): appstream's cross build looks the build machine's appstream up.
+    QEMU's configure makes a venv with pip (`mkvenv.py`), which melon's python3 can't (no ensurepip): on melon,
+    recipes/qemu and qemu-guest-agent use the host Python (`hosttools/python` keeps ensurepip) and put setuptools
+    and wheel (PyPI wheels in `sources/`) next to QEMU's own in `python/wheels`, where its offline "tooling" group
+    looks for them.
+54. **i686 needs SSE2 and `libssp_nonshared.a`.** The 32-bit toolchain targets `-march=pentium-m -mfpmath=sse`
+    (`GCC_ARCH`/`GCC_FPMATH` in `env.sh`): Qt 6 refuses to build without SSE2, and Alpine's x86 does the same. With
+    `--enable-default-ssp`, position-independent i386 code calls the hidden `__stack_chk_fail_local`, which musl
+    doesn't provide: `toolchain-finish.sh` and the musl recipe build `libssp_nonshared.a`, and
+    `patches/gcc-i686/ssp-nonshared.patch` makes gcc link it (Alpine's way). Without it libatomic's configure fails.
+55. **No text relocations on i686.** BusyBox's SHA-NI assembly (`CONFIG_SHA1_HWACCEL`, `CONFIG_SHA256_HWACCEL`) isn't
+    position-independent on i386: the PIE BusyBox got a TEXTREL and every applet segfaulted at start. The recipe
+    switches those off on i386. After a new 32-bit package, check `readelf -d` for `TEXTREL`.
+56. **GRUB 2.14 with binutils 2.44 or newer links its kernel at the wrong address.** Its configure picks
+    `-Wl,--image-base=0x400000`, which newer ld honours instead of `-Ttext`: `grub-mkimage` then stops with "kernel.img
+    miscompiled ... start address is 0x9074 instead of 0x9000" (i386-pc). `recipes/grub` and `scripts/hostgrub.sh`
+    preset `ax_cv_check_ldflags___Wl___image_base_0x400000=no`.
+57. **Generated recipes are edited in their generator.** `gen-simple-recipes.py`, `gen-kde-recipes.py` and
+    `gen-lxqt-recipes.py` rewrite their recipes at every `build-everything.sh` start, so an edit made only in
+    `recipes/<name>/MELONBUILD` is silently undone (qtdeclarative's "no PCH on x86" was). Change the generator, run it,
+    and commit both. Per-arch options go inside the arguments as `$([ "$APK_ARCH" != x86 ] || echo ...)`. On x86,
+    qt6-qtdeclarative builds without precompiled headers: with them its build tree passed 11 GB and filled the disk.
+58. **A failed package unpacks fresh on the next pass.** A CMake cache from a run that failed remembers what wasn't
+    there yet (Qt's `HAVE_EGL=false` before Mesa existed) and keeps failing after the dependency is built:
+    `build-everything.sh` deletes `work/pkg/<name>/.prepared` of each failed package between passes.
+59. **SDDM's greeter on labwc (melon-lxqt) is an xdg-shell window that labwc makes full screen.** With SDDM's
+    default layer-shell integration under labwc the greeter came up as a small box on a black screen.
+    `/etc/sddm.conf.d/15-lxqt.conf` sets `QT_WAYLAND_SHELL_INTEGRATION=xdg-shell` for the greeter and starts labwc with
+    `/usr/share/melon/sddm-labwc/rc.xml` (a window rule: no decorations, full screen). wlroots' Xwayland path must be
+    `/usr/bin/Xwayland` (recipes/wlroots), not the sysroot's, and labwc's own `labwc.desktop` session is removed so
+    SDDM starts LXQt.
+
+60. **WSL2 on Windows is a supported build machine, with traps** (BUILDING.md, "Windows + WSL2 build machine"):
+    the PC must not go to sleep while a build runs (connected standby freezes the VM and even `wsl --shutdown` hangs; recover with
+    an elevated stop of WslService and `vmmem`/`vmwp`, or a restart); Windows' `PATH` is switched off in `/etc/wsl.conf`
+    (`appendWindowsPath=false`), because a space in it broke `host-rust.sh`; scripts and queues are run by absolute path from
+    the Linux disk, never from `/mnt/c`; and on Windows 10 there is no KVM, so QEMU tests are slow software emulation. A signing
+    key kept on a USB stick is used in place through `MELON_SIGN_KEY` (`melon-build` and `mkiso.sh` read it), never copied.
+
 To resume a failed long build without unpacking again (for example the kernel):
-`MELON_KEEP_SRC=1 scripts/melon-build linux-melon`.
+`MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but
+only while the recipe and its patches are the ones the tree was unpacked with (`work/pkg/<name>/.prepared` holds their
+checksum): after a fix to the recipe, the package unpacks fresh so the new patches and `prepare()` run.
 
 The build container can be reclaimed while idle, which kills background builds. `scripts/resume.sh`
 restarts the host Qt build and the Qt/KF6/Plasma queue (`scripts/queue-4.sh`); finished host Qt modules
@@ -349,8 +437,13 @@ can come to rest off the flippers is a trap). Harvest's melons, grafts, pests an
 their effects are in `game.cpp` (`applyMachine` for the physics, `add` and `currentMult` for the scoring). Unlocks
 are variety only (no permanent power) and live in the player's `~/.local/share/melon/pinball/unlocks.txt`.
 
-Logs go to `logs/qemu-*.log`. The tests use KVM when `/dev/kvm` is usable (WSL2 has it); without it QEMU runs in
-software emulation and everything is slow. Use generous timeouts. The ISO's GRUB and the installed system both use
+Logs go to `logs/qemu-*.log`. The tests use KVM when it really works (`qemu-test.py` asks the kernel with the
+`KVM_GET_API_VERSION` ioctl: WSL2 on Windows 11 does, WSL2 on **Windows 10, or on a CPU Windows can't nest on, creates a
+`/dev/kvm` that QEMU can't use**, "failed to initialize kvm: No such device"); without it QEMU runs in software emulation
+(`-accel tcg,thread=multi -cpu max`) and everything is slow. Measured on a Ryzen 7 5800U under Windows 10 (4 vCPUs, no KVM, 9 October 2026):
+the console `live` install takes 77 s, `disk` and `disk --uefi` about 40 s each, and the desktop ISO boots and takes a login on
+the serial console in 25 s, but the Plasma desktop tests (`desktop`, `desktop-install`) were not usable there (another session saw
+Plasma not start in 15 minutes): run those on a machine with KVM. Use generous timeouts. The ISO's GRUB and the installed system both use
 the serial port, so tests don't need a screen. The test also records the sound card output to
 `logs/audio-capture.wav`, which lets you check that the installer music really plays.
 
@@ -420,6 +513,15 @@ the serial port, so tests don't need a screen. The test also records the sound c
   - if you need to run it in a test, call `/usr/libexec/melon/.cold` directly.
   It asks base or desktop and installs exactly what the desktop ISO installs. It plays
   `/usr/share/melon/.ice` (from the `melon-sounds` package, live ISO only) at 30% volume while it runs.
+  On 8 October 2026 the owner gave it a new name (only its hash is in `zz-melon.sh`; the old name no longer works) and
+  a new song, which also plays under the graphical installer (`melon-install-gui`), and a new intro: `/usr/share/melon/.fall`
+  (replaces the diamond glove) draws a melon rolling off a cliff at dusk in true-colour half blocks, then the title from a 5x7
+  pixel font, so the name is in glyph rows, never as text. Original art, in the mood the owner asked for. The Linux console and
+  most serial terminals have 16 colours, where true colour turns into banded grey, so `.fall` draws a second version of the scene
+  with the 16 console colours (`vpix`) unless `COLORTERM` says `truecolor` or `24bit`; change both when you change the art. The song is `recipes/melon-sounds/ice.mp3`:
+  the owner's file, re-encoded as 128 kb/s MP3 and set to about -12 LUFS so that it is as loud as the old track at the same
+  30% (the original was 10 dB quieter). The file names `.cold` and `.ice` stay as they are, so nothing in the repo spells
+  the name. A new name means a new hash: `printf %s <name> | sha256sum | cut -c1-16`.
 - **Dual boot.** On UEFI, when the chosen disk already has an EFI system partition and at least 20 GiB unallocated
   (Windows' Disk Management "Shrink Volume" makes that), the console installer offers `alongside` (the default
   then; `MELON_MODE=alongside|erase`): a 1 GiB FAT32 `/boot` (extended boot loader type) and `/` go into the free
@@ -449,6 +551,93 @@ the serial port, so tests don't need a screen. The test also records the sound c
   (`melon-repo enable alpine`); apk only uses it for packages asked for as `name@alpine`. Void isn't
   offered (xbps, not apk). Never make a foreign repo untagged or on by default.
 
+## Website
+
+The website is `site/`, published to the `gh-pages` branch by `scripts/publish-site.sh` (GitHub Pages serves that branch at
+`https://melon-77.github.io/melon-os/`). Edit it here and open the pull request against `testing`; never edit `gh-pages`
+by hand. Keep it dependency-free: hand-written HTML and CSS, the three fonts hosted in `site/fonts` (no Google Fonts or
+other third-party requests, which the footer promises), no trackers. Its facts must stay true to the repository:
+versions and sizes come from the latest release, and an edition that isn't published yet says so (the 32-bit LXQt one was "coming" until its signed build, 7 October 2026).
+The ISO facts on the site (release name and date, each ISO's size, SHA-256 and link, which editions are still "coming") are data in
+`site/releases.json`, and `scripts/site-release.py` writes them into the marked regions (`<!-- release:... -->`) of `site/index.html` and
+`site/download/index.html`: never edit those regions by hand. After a release, `scripts/site-release.py update --tag <tag>` reads the
+release's assets from GitHub (sizes and SHA-256 come from there), fills `releases.json` and renders; `scripts/site-release.py check`
+fails when the pages are stale. The 32-bit pre-release is a second release in the same file (`update --tag i686-<date> --editions ...`). Read
+`docs/iso-hosting.md` before moving the files to another host (`scripts/upload-isos.sh`; other hosts go into `mirrors` in `releases.json`).
+`gauntlet.js` is only a taste of the real gauntlet, using easy questions that already appear in
+`recipes/calamares-melon/modules/gauntlet/questions.js`; never copy anything from `trial.js` (not even its questions) into the site, and keep
+the hidden owner commands out of it, as everywhere else. **The install section shows no installer video for now** (the
+owner's decision, 9 October 2026): the console installer's video looked slow (software emulation) and is for an installer
+almost nobody uses, so it came off the site; the video the owner wants there is the graphical installer (Calamares and the
+gauntlet). That one has no recording yet: Plasma doesn't finish starting in QEMU's software emulation (no KVM under
+Windows 10's WSL2), so it has to come from real hardware or a machine with KVM. Show it with the `.video` figure in
+`style.css` (at most 36rem wide), and never let a recording show a hidden owner command being typed.
+`scripts/record-installer.py` still records the console installer (`record`, then `build`). **The intro spells that
+installer's name in big letters, so `build` blacks out those rows in every frame, and only the built file may go into the
+repo or the site**: never commit the raw screenshots or the unmasked video. The pixel melon is generated from `melonfetch`'s own awk drawing
+(`art/site.py`), so change the melon there, not in the SVG.
+
+## Boot time
+
+Where the time goes after the firmware: GRUB (the live ISO's menu waits 5 s; an installed melon-only system's is hidden and
+skipped after 1 s, `GRUB_TIMEOUT` and `GRUB_TIMEOUT_STYLE` in `/etc/default/grub` change that; the `grub` package's own `/etc/default/grub` must not set `GRUB_TIMEOUT`, or it wins over `melon-update-grub`'s default: it did, until `grub` pkgrel 2), the kernel, stage 1 (`/etc/runit/1`:
+mounts, udev coldplug, filesystems), then stage 2 (runsvdir starts every service at once; services that need another
+wait for it with `sv check`, which polls for up to 7 s, every 20 ms since `runit` pkgrel 1; it was every 0.42 s). Stage 1 writes a
+timeline to `/run/melon-boot-times` and **`melon-boottime`** prints it with the start times of the main daemons (read from
+their processes, so to 10 ms): run it on a real machine before and after changing anything that touches boot, and quote its
+numbers in the PR.
+
+**Stage 1 doesn't wait for udev to finish** (`melon-base` pkgrel 34). It starts udevd, triggers the coldplug, and waits only
+for the devices named in `/etc/fstab` (their `/dev/disk/by-*` links, at most 20 s in all; `noauto` and `nofail` entries don't
+count) before it mounts. The rest of the coldplug (the GPU's driver and firmware, Wi-Fi, sound) goes on in the background while
+stage 2 starts the services, and `melon-boottime` shows when it ended as `udev-settled`. The `udevd` service adopts the udevd
+stage 1 started instead of replacing it (rule 44). Services that need a device wait for it themselves: SDDM waits until elogind
+reports seat0 graphical, NetworkManager and BlueZ handle devices that appear later. The kernel option `melon.udev=sync` (add it
+in GRUB's editor, or to `GRUB_CMDLINE_LINUX_DEFAULT`) brings back the old behaviour (wait for everything, stop udevd, let
+the service start a new one) if a machine misbehaves: an issue report with and without it is the first thing to ask for.
+
+**The live system and the installers read `rootfs.sqfs` through squashfs.** The kernel's defaults were one decompressor and one
+shared cache (`SQUASHFS_DECOMP_SINGLE`, `SQUASHFS_FILE_CACHE`), so every program the live desktop starts waited for the
+others' reads to decompress. `config-melon` now asks for `SQUASHFS_COMPILE_DECOMP_MULTI_PERCPU` and `SQUASHFS_FILE_DIRECT`
+(one decompressor per CPU, straight into the page cache; `linux-melon` pkgrel 5, and `nvidia-open` pkgrel 1 with it, rule 51).
+Installed systems don't use squashfs, so only the ISO sessions and installs gain.
+
+Measured on 7 and 8 October 2026 with the 29 September desktop image in QEMU **without KVM** (software emulation on 4 vCPUs, so
+every CPU-bound step is several times slower than on real hardware; read the proportions, not the seconds). Seconds counted
+from the start of stage 1, one boot each except the old order, which ran twice:
+
+| | old order | new order (`melon.udev=sync` gives the old one back) |
+|---|---|---|
+| udev coldplug + settle in stage 1 | 3.9 to 4.8 s | 0 (finishes 3.8 s after stage 1, in parallel with the services) |
+| stage 1 lasted | 6.5 to 7.3 s | 4.2 s |
+| SDDM started | 7.5 to 7.9 s | 4.9 s |
+| SDDM's session helper started | 13.2 to 13.5 s | 11.8 s |
+
+Kernel to `/init` was 2.4 s and the initramfs 0.5 s in all of them. The squashfs options (new kernel) moved the live
+desktop's `plasma_session` from 30.3 s to 27.1 s after stage 1 in one run each, which is inside the run-to-run noise (about 3 s)
+of this setup; the gain is real on a machine that reads from the ISO on several cores, but this container can't size it.
+The 20 ms `sv` poll can't be seen in these numbers either (the services start within 0.4 s of each other). Not measured yet:
+real hardware (a GPU's firmware load blocks `udevadm settle`, so the gain should be larger there) and the installed system, where
+`melon-boottime` is the tool. Ideas, not done: shutdown spends a fixed 1 s between TERM and KILL (`/etc/runit/3`); a smaller
+kernel config and built-in drivers for the boot disk.
+
+## Smaller images, second round
+
+Measured on the 29 September desktop image with `mksquashfs` (zstd, 512 KiB blocks), 8 October 2026:
+
+- **`grub` pkgrel 3 drops the build leftovers in `/usr/lib/grub/*/`**: `*.module`, `kernel.exec`, `gdb_grub`, `gdb_helper.py`. Nothing
+  reads them on a running system: `grub-install` copies only `.mod`, `.lst`, `.img`, `.efi`, `modinfo.sh` and the efiemu
+  objects (`util/grub-install-common.c`), and `grub-mkimage` reads `.mod` and `kernel.img`; a `core.img` for `i386-pc` and
+  for `x86_64-efi` made with and without them is byte-identical. 36 MB less on disk, 11 MB less in the compressed image.
+- **`breeze` pkgrel 1 drops two sizes of the default "Next" wallpaper** (in `scripts/gen-kde-recipes.py`: the recipe is generated, rule 57) (`7680x2160` for 32:9 screens and `1440x2960` for
+  phones, light and dark: 24 MB of PNG, which doesn't compress). 16:9 and 16:10 screens use the `5120x2880` one, and Plasma
+  scales it on the others.
+- Left alone on purpose: translations (49 MB compressed: dropping languages is a product decision), the Mesa and LLVM
+  libraries, the kernel modules, firmware (see "Smaller images" if #49 has landed).
+
+Not rebuilt in a container: both recipes only `rm` files in `package()`, so the check was on the extracted image. A new ISO
+shows the real sizes.
+
 ## Package repository (online)
 
 `scripts/publish-repo.sh` puts `repo/<arch>/` on the `packages` branch of github.com/melon-77/melon-os (one
@@ -464,9 +653,28 @@ firmware is its own package for that reason). Publish after building packages pe
 Releases are named **melon <version> “<melon variety>”**, the varieties in alphabetical order: 0.1 “Antalya”,
 0.2 “Bailan”, then 0.3 “Cantaloupe”, 0.4 “Dudaim”, 0.5 “Esfahan”, 0.6 “Fukui”, 0.7 “Galia”, 0.8 “Honeydew”, … (the
 owner's choice, 29 September 2026). Tags are `v<version>` from 0.3 on (0.1 and 0.2 kept their date tags). A release
-is marked Latest (the website's download button points at `releases/latest`), carries both ISOs and `SHA256SUMS`,
+is marked Latest, carries every ISO and `SHA256SUMS`,
 has notes written for users (what's new, which file to download, `doas apk upgrade` for installed systems), and the
 release it replaces is retitled "(superseded)" with a link to the new one.
+
+The 32-bit edition has its own **pre-release**, not marked Latest, so the website's download button keeps pointing at
+the 64-bit release: tag `i686-<date>` (`i686-20261007`), title "melon 32-bit (i686) test build, <date>", both i686 ISOs and
+`SHA256SUMS`. The download page lists it next to the 64-bit release (see "Website").
+
+**New ISOs for meaningful changes (the owner's rule, 7 October 2026).** When a change lands that alters what is on an ISO or how it
+installs or boots (kernel, drivers and firmware, installers, the desktop, base packages, boot, hardware support), new ISOs are built,
+tested (see Testing), added to a GitHub release, and **the website is updated in the same sitting**:
+
+1. Build and test the ISOs on a machine with the signing key (the owner's computer, or a cloud session the owner has given the key: it can
+   sign packages and push the package repo through git).
+2. Create the release (name, notes, every ISO and `SHA256SUMS`), mark it Latest, retitle the one it replaces. **A cloud session can't do
+   this step**: GitHub answers 403 "not permitted for this session type" for release creation and asset uploads, so the ISOs go to the
+   owner's computer (WSL, or through `/mnt/project-files/releases/<tag>/`) and `gh release create` / `gh release upload` run there.
+3. `scripts/site-release.py update --tag <tag>`, commit `site/`, open the pull request against `testing`, then `scripts/publish-site.sh`
+   (or a pull request into `gh-pages`) once it is merged. An edition with no ISO in the release stays "coming" on its own.
+4. If other file hosts are in use (`docs/iso-hosting.md`), upload with `scripts/upload-isos.sh` and add them to `mirrors` in `site/releases.json`.
+
+A change that touches only recipes in the online repository, docs or the site doesn't need new ISOs.
 
 ## Signing keys and rotation
 
@@ -514,11 +722,18 @@ that is the only place Ubuntu is still needed.
   KWin on Wayland, SDDM, PipeWire, NetworkManager, Bluetooth, printing, Calamares with the gauntlet, the desktop ISO
   and the desktop profile for both installers (`qemu-test.py desktop` and `desktop-install`). Open hardware work
   is tracked in GitHub issues: Intel SOF audio, newer linux-firmware, Broadcom Wi-Fi.
-- **32-bit (i686) console edition: paused by the owner** (resume later). Everything is arch-aware
-  (`MELON_ARCH=x86`), but the i686 toolchain doesn't finish yet: GCC's final build fails in libatomic's
-  configure because `--enable-default-ssp` on i386 needs `__stack_chk_fail_local`, which comes from a
-  `libssp_nonshared.a` (Alpine builds one in its musl package). Add that to the musl build (or drop
-  default SSP for i686), then run `scripts/queue-2.sh`'s 32-bit part.
+- **32-bit (i686) edition with LXQt: built, signed and published, waiting for real hardware** (resumed by the owner,
+  7 October 2026, for an MSI Wind U100: Atom N270, 2 GB). `MELON_ARCH=x86 scripts/build-everything.sh` builds the
+  toolchain, the base system, Qt, LXQt and labwc, then both ISOs (BUILDING.md). Both pass their tests on QEMU's Atom
+  N270 CPU model: the console ISO (`qemu-test.py live|disk --i686`) and the LXQt desktop ISO
+  (`desktop-install --i686`, 2 GB of RAM: install through Calamares, SDDM's greeter on labwc, the LXQt session,
+  printing, the gauntlet's rewards). Not yet on 32-bit: NetHack (its source wasn't reachable from the test machine),
+  the QEMU guest agent. Signed with melon's key and published (7 October 2026): `repo/x86` is on the `packages` branch
+  next to `x86_64` (publish-repo.sh replaces the whole branch, so a machine that built only one architecture must start
+  from the branch's current contents); both ISOs rebuilt from scratch on a new build container and retested (the desktop
+  test waits 90 s before typing when there is no KVM: the greeter ignores keys for a while on an emulated CPU). When
+  Ubuntu's source tool can't find an old version, its `orig` tarballs are still in `archive.ubuntu.com/ubuntu/pool/`
+  (same sha256 as the manifest). Next: a test on the owner's U100 (`sudo melon-hwreport` for Wi-Fi and graphics).
 - **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (`melon-flathub`), Steam, Firefox, VLC and
   Prism Launcher offered from Flathub on first login, GameMode. Still to do: gamepad and controller udev rules,
   MangoHud (`docs/stage2-plan.md`).
@@ -568,6 +783,10 @@ that is the only place Ubuntu is still needed.
   request (`testing` -> `main`, merge commit), after which `testing` is fast-forwarded to `main` again.
 - **Rebase, don't merge.** When `testing` moves, rebase your branch; no "Merge testing into ..." commits. PRs are
   squash-merged. No test/webhook commits and no personal email addresses in history (use GitHub's noreply address).
+- **Delete a branch once its PR is merged or closed.** GitHub's "delete branch on merge" is off, so branches pile up. Before deleting
+  one, check that no open PR, open issue or running thread still uses it, and write its name and last commit down so it can be restored.
+  A squash merge leaves the branch's own commits looking unmerged, so compare file contents with `testing`, not commit counts.
+  Keep `main`, `testing`, `gh-pages` and `packages`. (11 merged branches were cleaned up on 8 October 2026.)
 - **The build machine reviews PRs** about every 20 minutes. Its comments start with "Automated check from the melon
   build machine:" or "Automated reply ...". It reads the diff, builds every changed recipe, installs and runs the
   packages on a scratch melon root, runs the QEMU install tests when ISOs or installers change, and then requests
@@ -575,7 +794,9 @@ that is the only place Ubuntu is still needed.
   to a contributor's branch. The owner answers on PRs or on the pinned issue #17 ("Owner <-> build machine").
 - **What goes on an ISO (the owner's size rule):** small packages, below about 45 MB, may go on the ISOs; anything
   bigger is an online install from the package repository (gcc and friends, Cataclysm: DDA). **Extra desktops are
-  always online installs, whatever their size**: Plasma stays the only desktop on the ISO (issue #18, niri + Noctalia).
+  always online installs, whatever their size**: Plasma stays the only desktop on the 64-bit ISO (issue #18, niri +
+  Noctalia). The 32-bit desktop ISO carries LXQt instead of Plasma (the owner's decision); LXQt is in the 64-bit
+  package repository too, as an online install.
 - **Decided, don't re-propose:** Nix is available but off by default (not on the ISOs, no service, only root trusted);
   foreign repos stay opt-in and tagged; the gauntlet's rewards are only for people who pass its final trial; melon's
   own games may live in their own melon-77 repositories as submodules.
@@ -585,3 +806,5 @@ that is the only place Ubuntu is still needed.
 - Small, focused commits. The message says what changed and why.
 - Build outputs and downloaded sources are never committed.
 - If you change a recipe, bump `pkgrel` (or `pkgver`) in the same commit.
+- **Keep the docs true (the owner's rule, 7 October 2026):** when you find a bug or make a significant change, update every
+  `.md` file it touches (README, AGENTS, BUILDING, `docs/`) and the website (`site/`) in the same pull request, so nothing is out of date.

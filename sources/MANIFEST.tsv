@@ -283,7 +283,6 @@ deb/pulseaudio_17.0+dfsg1.orig.tar.xz	24a25d3cf8fcede801f6b3d05ca6d22b0a43ad2f71
 deb/python3.14_3.14.4.orig.tar.xz	d923c51303e38e249136fc1bdf3568d56ecb03214efdef48516176d3d7faaef8	apt	python3.14=3.14.4-1ubuntu0.2
 deb/qca2_2.3.10.orig.tar.xz	1c5b722da93d559365719226bb121c726ec3c0dc4c67dea34f1e50e4e0d14a02	apt	qca2=2.3.10-2
 deb/qcoro_0.13.0.orig.tar.gz	4bff7513c5c8e301b66308df05795043b1792ed16381a484e5c990171b8ff19e	apt	qcoro=0.13.0-1ubuntu2
-deb/qemu_10.2.1+ds.orig.tar.xz	4f495c2a523f78f50cc83327cabf01e7e89c6b9a5d3d6cadd9e78de94b25c416	apt	qemu=1:10.2.1+ds-1ubuntu3.2
 deb/qpdf_12.3.2.orig.tar.gz	6cba2f9f2cd887d905faeb99e0e51a307b217920d1bbf3e9cfbb2e8178a2deda	apt	qpdf=12.3.2-1
 deb/qrencode_4.1.1.orig.tar.bz2	e455d9732f8041cf5b9c388e345a641fd15707860f928e94507b1961256a6923	apt	qrencode=4.1.1-2build1
 deb/qt6-5compat_6.10.2.orig.tar.xz	3fa418f0fac02eb9efc5f762fbe25f20647b0ebb7fa92faf07e6de85044161c2	apt	qt6-5compat=6.10.2-1
@@ -645,7 +644,6 @@ pulseaudio-17.0.tar.xz	-	link	deb/pulseaudio_17.0+dfsg1.orig.tar.xz
 pulseaudio-qt-1.7.0.tar.xz	-	link	deb/pulseaudio-qt_1.7.0.orig.tar.xz
 qca-2.3.10.tar.xz	-	link	deb/qca2_2.3.10.orig.tar.xz
 qcoro-0.13.0.tar.gz	-	link	deb/qcoro_0.13.0.orig.tar.gz
-qemu-10.2.1.tar.xz	-	link	deb/qemu_10.2.1+ds.orig.tar.xz
 qpdf-12.3.2.tar.gz	-	link	deb/qpdf_12.3.2.orig.tar.gz
 qrencode-4.1.1.tar.bz2	-	link	deb/qrencode_4.1.1.orig.tar.bz2
 qt6-qt5compat-6.10.2.tar.xz	-	link	deb/qt6-5compat_6.10.2.orig.tar.xz
@@ -747,6 +745,8 @@ scdoc-1.11.5.tar.gz	98780bbdf16c1bce89ef3a8c0f537ac6e4ea77087b609e7698857614488a
 itstool-2.0.7.tar.gz	fba78a37dc3535e4686c7f57407b97d03c676e3a57beac5fb2315162b0cc3176	url	https://github.com/itstool/itstool/archive/2.0.7/itstool-2.0.7.tar.gz
 mako-1.4.3.tar.gz	cd6537fe88d5fec315c55c2f8529bc4ce7a9a352ad7db3eeaa6a66e2dd4ec37a	url	https://files.pythonhosted.org/packages/5a/09/e07c4b5579a79f4b16f8d4f29f6c54514ac787c4ad506b8c4f28a0e6b0bf/mako-1.4.3.tar.gz
 markupsafe-3.0.3.tar.gz	722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698	url	https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz
+jinja2-3.1.6.tar.gz	0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d	url	https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz
+pyparsing-3.3.3.tar.gz	928ae7e20211f3b6f3915a72f06a0cfd29ab9d24279dd6346b6b1a7146397d36	url	https://files.pythonhosted.org/packages/e4/11/b213bebff182584360cb8d17c72c1677fec5c5c228de439e63bcf8ab1c8f/pyparsing-3.3.3.tar.gz
 pyyaml-6.0.3.tar.gz	d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f	url	https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz
 packaging-26.3.tar.gz	94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79	url	https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz
 pexpect-4.9.0.tar.gz	ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f	url	https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz
@@ -762,3 +762,46 @@ spirv-llvm-translator-21.1.7.tar.gz	1a00e06eba69c24ded4ed5708ef3c55ad87862270172
 linux-firmware-20260916.tar.xz	f80dcb757a623deda62200c08e0e1a88c76fb6b54964f31b35fa74da1c90ccc5	url	https://cdn.kernel.org/pub/linux/kernel/firmware/linux-firmware-20260916.tar.xz
 NVIDIA-kernel-module-source-615.71.09.tar.xz	b038fe5d70e7c3209459a8121f231543939895145f0ad0d58d34f170e7eaf7e9	url	https://download.nvidia.com/XFree86/NVIDIA-kernel-module-source/NVIDIA-kernel-module-source-615.71.09.tar.xz
 NVIDIA-Linux-x86_64-615.71.09.run	cdceed22bbeb61248d1a6deabc2596673e3a6501698ee71ac8d2fdc28f3b70fe	url	https://download.nvidia.com/XFree86/Linux-x86_64/615.71.09/NVIDIA-Linux-x86_64-615.71.09.run
+rpcsvc-proto-1.4.4.tar.xz	81c3aa27edb5d8a18ef027081ebb984234d5b5860c65bd99d4ac8f03145a558b	url	https://github.com/thkukuk/rpcsvc-proto/releases/download/v1.4.4/rpcsvc-proto-1.4.4.tar.xz
+setuptools-84.0.0-py3-none-any.whl	51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670	url	https://files.pythonhosted.org/packages/95/9c/c510029fc6ef33a6275cd2c5d3cecd6613dfd6aa401d57c54f1c18852ccf/setuptools-84.0.0-py3-none-any.whl
+wheel-0.45.1-py3-none-any.whl	708e7481cc80179af0e556bbf0cc00b8444c7321e2700b8d8580231d13017248	url	https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl
+lxqt-build-tools-2.4.0.tar.xz	14999ff954e820a23af44389b9f7c65f9e58b2f1c0a559f0badd38f9b459aee6	url	https://github.com/lxqt/lxqt-build-tools/releases/download/2.4.0/lxqt-build-tools-2.4.0.tar.xz
+libqtxdg-4.4.0.tar.xz	34d25949ae7b6275fb54da46187dd8ba41771600353405b15e53bdc90b9e287a	url	https://github.com/lxqt/libqtxdg/releases/download/4.4.0/libqtxdg-4.4.0.tar.xz
+qtxdg-tools-4.4.0.tar.xz	f21ba4308eac0effd417d910cc4916df7b6202aaeee777b51bb120f7abc6c5ac	url	https://github.com/lxqt/qtxdg-tools/releases/download/4.4.0/qtxdg-tools-4.4.0.tar.xz
+lxqt-menu-data-2.4.0.tar.xz	3487e47562dc19e63358a50c81e51cd0cf1a020397943cadd8db35daeb4866cc	url	https://github.com/lxqt/lxqt-menu-data/releases/download/2.4.0/lxqt-menu-data-2.4.0.tar.xz
+liblxqt-2.4.0.tar.xz	6627215644eb370723536274555743db52baed919db6ffc32ebc2bdf3cf8ee4a	url	https://github.com/lxqt/liblxqt/releases/download/2.4.0/liblxqt-2.4.0.tar.xz
+libdbusmenu-lxqt-0.4.0.tar.xz	b7f94d653559f021932aada76291e933535431a337c39c1a146d0461dd27a103	url	https://github.com/lxqt/libdbusmenu-lxqt/releases/download/0.4.0/libdbusmenu-lxqt-0.4.0.tar.xz
+lxqt-globalkeys-2.4.0.tar.xz	6f7fb82337bd06823f698df5a1e631059e99e544bfa9a1d7c5b67fd01ff9319a	url	https://github.com/lxqt/lxqt-globalkeys/releases/download/2.4.0/lxqt-globalkeys-2.4.0.tar.xz
+libsysstat-1.1.0.tar.xz	996e5e8c43b1364a81a660b56956948c628e919f1d73554df6be152bbec8d430	url	https://github.com/lxqt/libsysstat/releases/download/1.1.0/libsysstat-1.1.0.tar.xz
+libfm-qt-2.4.0.tar.xz	72766d7b41fd1aa06c0a7ef8be015205506ff75963b977e5307994555dcc023b	url	https://github.com/lxqt/libfm-qt/releases/download/2.4.0/libfm-qt-2.4.0.tar.xz
+lxqt-panel-2.4.0.tar.xz	23b9cda6e6ad47df61d2e813de2fced52597fd547de120d2eae8df5db4573702	url	https://github.com/lxqt/lxqt-panel/releases/download/2.4.0/lxqt-panel-2.4.0.tar.xz
+pcmanfm-qt-2.4.0.tar.xz	53fb1acf5a818300487ceffabc5b768034fa4dee956b9d1bc0019bb456b48daf	url	https://github.com/lxqt/pcmanfm-qt/releases/download/2.4.0/pcmanfm-qt-2.4.0.tar.xz
+lxqt-qtplugin-2.4.0.tar.xz	8c36b572613ccb0e35d39e87c044ac07e115c2de85bbdb646ffe4533af788a45	url	https://github.com/lxqt/lxqt-qtplugin/releases/download/2.4.0/lxqt-qtplugin-2.4.0.tar.xz
+lxqt-themes-2.4.0.tar.xz	b39475e0fdaf5b94747141da28319694d45d4646b3d83c45917f5a1d9af432fb	url	https://github.com/lxqt/lxqt-themes/releases/download/2.4.0/lxqt-themes-2.4.0.tar.xz
+lxqt-session-2.4.0.tar.xz	d77f378ece0bfc7195f1964e88f55919729c3b0a55a858d7155ffaacc57bba44	url	https://github.com/lxqt/lxqt-session/releases/download/2.4.0/lxqt-session-2.4.0.tar.xz
+lxqt-runner-2.4.0.tar.xz	d0441f18922162db5ef6a5a9617aa20b0b437d2ddc76d0542fb32c7fd68f9029	url	https://github.com/lxqt/lxqt-runner/releases/download/2.4.0/lxqt-runner-2.4.0.tar.xz
+lxqt-notificationd-2.4.0.tar.xz	525a21feb622cb255f10b7ebd28b4af5afba9da4833560337f167ffe5f1d19d2	url	https://github.com/lxqt/lxqt-notificationd/releases/download/2.4.0/lxqt-notificationd-2.4.0.tar.xz
+lxqt-policykit-2.4.0.tar.xz	d151161ce639d3dee07f41e0fc623951da0d62c405b1cecd6960e76cfdc43846	url	https://github.com/lxqt/lxqt-policykit/releases/download/2.4.0/lxqt-policykit-2.4.0.tar.xz
+lxqt-powermanagement-2.4.0.tar.xz	24dcc7f668e97c8c0f8584115d376190493d47f36c73bab6042814c772280360	url	https://github.com/lxqt/lxqt-powermanagement/releases/download/2.4.0/lxqt-powermanagement-2.4.0.tar.xz
+lxqt-config-2.4.0.tar.xz	8943a0d61993e068fa71aac85eb1eb93ac32064928ee1c8c1ff9666b45e1610e	url	https://github.com/lxqt/lxqt-config/releases/download/2.4.0/lxqt-config-2.4.0.tar.xz
+lxqt-wayland-session-0.4.0.tar.xz	b9aa41aa0ce3e187877dc6ccef1abb6542faeb1ec4b755cb9f8af716079da68e	url	https://github.com/lxqt/lxqt-wayland-session/releases/download/0.4.0/lxqt-wayland-session-0.4.0.tar.xz
+qtermwidget-2.4.0.tar.xz	ceb7d1991ecc0e75b751b6b7786c4962598d367c6e9a0b55f78fc12a49f25304	url	https://github.com/lxqt/qtermwidget/releases/download/2.4.0/qtermwidget-2.4.0.tar.xz
+qterminal-2.4.0.tar.xz	aeb6cf5ff7f31f0b89e60f6cc1c83c4d6fbed57717196d2ebba2bc0dcb8436d4	url	https://github.com/lxqt/qterminal/releases/download/2.4.0/qterminal-2.4.0.tar.xz
+pavucontrol-qt-2.4.0.tar.xz	7f813d3029e9f1b66020cf3da143d07196dd8bce01a95bd754489287ca5b6380	url	https://github.com/lxqt/pavucontrol-qt/releases/download/2.4.0/pavucontrol-qt-2.4.0.tar.xz
+lximage-qt-2.4.0.tar.xz	7ca49039f3246011b80d76037603ac6a7af484574d8e5e2cc5bb7b8534298636	url	https://github.com/lxqt/lximage-qt/releases/download/2.4.0/lximage-qt-2.4.0.tar.xz
+menu-cache-1.1.0.tar.xz	ed02eb459dcb398f69b9fa5bf4dd813020405afc84331115469cdf7be9273ec7	url	https://downloads.sourceforge.net/lxde/menu-cache-1.1.0.tar.xz
+libfm-1.3.2.tar.xz	a5042630304cf8e5d8cff9d565c6bd546f228b48c960153ed366a34e87cad1e5	url	https://downloads.sourceforge.net/pcmanfm/libfm-1.3.2.tar.xz
+libexif-0.6.26.tar.bz2	0830ed253fceeb60444fb309598bc8a9491d3007dc054aad3a50a347c5597c57	url	https://github.com/libexif/libexif/releases/download/v0.6.26/libexif-0.6.26.tar.bz2
+fribidi-1.0.16.tar.xz	1b1cde5b235d40479e91be2f0e88a309e3214c8ab470ec8a2744d82a5a9ea05c	url	https://github.com/fribidi/fribidi/releases/download/v1.0.16/fribidi-1.0.16.tar.xz
+cairo-1.18.4.tar.xz	445ed8208a6e4823de1226a74ca319d3600e83f6369f99b14265006599c32ccb	url	https://cairographics.org/releases/cairo-1.18.4.tar.xz
+deb/wlroots_0.20.2.orig.tar.bz2	20c37b521dc3054b6e9627b79bdd45fc716db9ebc58bdf97e57e84d04b04610f	apt	wlroots=0.20.2-1
+wlroots-0.20.2.tar.bz2	-	link	deb/wlroots_0.20.2.orig.tar.bz2
+deb/libsfdo_0.1.4.orig.tar.xz	8f384d708b1882d9c04cb42700b1af77dda0921a733f583824b096038fdfe143	apt	libsfdo=0.1.4-2
+libsfdo-0.1.4.tar.xz	-	link	deb/libsfdo_0.1.4.orig.tar.xz
+deb/xdg-user-dirs_0.19.orig.tar.xz	e92deb929c10d4b29329397af8a2585101247f7e6177ac6f1d28e82130ed8c19	apt	xdg-user-dirs=0.19-1
+xdg-user-dirs-0.19.tar.xz	-	link	deb/xdg-user-dirs_0.19.orig.tar.xz
+pango-1.57.0.tar.gz	-	git	https://github.com/GNOME/pango 1.57.0
+seatd-0.9.3.tar.gz	-	git	https://github.com/kennylevinsen/seatd 0.9.3
+labwc-0.20.2.tar.gz	-	git	https://github.com/labwc/labwc 0.20.2
+libXScrnSaver-1.2.3.tar.gz	4f74e7e412144591d8e0616db27f433cfc9f45aae6669c6c4bb03e6bf9be809a	url	https://www.x.org/releases/individual/lib/libXScrnSaver-1.2.3.tar.gz
+procps-ng-4.0.7.tar.xz	9d2021f47a4501c667862c9942a92d1953694b21d11bcd1702e83eb594e3d67d	url	https://downloads.sourceforge.net/project/procps-ng/Production/procps-ng-4.0.7.tar.xz

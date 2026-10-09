@@ -1,5 +1,6 @@
 pkgname=squashfs-tools
 pkgver=4.7.5
+pkgrel=1
 pkgdesc="Tools to create and extract squashfs images (the installers unpack the live system with them)"
 license=GPL-2.0-or-later
 url=https://github.com/plougher/squashfs-tools
@@ -8,5 +9,7 @@ builddir=$srcdir/squashfs-tools-4.7.5/squashfs-tools
 makedepends=(zlib-dev zstd-dev)
 build(){ make -j$JOBS CC="$CC" GZIP_SUPPORT=1 ZSTD_SUPPORT=1 XZ_SUPPORT=0 LZO_SUPPORT=0 LZ4_SUPPORT=0 LZMA_XZ_SUPPORT=0 \
     XATTR_SUPPORT=1 COMP_DEFAULT=zstd; }
-package(){ make INSTALL_PREFIX=$pkgdir/usr INSTALL_MANPAGES_DIR= install GZIP_SUPPORT=1 ZSTD_SUPPORT=1 XZ_SUPPORT=0 \
-    LZO_SUPPORT=0 LZ4_SUPPORT=0 LZMA_XZ_SUPPORT=0 COMP_DEFAULT=zstd; }
+# what `make install` does without its manpage step, whose script stops unless sed is GNU sed (BusyBox's on a melon
+# build machine), even when told to install no manpages
+package(){ install -Dm755 -t $pkgdir/usr/bin mksquashfs unsquashfs
+  ln -s unsquashfs $pkgdir/usr/bin/sqfscat; ln -s mksquashfs $pkgdir/usr/bin/sqfstar; }

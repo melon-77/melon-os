@@ -10,6 +10,7 @@ W=$M/work/host-qt
 unset CC CXX CFLAGS CXXFLAGS LDFLAGS PKG_CONFIG_LIBDIR PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH
 mkdir -p $W $H; cd $W
 common="-G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$H -DQT_BUILD_EXAMPLES=OFF -DQT_BUILD_TESTS=OFF -DBUILD_TESTING=OFF"
+q(){ if [ -n "${LOG:-}" ]; then "$@" >>"$LOG" 2>&1; else "$@" >/dev/null; fi; }   # under host-setup.sh: output into its log
 mod(){ # mod <debian-name> <dir-prefix> [cmake args...]
   local deb=$1 dir=$2; shift 2
   # finished modules leave a marker, so a restarted run (e.g. after the container was reclaimed) resumes
@@ -18,9 +19,9 @@ mod(){ # mod <debian-name> <dir-prefix> [cmake args...]
   tar xf $M/sources/deb/${deb}_${QV}*.orig.tar.xz
   local src=$(ls -d ${dir}*${QV}* | head -1)
   echo "=== $(date +%T) $src"
-  cmake -S $src -B b-$deb $common -DCMAKE_PREFIX_PATH=$H "$@" >/dev/null
-  ninja -C b-$deb -j${JOBS:-$(nproc)} >/dev/null
-  ninja -C b-$deb install >/dev/null
+  q cmake -S $src -B b-$deb $common -DCMAKE_PREFIX_PATH=$H "$@"
+  q ninja -C b-$deb -j${JOBS:-$(nproc)}
+  q ninja -C b-$deb install
   rm -rf $src b-$deb
   touch $H/.done-$deb
 }

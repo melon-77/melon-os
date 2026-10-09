@@ -12,6 +12,11 @@ depends_musl_utils="musl"
 pkgdesc_musl_utils="musl libc utilities (ldd, getconf-like helpers)"
 provides_musl=("so:libc.so=1" "so:libc.musl-$APK_ARCH.so.1=1")
 build(){ ./configure --target=$CHOST --prefix=/usr --syslibdir=/usr/lib CROSS_COMPILE=$CHOST-; make -j$JOBS; }
-package(){ make DESTDIR=$pkgdir install; ln -sf libc.so $pkgdir/usr/lib/$MUSL_LDSO; ln -sf $MUSL_LDSO $pkgdir/usr/lib/libc.musl-$APK_ARCH.so.1; }
+package(){ make DESTDIR=$pkgdir install; ln -sf libc.so $pkgdir/usr/lib/$MUSL_LDSO; ln -sf $MUSL_LDSO $pkgdir/usr/lib/libc.musl-$APK_ARCH.so.1
+  # i686: libssp_nonshared.a, which melon's gcc links into everything there (scripts/toolchain-finish.sh says why)
+  if [ "$MUSL_ARCH" = i386 ]; then
+    printf 'extern void __stack_chk_fail(void);\nvoid __attribute__((visibility("hidden"))) __stack_chk_fail_local(void) { __stack_chk_fail(); }\n' > ssp-local.c
+    $CC -O2 -fPIC -fno-stack-protector -c ssp-local.c -o ssp-local.o && $AR rcs $pkgdir/usr/lib/libssp_nonshared.a ssp-local.o
+  fi; }
 pkg_dev(){ amove usr/include 'usr/lib/*.a' 'usr/lib/*.o' usr/lib/musl-gcc.specs; }
 pkg_utils(){ mkdir -p $subpkgdir/usr/bin; ln -sf ../lib/$MUSL_LDSO $subpkgdir/usr/bin/ldd; }

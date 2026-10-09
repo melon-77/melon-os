@@ -1,5 +1,6 @@
 pkgname=opendoas
 pkgver=6.8.2
+pkgrel=1
 pkgdesc="Run commands as another user (doas), plus a sudo command that uses it"
 license=ISC
 url=https://github.com/Duncaen/OpenDoas
@@ -8,7 +9,7 @@ makedepends=(bsd-compat-headers)
 options=('!strip')
 build(){
   ./configure --prefix=/usr --sysconfdir=/etc --without-pam --with-shadow --with-timestamp
-  make -j$JOBS CC="$CC"
+  make -j$JOBS CC="$CC" YACC="bison -y"   # melon's bison has no yacc command (a melon build machine)
   $STRIP doas
 }
 package(){

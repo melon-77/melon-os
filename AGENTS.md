@@ -58,7 +58,7 @@ scripts/mkiso.sh        live/installer ISO: rootfs.sqfs (pristine apk-installed 
                         installers) + live.sqfs (small live-session layer) + a small repo of extras (VM guest tools,
                         a few base packages; never a second copy of what rootfs.sqfs already holds)
 scripts/qemu-test.py    headless boot + install + reboot test over the serial console
-scripts/record-installer.py  records the console installer in QEMU as the website's video (blacks out the intro's title)
+scripts/record-installer.py  records the console installer in QEMU as a video (blacks out the intro's title; not on the site)
 recipes/<name>/MELONBUILD   one directory per recipe (see below)
 recipes/<name>/*.patch      applied automatically with patch -p1, in name order
 recipes/<name>/<pkg>.post-install etc.   apk scripts for (sub)package <pkg>
@@ -566,13 +566,15 @@ fails when the pages are stale. The 32-bit pre-release is a second release in th
 `docs/iso-hosting.md` before moving the files to another host (`scripts/upload-isos.sh`; other hosts go into `mirrors` in `releases.json`).
 `gauntlet.js` is only a taste of the real gauntlet, using easy questions that already appear in
 `recipes/calamares-melon/modules/gauntlet/questions.js`; never copy anything from `trial.js` (not even its questions) into the site, and keep
-the hidden owner commands out of it, as everywhere else. The install section has a video of the console installer
-(`site/assets/installer-console.mp4` with its poster), recorded from the ISO in QEMU by `scripts/record-installer.py`
-(`record`, then `build`). **The intro spells the installer's name in big letters, so `build` blacks out those rows in
-every frame, and only the built file may go into the repo or the site**: never commit the raw screenshots or the unmasked
-video. Re-record it when the installer's questions or intro change. The graphical (Calamares) installer has no video
-yet: Plasma doesn't finish starting in QEMU's software emulation (no KVM under Windows 10's WSL2), so it needs a
-machine with KVM. The pixel melon is generated from `melonfetch`'s own awk drawing
+the hidden owner commands out of it, as everywhere else. **The install section shows no installer video for now** (the
+owner's decision, 9 October 2026): the console installer's video looked slow (software emulation) and is for an installer
+almost nobody uses, so it came off the site; the video the owner wants there is the graphical installer (Calamares and the
+gauntlet). That one has no recording yet: Plasma doesn't finish starting in QEMU's software emulation (no KVM under
+Windows 10's WSL2), so it has to come from real hardware or a machine with KVM. Show it with the `.video` figure in
+`style.css` (at most 36rem wide), and never let a recording show a hidden owner command being typed.
+`scripts/record-installer.py` still records the console installer (`record`, then `build`). **The intro spells that
+installer's name in big letters, so `build` blacks out those rows in every frame, and only the built file may go into the
+repo or the site**: never commit the raw screenshots or the unmasked video. The pixel melon is generated from `melonfetch`'s own awk drawing
 (`art/site.py`), so change the melon there, not in the SVG.
 
 ## Boot time

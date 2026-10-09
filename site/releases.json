@@ -52,6 +52,26 @@
       "coming_group": "x86",
       "tag": "i686-20261007",
       "prerelease": true
+    },
+    {
+      "id": "desktop-test",
+      "title": "melon 0.3 desktop (test build)",
+      "variant": "x86_64",
+      "match": "melon-desktop-*-x86_64.iso",
+      "blurb": "Test build of melon 0.3 “Cantaloupe”: faster boot, 24 MB smaller. Not tried on a working desktop yet, so 0.2 above stays the one to download.",
+      "desc": "Test build of melon 0.3 “Cantaloupe”. The desktop boots and takes a login, but has not been checked as far as a working Plasma session (no KVM on the build PC).",
+      "tag": "v0.3",
+      "prerelease": true
+    },
+    {
+      "id": "console-test",
+      "title": "melon 0.3 console (test build)",
+      "variant": "x86_64",
+      "match": "melon-2*-x86_64.iso",
+      "blurb": "Test build of melon 0.3 “Cantaloupe”: faster boot and a smaller image. Passed the install and boot tests (BIOS and UEFI).",
+      "desc": "Test build of melon 0.3 “Cantaloupe”. Passed the unattended install and the BIOS and UEFI boots in QEMU.",
+      "tag": "v0.3",
+      "prerelease": true
     }
   ],
   "coming_groups": {
@@ -91,6 +111,20 @@
       "sha256": "d0501153f56181675b59c6c267feb2bf5b24fb5f331448d520daf05ec1c50f86",
       "tag": "i686-20261007",
       "url": "https://github.com/melon-77/melon-os/releases/download/i686-20261007/melon-20261007-i686.iso"
+    },
+    "desktop-test": {
+      "file": "melon-desktop-20261008-x86_64.iso",
+      "size": 802871296,
+      "sha256": "738fc4f75386731e1d3c32e2c234465e49c5cd6538a5a9f686379311afa9d782",
+      "tag": "v0.3",
+      "url": "https://github.com/melon-77/melon-os/releases/download/v0.3/melon-desktop-20261008-x86_64.iso"
+    },
+    "console-test": {
+      "file": "melon-20261008-x86_64.iso",
+      "size": 384931840,
+      "sha256": "bdabbd1ebce973c8baa45687cac010e720e73f5f9731599f10d2085d87ff9b62",
+      "tag": "v0.3",
+      "url": "https://github.com/melon-77/melon-os/releases/download/v0.3/melon-20261008-x86_64.iso"
     }
   },
   "keep_github": true

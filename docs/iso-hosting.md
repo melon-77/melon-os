@@ -67,3 +67,6 @@ This is a recommendation; the owner decides, and signing up is the owner's to do
   `releases.json`), so each file shows "also from GitHub"; without that setting GitHub's link is dropped for every file SourceForge carries.
   A file SourceForge doesn't carry yet keeps its GitHub link as the button, so no button is ever dead; add a release's folder to the
   entry's `tags` as soon as it is uploaded. The GitHub releases stay as the release notes and the source of the checksums the site reads.
+- **melon 0.3 “Cantaloupe” test build** (9 October 2026, GitHub pre-release `v0.3`, both ISOs and `SHA256SUMS`): listed on the download page as the editions `desktop-test`
+  and `console-test` below 0.2, which stays the main download until the desktop is confirmed working. Its GitHub links are live; add `"v0.3"` to the SourceForge entry's `tags` in
+  `site/releases.json` (and run `scripts/site-release.py render`) as soon as the `v0.3` folder is uploaded to SourceForge, so the buttons switch to SourceForge.

@@ -9,7 +9,8 @@
       "label": "SourceForge",
       "tags": {
         "melon-20260929.2": "https://sourceforge.net/projects/melonl/files/melon-20260929.2/{file}/download",
-        "i686-20261007": "https://sourceforge.net/projects/melonl/files/i686-20261007/{file}/download"
+        "i686-20261007": "https://sourceforge.net/projects/melonl/files/i686-20261007/{file}/download",
+        "v0.3": "https://sourceforge.net/projects/melonl/files/v0.3/{file}/download"
       },
       "primary": true
     }

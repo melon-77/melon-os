@@ -6,5 +6,5 @@ license=custom
 source=(libfyaml-0.9.4.tar.gz)
 builddir=$srcdir/pantoniou-libfyaml-deb1ec7
 subpackages=(libfyaml-dev)
-build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DENABLE_NETWORK=OFF -DBUILD_TESTING=OFF; ninja -C build; }
+build(){ cmake_setup -B build -DBUILD_SHARED_LIBS=ON -DENABLE_NETWORK=OFF -DBUILD_TESTING=OFF $([ "$MUSL_ARCH" != i386 ] || echo -DENABLE_PORTABLE_TARGET=ON); ninja -C build; }
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }

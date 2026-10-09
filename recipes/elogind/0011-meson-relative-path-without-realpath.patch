@@ -1,0 +1,19 @@
+Compute the relative source path with Python instead of `realpath --relative-to`
+
+BusyBox realpath (a melon build machine) has no options; meson already needs Python.
+
+--- a/meson.build	2026-10-06 18:12:50.505506246 +0000
++++ b/meson.build	2026-10-06 18:12:50.544090284 +0000
+@@ -32,9 +32,9 @@
+ # the wrong result when elogind is being built as a meson subproject
+ project_source_root = meson.current_source_dir()
+ project_build_root = meson.current_build_dir()
+-relative_source_path = run_command('realpath',
+-                                   '--relative-to=@0@'.format(project_build_root),
+-                                   project_source_root,
++relative_source_path = run_command('python3', '-c',
++                                   'import os, sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))',
++                                   project_source_root, project_build_root,
+                                    check : true).stdout().strip()
+ conf.set_quoted('RELATIVE_SOURCE_PATH', relative_source_path)
+ 

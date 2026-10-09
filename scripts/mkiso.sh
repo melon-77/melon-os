@@ -24,7 +24,9 @@ EDITION=${MELON_EDITION:-console}
 DESKTOP_PKGS=${DESKTOP_PKGS:-}
 LIVE_ONLY=
 if [ "$EDITION" = desktop ]; then
-  DESKTOP_PKGS=${DESKTOP_PKGS:-$(grep -v '^#' $M/scripts/desktop-packages.txt | xargs)}
+  # the 32-bit edition has its own list (LXQt instead of Plasma): desktop-packages-x86.txt
+  _list=$M/scripts/desktop-packages$ARCH_SUFFIX.txt; [ -f $_list ] || _list=$M/scripts/desktop-packages.txt
+  DESKTOP_PKGS=${DESKTOP_PKGS:-$(grep -v '^#' $_list | xargs)}
   LIVE_ONLY=${LIVE_ONLY:-calamares-melon}
   OUTISO=$M/out/melon-desktop-$DATE-$ISOARCH.iso
 fi
@@ -55,8 +57,10 @@ done > $ROOT/usr/share/melon/rust-packages
 if [ -n "$DESKTOP_PKGS" ]; then
   printf '%s\n' $PKGS $(printf '%s\n' $DESKTOP_PKGS | grep -vxF "${LIVE_ONLY:-@none@}") > $ROOT/usr/share/melon/profiles/desktop
   # services for the desktop profile: udev replaces mdev, NetworkManager replaces the dhcp/wpa services
-  printf '%s\n' -mdevd -dhcp udevd dbus elogind polkitd NetworkManager bluetoothd power-profiles-daemon zram sddm \
-    avahi-daemon cupsd > $ROOT/usr/share/melon/profiles/desktop.services
+  # (only the ones the profile's packages ship: the 32-bit edition has no CUPS, Avahi or power-profiles-daemon)
+  for s in -mdevd -dhcp udevd dbus elogind polkitd NetworkManager bluetoothd power-profiles-daemon zram sddm avahi-daemon cupsd; do
+    case $s in -*) echo $s ;; *) [ ! -d $ROOT/etc/sv/$s ] || echo $s ;; esac
+  done > $ROOT/usr/share/melon/profiles/desktop.services
 fi
 cp $ROOT/boot/vmlinuz-melon $ISO/boot/vmlinuz
 
@@ -68,8 +72,9 @@ echo 'GETTY_ARGS="-n -l /usr/bin/melon-autologin"' > $LIVE/etc/sv/getty-tty1/con
 echo 'GETTY_ARGS="-n -l /usr/bin/melon-autologin"' > $LIVE/etc/sv/getty-ttyS0/conf
 if [ "$EDITION" = desktop ]; then
   for s in getty-tty2 getty-tty3 getty-ttyS0 syslogd klogd udevd dbus elogind polkitd NetworkManager bluetoothd \
-           power-profiles-daemon zram sddm avahi-daemon cupsd qemu-ga vmtoolsd hv_kvp_daemon hv_vss_daemon hv_fcopy_uio_daemon; do ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
-  # the live user: logs in automatically to Plasma, may use doas without a password, has the installer on the desktop
+           power-profiles-daemon zram sddm avahi-daemon cupsd qemu-ga vmtoolsd hv_kvp_daemon hv_vss_daemon hv_fcopy_uio_daemon; do
+    [ ! -d $ROOT/etc/sv/$s ] || ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
+  # the live user: logs in automatically to Plasma (LXQt on the 32-bit edition), may use doas without a password, has the installer on the desktop
   awk -F: '$1!="live"' $ROOT/etc/passwd > $LIVE/etc/passwd; echo 'live:x:1000:1000:melon live:/home/live:/bin/bash' >> $LIVE/etc/passwd
   awk -F: '$1!="live"' $LIVE/etc/shadow > $LIVE/etc/shadow.t; echo 'live::20000:0:99999:7:::' >> $LIVE/etc/shadow.t
   mv $LIVE/etc/shadow.t $LIVE/etc/shadow; chmod 640 $LIVE/etc/shadow
@@ -79,7 +84,8 @@ if [ "$EDITION" = desktop ]; then
   cp -a $ROOT/etc/skel/. $LIVE/home/live/
   install -m755 $ROOT/usr/share/applications/melon-install.desktop $LIVE/home/live/Desktop/melon-install.desktop 2>/dev/null || true
   chown -R 1000:1000 $LIVE/home/live
-  printf '[Autologin]\nUser=live\nSession=plasma\nRelogin=false\n' > $LIVE/etc/sddm.conf.d/20-live.conf
+  session=plasma; [ -f $ROOT/usr/share/wayland-sessions/plasma.desktop ] || session=lxqt-wayland
+  printf '[Autologin]\nUser=live\nSession=%s\nRelogin=false\n' $session > $LIVE/etc/sddm.conf.d/20-live.conf
   { cat $ROOT/etc/doas.conf 2>/dev/null; echo 'permit nopass live'; } > $LIVE/etc/doas.conf; chmod 600 $LIVE/etc/doas.conf
 else
   for s in getty-tty1 getty-tty2 getty-tty3 getty-ttyS0 mdevd syslogd klogd dhcp; do ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
@@ -111,7 +117,7 @@ extras="melon-base bash busybox musl apk-tools"
 # guest tools, which the installers add when they run inside a VM
 ls $M/repo/$APK_ARCH/melon-vm-guest-[0-9]*.apk >/dev/null 2>&1 && extras="$extras melon-vm-guest"
 apkx fetch --recursive --output $ISO/melon/repo/$APK_ARCH $extras >/dev/null
-( cd $ISO/melon/repo/$APK_ARCH && $APK --keys-dir $M/keys/trusted --sign-key $M/keys/melon-signing.rsa mkndx -d "melon $DATE" -o Packages.adb *.apk )
+( cd $ISO/melon/repo/$APK_ARCH && $APK --keys-dir $M/keys/trusted --sign-key "${MELON_SIGN_KEY:-$M/keys/melon-signing.rsa}" mkndx -d "melon $DATE" -o Packages.adb *.apk )
 
 step "initramfs"
 mkdir -p $INITRD/bin $INITRD/lib $INITRD/dev
@@ -167,6 +173,8 @@ menuentry 'melon live (serial console)' {
   initrd /boot/initramfs.img
 }
 CFG
+# the 32-bit edition runs on any x86 CPU: no 64-bit check
+[ $MELON_ARCH != x86 ] || sed -i '/^# melon is 64-bit/,/^fi$/d' $ISO/boot/grub/grub.cfg
 # desktop edition: the melon boot menu theme (from melon-desktop)
 if [ -f $ROOT/usr/share/melon/grub/themes/melon/theme.txt ]; then
   mkdir -p $ISO/boot/grub/themes && cp -r $ROOT/usr/share/melon/grub/themes/melon $ISO/boot/grub/themes/

@@ -4,7 +4,7 @@
 set -euo pipefail
 . "$(dirname "$(readlink -f "$0")")/env.sh"
 APK=$M/hosttools/bin/apk
-KEY=${MELON_SIGN_KEY:-$M/keys/melon-signing.rsa}   # MELON_SIGN_KEY: only for a key rotation (AGENTS.md)
+KEY=${MELON_SIGN_KEY:-$M/keys/melon-signing.rsa}   # MELON_SIGN_KEY: a key rotation (AGENTS.md), or the everyday key kept on a USB stick and used in place (BUILDING.md); mkiso.sh reads it too
 ARCH=$APK_ARCH
 OUT=$REPO/$ARCH
 mkdir -p "$OUT"
@@ -35,10 +35,17 @@ export PKG_CONFIG_PATH=
 # msgfmt finds ITS rules (polkit, gschema, ...) installed by earlier melon packages
 export GETTEXTDATADIRS=$SYSROOT/usr/share/gettext:/usr/share/gettext
 export CONFIG_SITE=$M/scripts/config.site
+# CMake 4 (melon's, on a melon build machine) refuses cmake_minimum_required below 3.5 (libjpeg-turbo, yaml-cpp); this
+# raises those to 3.5. CMake 3.x (Ubuntu's) ignores it.
+export CMAKE_POLICY_VERSION_MINIMUM=3.5
+# programs a build compiles for the build machine (CC_FOR_BUILD: flex's stage1flex, gnulib's rpl_malloc) get the C
+# dialect Ubuntu's GCC 13 defaults to: melon's GCC 15 defaults to C23, where old `void *malloc ();` is "no arguments"
+# (rule 40). Ubuntu builds keep autoconf's default.
+[ "$MELON_HOST" = melon ] && export CFLAGS_FOR_BUILD="-g -O2 -std=gnu17"
 # build systems that ask git for "their" revision (clang --version, Rust build scripts) must not find melon's own
 # checkout above the source tree: git stops looking at $WORK
 export GIT_CEILING_DIRECTORIES=$WORK
-CHOST=$TARGET CBUILD=$(gcc -dumpmachine)
+CHOST=$TARGET CBUILD=$BUILD_TRIPLE   # env.sh: never equal to $TARGET, even on melon
 export CHOST CBUILD
 conf_flags="--host=$CHOST --build=$CBUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --mandir=/usr/share/man --infodir=/usr/share/info --libdir=/usr/lib --bindir=/usr/bin --sbindir=/usr/bin --libexecdir=/usr/libexec"
 
@@ -141,6 +148,9 @@ pkgdir=$pkgbase/$pkgname
 startdir=$M/recipes/$name
 export srcdir pkgdir builddir startdir pkgname pkgver
 
+# unpack a source tarball. .xz goes through xz itself: BusyBox's tar (melon as the build machine) decodes xz only up to a
+# 64 MiB dictionary, and Rust's release tarballs use 128 MiB ("tar: corrupted data"). Recipes can call it too.
+untar(){ case $1 in *.xz|*.txz) xz -dc "$1" | tar -xf - -C "${2:-.}";; *) tar -xf "$1" -C "${2:-.}";; esac; }
 has_opt(){ local o; for o in "${options[@]:-}"; do [ "$o" = "$1" ] && return 0; done; return 1; }
 
 # ---------- install makedepends into the sysroot ----------
@@ -154,8 +164,10 @@ if [ ${#makedepends[@]} -gt 0 ]; then msg "sysroot: ${makedepends[*]}"; sysroot_
 
 # ---------- fetch / unpack ----------
 # MELON_KEEP_SRC=1 resumes a failed build in the existing tree (no unpack, no patches, no prepare)
-# MELON_AUTO_RESUME=1 resumes by itself when an earlier run got past "prepare" (container restarts)
-[ "${MELON_AUTO_RESUME:-0}" = 1 ] && [ -f "$WORK/pkg/$name/.prepared" ] && MELON_KEEP_SRC=1
+# MELON_AUTO_RESUME=1 resumes by itself when an earlier run got past "prepare" (container restarts), but only with
+# the same recipe and patches: a fix pulled since then must unpack fresh, or its patches and prepare() never run
+recipe_sum=$(for f in "$startdir"/MELONBUILD "$startdir"/*.patch; do [ ! -f "$f" ] || cat "$f"; done | sha256sum | cut -d' ' -f1)
+[ "${MELON_AUTO_RESUME:-0}" = 1 ] && [ "$(cat "$WORK/pkg/$name/.prepared" 2>/dev/null)" = "$recipe_sum" ] && MELON_KEEP_SRC=1
 if [ "${MELON_KEEP_SRC:-0}" = 1 ] && [ -d "$srcdir" ]; then
   msg "reusing existing source tree"; rm -rf "$pkgbase"; mkdir -p "$pkgdir"; KEEP=1
 else
@@ -165,13 +177,13 @@ for s in "${source[@]:-}"; do
   [ -z "$s" ] && continue
   if [ -f "$startdir/$s" ]; then cp "$startdir/$s" "$srcdir/"; continue; fi
   f=$SRC/$s; [ -e "$f" ] || { echo "missing source $f"; exit 1; }
-  case $s in *.tar*|*.tgz) msg "unpack $s"; tar xf "$f" -C "$srcdir";; *) cp "$f" "$srcdir/";; esac
+  case $s in *.tar*|*.tgz) msg "unpack $s"; untar "$f" "$srcdir";; *) cp "$f" "$srcdir/";; esac
 done
 cd "$srcdir"; [ -d "$builddir" ] && cd "$builddir"
 # apply patches shipped with the recipe
 for p in "$startdir"/*.patch; do [ -f "$p" ] || continue; msg "patch $(basename $p)"; patch -p1 -s < "$p"; done
 msg prepare; prepare
-: > "$WORK/pkg/$name/.prepared"
+echo "$recipe_sum" > "$WORK/pkg/$name/.prepared"
 fi
 cd "$builddir" 2>/dev/null || cd "$srcdir"
 msg build; build
@@ -191,7 +203,8 @@ _relocate "$SYSROOT" /
 _relocate "$M/hosttools/qt6/qml" /usr/lib/qt6/qml
 _relocate "$M/hosttools/qt6/plugins" /usr/lib/qt6/plugins
 [ -d "$pkgdir${M%/*}" ] && find "$pkgdir${M%%/${M#/*/}}" -depth -type d -empty -delete 2>/dev/null || true
-grep -rlaE --exclude='*.la' "$SYSROOT/(usr/(share|lib|libexec|bin)|etc)|$M/hosttools" "$pkgdir" 2>/dev/null | sed "s|^$pkgdir||" | while read -r f; do
+# (no --exclude: BusyBox grep, on a melon build machine, has none)
+grep -rlaE "$SYSROOT/(usr/(share|lib|libexec|bin)|etc)|$M/hosttools" "$pkgdir" 2>/dev/null | grep -v '\.la$' | sed "s|^$pkgdir||" | while read -r f; do
   msg "LEAK: build-machine path compiled into $f"; done || true
 
 varname(){ printf '%s' "$1" | tr -c 'a-zA-Z0-9' '_'; }
@@ -211,9 +224,11 @@ normalise(){ local d=$1
   [ -d "$d/lib" ] && [ ! -L "$d/lib" ] && { mkdir -p "$d/usr/lib"; cp -a "$d/lib/." "$d/usr/lib/"; rm -rf "$d/lib"; }
   find "$d" -name '*.la' -delete
   # absolute library and header links (keyutils: libkeyutils.so -> /usr/lib/...) would point into the build
-  # machine's own /usr from the sysroot: make them relative (-s: resolve by name only, never through host links)
+  # machine's own /usr from the sysroot: make them relative, by name only, never through the host's links
+  # (os.path.relpath, as GNU realpath -s -m --relative-to; BusyBox realpath on a melon build machine has no options)
   find "$d/usr/lib" "$d/usr/include" -type l 2>/dev/null | while read -r l; do
-    t=$(readlink "$l"); case $t in /usr/*) ln -sfn "$(realpath -s -m --relative-to="$(dirname "${l#$d}")" "$t")" "$l";; esac; done || true
+    t=$(readlink "$l"); case $t in /usr/*) ln -sfn "$(python3 -c 'import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))' \
+      "$t" "$(dirname "${l#$d}")")" "$l";; esac; done || true
   if ! has_opt '!strip'; then
     find "$d" -type f \( -perm -u+x -o -name '*.so*' \) 2>/dev/null | while read -r f; do
       case $(file -b "$f") in *ELF*relocatable*) ;; *ELF*) $STRIP --strip-unneeded "$f" 2>/dev/null || true;; esac; done
@@ -223,7 +238,9 @@ normalise(){ local d=$1
   # files copied with cp -a from the checkout (a recipe's files/) keep the builder's own account; apk records its
   # name, and a system without that account gets them as nobody (rule 45). Root owns them; system accounts a recipe
   # chose on purpose (uid/gid below 1000: cups' lp, dbus' messagebus) stay.
-  find "$d" \( -uid +999 -o -gid +999 \) -exec chown -h 0:0 {} +
+  # (stat, not find -uid/-gid: BusyBox find on a melon build machine has neither; stat -c reads the link itself, like chown -h)
+  find "$d" -exec stat -c '%u %g %n' {} + | while read -r u g f; do
+    if [ "$u" -gt 999 ] || [ "$g" -gt 999 ]; then chown -h 0:0 "$f"; fi; done
 }
 
 # ---------- package metadata + creation ----------

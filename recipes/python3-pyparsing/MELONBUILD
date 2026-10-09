@@ -1,0 +1,10 @@
+pkgname=python3-pyparsing
+pkgver=3.3.3
+pkgrel=0
+pkgdesc="pyparsing for Python (flatpak's build compiles its variant schemas with it)"
+license=MIT
+url=https://github.com/pyparsing/pyparsing
+source=(pyparsing-3.3.3.tar.gz)
+builddir=$srcdir/pyparsing-3.3.3
+depends=(python3)
+package(){ py_install pyparsing pyparsing; }

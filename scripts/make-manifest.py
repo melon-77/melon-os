@@ -46,7 +46,11 @@ GIT = {  # tarball name prefix -> repo, tag pattern
     'vulkan-headers': ('https://github.com/KhronosGroup/Vulkan-Headers', 'v{v}'),
     'spirv-llvm-translator': ('https://github.com/KhronosGroup/SPIRV-LLVM-Translator', 'v{v}'),
     'gh': ('https://github.com/cli/cli', 'v{v}'),
-    'libslirp': ('https://gitlab.freedesktop.org/slirp/libslirp', 'v{v}')}
+    'libslirp': ('https://gitlab.freedesktop.org/slirp/libslirp', 'v{v}'),
+    # GNOME's official GitHub mirror and seatd's author's mirror: gitlab.gnome.org and git.sr.ht were out of reach
+    'pango': ('https://github.com/GNOME/pango', '{v}'),
+    'seatd': ('https://github.com/kennylevinsen/seatd', '{v}'),
+    'labwc': ('https://github.com/labwc/labwc', '{v}')}
 URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA 0.H, Rust 1.93 and its make-dfsg drops make's doc/; host-rust.sh wants 1.98.1)
     'cataclysm-dda-0.9.1.tar.gz': 'https://github.com/CleverRaven/Cataclysm-DDA/archive/refs/tags/0.I-1.tar.gz',
     'cargo-1.98.1-x86_64-unknown-linux-gnu.tar.xz': 'https://static.rust-lang.org/dist/cargo-1.98.1-x86_64-unknown-linux-gnu.tar.xz',
@@ -88,6 +92,44 @@ URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA
     'itstool-2.0.7.tar.gz': 'https://github.com/itstool/itstool/archive/2.0.7/itstool-2.0.7.tar.gz',
     'mako-1.4.3.tar.gz': 'https://files.pythonhosted.org/packages/5a/09/e07c4b5579a79f4b16f8d4f29f6c54514ac787c4ad506b8c4f28a0e6b0bf/mako-1.4.3.tar.gz',
     'markupsafe-3.0.3.tar.gz': 'https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz',
+    # LXQt 2.4 and its libraries (melon's 32-bit desktop): checked against Alpine's sha512sums; cairo against Void's,
+    # libfm and menu-cache against Arch's
+    'cairo-1.18.4.tar.xz': 'https://cairographics.org/releases/cairo-1.18.4.tar.xz',
+    'fribidi-1.0.16.tar.xz': 'https://github.com/fribidi/fribidi/releases/download/v1.0.16/fribidi-1.0.16.tar.xz',
+    'libdbusmenu-lxqt-0.4.0.tar.xz': 'https://github.com/lxqt/libdbusmenu-lxqt/releases/download/0.4.0/libdbusmenu-lxqt-0.4.0.tar.xz',
+    # X.Org's own tarball (liblxqt needs it); x.org was out of reach from the build container, so the copy there came from
+    # Ubuntu's pool (libxss_1.2.3.orig.tar.gz, the same file), checked against the sha256 in Ubuntu's libxss_1.2.3-1build4.dsc
+    'libXScrnSaver-1.2.3.tar.gz': 'https://www.x.org/releases/individual/lib/libXScrnSaver-1.2.3.tar.gz',
+    # procps-ng: SourceForge's release, checked against Alpine's sha512 (main/procps-ng, 4.0.7)
+    'procps-ng-4.0.7.tar.xz': 'https://downloads.sourceforge.net/project/procps-ng/Production/procps-ng-4.0.7.tar.xz',
+    'libexif-0.6.26.tar.bz2': 'https://github.com/libexif/libexif/releases/download/v0.6.26/libexif-0.6.26.tar.bz2',
+    'libfm-1.3.2.tar.xz': 'https://downloads.sourceforge.net/pcmanfm/libfm-1.3.2.tar.xz',
+    'libfm-qt-2.4.0.tar.xz': 'https://github.com/lxqt/libfm-qt/releases/download/2.4.0/libfm-qt-2.4.0.tar.xz',
+    'liblxqt-2.4.0.tar.xz': 'https://github.com/lxqt/liblxqt/releases/download/2.4.0/liblxqt-2.4.0.tar.xz',
+    'libqtxdg-4.4.0.tar.xz': 'https://github.com/lxqt/libqtxdg/releases/download/4.4.0/libqtxdg-4.4.0.tar.xz',
+    'libsysstat-1.1.0.tar.xz': 'https://github.com/lxqt/libsysstat/releases/download/1.1.0/libsysstat-1.1.0.tar.xz',
+    'lximage-qt-2.4.0.tar.xz': 'https://github.com/lxqt/lximage-qt/releases/download/2.4.0/lximage-qt-2.4.0.tar.xz',
+    'lxqt-build-tools-2.4.0.tar.xz': 'https://github.com/lxqt/lxqt-build-tools/releases/download/2.4.0/lxqt-build-tools-2.4.0.tar.xz',
+    'lxqt-config-2.4.0.tar.xz': 'https://github.com/lxqt/lxqt-config/releases/download/2.4.0/lxqt-config-2.4.0.tar.xz',
+    'lxqt-globalkeys-2.4.0.tar.xz': 'https://github.com/lxqt/lxqt-globalkeys/releases/download/2.4.0/lxqt-globalkeys-2.4.0.tar.xz',
+    'lxqt-menu-data-2.4.0.tar.xz': 'https://github.com/lxqt/lxqt-menu-data/releases/download/2.4.0/lxqt-menu-data-2.4.0.tar.xz',
+    'lxqt-notificationd-2.4.0.tar.xz': 'https://github.com/lxqt/lxqt-notificationd/releases/download/2.4.0/lxqt-notificationd-2.4.0.tar.xz',
+    'lxqt-panel-2.4.0.tar.xz': 'https://github.com/lxqt/lxqt-panel/releases/download/2.4.0/lxqt-panel-2.4.0.tar.xz',
+    'lxqt-policykit-2.4.0.tar.xz': 'https://github.com/lxqt/lxqt-policykit/releases/download/2.4.0/lxqt-policykit-2.4.0.tar.xz',
+    'lxqt-powermanagement-2.4.0.tar.xz': 'https://github.com/lxqt/lxqt-powermanagement/releases/download/2.4.0/lxqt-powermanagement-2.4.0.tar.xz',
+    'lxqt-qtplugin-2.4.0.tar.xz': 'https://github.com/lxqt/lxqt-qtplugin/releases/download/2.4.0/lxqt-qtplugin-2.4.0.tar.xz',
+    'lxqt-runner-2.4.0.tar.xz': 'https://github.com/lxqt/lxqt-runner/releases/download/2.4.0/lxqt-runner-2.4.0.tar.xz',
+    'lxqt-session-2.4.0.tar.xz': 'https://github.com/lxqt/lxqt-session/releases/download/2.4.0/lxqt-session-2.4.0.tar.xz',
+    'lxqt-themes-2.4.0.tar.xz': 'https://github.com/lxqt/lxqt-themes/releases/download/2.4.0/lxqt-themes-2.4.0.tar.xz',
+    'lxqt-wayland-session-0.4.0.tar.xz': 'https://github.com/lxqt/lxqt-wayland-session/releases/download/0.4.0/lxqt-wayland-session-0.4.0.tar.xz',
+    'menu-cache-1.1.0.tar.xz': 'https://downloads.sourceforge.net/lxde/menu-cache-1.1.0.tar.xz',
+    'pavucontrol-qt-2.4.0.tar.xz': 'https://github.com/lxqt/pavucontrol-qt/releases/download/2.4.0/pavucontrol-qt-2.4.0.tar.xz',
+    'pcmanfm-qt-2.4.0.tar.xz': 'https://github.com/lxqt/pcmanfm-qt/releases/download/2.4.0/pcmanfm-qt-2.4.0.tar.xz',
+    'qterminal-2.4.0.tar.xz': 'https://github.com/lxqt/qterminal/releases/download/2.4.0/qterminal-2.4.0.tar.xz',
+    'qtermwidget-2.4.0.tar.xz': 'https://github.com/lxqt/qtermwidget/releases/download/2.4.0/qtermwidget-2.4.0.tar.xz',
+    'qtxdg-tools-4.4.0.tar.xz': 'https://github.com/lxqt/qtxdg-tools/releases/download/4.4.0/qtxdg-tools-4.4.0.tar.xz',
+    'pyparsing-3.3.3.tar.gz': 'https://files.pythonhosted.org/packages/e4/11/b213bebff182584360cb8d17c72c1677fec5c5c228de439e63bcf8ab1c8f/pyparsing-3.3.3.tar.gz',
+    'jinja2-3.1.6.tar.gz': 'https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz',
     'pyyaml-6.0.3.tar.gz': 'https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz',
     'packaging-26.3.tar.gz': 'https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz',
     'pexpect-4.9.0.tar.gz': 'https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz',
@@ -97,10 +139,16 @@ URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA
     'go1.27.1.src.tar.gz': 'https://go.dev/dl/go1.27.1.src.tar.gz',
     'go1.27.1.linux-amd64.tar.gz': 'https://go.dev/dl/go1.27.1.linux-amd64.tar.gz',
     'qemu-11.1.1.tar.xz': 'https://download.qemu.org/qemu-11.1.1.tar.xz',
+    # QEMU's configure venv on a melon build machine (recipes/qemu): PyPI's wheels (PyPI's sha256, files identical to the
+    # sdists that Gentoo's Manifest and Debian's .dsc list; wheel's PyPI attestation from pypa/wheel)
+    'setuptools-84.0.0-py3-none-any.whl': 'https://files.pythonhosted.org/packages/95/9c/c510029fc6ef33a6275cd2c5d3cecd6613dfd6aa401d57c54f1c18852ccf/setuptools-84.0.0-py3-none-any.whl',
+    'wheel-0.45.1-py3-none-any.whl': 'https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl',
     # NVIDIA: linux-firmware (signed by its maintainer), NVIDIA's module source and driver (NVIDIA's sha256, Arch's sha512)
     'linux-firmware-20260916.tar.xz': 'https://cdn.kernel.org/pub/linux/kernel/firmware/linux-firmware-20260916.tar.xz',
     'NVIDIA-kernel-module-source-615.71.09.tar.xz': 'https://download.nvidia.com/XFree86/NVIDIA-kernel-module-source/NVIDIA-kernel-module-source-615.71.09.tar.xz',
-    'NVIDIA-Linux-x86_64-615.71.09.run': 'https://download.nvidia.com/XFree86/Linux-x86_64/615.71.09/NVIDIA-Linux-x86_64-615.71.09.run'}
+    'NVIDIA-Linux-x86_64-615.71.09.run': 'https://download.nvidia.com/XFree86/Linux-x86_64/615.71.09/NVIDIA-Linux-x86_64-615.71.09.run',
+    # rpcgen (open-vm-tools' build runs it); upstream publishes no checksum: Alpine's sha512 and Debian's sha256 match
+    'rpcsvc-proto-1.4.4.tar.xz': 'https://github.com/thkukuk/rpcsvc-proto/releases/download/v1.4.4/rpcsvc-proto-1.4.4.tar.xz'}
 
 rows, missing = [], []
 def add(path, method, arg):

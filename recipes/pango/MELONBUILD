@@ -1,0 +1,13 @@
+pkgname=pango
+pkgver=1.57.0
+pkgrel=0
+pkgdesc="Text layout and rendering (labwc's titles and menus)"
+license=LGPL-2.1-or-later
+url=https://www.gtk.org
+source=(pango-1.57.0.tar.gz)
+subpackages=(pango-dev)
+makedepends=(glib-dev harfbuzz-dev fribidi-dev fontconfig-dev freetype-dev cairo-dev)
+build(){ meson_setup -Dintrospection=disabled -Dbuild-testsuite=false -Dbuild-examples=false -Ddocumentation=false \
+  -Dman-pages=false -Dfontconfig=enabled -Dfreetype=enabled -Dcairo=enabled -Dlibthai=disabled -Dxft=disabled -Dsysprof=disabled build
+  ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

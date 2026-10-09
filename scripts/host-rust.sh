@@ -9,15 +9,22 @@ M=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd); V=1.98.1; H=$M/hosttools/r
 # lockfile (--locked); crates come from crates.io into sources/cargo like every Rust recipe's, checked by checksum.
 # It loads the build machine's libclang (LIBCLANG_PATH in recipes/mesa-nvk).
 BG=0.73.2 CB=0.29.4   # and cbindgen, the other direction (C headers for Rust code)
-_inst(){ PATH=$H/bin:$PATH CARGO_HOME=$M/sources/cargo $H/bin/cargo install --quiet --locked --root $H "$@"; }
-bindgen(){ $H/bin/bindgen --version 2>/dev/null | grep -q " $BG$" || _inst bindgen-cli@$BG
+# the build machine's own Rust: glibc builds on Ubuntu, upstream's musl-hosted builds on melon (no glibc there)
+HT=x86_64-unknown-linux-gnu; [ -e /lib/ld-musl-x86_64.so.1 ] && ! [ -e /lib64/ld-linux-x86-64.so.2 ] && HT=x86_64-unknown-linux-musl
+# Rust's musl target links statically by default, and a static musl program can't dlopen(): bindgen on melon must be
+# dynamic to load libclang ("Dynamic loading not supported"). Ubuntu's glibc build is dynamic anyway.
+RF=; [ $HT = x86_64-unknown-linux-musl ] && RF="-C target-feature=-crt-static"
+_inst(){ local e=(); [ -n "$RF" ] && e=(RUSTFLAGS="$RF")
+  env "${e[@]}" PATH="$H/bin:$PATH" CARGO_HOME=$M/sources/cargo $H/bin/cargo install --quiet --locked --force --root $H "$@"; }
+_dynamic(){ readelf -l "$1" 2>/dev/null | grep -q 'program interpreter'; }   # a static bindgen from before this fix: rebuild
+bindgen(){ { $H/bin/bindgen --version 2>/dev/null | grep -q " $BG$" && _dynamic $H/bin/bindgen; } || _inst bindgen-cli@$BG
   $H/bin/cbindgen --version 2>/dev/null | grep -q " $CB$" || _inst cbindgen@$CB
   $H/bin/bindgen --version; $H/bin/cbindgen --version; }
 if [ -x $H/bin/rustc ] && $H/bin/rustc --version | grep -q "^rustc $V "; then echo "host rust $V already installed"; bindgen; exit 0; fi
 rm -rf $W $H; mkdir -p $W; cd $W
-for c in rustc-$V-x86_64-unknown-linux-gnu cargo-$V-x86_64-unknown-linux-gnu rust-std-$V-x86_64-unknown-linux-gnu \
-         rust-std-$V-x86_64-unknown-linux-musl; do
-  tar xJf $M/sources/$c.tar.xz
+comps="rustc-$V-$HT cargo-$V-$HT rust-std-$V-$HT"; [ $HT = x86_64-unknown-linux-musl ] || comps="$comps rust-std-$V-x86_64-unknown-linux-musl"
+for c in $comps; do
+  xz -dc $M/sources/$c.tar.xz | tar -xf -   # not tar xJf: BusyBox tar (melon) stops at xz dictionaries over 64 MiB
   $c/install.sh --prefix=$H --disable-ldconfig --without=rust-docs >/dev/null
 done
 cd /; rm -rf $W

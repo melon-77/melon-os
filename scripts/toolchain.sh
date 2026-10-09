@@ -12,7 +12,7 @@ step(){ echo "=== $(date +%T) $*"; }
 step binutils
 if [ ! -x $TOOLS/bin/$TARGET-as ]; then rm -rf b-binutils binutils-with-gold-2.46
 tar xf $SRC/binutils-2.46.tar.xz; mkdir b-binutils; cd b-binutils
-../binutils-with-gold-2.46/configure --target=$TARGET --prefix=$TOOLS --with-sysroot=$SYSROOT \
+../binutils-with-gold-2.46/configure $TOOLCHAIN_HOST_FLAGS --target=$TARGET --prefix=$TOOLS --with-sysroot=$SYSROOT \
   --disable-nls --disable-werror --disable-multilib --disable-gprofng --enable-deterministic-archives --disable-gold >/dev/null
 make -j$JOBS >/dev/null; make install >/dev/null; cd ..
 fi
@@ -24,6 +24,8 @@ make -C linux-7.0 ARCH=$KARCH INSTALL_HDR_PATH=$SYSROOT/usr headers_install >/de
 
 step gcc sources
 tar xf $SRC/gcc-15.2.0.tar.xz; cd gcc-15.2.0
+# i686: link musl's libssp_nonshared.a (toolchain-finish.sh builds it), as Alpine does; x86_64 doesn't need it
+[ "$MUSL_ARCH" != i386 ] || patch -p1 -s < $M/patches/gcc-i686/ssp-nonshared.patch
 tar xf $SRC/gmp-6.3.0.tar.xz && mv gmp-6.3.0+dfsg gmp
 # the Debian dfsg tarball drops the docs; stop GMP from expecting them
 sed -i "s| doc/Makefile||" gmp/configure; sed -i "s/^SUBDIRS = \(.*\) doc$/SUBDIRS = \1/" gmp/Makefile.in
@@ -36,16 +38,19 @@ tar xzf $SRC/musl-1.2.5.tar.gz; cd musl-1.2.5
 for p in $M/patches/musl/*.patch; do patch -p1 -s < $p; done
 make ARCH=$MUSL_ARCH prefix=/usr DESTDIR=$SYSROOT install-headers >/dev/null; cd ..
 
-GCC_CONF="--target=$TARGET --prefix=$TOOLS --with-sysroot=$SYSROOT --with-build-sysroot=$SYSROOT
+GCC_CONF="$TOOLCHAIN_HOST_FLAGS --target=$TARGET --prefix=$TOOLS --with-sysroot=$SYSROOT --with-build-sysroot=$SYSROOT
   --enable-languages=c,c++ --disable-multilib --disable-nls --disable-werror
   --disable-libsanitizer --disable-libssp --disable-libquadmath --disable-libgomp-offload
   --enable-default-pie --enable-default-ssp --enable-tls --enable-initfini-array
   --enable-libstdcxx-time --enable-__cxa_atexit --enable-threads=posix --enable-shared
-  --with-pkgversion=melon --disable-symvers --disable-fixed-point --with-arch=$GCC_ARCH --with-tune=generic"
+  --with-pkgversion=melon --disable-symvers --disable-fixed-point --with-arch=$GCC_ARCH ${GCC_FPMATH:+--with-fpmath=$GCC_FPMATH} --with-tune=generic"
 
 step gcc stage1
 mkdir b-gcc; cd b-gcc
-../gcc-15.2.0/configure $GCC_CONF >/dev/null
+# -std=gnu17 for the build machine's compiler: in-tree GMP's configure test calls `void g(){}` with arguments, which
+# GCC 15's default C23 rejects ("could not find a working compiler", rule 40). GCC 13 on Ubuntu defaults to gnu17 anyway;
+# the target libraries keep their own flags (CFLAGS_FOR_TARGET).
+CFLAGS="-g -O2 -std=gnu17" ../gcc-15.2.0/configure $GCC_CONF >/dev/null
 make -j$JOBS all-gcc >/dev/null; make install-gcc >/dev/null
 # libgcc's static parts build fine now; the shared libgcc_s needs the C library, which comes next.
 # Install the static pieces by hand so musl can be built with this compiler.
@@ -55,4 +60,4 @@ cp $L/libgcc.a $L/libgcc_eh.a $L/crtbegin.o $L/crtbeginS.o $L/crtbeginT.o $L/crt
 cd ..
 
 step "musl + final gcc"
-exec "$(dirname "$0")/toolchain-finish.sh"
+exec $M/scripts/toolchain-finish.sh   # $M, not $0: a relative $0 no longer resolves after the cd above

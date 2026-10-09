@@ -100,7 +100,7 @@ h2 + .note { margin: -12px 0 30px; }
 @media (prefers-color-scheme: dark) { .shots img { border-color: var(--line); box-shadow: 6px 6px 0 #050805; } }
 .shots figcaption { font: 400 13px var(--f-mono); color: var(--muted); margin-top: 16px; }
 .shots figcaption b { color: var(--flesh); margin-right: .6em; }
-.video { margin: 34px 0 0; max-width: 56rem; }
+.video { margin: 34px 0 0; max-width: 36rem; }
 .video video { display: block; width: 100%; height: auto; background: #000; border: 2px solid var(--shadow); border-radius: 6px; box-shadow: 6px 6px 0 var(--shadow); }
 @media (prefers-color-scheme: dark) { .video video { border-color: var(--line); box-shadow: 6px 6px 0 #050805; } }
 .video figcaption { font: 400 13px var(--f-mono); color: var(--muted); margin-top: 16px; }

@@ -58,6 +58,7 @@ scripts/mkiso.sh        live/installer ISO: rootfs.sqfs (pristine apk-installed 
                         installers) + live.sqfs (small live-session layer) + a small repo of extras (VM guest tools,
                         a few base packages; never a second copy of what rootfs.sqfs already holds)
 scripts/qemu-test.py    headless boot + install + reboot test over the serial console
+scripts/record-installer.py  records the console installer in QEMU as the website's video (blacks out the intro's title)
 recipes/<name>/MELONBUILD   one directory per recipe (see below)
 recipes/<name>/*.patch      applied automatically with patch -p1, in name order
 recipes/<name>/<pkg>.post-install etc.   apk scripts for (sub)package <pkg>
@@ -507,6 +508,15 @@ the serial port, so tests don't need a screen. The test also records the sound c
   - if you need to run it in a test, call `/usr/libexec/melon/.cold` directly.
   It asks base or desktop and installs exactly what the desktop ISO installs. It plays
   `/usr/share/melon/.ice` (from the `melon-sounds` package, live ISO only) at 30% volume while it runs.
+  On 8 October 2026 the owner gave it a new name (only its hash is in `zz-melon.sh`; the old name no longer works) and
+  a new song, which also plays under the graphical installer (`melon-install-gui`), and a new intro: `/usr/share/melon/.fall`
+  (replaces the diamond glove) draws a melon rolling off a cliff at dusk in true-colour half blocks, then the title from a 5x7
+  pixel font, so the name is in glyph rows, never as text. Original art, in the mood the owner asked for. The Linux console and
+  most serial terminals have 16 colours, where true colour turns into banded grey, so `.fall` draws a second version of the scene
+  with the 16 console colours (`vpix`) unless `COLORTERM` says `truecolor` or `24bit`; change both when you change the art. The song is `recipes/melon-sounds/ice.mp3`:
+  the owner's file, re-encoded as 128 kb/s MP3 and set to about -12 LUFS so that it is as loud as the old track at the same
+  30% (the original was 10 dB quieter). The file names `.cold` and `.ice` stay as they are, so nothing in the repo spells
+  the name. A new name means a new hash: `printf %s <name> | sha256sum | cut -c1-16`.
 - **Dual boot.** On UEFI, when the chosen disk already has an EFI system partition and at least 20 GiB unallocated
   (Windows' Disk Management "Shrink Volume" makes that), the console installer offers `alongside` (the default
   then; `MELON_MODE=alongside|erase`): a 1 GiB FAT32 `/boot` (extended boot loader type) and `/` go into the free
@@ -551,7 +561,13 @@ fails when the pages are stale. The 32-bit pre-release is a second release in th
 `docs/iso-hosting.md` before moving the files to another host (`scripts/upload-isos.sh`; other hosts go into `mirrors` in `releases.json`).
 `gauntlet.js` is only a taste of the real gauntlet, using easy questions that already appear in
 `recipes/calamares-melon/modules/gauntlet/questions.js`; never copy anything from `trial.js` (not even its questions) into the site, and keep
-the hidden owner commands out of it, as everywhere else. The pixel melon is generated from `melonfetch`'s own awk drawing
+the hidden owner commands out of it, as everywhere else. The install section has a video of the console installer
+(`site/assets/installer-console.mp4` with its poster), recorded from the ISO in QEMU by `scripts/record-installer.py`
+(`record`, then `build`). **The intro spells the installer's name in big letters, so `build` blacks out those rows in
+every frame, and only the built file may go into the repo or the site**: never commit the raw screenshots or the unmasked
+video. Re-record it when the installer's questions or intro change. The graphical (Calamares) installer has no video
+yet: Plasma doesn't finish starting in QEMU's software emulation (no KVM under Windows 10's WSL2), so it needs a
+machine with KVM. The pixel melon is generated from `melonfetch`'s own awk drawing
 (`art/site.py`), so change the melon there, not in the SVG.
 
 ## Package repository (online)

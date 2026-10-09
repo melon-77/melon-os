@@ -370,6 +370,13 @@ Rebuilding the kernel takes about an hour on 2 cores.
     `/usr/bin/Xwayland` (recipes/wlroots), not the sysroot's, and labwc's own `labwc.desktop` session is removed so
     SDDM starts LXQt.
 
+60. **WSL2 on Windows is a supported build machine, with traps** (BUILDING.md, "Windows + WSL2 build machine"):
+    the PC must not go to sleep while a build runs (connected standby freezes the VM and even `wsl --shutdown` hangs; recover with
+    an elevated stop of WslService and `vmmem`/`vmwp`, or a restart); Windows' `PATH` is switched off in `/etc/wsl.conf`
+    (`appendWindowsPath=false`), because a space in it broke `host-rust.sh`; scripts and queues are run by absolute path from
+    the Linux disk, never from `/mnt/c`; and on Windows 10 there is no KVM, so QEMU tests are slow software emulation. A signing
+    key kept on a USB stick is used in place through `MELON_SIGN_KEY` (`melon-build` and `mkiso.sh` read it), never copied.
+
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but
 only while the recipe and its patches are the ones the tree was unpacked with (`work/pkg/<name>/.prepared` holds their

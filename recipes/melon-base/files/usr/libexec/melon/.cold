@@ -175,6 +175,8 @@ say "Copying the melon system"
 mkdir -p /run/melon-src; mount -t squashfs -o loop,ro "$SYSIMG" /run/melon-src
 tar -C /run/melon-src --exclude=./boot -cf - . | tar -C $TARGET -xpf -
 for f in /run/melon-src/boot/*; do [ -f "$f" ] && cp "$f" $TARGET/boot/; done
+# the ISO carries the kernel once (next to the system image), not inside it
+[ -f $TARGET/boot/vmlinuz-melon ] || cp "$(dirname "$SYSIMG")/vmlinuz" $TARGET/boot/vmlinuz-melon || die "no kernel on the ISO"
 umount /run/melon-src
 mkdir -p $TARGET/dev $TARGET/proc $TARGET/sys $TARGET/run
 for d in dev proc sys; do mount --bind /$d $TARGET/$d; done

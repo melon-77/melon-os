@@ -13,3 +13,5 @@ command_not_found_handle(){
   printf 'bash: %s: command not found\n' "$1" >&2; return 127
 }
 fi
+# a language the translations of which are not installed (see melon-lang)
+case $- in *i*) [ -x /usr/bin/melon-lang ] && /usr/bin/melon-lang hint 2>/dev/null || true ;; esac

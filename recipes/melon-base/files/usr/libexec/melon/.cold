@@ -15,7 +15,7 @@
 # This is the quick installer. The desktop ISO's advertised installer is Calamares
 # (with the melon gauntlet); this one installs the same thing in a handful of prompts.
 #   MELON_PROFILE=base     console system
-#   MELON_PROFILE=desktop  everything the desktop ISO installs (KDE Plasma, Wayland, Flatpak, ...)
+#   MELON_PROFILE=desktop  everything the desktop ISO installs (Wayfire with LXQt, Flatpak, ...)
 set -e
 PATH=/usr/bin
 REPO=${MELON_REPO:-/media/melon/melon/repo}

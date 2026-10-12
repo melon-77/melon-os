@@ -1,3 +1,0 @@
-# Languages whose translations stay in every package (plus English). Every other language is in the package's -lang-more
-# part, installed with melon-lang-more. scripts/melon-build reads this file; melon-lang and the login hint use it too.
-ar de es fr it ja ko nl pl pt ru tr uk zh

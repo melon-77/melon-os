@@ -21,7 +21,7 @@ fi
 
 BASE="melon-layout linux-headers musl gcc-runtime zlib zstd xz openssl apk-tools busybox ncurses bash runit util-linux
   userspace-rcu inih bsd-compat-headers xfsprogs grub libnl3 expat dbus wpa_supplicant alsa-lib alsa-utils mpg123 kmod
-  opendoas ca-certificates linux-firmware melon-base melon-lang-more melon-sounds linux-melon"
+  opendoas ca-certificates linux-firmware melon-base melon-sounds linux-melon"
 PLUMBING="libffi pcre2 glib libcap duktape linux-pam eudev elogind polkit argp-standalone musl-fts musl-obstack elfutils
   sqlite json-c popt device-mapper cryptsetup dosfstools squashfs-tools e2fsprogs bzip2 hunspell attr acl lm-sensors libogg libvorbis
   libtool sound-theme-freedesktop libcanberra icu boost-headers python3 readline keyutils gmp mpfr

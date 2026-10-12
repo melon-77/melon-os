@@ -53,7 +53,7 @@ scripts/toolchain.sh    cross toolchain, part 1 (binutils, headers, gcc stage 1)
 scripts/toolchain-finish.sh  part 2 (musl, full gcc)
 scripts/melon-build     build ONE recipe -> signed .apk(s) in repo/x86_64, reindex, install into sysroot
 scripts/build-all.sh    build a list of recipes in order, logs to logs/pkg-<name>.log
-scripts/size-round.sh   one command for the desktop ISO size round: changed + translation packages, both ISOs, QEMU tests
+scripts/size-round.sh   one command for the desktop ISO size round: changed packages, both ISOs, QEMU tests
 scripts/check-order.sh  every makedepends is built before the recipe that needs it (build-everything.sh runs it first)
 scripts/mkiso.sh        live/installer ISO: rootfs.sqfs (pristine apk-installed system, copied to disk by the
                         installers) + live.sqfs (small live-session layer) + a small repo of extras (VM guest tools,
@@ -389,16 +389,10 @@ Rebuilding the kernel takes about an hour on 2 cores.
     the Linux disk, never from `/mnt/c`; and on Windows 10 there is no KVM, so QEMU tests are slow software emulation. A signing
     key kept on a USB stick is used in place through `MELON_SIGN_KEY` (`melon-build` and `mkiso.sh` read it), never copied.
 
-61. **Translations are split off at packaging time** (`split_lang` in `scripts/melon-build`). Every `usr/share/locale/<lang>` of a package or
-    subpackage whose language isn't English or in `recipes/melon-base/files/usr/share/melon/lang-keep` moves to `<name>-lang-more`, which
-    apk installs next to `<name>` only while the empty package `melon-lang-more` is installed (`install-if`, so `sudo melon-lang all`
-    brings back everything and `melon-lang remove` takes it off again; `melon-lang hint` runs at login and says so when `LANGUAGE`, `LANG` or Plasma's
-    language isn't covered; on Plasma `melon-lang-offer`, a melon-desktop autostart entry, asks once per language and installs them). A package that gets a `-lang-more` is built one `pkgrel` higher than its recipe says: its old release had the
-    languages inside, and apk would refuse the split files over them. Release notes tell upgraders to run `sudo melon-lang all` if they use
-    another language. The keep list is one file for the builder, `melon-lang` and the hint; `MELON_LANG_KEEP` overrides it for a build
-    and `MELON_LANG_SPLIT=0` switches the split off. Qt's own `.qm` translations (`qt6-qttranslations`) are not touched.
-    The base-profile install from the desktop ISO keeps `melon-vm-guest` in a VM (`.cold` adds it to the wanted list before the removal),
-    because the desktop ISO's repo holds only that package, not the libraries it needs.
+61. **The desktop ISO's extras repo holds `melon-vm-guest` alone, not the libraries it needs** (they are in its system image). So the
+    base-profile install from the desktop ISO keeps `melon-vm-guest` in a VM: `.cold` adds it to the wanted list before it removes what
+    the profile doesn't include. Translations are never split off or dropped to save space (the owner, 12 October 2026: the size work
+    removes only what nothing uses).
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but
@@ -655,9 +649,11 @@ Measured on the 29 September desktop image with `mksquashfs` (zstd, 512 KiB bloc
 Not rebuilt in a container: both recipes only `rm` files in `package()`, so the check was on the extracted image. A new ISO
 shows the real sizes.
 
-## Desktop ISO size goal: 500 MB (the owner, 9 October 2026)
+## Desktop ISO size (the owner, 9 and 12 October 2026)
 
-The 0.4 desktop ISO is 793.6 MB (rootfs.sqfs 749 MB of it); the goal is **500 MB**. Where the bytes were, measured on the published 0.4
+The 0.4 desktop ISO is 793.6 MB (rootfs.sqfs 749 MB of it). The first goal was 500 MB; the owner then made the rule: **it doesn't have to be
+exactly 500, make the ISO smaller without removing anything a general computer needs to run melon, i.e. only garbage that nothing uses.**
+Where the bytes were, measured on the published 0.4
 image (zstd as squashfs does it, MiB): firmware 259, shared libraries 258 (libLLVM 35, Mesa's Gallium and Vulkan 23), translations
 (145 languages) 54, binaries 40, kernel modules 24 plus the kernel 12 (and a second copy of the kernel in `/boot` of the ISO), wallpapers
 16 (Breeze 8.9 and the rewards), icons 13, fonts 12 (the colour emoji font is 9), `usr/share/melon` 12, the extras repository 11.6.
@@ -682,19 +678,20 @@ Steps, in the order they ship. Each step is measured before it is called done, a
      new system's `/boot` (`.cold` and `cal-finish`: `melon-base` pkgrel 37, `calamares-melon` pkgrel 9). About 12 MiB.
    - *Breeze's default wallpaper as JPEG* (`scripts/png2jpg.py`, quality 95, no chroma subsampling; `breeze` pkgrel 2): Plasma reads
      `5120x2880.jpg` as it read the PNG. About 14 MiB. Lossless codecs don't help these photos; the reward wallpapers are left alone.
-   - *Translations split* (rule 61): English and the 14 common languages stay, every other language is installed online by one command.
-     About 40 MiB.
-3. **Left alone because they would cost functionality** (the owner's condition): text-to-speech (Plasma's "Speak Text"), a trimmed ICU data
-   file, the kernel's driver set, a smaller emoji font, OpenCV in Spectacle. They are not in this plan unless the owner says otherwise.
+3. **Left alone because they are used** (the owner's rule): translations (every language: a computer set to that language uses them;
+   a split into `-lang-more` packages was tried in this PR and taken out again), text-to-speech (Plasma's "Speak Text"), ICU data, the
+   kernel's driver set, the emoji font, OpenCV in Spectacle, Mesa's `hasvk` (Haswell/Broadwell Vulkan), and `libKF6BreezeIcons` (KIconThemes
+   links it as the icon fallback, so it isn't a removable duplicate of the icon files). Checked and found nearly empty, so nothing to gain:
+   headers, pkg-config and CMake files, man pages, Python caches (static `.a` libraries are 4.4 MiB uncompressed). `boot/System.map-melon`
+   (8.6 MiB uncompressed, about 3 MB on the ISO) is unused at runtime, but dropping it means a kernel rebuild and a `linux-melon` pkgrel
+   bump (which `nvidia-open` pins): do it with the next kernel change. mksquashfs already stores identical files once.
 
-**To build and test all of this in one go:** `scripts/size-round.sh` (WSL, by absolute path, key plugged in; `packages`, `isos` and `tests` run one part; log `logs/size-round.log`).
-It builds the changed recipes, rebuilds every package whose `.apk` carries translations (found with `apk adbdump`: `apk manifest` only reads installed packages), builds both ISOs and runs the QEMU tests.
+**To build and test all of this in one go:** `scripts/size-round.sh` (WSL, by absolute path, key plugged in; `packages`, `isos` and
+`tests` run one part; log `logs/size-round.log`). It builds the changed recipes, both ISOs and runs the QEMU tests.
 
-Honest estimate with only the lossless cuts: about 534 MiB (about 560 MB). The last 60 MiB to reach 500 MB are choices with a price: the
-emoji font (9), ICU data (9), kernel drivers (8), TTS (5), Mesa's `hasvk` (5), or shipping the big firmware families
-(Intel, Atheros, MediaTek: ~160 MiB on the ISO) as install-time downloads for users with network, which would put an offline install on
-such hardware at risk. `scripts/mkiso.sh` and the measurements above are the place to re-check after every step.
-**Never trade away Wi-Fi, graphics or audio drivers for a PC to save bytes**; whatever leaves the ISO must stay one `apk add` away.
+Measured on 12 October 2026 (a build of this PR on the WSL machine, with the translation split, which only breeze had): desktop ISO
+612 MB, console ISO 243 MB. **Never trade away Wi-Fi, graphics, audio or network drivers for a PC to save bytes**; whatever leaves the ISO
+must be hardware a PC doesn't have, and stays one `apk add` away.
 
 ## Package repository (online)
 

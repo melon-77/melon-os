@@ -5,9 +5,7 @@
 failed=()
 # MELON_SKIP_BUILT=1: skip recipes whose current version-release is already in the repo (to resume a queue);
 # an empty .apk (truncated by a crash) does not count
-# (a package with translations to split off is built one release higher than its recipe says, see rule 61)
-built(){ ( pkgrel=0; . $M/recipes/$1/MELONBUILD >/dev/null 2>&1
-           [ -s $REPO/$APK_ARCH/$pkgname-$pkgver-r$pkgrel.apk ] || [ -s $REPO/$APK_ARCH/$pkgname-$pkgver-r$((pkgrel + 1)).apk ] ); }
+built(){ ( pkgrel=0; . $M/recipes/$1/MELONBUILD >/dev/null 2>&1; [ -s $REPO/$APK_ARCH/$pkgname-$pkgver-r$pkgrel.apk ] ); }
 for p in "$@"; do
   if [ "${MELON_SKIP_BUILT:-0}" = 1 ] && built $p; then echo "##### $p already built"; continue; fi
   echo "##### $(date +%T) $p"

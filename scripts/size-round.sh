@@ -20,7 +20,7 @@ APK=$M/hosttools/bin/apk
 
 packages(){
   echo "##### $(date +%T) packages that changed"
-  MELON_AUTO_RESUME=1 scripts/build-all.sh linux-firmware breeze melon-base melon-lang-more calamares-melon
+  MELON_AUTO_RESUME=1 scripts/build-all.sh linux-firmware breeze melon-base melon-desktop melon-lang-more calamares-melon
   echo "##### $(date +%T) packages with translations to split off"
   local list=() warn=() f n r lang base
   for f in $REPO/$APK_ARCH/*.apk; do

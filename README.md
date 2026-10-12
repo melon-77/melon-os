@@ -116,10 +116,10 @@ The desktop ISO is being slimmed from 794 MB to a goal of 500 MB without losing 
 (details and measurements in AGENTS.md, "Desktop ISO size goal"). In the repository now:
 
 - Intel Wi-Fi firmware keeps the one version the kernel loads, and firmware for hardware that is not in PCs and laptops (SoC boards,
-  phone and router Wi-Fi chips, server network cards, ADSL modems) moves to `linux-firmware-extra`: if you use such hardware,
-  `sudo apk add linux-firmware-extra`.
+  phone and router Wi-Fi chips, big server network cards) moves to `linux-firmware-extra`, and the ISOs install `linux-firmware-pc` (all
+  but that part): if you use such hardware, `sudo apk add linux-firmware-extra`. Installed systems that upgrade keep everything.
 - **Translations:** English and the common languages (Arabic, German, Spanish, French, Italian, Japanese, Korean, Dutch, Polish,
-  Portuguese, Russian, Turkish, Ukrainian, Chinese) are included; for any other language run `sudo melon-lang all` (it installs
+  Portuguese, Russian, Turkish, Ukrainian, Chinese) are included; for any other language run `sudo melon-lang all` (Plasma offers it at login) (it installs
   `melon-lang-more`, which brings every package's other translations; `melon-lang` alone says what you have).
 - The kernel is stored once on the ISO, Breeze's default wallpaper is a high-quality JPEG, and the ISOs are squashed with zstd level 19.
 

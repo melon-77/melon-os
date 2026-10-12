@@ -43,20 +43,37 @@ ORDER = [
  ('lxqt-powermanagement', '2.4.0', '', False, 'LXQt power management (battery, lid, idle)'),
  # touchpad settings are for Xorg's libinput driver; under labwc lxqt-wayland-session sets the touchpad
  ('lxqt-config', '2.4.0', ' -DWITH_TOUCHPAD=OFF -DCMAKE_CXX_STANDARD=20', False, 'LXQt settings (appearance, input, locale, ...)'),
- ('lxqt-wayland-session', '0.4.0', '', False, 'LXQt Wayland session files (labwc, kwin_wayland, ... as compositor)'),
+ ('lxqt-wayland-session', '0.4.0', '', False, 'LXQt Wayland session files (Wayfire, labwc, ... as compositor)'),
  ('qtermwidget', '2.4.0', '', True, 'Terminal widget for Qt (QTerminal)'),
  ('qterminal', '2.4.0', '', False, 'QTerminal, the LXQt terminal'),
  ('pavucontrol-qt', '2.4.0', '', False, 'Volume control for PulseAudio (PipeWire)'),
  ('lximage-qt', '2.4.0', '', False, 'LXImage-Qt, the LXQt image viewer and screenshot tool'),
 ]
 
+# pkgrel of recipes changed after their first build (rule 31: the builder only reinstalls a new version-release)
+PKGREL = {
+ # wayfire-defaults-from-xdg.patch: startlxqtwayland copies a distribution's lxqt-wayfire.ini from /etc/xdg (melon-wayfire)
+ 'lxqt-wayland-session': 1,
+ 'lxqt-panel': 1,   # POST below: melon's menu button and, on Wayfire, no workspace switcher
+}
+
+# extra package() steps, run after the install
+POST = {
+ # the panel's default layout is /etc/xdg/lxqt/panel.conf, which this package owns: a small melon as the menu button (the
+ # one piece of branding on the desktop), and on x86_64 (Wayfire, whose workspaces are Ctrl+Super+arrows and Super+W)
+ # no workspace switcher
+ 'lxqt-panel': r" sed -i 's|^\[fancymenu\]$|[fancymenu]\nownIcon=true\nicon=/usr/share/icons/hicolor/scalable/apps/melon.svg|'"
+               r" $pkgdir/etc/xdg/lxqt/panel.conf; grep -q '^ownIcon=true' $pkgdir/etc/xdg/lxqt/panel.conf;"
+               r""" [ "$APK_ARCH" = x86 ] || sed -i 's/^plugins=fancymenu,desktopswitch,/plugins=fancymenu,/' $pkgdir/etc/xdg/lxqt/panel.conf;""",
+}
+
 def write(name, ver, extra, dev, desc):
-    lines = [f'pkgname={name}', f'pkgver={ver}', 'pkgrel=0', f'pkgdesc="{desc}"',
+    lines = [f'pkgname={name}', f'pkgver={ver}', f'pkgrel={PKGREL.get(name, 0)}', f'pkgdesc="{desc}"',
              'license="LGPL-2.1-or-later (see sources)"', 'url=https://lxqt-project.org',
              f'source=({name}-{ver}.tar.xz)']
     if dev: lines.append(f'subpackages=({name}-dev)')
     lines.append(f'build(){{ cmake_setup -B build {QT}{extra}; ninja -C build -j$JOBS; }}')
-    lines.append('package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; }')
+    lines.append('package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man;' + POST.get(name, '') + ' }')
     d = f'{M}/recipes/{name}'; os.makedirs(d, exist_ok=True)
     open(f'{d}/MELONBUILD', 'w').write('\n'.join(lines) + '\n')
 

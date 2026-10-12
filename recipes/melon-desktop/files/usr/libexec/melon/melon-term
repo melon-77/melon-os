@@ -1,0 +1,13 @@
+#!/bin/sh
+# melon-term COMMAND [ARG...]: run a command-line program in the desktop's terminal, for melon's first-login
+# questions: Konsole in Plasma, QTerminal in melon's default desktop (LXQt on Wayfire, or on labwc).
+case ":${XDG_CURRENT_DESKTOP:-}:" in
+  *:KDE:*) command -v konsole >/dev/null && exec konsole --hide-menubar -e "$@" ;;
+esac
+if command -v qterminal >/dev/null; then
+  # QTerminal takes the command as one string
+  cmd=; for a in "$@"; do cmd="$cmd '$(printf %s "$a" | sed "s/'/'\\\\''/g")'"; done
+  exec qterminal -e "sh -c 'exec \"\$@\"' sh$cmd"
+fi
+command -v konsole >/dev/null && exec konsole --hide-menubar -e "$@"
+echo "melon-term: no terminal found (qterminal or konsole)" >&2; exit 1

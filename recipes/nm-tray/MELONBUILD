@@ -1,0 +1,12 @@
+pkgname=nm-tray
+pkgver=0.5.1
+pkgrel=0
+pkgdesc="NetworkManager in the panel's tray (Qt): Wi-Fi and wired connections"
+license=GPL-2.0-or-later
+url=https://github.com/palinek/nm-tray
+source=(nm-tray-0.5.1.tar.gz)
+makedepends=(qt6-qtbase-dev kf6-networkmanager-qt-dev)
+depends=(networkmanager)
+build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake \
+  -DQt6LinguistTools_DIR=$M/hosttools/qt6/lib/cmake/Qt6LinguistTools -DWITH_MODEMMANAGER_SUPPORT=OFF; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

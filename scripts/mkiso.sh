@@ -18,13 +18,13 @@ PKGS=${PKGS:-"melon-base linux-melon linux-firmware-pc wpa_supplicant xfsprogs g
 _p=; for x in $PKGS; do
   if ls $M/repo/$APK_ARCH/$x-[0-9]*.apk >/dev/null 2>&1; then _p="$_p $x"; else echo "warning: $x is not built for $APK_ARCH, left out"; fi
 done; PKGS=${_p# }
-# MELON_EDITION=desktop: the Plasma live ISO. Its system image already contains the desktop (the installers
+# MELON_EDITION=desktop: the desktop live ISO (LXQt on Wayfire; on labwc for 32-bit). Its system image already contains the desktop (the installers
 # copy it as is) plus the live-only installer packages, which both installers remove from the new system.
 EDITION=${MELON_EDITION:-console}
 DESKTOP_PKGS=${DESKTOP_PKGS:-}
 LIVE_ONLY=
 if [ "$EDITION" = desktop ]; then
-  # the 32-bit edition has its own list (LXQt instead of Plasma): desktop-packages-x86.txt
+  # the 32-bit edition has its own list (LXQt on labwc instead of Wayfire): desktop-packages-x86.txt
   _list=$M/scripts/desktop-packages$ARCH_SUFFIX.txt; [ -f $_list ] || _list=$M/scripts/desktop-packages.txt
   DESKTOP_PKGS=${DESKTOP_PKGS:-$(grep -v '^#' $_list | xargs)}
   LIVE_ONLY=${LIVE_ONLY:-calamares-melon}
@@ -76,7 +76,7 @@ if [ "$EDITION" = desktop ]; then
   for s in getty-tty2 getty-tty3 getty-ttyS0 syslogd klogd udevd dbus elogind polkitd NetworkManager bluetoothd \
            power-profiles-daemon zram sddm avahi-daemon cupsd qemu-ga vmtoolsd hv_kvp_daemon hv_vss_daemon hv_fcopy_uio_daemon; do
     [ ! -d $ROOT/etc/sv/$s ] || ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
-  # the live user: logs in automatically to Plasma (LXQt on the 32-bit edition), may use doas without a password, has the installer on the desktop
+  # the live user: logs in automatically to LXQt (on Wayfire, labwc on the 32-bit edition; Plasma if a custom list has it), may use doas without a password, has the installer on the desktop
   awk -F: '$1!="live"' $ROOT/etc/passwd > $LIVE/etc/passwd; echo 'live:x:1000:1000:melon live:/home/live:/bin/bash' >> $LIVE/etc/passwd
   awk -F: '$1!="live"' $LIVE/etc/shadow > $LIVE/etc/shadow.t; echo 'live::20000:0:99999:7:::' >> $LIVE/etc/shadow.t
   mv $LIVE/etc/shadow.t $LIVE/etc/shadow; chmod 640 $LIVE/etc/shadow
@@ -142,6 +142,7 @@ set timeout=5
 set default=0
 # serial console only where there is a serial port (most VMs and PCs have none)
 if serial --unit=0 --speed=115200; then
+  set melon_serial=serial
   terminal_input console serial
   terminal_output console serial
 fi
@@ -164,33 +165,39 @@ fi
 insmod all_video
 # the kernel starts in the firmware's own mode (VGA text on BIOS, so its first messages and errors
 # stay visible; the GOP framebuffer on UEFI)
+# without the theme (no graphics mode): white on black, the selected entry in melon green
 set menu_color_normal=light-gray/black
 set menu_color_highlight=black/light-green
+#THEME#
 menuentry 'melon live' {
   linux /melon/vmlinuz quiet
   initrd /boot/initramfs.img
 }
-menuentry 'melon live (copy to RAM)' {
+menuentry 'melon live, run from RAM' {
   linux /melon/vmlinuz quiet toram
   initrd /boot/initramfs.img
 }
-menuentry 'melon live (safe graphics)' {
+menuentry 'melon live, safe graphics' {
   linux /melon/vmlinuz nomodeset
   initrd /boot/initramfs.img
 }
-menuentry 'melon live (serial console)' {
+menuentry 'melon live, serial console' {
   linux /melon/vmlinuz console=tty0 console=ttyS0,115200
   initrd /boot/initramfs.img
 }
 CFG
 # the 32-bit edition runs on any x86 CPU: no 64-bit check
 [ $MELON_ARCH != x86 ] || sed -i '/^# melon is 64-bit/,/^fi$/d' $ISO/boot/grub/grub.cfg
-# desktop edition: the melon boot menu theme (from melon-desktop)
-if [ -f $ROOT/usr/share/melon/grub/themes/melon/theme.txt ]; then
-  mkdir -p $ISO/boot/grub/themes && cp -r $ROOT/usr/share/melon/grub/themes/melon $ISO/boot/grub/themes/
-  fonts=$(cd $ISO/boot/grub/themes/melon && for f in *.pf2; do printf 'loadfont /boot/grub/themes/melon/%s; ' $f; done)
-  sed -i "s|^insmod all_video\$|insmod all_video\nif loadfont unicode; then set gfxmode=auto; insmod gfxterm; insmod png; terminal_output gfxterm serial; ${fonts}set theme=/boot/grub/themes/melon/theme.txt; fi|" $ISO/boot/grub/grub.cfg
+# melon's boot menu theme (from melon-base, so on both ISOs, BIOS and UEFI): graphics mode where the firmware has one, the
+# serial port next to it when there is one (the tests' console), and the plain text menu above when there's no graphics
+if [ -f $ROOT/usr/share/grub/themes/melon/theme.txt ]; then
+  mkdir -p $ISO/boot/grub/themes && cp -r $ROOT/usr/share/grub/themes/melon $ISO/boot/grub/themes/
+  fonts=$(cd $ISO/boot/grub/themes/melon && for f in *.pf2; do printf '  loadfont /boot/grub/themes/melon/%s\n' $f; done)
+  theme=$(printf 'if loadfont unicode; then\n  set gfxmode=auto\n  insmod gfxterm\n  insmod png\n  terminal_output gfxterm $melon_serial\n%s\n  set theme=/boot/grub/themes/melon/theme.txt\nfi' "$fonts")
+  awk -v t="$theme" '$0 == "#THEME#" { print t; next } { print }' $ISO/boot/grub/grub.cfg > $ISO/boot/grub/grub.cfg.t
+  mv $ISO/boot/grub/grub.cfg.t $ISO/boot/grub/grub.cfg
 fi
+sed -i '/^#THEME#$/d' $ISO/boot/grub/grub.cfg
 mkdir -p $M/out
 if [ "$EDITION" = desktop ]; then rm -f $M/out/melon-desktop-*-$ISOARCH.iso; else rm -f $M/out/melon-2*-$ISOARCH.iso; fi
 $M/hosttools/grub$ARCH_SUFFIX/bin/grub-mkrescue -o $OUTISO $ISO -- -volid MELON 2>&1 | grep -v -E '^xorriso|^Drive|^Media|^libisofs|^Added|^ISO image|^Writing|^Written|^$' || true

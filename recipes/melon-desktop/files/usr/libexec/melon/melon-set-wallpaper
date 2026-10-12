@@ -1,0 +1,16 @@
+#!/bin/sh
+# melon-set-wallpaper DIR: make a wallpaper package (DIR/contents/images/<w>x<h>.jpg, as in /usr/share/wallpapers) the
+# current user's wallpaper, in Plasma or in melon's default desktop (pcmanfm-qt draws the desktop in LXQt on Wayfire
+# and on labwc). Fails while the desktop isn't up yet (Plasma), so autostart entries that call it can try again.
+d=${1%/}
+case ":${XDG_CURRENT_DESKTOP:-}:" in *:KDE:*) exec plasma-apply-wallpaperimage "$d/" ;; esac
+img=$d/contents/images/1920x1080.jpg; [ -f "$img" ] || img=$d
+[ -f "$img" ] || { echo "melon-set-wallpaper: no image in $d" >&2; exit 1; }
+cfg=${XDG_CONFIG_HOME:-$HOME/.config}/pcmanfm-qt/lxqt/settings.conf
+mkdir -p "${cfg%/*}"
+[ -f "$cfg" ] || cp /etc/xdg/pcmanfm-qt/lxqt/settings.conf "$cfg" 2>/dev/null || printf '[Desktop]\n' > "$cfg"
+if grep -q '^Wallpaper=' "$cfg"; then sed -i "s|^Wallpaper=.*|Wallpaper=$img|" "$cfg"
+else sed -i "s|^\[Desktop\]\$|[Desktop]\nWallpaper=$img|" "$cfg"; fi
+# the running desktop takes it at once
+if pgrep -x pcmanfm-qt >/dev/null 2>&1; then pcmanfm-qt --set-wallpaper="$img" --wallpaper-mode=zoom >/dev/null 2>&1 || true; fi
+exit 0

@@ -1,7 +1,7 @@
 #!/bin/sh
 # melon-rewards ROOT [USER]: a gauntlet survivor's rewards: the survivor wallpapers, the badge melonfetch shows (and
 # melon-update-grub reads, for the gold boot menu), the gold login screen, the gold colours, Plasma style and Konsole
-# scheme, and, for USER, the certificate in ~/Pictures and the gold look on the next Plasma login
+# scheme (for Plasma, an optional install), and, for USER, the certificate in ~/Pictures and the gold look on the next login
 # (melon-survivor-look). Used by the installer and to unlock them for testing.
 set -eu
 ROOT=${1:-/} U=${2:-}

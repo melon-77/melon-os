@@ -499,13 +499,13 @@ var questions = [
  {
   "q": "Which desktop does melon ship?",
   "o": [
-   "KDE Plasma",
+   "LXQt on Wayfire",
    "GNOME",
    "Xfce",
-   "Cinnamon"
+   "KDE Plasma"
   ],
   "s": "801ebe3c92c1",
-  "h": "2264a4bb5b99f5a7d9da4bb42b9f23fa"
+  "h": "61986851283391de49f5db8f565ef9cc"
  },
  {
   "q": "How does melon run Steam?",

@@ -22,7 +22,7 @@ source by our own scripts and shipped as a signed apk v3 package.
 | boot | GRUB 2.14, both `i386-pc` and `x86_64-efi` | ISO and installs boot on BIOS **and** UEFI; the installed system's boot menu is hidden (skipped after 1 s, Shift or Esc opens it) unless another system is found, then it shows for 5 s |
 | disks | GPT: 1 MiB BIOS boot, 1 GiB FAT32 `/boot` (also the ESP), XFS `/` | kernel boots with `root=PARTUUID=...`; only encrypted (LUKS) installs have an initramfs (rule 28); dual boot next to Windows on UEFI (see Installers) |
 | filesystem | merged `/usr`: `/bin`, `/sbin`, `/usr/sbin` -> `usr/bin`, `/lib` -> `usr/lib` | packages must only ship files under `/usr`, `/etc`, `/var`, `/boot` |
-| desktop | KDE Plasma 6.6 on Wayland (KWin, Xwayland), Qt 6.10, SDDM | desktop ISO and desktop profile; list in `scripts/desktop-packages.txt` |
+| desktop | Wayfire 0.11 (wlroots 0.20, Xwayland) with LXQt 2.4's panel, launcher, notifications and PCManFM-Qt on top (LXQt's own Wayfire session), Qt 6.10, SDDM (its greeter on labwc), swaylock + swayidle, nm-tray | the owner's decision (12 October 2026): Wayfire replaced KDE Plasma as the default, for a faster start and a smaller ISO; desktop ISO and desktop profile; list in `scripts/desktop-packages.txt`; Plasma 6.6 stays in the package repository as one online install, `melon-plasma` (README, "Plasma") |
 | 32-bit edition | i686 (`MELON_ARCH=x86`, `-march=pentium-m -mfpmath=sse`: SSE2, as Qt 6 needs), LXQt 2.4 on Wayland with labwc 0.20 (wlroots), SDDM, Mesa with LLVM built for the X86 backend only (i915, crocus, r300, r600, nouveau, llvmpipe, softpipe) | the owner's decision (7 October 2026): LXQt is the 32-bit desktop, for netbooks such as the MSI Wind U100 (Atom N270, 1–2 GB); drivers for every netbook-era Wi-Fi, Ethernet, graphics and laptop chip in `recipes/linux-melon/config-melon-x86` (the owner: "it should just work"; Broadcom b43 cards still need firmware nobody may redistribute); package list `scripts/desktop-packages-x86.txt`, recipes from `scripts/gen-lxqt-recipes.py` plus `recipes/melon-lxqt` (melon's LXQt defaults); no Plasma, Flatpak, NVIDIA or QEMU guest agent there (QEMU 11 doesn't build for 32-bit hosts) |
 | desktop plumbing | D-Bus, elogind, polkit, PipeWire + WirePlumber, NetworkManager, BlueZ, CUPS, UDisks2 | console profile keeps `dhcp` + wpa_supplicant |
 | graphics | Mesa 26.0 with LLVM: radeonsi/RADV, iris/ANV, nouveau, llvmpipe; zink (OpenGL on Vulkan) | |
@@ -394,6 +394,15 @@ Rebuilding the kernel takes about an hour on 2 cores.
     the profile doesn't include. Translations are never split off or dropped to save space (the owner, 12 October 2026: the size work
     removes only what nothing uses).
 
+62. **The default desktop is LXQt's own Wayfire session, configured from `/etc/xdg`.** `startlxqtwayland` (lxqt-wayland-session)
+    starts the compositor named in `/etc/xdg/lxqt/session.conf` (melon-lxqt: `wayfire` on x86_64, `labwc` on x86) and, on a
+    user's first login, copies `lxqt-wayfire.ini` to `~/.config/lxqt/wayland/`; `wayfire-defaults-from-xdg.patch` makes it take
+    melon's copy from `/etc/xdg/lxqt/wayland/` (melon-wayfire) before LXQt's. Wayfire's autostart there starts `lxqt-session`
+    (panel, runner, notifications, PCManFM-Qt's desktop, polkit agent) and `swayidle`; change Wayfire's defaults in that file,
+    knowing existing users keep their copy. The `wayfire` package drops its own `wayfire.desktop` session, so SDDM offers one
+    desktop. `melon-wayfire` must be built before `melon-lxqt` (a runtime dependency: the builder installs each package into
+    the sysroot), which `build-everything.sh` does. Tests look for `wayfire` and `lxqt-panel`, not KWin and plasmashell.
+
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but
 only while the recipe and its patches are the ones the tree was unpacked with (`work/pkg/<name>/.prepared` holds their
@@ -423,15 +432,15 @@ scripts/qemu-test.py disk /tmp/disk.img --uefi                            # UEFI
 scripts/qemu-test.py live out/melon-*-x86_64.iso /tmp/disk.img --luks     # install with an encrypted root
 scripts/qemu-test.py disk /tmp/disk.img --luks                            # boot it, typing the passphrase
 scripts/qemu-test.py dualboot out/melon-*-x86_64.iso /tmp/dual.img        # install next to a fake Windows (UEFI), Windows untouched
-MELON_EDITION=desktop scripts/mkiso.sh                                    # the Plasma live ISO (desktop edition)
-scripts/qemu-test.py desktop out/melon-desktop-*-x86_64.iso              # services ready, Plasma running, a USB stick mounts through
+MELON_EDITION=desktop scripts/mkiso.sh                                    # the desktop live ISO (LXQt on Wayfire)
+scripts/qemu-test.py desktop out/melon-desktop-*-x86_64.iso              # services ready, Wayfire and the LXQt panel running, a USB stick mounts through
                                                                           # UDisks2, screen-recording encoders work, a text file prints
                                                                           # to a virtual IPP Everywhere printer, nmcli online, and
                                                                           # NetworkManager joins WPA2 Wi-Fi on mac80211_hwsim radios;
                                                                           # LOOK at logs/qemu-desktop.ppm
 qemu-img create -f raw /tmp/desk.img 16G
 scripts/qemu-test.py desktop-install out/melon-desktop-*-x86_64.iso /tmp/desk.img   # install, SDDM greeter stays up,
-                                                                          # log in through it, Plasma runs; LOOK at both screenshots
+                                                                          # log in through it, LXQt on Wayfire runs; LOOK at both screenshots
 # --offline (any mode): the VM keeps its network card but reaches nothing outside; the installers must still work
 ```
 
@@ -492,17 +501,28 @@ the serial port, so tests don't need a screen. The test also records the sound c
      sends you back 10; in the last 20 any mistake restarts the finale. Walking away still installs melon.
   It's deliberately slow, to put off people who are only there for status. Keep it that way. Only passing the trial
   (the page writes `/run/melon/.trial-passed`) earns the rewards: melon in gold (the `melon-gold` login screen via
-  `/etc/sddm.conf.d/20-survivor.conf`, the MelonGold colours, the `melon-gold` Plasma style, the MelonGold Konsole
-  profile and the golden melon on the lock screen, applied on first login by `melon-survivor-look`, and the gold
+  `/etc/sddm.conf.d/20-survivor.conf`, gold as the accent colour in LXQt and on swaylock's ring (with `melon-plasma`: the
+  MelonGold colours, the `melon-gold` Plasma style, the MelonGold Konsole profile and the golden melon on the lock screen),
+  applied on first login by `melon-survivor-look`, and the gold
   boot menu, which melon-update-grub picks by the badge), three wallpapers ("the other side" portal, golden rain and
   the golden melon), an SVG certificate in `~/Pictures` and a melonfetch badge (`/etc/melon/gauntlet-survivor`). The
   rewards live hidden in melon-desktop (`/usr/share/melon/.rewards`) and `melon-rewards ROOT USER` hands them out
   (`cal-finish`, and the unlock command below).
-- **melon's look (melon-desktop):** Plasma style `melon`, colours MelonDark, Konsole profile Melon, SDDM theme `melon`
-  (its own QML, `usr/share/sddm/themes/melon`; the gold edition reuses the same `Main.qml` with another
-  `theme.conf`), GRUB theme `usr/share/melon/grub/themes/melon` (the desktop ISO uses it too). The art generators are
-  in `art/` (run from a checkout of the melon-art working directory with its fonts); `art/grubtheme.py` needs
-  `grub-mkfont` (from Ubuntu's grub-common: `apt-get download grub-common` and `dpkg -x` it, no install needed).
+- **melon's look: calm, the palette as accents (the owner, 12 October 2026).** Dark grey-green surfaces (`#121714`,
+  `#1b221d`), light text, and melon green (`#6fbf4a`) only where it means something: the selection, focus, links, the
+  lock screen's ring. Branding stays small: the melon on the panel's menu button, in the boot menu and in the installer,
+  nothing else. Don't bring back big melon pictures, patterned wallpapers or green-filled surfaces.
+  Where it lives: LXQt's palette, theme and wallpaper in `melon-lxqt` (`/etc/xdg/lxqt/lxqt.conf`,
+  `/etc/xdg/pcmanfm-qt`), the panel's menu button in `gen-lxqt-recipes.py` (lxqt-panel owns `panel.conf`), Wayfire's
+  settings, swaylock's colours and the portals in `melon-wayfire`, the wallpaper (`usr/share/wallpapers/melon`, drawn by
+  `art/wallpaper.py`) and SDDM theme `melon` (its own QML, `usr/share/sddm/themes/melon`; the gold edition reuses the same
+  `Main.qml` with another `theme.conf`) in `melon-desktop`, which also keeps the Plasma style `melon`, colours MelonDark and
+  Konsole profile Melon for `melon-plasma`. The GRUB theme is in **melon-base** (`usr/share/grub/themes/melon`, so the
+  console ISO, the desktop ISO and every install have it, BIOS and UEFI): one dark colour, no picture, a small melon,
+  a centred menu with the selected entry in a thin green outline, a countdown and one help line. `art/grubtheme.py` draws
+  it and the gold edition; it needs `grub-mkfont` (from Ubuntu's grub-common: `apt-get download grub-common` and
+  `dpkg -x` it, no install needed) and the Noto fonts (`fonts-noto-core`). Upgraded systems that still show the old
+  picture menu get the new one from melon-base's post-upgrade.
 - **Hidden owner commands** work like the console installer: `/etc/profile.d/zz-melon.sh` recognises them by the
   first 16 hex digits of their name's sha256 and nothing else. The same rules apply: never write their names in any
   file, comment, commit or test. `59c1a50f2e93bdc1` unlocks every gauntlet reward (`/usr/libexec/melon/.gold`,
@@ -553,7 +573,7 @@ the serial port, so tests don't need a screen. The test also records the sound c
   needs a Rust package, the desktop goes too. The reward comes first, so it stays whatever the removal takes:
   `melon-rust-free ROOT USER` (melon-desktop, from `/usr/share/melon/.rewards/rust-free`) installs the
   "farewell, Ferris" wallpaper (drawn by `art/ferris.py`, which also writes the lossless master `art/ferris.png`), sets
-  it on the user's first Plasma login and leaves the badge `/etc/melon/rust-free`.
+  it on the user's first desktop login (LXQt or Plasma) and leaves the badge `/etc/melon/rust-free`.
 - **Profiles** live in `/usr/share/melon/profiles/` on the live system: `<name>` is the package list,
   `<name>.services` the runit services (`name` enables one, `-name` drops a base service). `mkiso.sh`
   writes them. The desktop profile swaps `mdevd`/`dhcp` for `udevd` and NetworkManager, and the
@@ -789,7 +809,8 @@ that is the only place Ubuntu is still needed.
 - **Stage 2 (desktop): done.** eudev, D-Bus, elogind, polkit, Mesa with LLVM, Qt 6, KDE Frameworks 6, Plasma and
   KWin on Wayland, SDDM, PipeWire, NetworkManager, Bluetooth, printing, Calamares with the gauntlet, the desktop ISO
   and the desktop profile for both installers (`qemu-test.py desktop` and `desktop-install`). Open hardware work
-  is tracked in GitHub issues: Intel SOF audio, newer linux-firmware, Broadcom Wi-Fi.
+  is tracked in GitHub issues: Intel SOF audio, newer linux-firmware, Broadcom Wi-Fi. On 12 October 2026 the owner made
+  Wayfire with LXQt's shell the default desktop (faster to start, a smaller ISO) and Plasma an online install (`melon-plasma`).
 - **32-bit (i686) edition with LXQt: built, signed and published, waiting for real hardware** (resumed by the owner,
   7 October 2026, for an MSI Wind U100: Atom N270, 2 GB). `MELON_ARCH=x86 scripts/build-everything.sh` builds the
   toolchain, the base system, Qt, LXQt and labwc, then both ISOs (BUILDING.md). Both pass their tests on QEMU's Atom
@@ -862,9 +883,9 @@ that is the only place Ubuntu is still needed.
   to a contributor's branch. The owner answers on PRs or on the pinned issue #17 ("Owner <-> build machine").
 - **What goes on an ISO (the owner's size rule):** small packages, below about 45 MB, may go on the ISOs; anything
   bigger is an online install from the package repository (gcc and friends, Cataclysm: DDA). **Extra desktops are
-  always online installs, whatever their size**: Plasma stays the only desktop on the 64-bit ISO (issue #18, niri +
-  Noctalia). The 32-bit desktop ISO carries LXQt instead of Plasma (the owner's decision); LXQt is in the 64-bit
-  package repository too, as an online install.
+  always online installs, whatever their size**: LXQt on Wayfire is the only desktop on the 64-bit ISO since 12 October
+  2026 (it replaced Plasma, which is now the online install `melon-plasma`; issue #18, niri + Noctalia, is another).
+  The 32-bit desktop ISO carries the same LXQt on labwc (the owner's decision).
 - **Decided, don't re-propose:** Nix is available but off by default (not on the ISOs, no service, only root trusted);
   foreign repos stay opt-in and tagged; the gauntlet's rewards are only for people who pass its final trial; melon's
   own games may live in their own melon-77 repositories as submodules.

@@ -1,0 +1,11 @@
+pkgname=wf-config
+pkgver=0.11.0
+pkgrel=0
+pkgdesc="Wayfire's configuration library"
+license=MIT
+url=https://github.com/WayfireWM/wf-config
+source=(wf-config-0.11.0.tar.xz)
+subpackages=(wf-config-dev)
+makedepends=(glm libevdev-dev libxml2-dev)
+build(){ meson_setup -Dtests=disabled build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

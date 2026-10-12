@@ -53,6 +53,7 @@ scripts/toolchain.sh    cross toolchain, part 1 (binutils, headers, gcc stage 1)
 scripts/toolchain-finish.sh  part 2 (musl, full gcc)
 scripts/melon-build     build ONE recipe -> signed .apk(s) in repo/x86_64, reindex, install into sysroot
 scripts/build-all.sh    build a list of recipes in order, logs to logs/pkg-<name>.log
+scripts/size-round.sh   one command for the desktop ISO size round: changed packages, both ISOs, QEMU tests
 scripts/check-order.sh  every makedepends is built before the recipe that needs it (build-everything.sh runs it first)
 scripts/mkiso.sh        live/installer ISO: rootfs.sqfs (pristine apk-installed system, copied to disk by the
                         installers) + live.sqfs (small live-session layer) + a small repo of extras (VM guest tools,
@@ -388,6 +389,11 @@ Rebuilding the kernel takes about an hour on 2 cores.
     the Linux disk, never from `/mnt/c`; and on Windows 10 there is no KVM, so QEMU tests are slow software emulation. A signing
     key kept on a USB stick is used in place through `MELON_SIGN_KEY` (`melon-build` and `mkiso.sh` read it), never copied.
 
+61. **The desktop ISO's extras repo holds `melon-vm-guest` alone, not the libraries it needs** (they are in its system image). So the
+    base-profile install from the desktop ISO keeps `melon-vm-guest` in a VM: `.cold` adds it to the wanted list before it removes what
+    the profile doesn't include. Translations are never split off or dropped to save space (the owner, 12 October 2026: the size work
+    removes only what nothing uses).
+
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but
 only while the recipe and its patches are the ones the tree was unpacked with (`work/pkg/<name>/.prepared` holds their
@@ -642,6 +648,50 @@ Measured on the 29 September desktop image with `mksquashfs` (zstd, 512 KiB bloc
 
 Not rebuilt in a container: both recipes only `rm` files in `package()`, so the check was on the extracted image. A new ISO
 shows the real sizes.
+
+## Desktop ISO size (the owner, 9 and 12 October 2026)
+
+The 0.4 desktop ISO is 793.6 MB (rootfs.sqfs 749 MB of it). The first goal was 500 MB; the owner then made the rule: **it doesn't have to be
+exactly 500, make the ISO smaller without removing anything a general computer needs to run melon, i.e. only garbage that nothing uses.**
+Where the bytes were, measured on the published 0.4
+image (zstd as squashfs does it, MiB): firmware 259, shared libraries 258 (libLLVM 35, Mesa's Gallium and Vulkan 23), translations
+(145 languages) 54, binaries 40, kernel modules 24 plus the kernel 12 (and a second copy of the kernel in `/boot` of the ISO), wallpapers
+16 (Breeze 8.9 and the rewards), icons 13, fonts 12 (the colour emoji font is 9), `usr/share/melon` 12, the extras repository 11.6.
+
+Steps, in the order they ship. Each step is measured before it is called done, and the console ISO gains from the first two as well.
+
+1. **Done (pkgrel bumps in this PR, ISOs not rebuilt yet):** `linux-firmware` pkgrel 2 keeps one version of each Intel Wi-Fi firmware
+   (about 62 MB: for every device the kernel loads the highest API version it finds, and kernel 7.0's `cfg/*.c` accepts exactly the
+   one that stays: `MIN` = `MAX` 77 for the 22000 family, 89 for AX210, `-c101` core releases for BE200/Bz and Sc; the `-c` files stay
+   whole), and moves firmware for hardware that is not in PCs and laptops (SoCs, phone and router Wi-Fi, server network cards, ADSL
+   modems: about 56 MB) to `linux-firmware-extra`, which the ISOs leave out and `apk add linux-firmware-extra` brings back (the PC session's review, 12 October 2026,
+   changed two things: wired network cards people put in desktops (tigon, bnx2x, cxgb3/4, myri10ge, 3com), USB ADSL modems and pro-audio
+   cards stay in `other`, about 8 MiB; and `linux-firmware` still depends on everything including `-extra`, so `apk upgrade` never takes
+   firmware from an installed system, while the ISOs install the new meta package `linux-firmware-pc`, all but `-extra`). TI's
+   `tas2781` laptop amplifier firmware stays. `mkiso.sh` squashes with zstd 19 and 512 KiB blocks (about 20 MB less than level 15 with
+   128 KiB blocks; 1 MiB blocks would save 5 MB more) and, on the desktop ISO, carries only the `melon-vm-guest` package in the extras
+   repo, not a second copy of its dependencies (11 MB).
+2. **Done in the repository (ISOs not rebuilt yet; the owner: "All of them", then "just make sure we aren't losing os functionality as a
+   consequence of this", 12 October 2026): the cuts that lose nothing.**
+   - *The kernel is stored once on the ISO* (`melon/vmlinuz` next to the system image; `rootfs.sqfs` is built without `boot/vmlinuz-melon`).
+     GRUB's four menu entries load it from there, `toram` already copies the whole `melon/` directory, and the installers copy it into the
+     new system's `/boot` (`.cold` and `cal-finish`: `melon-base` pkgrel 37, `calamares-melon` pkgrel 9). About 12 MiB.
+   - *Breeze's default wallpaper as JPEG* (`scripts/png2jpg.py`, quality 95, no chroma subsampling; `breeze` pkgrel 2): Plasma reads
+     `5120x2880.jpg` as it read the PNG. About 14 MiB. Lossless codecs don't help these photos; the reward wallpapers are left alone.
+3. **Left alone because they are used** (the owner's rule): translations (every language: a computer set to that language uses them;
+   a split into `-lang-more` packages was tried in this PR and taken out again), text-to-speech (Plasma's "Speak Text"), ICU data, the
+   kernel's driver set, the emoji font, OpenCV in Spectacle, Mesa's `hasvk` (Haswell/Broadwell Vulkan), and `libKF6BreezeIcons` (KIconThemes
+   links it as the icon fallback, so it isn't a removable duplicate of the icon files). Checked and found nearly empty, so nothing to gain:
+   headers, pkg-config and CMake files, man pages, Python caches (static `.a` libraries are 4.4 MiB uncompressed). `boot/System.map-melon`
+   (8.6 MiB uncompressed, about 3 MB on the ISO) is unused at runtime, but dropping it means a kernel rebuild and a `linux-melon` pkgrel
+   bump (which `nvidia-open` pins): do it with the next kernel change. mksquashfs already stores identical files once.
+
+**To build and test all of this in one go:** `scripts/size-round.sh` (WSL, by absolute path, key plugged in; `packages`, `isos` and
+`tests` run one part; log `logs/size-round.log`). It builds the changed recipes, both ISOs and runs the QEMU tests.
+
+Measured on 12 October 2026 (a build of this PR on the WSL machine, with the translation split, which only breeze had): desktop ISO
+612 MB, console ISO 243 MB. **Never trade away Wi-Fi, graphics, audio or network drivers for a PC to save bytes**; whatever leaves the ISO
+must be hardware a PC doesn't have, and stays one `apk add` away.
 
 ## Package repository (online)
 

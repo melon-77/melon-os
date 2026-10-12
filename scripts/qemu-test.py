@@ -432,7 +432,7 @@ elif mode == 'toram':
     step('waiting for GRUB')
     p.expect('melon live', timeout=300); time.sleep(1)
     p.send('c'); p.expect('grub>', timeout=60)
-    for line in ['linux /boot/vmlinuz toram console=tty0 console=ttyS0,115200', 'initrd /boot/initramfs.img', 'boot']:
+    for line in ['linux /melon/vmlinuz toram console=tty0 console=ttyS0,115200', 'initrd /boot/initramfs.img', 'boot']:
         for ch in line: p.send(ch); time.sleep(0.08)   # GRUB drops keys that arrive too fast
         p.send('\r'); time.sleep(1)
     p.expect('copying .* MiB to RAM', timeout=600); step('copying to RAM')

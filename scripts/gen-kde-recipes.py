@@ -105,7 +105,7 @@ PKGREL['sddm'] = 4   # 1: QML components back from the host Qt's qml dir; 2: PAM
                     # 4: UID_MAX given (it read the build machine's /etc/login.defs, which melon doesn't have; 60000 as Ubuntu's)
 PKGREL['qcoro'] = 1   # shared libraries instead of static ones
 PKGREL['qca'] = 2   # relocatable CMake export (POST below)
-PKGREL['breeze'] = 1   # drops two unused sizes of the default "Next" wallpaper (POST below)
+PKGREL['breeze'] = 2   # 1: drops two unused sizes of the default "Next" wallpaper; 2: the rest as JPEG q95 (POST below)
 PKGREL['qt6-qtbase'] = 3   # 2: CUPS print support (xdg-desktop-portal-kde); 3: Vulkan (kinfocenter; Mesa has RADV/ANV)
 
 # extra build() steps, run before configuring
@@ -137,7 +137,9 @@ POST = {
     # the default "Next" wallpaper ships 7680x2160 (32:9 screens) and 1440x2960 (phones), light and dark: 24 MB of PNG that
     # doesn't compress; 16:9 and 16:10 screens use the 5120x2880 one and Plasma scales it on the others
     'breeze': ' rm -f $pkgdir/usr/share/wallpapers/Next/contents/images*/7680x2160.png'
-              ' $pkgdir/usr/share/wallpapers/Next/contents/images*/1440x2960.png;',
+              ' $pkgdir/usr/share/wallpapers/Next/contents/images*/1440x2960.png;'
+              # the 5120x2880 ones are 8 MB each as PNG and 1.4 MB as JPEG at quality 95 without chroma subsampling
+              ' python3 $M/scripts/png2jpg.py $pkgdir/usr/share/wallpapers/Next/contents/images*/5120x2880.png;',
     # QCA exports absolute /usr paths in its CMake targets; make them relative so they resolve inside the sysroot too
     'qca': " sed -i 's|\"/usr/|\"${_IMPORT_PREFIX}/|g' $pkgdir/usr/lib/cmake/Qca-qt6/Qca-qt6Targets*.cmake;"
            " sed -i 's|^set(_IMPORT_PREFIX \"/usr\")$|get_filename_component(_IMPORT_PREFIX \"${CMAKE_CURRENT_LIST_DIR}/../../..\" ABSOLUTE)|'"

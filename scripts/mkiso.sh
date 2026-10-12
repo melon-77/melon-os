@@ -13,7 +13,7 @@ ROOT=$WORK/liveroot LIVE=$WORK/livelayer ISO=$WORK/iso INITRD=$WORK/initrd
 DATE=$(date -u +%Y%m%d)   # UTC: WSL keeps Windows' time zone, which gave ISOs the day before's date
 ISOARCH=$([ $MELON_ARCH = x86 ] && echo i686 || echo x86_64)
 OUTISO=$M/out/melon-$DATE-$ISOARCH.iso
-PKGS=${PKGS:-"melon-base linux-melon linux-firmware wpa_supplicant xfsprogs grub zstd openssl ca-certificates cryptsetup ncurses-terminfo musl-utils alsa-utils mpg123 kmod efibootmgr nethack"}
+PKGS=${PKGS:-"melon-base linux-melon linux-firmware-pc wpa_supplicant xfsprogs grub zstd openssl ca-certificates cryptsetup ncurses-terminfo musl-utils alsa-utils mpg123 kmod efibootmgr nethack"}
 # leave out optional packages that haven't been built for this architecture yet (with a warning)
 _p=; for x in $PKGS; do
   if ls $M/repo/$APK_ARCH/$x-[0-9]*.apk >/dev/null 2>&1; then _p="$_p $x"; else echo "warning: $x is not built for $APK_ARCH, left out"; fi
@@ -62,7 +62,9 @@ if [ -n "$DESKTOP_PKGS" ]; then
     case $s in -*) echo $s ;; *) [ ! -d $ROOT/etc/sv/$s ] || echo $s ;; esac
   done > $ROOT/usr/share/melon/profiles/desktop.services
 fi
-cp $ROOT/boot/vmlinuz-melon $ISO/boot/vmlinuz
+# the kernel is on the ISO once, in melon/ (so `toram` copies it too): GRUB loads it from there and the installers put it on the new
+# system's /boot, because rootfs.sqfs leaves it out (it would be a second 12 MB copy)
+cp $ROOT/boot/vmlinuz-melon $ISO/melon/vmlinuz
 
 step "live layer"
 mkdir -p $LIVE/etc/sv/getty-tty1 $LIVE/etc/sv/getty-ttyS0 $LIVE/var/service $LIVE/etc/apk $LIVE/usr/share/melon
@@ -105,7 +107,9 @@ cat > $LIVE/etc/motd <<'MOTD'
 MOTD
 
 step "squashfs"
-mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet
+# zstd level 19 with 512 KiB blocks: about 20 MB smaller than level 15 with 128 KiB blocks on the desktop image (measured on
+# the 0.4 contents; 1 MiB blocks save 5 MB more but make every small read decompress more), the same speed to read
+mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 19 -b 512K -noappend -quiet -e boot/vmlinuz-melon
 mksquashfs $LIVE $ISO/melon/live.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet   # built as root; /home/live keeps its owner
 
 step "package repository (extras only; the base system comes from rootfs.sqfs)"
@@ -114,9 +118,15 @@ mkdir -p $ISO/melon/repo/$APK_ARCH
 # a second copy cost about 460 MB on the ISO and on every installed system; anything else comes from the online repo)
 # always carry the small, commonly wanted extras so an offline install can still add them
 extras="melon-base bash busybox musl apk-tools"
-# guest tools, which the installers add when they run inside a VM
-ls $M/repo/$APK_ARCH/melon-vm-guest-[0-9]*.apk >/dev/null 2>&1 && extras="$extras melon-vm-guest"
+# guest tools, which the installers add when they run inside a VM. The desktop image has them in rootfs.sqfs already, so only
+# the package itself goes in the index (the installers still run `apk add melon-vm-guest`); a second copy of its dependencies
+# (glib, OpenSSL, ...) cost 11 MB
+vmg=
+if ls $M/repo/$APK_ARCH/melon-vm-guest-[0-9]*.apk >/dev/null 2>&1; then
+  case " $PKGS $DESKTOP_PKGS " in *" melon-vm-guest "*) vmg=melon-vm-guest ;; *) extras="$extras melon-vm-guest" ;; esac
+fi
 apkx fetch --recursive --output $ISO/melon/repo/$APK_ARCH $extras >/dev/null
+[ -z "$vmg" ] || apkx fetch --output $ISO/melon/repo/$APK_ARCH $vmg >/dev/null
 ( cd $ISO/melon/repo/$APK_ARCH && $APK --keys-dir $M/keys/trusted --sign-key "${MELON_SIGN_KEY:-$M/keys/melon-signing.rsa}" mkndx -d "melon $DATE" -o Packages.adb *.apk )
 
 step "initramfs"
@@ -157,19 +167,19 @@ insmod all_video
 set menu_color_normal=light-gray/black
 set menu_color_highlight=black/light-green
 menuentry 'melon live' {
-  linux /boot/vmlinuz quiet
+  linux /melon/vmlinuz quiet
   initrd /boot/initramfs.img
 }
 menuentry 'melon live (copy to RAM)' {
-  linux /boot/vmlinuz quiet toram
+  linux /melon/vmlinuz quiet toram
   initrd /boot/initramfs.img
 }
 menuentry 'melon live (safe graphics)' {
-  linux /boot/vmlinuz nomodeset
+  linux /melon/vmlinuz nomodeset
   initrd /boot/initramfs.img
 }
 menuentry 'melon live (serial console)' {
-  linux /boot/vmlinuz console=tty0 console=ttyS0,115200
+  linux /melon/vmlinuz console=tty0 console=ttyS0,115200
   initrd /boot/initramfs.img
 }
 CFG

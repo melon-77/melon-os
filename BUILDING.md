@@ -1,7 +1,7 @@
 # Building melon on your own machine
 
 Everything melon ships is built by the scripts in this repo, so any x86_64 machine with Ubuntu 24.04
-can build it. On an 8-core/16-thread CPU a full build (toolchain, base system, Plasma desktop, ISOs)
+can build it. On an 8-core/16-thread CPU a full build (toolchain, base system, the KDE and LXQt desktops, ISOs)
 takes roughly 8–12 hours; on 2 cores it takes days.
 
 ## Windows + WSL2 build machine

@@ -613,6 +613,19 @@ others' reads to decompress. `config-melon` now asks for `SQUASHFS_COMPILE_DECOM
 (one decompressor per CPU, straight into the page cache; `linux-melon` pkgrel 5, and `nvidia-open` pkgrel 1 with it, rule 51).
 Installed systems don't use squashfs, so only the ISO sessions and installs gain.
 
+**The "superkernel" round (the owner asked for a kernel tuned for speed and fast boot, 12 October 2026; `linux-melon` pkgrel 6, `nvidia-open` pkgrel 2
+with it, rule 51).** Found by merging `config-melon` into kernel 7.0's defconfig: eBPF ran in the interpreter (`BPF_JIT` off), there were no
+transparent huge pages, no multi-gen LRU, no autogroup, no BFQ, no PSI, and zswap compressed with lzo. `config-melon` now turns those on
+(THP only on request through `madvise`, so nothing changes for programs that don't ask; each option was checked to survive `olddefconfig`).
+Nothing is taken away: mitigations, debug and tracing facilities, drivers and the boot-critical built-ins (disk controllers, XFS, FAT,
+squashfs, USB storage) stay as they were. The kernel is a small part of boot (kernel to `/init` was 2.4 s under software emulation, most of it
+decompression and driver initcalls), so expect the gain at run time (memory pressure, browsers, games) more than at boot. To go further,
+measure first: boot once with `initcall_debug` on the kernel command line and run `scripts/kernel-boot-profile.sh` for the slowest
+initcalls, then `melon-boottime` before and after. Cmdline ideas not done, to be measured: `rcupdate.rcu_expedited=1` with
+`rcupdate.rcu_normal_after_boot=1`. Drivers that load as modules on purpose (GPU drivers need their firmware, which an installed system
+without an initramfs can't give a built-in driver) stay modules. Not built or booted yet: needs a kernel build (about an hour) after the
+size round, one toolchain build at a time.
+
 Measured on 7 and 8 October 2026 with the 29 September desktop image in QEMU **without KVM** (software emulation on 4 vCPUs, so
 every CPU-bound step is several times slower than on real hardware; read the proportions, not the seconds). Seconds counted
 from the start of stage 1, one boot each except the old order, which ran twice:

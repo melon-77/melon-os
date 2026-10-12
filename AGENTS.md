@@ -392,11 +392,13 @@ Rebuilding the kernel takes about an hour on 2 cores.
 61. **Translations are split off at packaging time** (`split_lang` in `scripts/melon-build`). Every `usr/share/locale/<lang>` of a package or
     subpackage whose language isn't English or in `recipes/melon-base/files/usr/share/melon/lang-keep` moves to `<name>-lang-more`, which
     apk installs next to `<name>` only while the empty package `melon-lang-more` is installed (`install-if`, so `sudo melon-lang all`
-    brings back everything and `melon-lang remove` takes it off again; `melon-lang hint` runs at login and says so when `LANG` or Plasma's
-    language isn't covered). A package that gets a `-lang-more` is built one `pkgrel` higher than its recipe says: its old release had the
+    brings back everything and `melon-lang remove` takes it off again; `melon-lang hint` runs at login and says so when `LANGUAGE`, `LANG` or Plasma's
+    language isn't covered; on Plasma `melon-lang-offer`, a melon-desktop autostart entry, asks once per language and installs them). A package that gets a `-lang-more` is built one `pkgrel` higher than its recipe says: its old release had the
     languages inside, and apk would refuse the split files over them. Release notes tell upgraders to run `sudo melon-lang all` if they use
     another language. The keep list is one file for the builder, `melon-lang` and the hint; `MELON_LANG_KEEP` overrides it for a build
     and `MELON_LANG_SPLIT=0` switches the split off. Qt's own `.qm` translations (`qt6-qttranslations`) are not touched.
+    The base-profile install from the desktop ISO keeps `melon-vm-guest` in a VM (`.cold` adds it to the wanted list before the removal),
+    because the desktop ISO's repo holds only that package, not the libraries it needs.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but
@@ -666,7 +668,10 @@ Steps, in the order they ship. Each step is measured before it is called done, a
    (about 62 MB: for every device the kernel loads the highest API version it finds, and kernel 7.0's `cfg/*.c` accepts exactly the
    one that stays: `MIN` = `MAX` 77 for the 22000 family, 89 for AX210, `-c101` core releases for BE200/Bz and Sc; the `-c` files stay
    whole), and moves firmware for hardware that is not in PCs and laptops (SoCs, phone and router Wi-Fi, server network cards, ADSL
-   modems: about 56 MB) to `linux-firmware-extra`, which the ISOs leave out and `apk add linux-firmware-extra` brings back. TI's
+   modems: about 56 MB) to `linux-firmware-extra`, which the ISOs leave out and `apk add linux-firmware-extra` brings back (the PC session's review, 12 October 2026,
+   changed two things: wired network cards people put in desktops (tigon, bnx2x, cxgb3/4, myri10ge, 3com), USB ADSL modems and pro-audio
+   cards stay in `other`, about 8 MiB; and `linux-firmware` still depends on everything including `-extra`, so `apk upgrade` never takes
+   firmware from an installed system, while the ISOs install the new meta package `linux-firmware-pc`, all but `-extra`). TI's
    `tas2781` laptop amplifier firmware stays. `mkiso.sh` squashes with zstd 19 and 512 KiB blocks (about 20 MB less than level 15 with
    128 KiB blocks; 1 MiB blocks would save 5 MB more) and, on the desktop ISO, carries only the `melon-vm-guest` package in the extras
    repo, not a second copy of its dependencies (11 MB).

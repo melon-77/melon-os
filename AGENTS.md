@@ -500,7 +500,7 @@ the serial port, so tests don't need a screen. The test also records the sound c
   (`cal-finish`, and the unlock command below).
 - **melon's look (melon-desktop):** Plasma style `melon`, colours MelonDark, Konsole profile Melon, SDDM theme `melon`
   (its own QML, `usr/share/sddm/themes/melon`; the gold edition reuses the same `Main.qml` with another
-  `theme.conf`), GRUB theme `usr/share/melon/grub/themes/melon` (the desktop ISO uses it too). The art generators are
+  `theme.conf`), GRUB theme `usr/share/grub/themes/melon` in **melon-base** (every ISO and install has it; the gold edition is in melon-desktop's hidden rewards). The art generators are
   in `art/` (run from a checkout of the melon-art working directory with its fonts); `art/grubtheme.py` needs
   `grub-mkfont` (from Ubuntu's grub-common: `apt-get download grub-common` and `dpkg -x` it, no install needed).
 - **Hidden owner commands** work like the console installer: `/etc/profile.d/zz-melon.sh` recognises them by the

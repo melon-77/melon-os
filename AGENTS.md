@@ -388,6 +388,15 @@ Rebuilding the kernel takes about an hour on 2 cores.
     the Linux disk, never from `/mnt/c`; and on Windows 10 there is no KVM, so QEMU tests are slow software emulation. A signing
     key kept on a USB stick is used in place through `MELON_SIGN_KEY` (`melon-build` and `mkiso.sh` read it), never copied.
 
+61. **Translations are split off at packaging time** (`split_lang` in `scripts/melon-build`). Every `usr/share/locale/<lang>` of a package or
+    subpackage whose language isn't English or in `recipes/melon-base/files/usr/share/melon/lang-keep` moves to `<name>-lang-more`, which
+    apk installs next to `<name>` only while the empty package `melon-lang-more` is installed (`install-if`, so `sudo melon-lang all`
+    brings back everything and `melon-lang remove` takes it off again; `melon-lang hint` runs at login and says so when `LANG` or Plasma's
+    language isn't covered). A package that gets a `-lang-more` is built one `pkgrel` higher than its recipe says: its old release had the
+    languages inside, and apk would refuse the split files over them. Release notes tell upgraders to run `sudo melon-lang all` if they use
+    another language. The keep list is one file for the builder, `melon-lang` and the hint; `MELON_LANG_KEEP` overrides it for a build
+    and `MELON_LANG_SPLIT=0` switches the split off. Qt's own `.qm` translations (`qt6-qttranslations`) are not touched.
+
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but
 only while the recipe and its patches are the ones the tree was unpacked with (`work/pkg/<name>/.prepared` holds their
@@ -660,12 +669,22 @@ Steps, in the order they ship. Each step is measured before it is called done, a
    `tas2781` laptop amplifier firmware stays. `mkiso.sh` squashes with zstd 19 and 512 KiB blocks (about 20 MB less than level 15 with
    128 KiB blocks; 1 MiB blocks would save 5 MB more) and, on the desktop ISO, carries only the `melon-vm-guest` package in the extras
    repo, not a second copy of its dependencies (11 MB).
-2. **Needs the owner's OK (a card is open in the thread):** only English and about twelve big languages on the ISO (the rest
-   installable online: needs a language-package split in `melon-build`), the Breeze and reward wallpapers as high-quality JPEG, no
-   text-to-speech (`qt6-qtspeech` without flite) and no OpenCV in Spectacle's image editor, a trimmed ICU data file and kernel driver
-   set, the kernel stored once on the ISO (installers copy `/boot/vmlinuz` from it), a smaller emoji font.
+2. **Done in the repository (ISOs not rebuilt yet; the owner: "All of them", then "just make sure we aren't losing os functionality as a
+   consequence of this", 12 October 2026): the cuts that lose nothing.**
+   - *The kernel is stored once on the ISO* (`melon/vmlinuz` next to the system image; `rootfs.sqfs` is built without `boot/vmlinuz-melon`).
+     GRUB's four menu entries load it from there, `toram` already copies the whole `melon/` directory, and the installers copy it into the
+     new system's `/boot` (`.cold` and `cal-finish`: `melon-base` pkgrel 37, `calamares-melon` pkgrel 9). About 12 MiB.
+   - *Breeze's default wallpaper as JPEG* (`scripts/png2jpg.py`, quality 95, no chroma subsampling; `breeze` pkgrel 2): Plasma reads
+     `5120x2880.jpg` as it read the PNG. About 14 MiB. Lossless codecs don't help these photos; the reward wallpapers are left alone.
+   - *Translations split* (rule 61): English and the 14 common languages stay, every other language is installed online by one command.
+     About 40 MiB.
+3. **Left alone because they would cost functionality** (the owner's condition): text-to-speech (Plasma's "Speak Text"), a trimmed ICU data
+   file, the kernel's driver set, a smaller emoji font, OpenCV in Spectacle. They are not in this plan unless the owner says otherwise.
 
-Estimates for the whole list reach about 500 MB; `scripts/mkiso.sh` and the measurements above are the place to re-check after every step.
+Honest estimate with only the lossless cuts: about 534 MiB (about 560 MB). The last 60 MiB to reach 500 MB are choices with a price: the
+emoji font (9), ICU data (9), kernel drivers (8), TTS (5), Mesa's `hasvk` (5), or shipping the big firmware families
+(Intel, Atheros, MediaTek: ~160 MiB on the ISO) as install-time downloads for users with network, which would put an offline install on
+such hardware at risk. `scripts/mkiso.sh` and the measurements above are the place to re-check after every step.
 **Never trade away Wi-Fi, graphics or audio drivers for a PC to save bytes**; whatever leaves the ISO must stay one `apk add` away.
 
 ## Package repository (online)

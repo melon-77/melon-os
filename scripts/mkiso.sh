@@ -62,7 +62,9 @@ if [ -n "$DESKTOP_PKGS" ]; then
     case $s in -*) echo $s ;; *) [ ! -d $ROOT/etc/sv/$s ] || echo $s ;; esac
   done > $ROOT/usr/share/melon/profiles/desktop.services
 fi
-cp $ROOT/boot/vmlinuz-melon $ISO/boot/vmlinuz
+# the kernel is on the ISO once, in melon/ (so `toram` copies it too): GRUB loads it from there and the installers put it on the new
+# system's /boot, because rootfs.sqfs leaves it out (it would be a second 12 MB copy)
+cp $ROOT/boot/vmlinuz-melon $ISO/melon/vmlinuz
 
 step "live layer"
 mkdir -p $LIVE/etc/sv/getty-tty1 $LIVE/etc/sv/getty-ttyS0 $LIVE/var/service $LIVE/etc/apk $LIVE/usr/share/melon
@@ -107,7 +109,7 @@ MOTD
 step "squashfs"
 # zstd level 19 with 512 KiB blocks: about 20 MB smaller than level 15 with 128 KiB blocks on the desktop image (measured on
 # the 0.4 contents; 1 MiB blocks save 5 MB more but make every small read decompress more), the same speed to read
-mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 19 -b 512K -noappend -quiet
+mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 19 -b 512K -noappend -quiet -e boot/vmlinuz-melon
 mksquashfs $LIVE $ISO/melon/live.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet   # built as root; /home/live keeps its owner
 
 step "package repository (extras only; the base system comes from rootfs.sqfs)"
@@ -165,19 +167,19 @@ insmod all_video
 set menu_color_normal=light-gray/black
 set menu_color_highlight=black/light-green
 menuentry 'melon live' {
-  linux /boot/vmlinuz quiet
+  linux /melon/vmlinuz quiet
   initrd /boot/initramfs.img
 }
 menuentry 'melon live (copy to RAM)' {
-  linux /boot/vmlinuz quiet toram
+  linux /melon/vmlinuz quiet toram
   initrd /boot/initramfs.img
 }
 menuentry 'melon live (safe graphics)' {
-  linux /boot/vmlinuz nomodeset
+  linux /melon/vmlinuz nomodeset
   initrd /boot/initramfs.img
 }
 menuentry 'melon live (serial console)' {
-  linux /boot/vmlinuz console=tty0 console=ttyS0,115200
+  linux /melon/vmlinuz console=tty0 console=ttyS0,115200
   initrd /boot/initramfs.img
 }
 CFG

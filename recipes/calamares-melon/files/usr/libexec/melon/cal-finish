@@ -14,6 +14,9 @@ rootdev=$(devof "$ROOT"); bootdev=$(devof "$ROOT/boot"); efidev=$(devof "$ROOT/b
 [ -n "$rootdev" ] || { echo "cal-finish: nothing mounted at $ROOT" >&2; exit 1; }
 [ -n "$bootdev" ] || bootdev=$rootdev
 
+# the ISO carries the kernel once (next to the system image), not inside it
+[ -f "$ROOT/boot/vmlinuz-melon" ] || cp /media/melon/melon/vmlinuz "$ROOT/boot/vmlinuz-melon"
+
 # the shims from cal-prepare were only for the users job
 rm -f "$ROOT/usr/local/bin/useradd" "$ROOT/usr/local/bin/usermod" "$ROOT/usr/local/bin/groupadd"
 

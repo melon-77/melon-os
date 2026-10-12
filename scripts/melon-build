@@ -265,6 +265,7 @@ make_apk(){ local sub=$1 dir=$2 desc=$3; shift 3; local deps=("$@")
   [ -n "$url" ] && info+=(-I "url:$url")
   [ ${#deps[@]} -gt 0 ] && info+=(-I "depends:$(printf '%s\n' "${deps[@]}" | sort -u | xargs)")
   [ ${#provides[@]} -gt 0 ] && info+=(-I "provides:${provides[*]}")
+  local iif="install_if_${vp}[@]"; [ -n "${!iif:-}" ] && info+=(-I "install-if:$(printf '%s ' ${!iif} | sed 's/ *$//')")
   local scr=() st
   for st in pre-install post-install pre-upgrade post-upgrade pre-deinstall post-deinstall trigger; do
     [ -f "$startdir/$sub.$st" ] && scr+=(-s "$st:$startdir/$sub.$st"); done
@@ -279,6 +280,33 @@ make_apk(){ local sub=$1 dir=$2 desc=$3; shift 3; local deps=("$@")
   msg "created $sub-$pkgver-r$pkgrel.apk ($(du -h "$OUT/$sub-$pkgver-r$pkgrel.apk" | cut -f1))"
 }
 
+# ---------- translations ----------
+# The ISOs carry the translations of the common languages only (the desktop ISO's 145 languages were 54 MB of its image).
+# Every package's usr/share/locale/<lang> for any other language goes to a subpackage <name>-lang-more, which apk installs
+# next to <name> only while the empty package melon-lang-more is installed (install-if): `apk add melon-lang-more` brings
+# back every language. English and the languages in MELON_LANG_KEEP (region and script variants included: de_AT, zh_TW,
+# sr@latin follows sr) stay in the package. The default list is recipes/melon-base/files/usr/share/melon/lang-keep (the same file melon-lang reads);
+# MELON_LANG_SPLIT=0 switches the split off.
+LANG_KEEP=${MELON_LANG_KEEP-$(grep -v '^#' $M/recipes/melon-base/files/usr/share/melon/lang-keep | tr '\n' ' ')}
+LANG_SPLIT_DONE=
+split_lang(){ local unit=$1 dir=$2 d lang base moved=0 dst=$pkgbase/$1-lang-more/usr/share/locale
+  [ "${MELON_LANG_SPLIT:-1}" = 1 ] || return 0
+  [ -d "$dir/usr/share/locale" ] || return 0
+  for d in "$dir"/usr/share/locale/*; do
+    [ -d "$d" ] || [ -L "$d" ] || continue
+    lang=${d##*/}; base=${lang%%[_@.]*}
+    case " en $LANG_KEEP " in *" $base "*) continue;; esac
+    mkdir -p "$dst"; mv "$d" "$dst/$lang"; moved=1
+  done
+  [ $moved = 1 ] || return 0
+  local v; v=$(varname "$unit-lang-more")
+  subpackages+=("$unit-lang-more")
+  printf -v "pkgdesc_$v" '%s' "Translations of $unit into the other languages (installed with melon-lang-more)"
+  eval "depends_$v=(\"$unit=\$pkgver-r\$((pkgrel + 1))\")"
+  eval "install_if_$v=(\"$unit=\$pkgver-r\$((pkgrel + 1))\" melon-lang-more)"
+  LANG_SPLIT_DONE=1
+}
+
 # subpackages first (they take files out of pkgdir)
 for sp in "${subpackages[@]:-}"; do
   [ -z "$sp" ] && continue
@@ -288,6 +316,13 @@ for sp in "${subpackages[@]:-}"; do
   elif [ "$fn" = dev ]; then default_dev
   elif [ "$fn" = doc ]; then default_doc; fi
 done
+# split the translations out of the main package and of every subpackage that has some; a package that gets
+# a -lang-more is a new version of itself (pkgrel + 1 over the recipe's: the old one had the languages inside, and apk
+# would refuse to install the split files over them), so recipes need no bump for this
+for _u in "$pkgname:$pkgdir" $(for sp in "${subpackages[@]:-}"; do [ -n "$sp" ] && echo "$sp:$pkgbase/$sp"; done); do
+  split_lang "${_u%%:*}" "${_u#*:}"
+done
+if [ -n "$LANG_SPLIT_DONE" ]; then pkgrel=$((pkgrel + 1)); msg "translations split off: $pkgname is now $pkgver-r$pkgrel"; fi
 for sp in "${subpackages[@]:-}"; do
   [ -z "$sp" ] && continue
   v=$(varname "$sp"); d="depends_${v}[@]"; dsc="pkgdesc_${v}"
@@ -302,7 +337,7 @@ msg "reindex"
 
 # ---------- install into sysroot so later builds can use it ----------
 if [ $INSTALL = 1 ]; then
-  all=("$pkgname"); for sp in "${subpackages[@]:-}"; do [ -n "$sp" ] && [[ $sp != *-doc ]] && all+=("$sp"); done
+  all=("$pkgname"); for sp in "${subpackages[@]:-}"; do [ -n "$sp" ] && [[ $sp != *-doc && $sp != *-lang-more ]] && all+=("$sp"); done
   msg "sysroot: ${all[*]}"; sysroot_add "${all[@]}"
 fi
 # free the disk: build trees are large (set MELON_KEEP_WORK=1 to keep them for debugging)

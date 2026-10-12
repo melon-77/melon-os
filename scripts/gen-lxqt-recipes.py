@@ -57,6 +57,14 @@ PKGREL = {
  'lxqt-panel': 1,   # POST below: melon's menu button and, on Wayfire, no workspace switcher
 }
 
+# what a recipe needs in the sysroot beyond the LXQt libraries built before it (a fresh sysroot doesn't have these -dev
+# packages unless a recipe asks for them)
+MAKEDEPS = {
+ 'lxqt-panel': 'lm-sensors-dev',        # the sensors plugin
+ 'lxqt-policykit': 'polkit-dev',        # polkit-agent-1
+ 'pavucontrol-qt': 'pulseaudio-dev',    # libpulse, libpulse-mainloop-glib
+}
+
 # extra package() steps, run after the install
 POST = {
  # the panel's default layout is /etc/xdg/lxqt/panel.conf, which this package owns: a small melon as the menu button (the
@@ -71,6 +79,7 @@ def write(name, ver, extra, dev, desc):
     lines = [f'pkgname={name}', f'pkgver={ver}', f'pkgrel={PKGREL.get(name, 0)}', f'pkgdesc="{desc}"',
              'license="LGPL-2.1-or-later (see sources)"', 'url=https://lxqt-project.org',
              f'source=({name}-{ver}.tar.xz)']
+    if name in MAKEDEPS: lines.append(f'makedepends=({MAKEDEPS[name]})')
     if dev: lines.append(f'subpackages=({name}-dev)')
     lines.append(f'build(){{ cmake_setup -B build {QT}{extra}; ninja -C build -j$JOBS; }}')
     lines.append('package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man;' + POST.get(name, '') + ' }')

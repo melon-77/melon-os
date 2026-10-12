@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Translations
-Comment=Offer to install the translations of the chosen language
-Exec=melon-lang-offer
-Icon=melon
-NoDisplay=true
-X-KDE-autostart-phase=2
-OnlyShowIn=KDE;

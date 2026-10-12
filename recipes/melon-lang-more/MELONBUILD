@@ -1,8 +1,0 @@
-pkgname=melon-lang-more
-pkgver=1
-pkgrel=0
-pkgdesc="Translations for every other language: while this package is installed, each package's -lang-more part comes along (sudo melon-lang all)"
-license=MIT
-# empty on purpose: apk's install-if rule on every <name>-lang-more subpackage does the work
-builddir=$srcdir
-package(){ mkdir -p $pkgdir/usr/share/melon; : > $pkgdir/usr/share/melon/lang-more; }

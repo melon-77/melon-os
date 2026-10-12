@@ -1,0 +1,10 @@
+pkgname=glm
+pkgver=1.0.3
+pkgrel=0
+pkgdesc="OpenGL Mathematics: header-only C++ maths library (Wayfire builds with it)"
+license=MIT
+url=https://github.com/g-truc/glm
+source=(glm-1.0.3.tar.gz)
+# headers only: Wayfire and wf-config look for glm/glm.hpp when there is no glm.pc
+package(){ install -d $pkgdir/usr/include; cp -r glm $pkgdir/usr/include/
+  find $pkgdir/usr/include/glm \( -name '*.cpp' -o -name CMakeLists.txt \) -delete; }

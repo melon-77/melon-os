@@ -1,0 +1,12 @@
+pkgname=xdg-desktop-portal-wlr
+pkgver=0.8.4
+pkgrel=0
+pkgdesc="Screenshot and screen sharing portal for wlroots compositors (Wayfire): browsers, OBS, video calls"
+license=MIT
+url=https://github.com/emersion/xdg-desktop-portal-wlr
+source=(xdg-desktop-portal-wlr-0.8.4.tar.gz)
+makedepends=(wayland-dev wayland-protocols pipewire-dev inih-dev libdrm-dev mesa-dev elogind-dev xdg-desktop-portal-dev)
+depends=(xdg-desktop-portal pipewire)
+# sd-bus from libelogind (melon has no systemd); no systemd user unit
+build(){ meson_setup -Dsd-bus-provider=libelogind -Dsystemd=disabled -Dman-pages=disabled build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

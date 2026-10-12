@@ -1,0 +1,16 @@
+--- a/startlxqtwayland.in	2026-10-12 03:30:49.840831384 +0000
++++ b/startlxqtwayland.in	2026-10-12 03:30:49.856892003 +0000
+@@ -143,7 +143,12 @@
+ 
+ elif [ "$COMPOSITOR" = "wayfire" ]; then
+     if [ ! -f "$XDG_CONFIG_HOME/lxqt/wayland/lxqt-wayfire.ini" ]; then
+-        cp "$share_dir"/lxqt/wayland/lxqt-wayfire.ini "$XDG_CONFIG_HOME"/lxqt/wayland/
++        # a distribution's defaults in an XDG config directory (/etc/xdg/lxqt/wayland) come before LXQt's own
++        wayfire_ini="$share_dir"/lxqt/wayland/lxqt-wayfire.ini
++        for d in $(echo "$XDG_CONFIG_DIRS" | tr : '\n'); do
++            if [ -f "$d/lxqt/wayland/lxqt-wayfire.ini" ]; then wayfire_ini="$d/lxqt/wayland/lxqt-wayfire.ini"; break; fi
++        done
++        cp "$wayfire_ini" "$XDG_CONFIG_HOME"/lxqt/wayland/lxqt-wayfire.ini
+         if echo "$valid_layouts" | grep -q "$trylayout"; then
+         layout="xkb_layout = $trylayout"
+         sed -i '/xkb_layout/d' $XDG_CONFIG_HOME/lxqt/wayland/lxqt-wayfire.ini

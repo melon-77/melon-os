@@ -1,0 +1,13 @@
+pkgname=swaylock
+pkgver=1.8.6
+pkgrel=0
+pkgdesc="Screen locker for Wayland compositors (Wayfire's lock screen in melon's desktop)"
+license=MIT
+url=https://github.com/swaywm/swaylock
+source=(swaylock-1.8.6.tar.gz)
+makedepends=(wayland-dev wayland-protocols libxkbcommon-dev cairo-dev gdk-pixbuf-dev linux-pam-dev)
+# PAM, so it checks passwords like SDDM does (no setuid binary)
+build(){ meson_setup -Dpam=enabled -Dgdk-pixbuf=enabled -Dman-pages=disabled -Dzsh-completions=false \
+  -Dfish-completions=false build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install
+  printf 'auth\tinclude\tbase-auth\n' > $pkgdir/etc/pam.d/swaylock; }

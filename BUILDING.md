@@ -183,7 +183,8 @@ finished 32-bit tree takes about 6 GB (toolchain, sysroot, packages, work), more
 Packages and the repository index are signed with `keys/melon-signing.rsa`. It is deliberately not in
 git. Copy it into `keys/` on the build machine and keep it private: whoever has it can publish packages
 that every melon system trusts. Losing it means installed systems need a new public key before they
-accept new packages.
+accept new packages. A key kept elsewhere (a USB stick) is used in place: `MELON_SIGN_KEY=/path/to/melon-signing.rsa` is
+honoured by `build-everything.sh`, `melon-build` and `mkiso.sh`; no copy or link in `keys/` is needed.
 
 ## Sources
 

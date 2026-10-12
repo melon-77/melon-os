@@ -28,7 +28,7 @@ packages(){
     n=$(basename "$f" | sed 's/-[0-9][^-]*-r[0-9]*\.apk$//')
     case $n in *-lang-more|*-doc) continue ;; esac
     # the languages this package ships: usr/share/locale/<lang>/ in its file list
-    lang=$($APK manifest "$f" 2>/dev/null | sed -n 's|.*usr/share/locale/\([^/]*\)/.*|\1|p' | sort -u) || true
+    lang=$($APK adbdump "$f" 2>/dev/null | sed -n 's|.*usr/share/locale/\([^/ ]*\).*|\1|p' | sort -u) || true
     [ -n "$lang" ] || continue
     local other=
     for l in $lang; do base=${l%%[_@.]*}; case " en $KEEP " in *" $base "*) ;; *) other=1; break ;; esac; done
@@ -40,7 +40,7 @@ packages(){
   list=($(printf '%s\n' "${list[@]}" | sort -u))
   echo "${#list[@]} recipes to rebuild: ${list[*]}"
   [ ${#warn[@]} -eq 0 ] || echo "no recipe found for (build their recipe by hand): ${warn[*]}"
-  [ ${#list[@]} -gt 0 ] || { echo "none found: is '$APK manifest' working on a v3 .apk? Try: $APK manifest <file>.apk"; return 1; }
+  [ ${#list[@]} -gt 0 ] || { echo "none found: is '$APK adbdump' working on a v3 .apk? Try: $APK adbdump <file>.apk | grep locale"; return 1; }
   # packages that were not rebuilt this round yet: their file is older than melon-build's split (newer than this script's marker)
   local mark=$M/work/.size-round-started
   [ -f $mark ] || touch $mark

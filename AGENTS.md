@@ -688,7 +688,7 @@ Steps, in the order they ship. Each step is measured before it is called done, a
    file, the kernel's driver set, a smaller emoji font, OpenCV in Spectacle. They are not in this plan unless the owner says otherwise.
 
 **To build and test all of this in one go:** `scripts/size-round.sh` (WSL, by absolute path, key plugged in; `packages`, `isos` and `tests` run one part; log `logs/size-round.log`).
-It builds the changed recipes, rebuilds every package whose `.apk` carries translations (found with `apk manifest`), builds both ISOs and runs the QEMU tests.
+It builds the changed recipes, rebuilds every package whose `.apk` carries translations (found with `apk adbdump`: `apk manifest` only reads installed packages), builds both ISOs and runs the QEMU tests.
 
 Honest estimate with only the lossless cuts: about 534 MiB (about 560 MB). The last 60 MiB to reach 500 MB are choices with a price: the
 emoji font (9), ICU data (9), kernel drivers (8), TTS (5), Mesa's `hasvk` (5), or shipping the big firmware families

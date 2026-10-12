@@ -2,14 +2,14 @@
 # build-everything.sh: build melon from nothing on a prepared host (scripts/host-setup.sh first).
 #   toolchain -> base system -> plumbing -> libraries and services -> Qt/KDE/Plasma -> installers -> ISOs
 # Resumable: run it again after an interruption; finished packages are skipped and a package that was
-# interrupted mid-build continues where it stopped. Needs keys/melon-signing.rsa (see BUILDING.md).
+# interrupted mid-build continues where it stopped. Needs the signing key: keys/melon-signing.rsa, or the file MELON_SIGN_KEY names (see BUILDING.md).
 #   JOBS=16 scripts/build-everything.sh
 #   MELON_ARCH=x86 scripts/build-everything.sh    the 32-bit edition: LXQt on labwc instead of Plasma (X86 below)
 set -uo pipefail
 . "$(dirname "$(readlink -f "$0")")/env.sh"
 LOG=$M/logs; mkdir -p $LOG $REPO/$APK_ARCH
 step(){ printf '\033[1;35m== %s  %s\033[0m\n' "$(date +%H:%M)" "$*"; }
-[ -f $M/keys/melon-signing.rsa ] || { echo "keys/melon-signing.rsa is missing (see BUILDING.md)" >&2; exit 1; }
+[ -f "${MELON_SIGN_KEY:-$M/keys/melon-signing.rsa}" ] || { echo "the signing key is missing: keys/melon-signing.rsa, or the file MELON_SIGN_KEY names (see BUILDING.md)" >&2; exit 1; }
 
 if [ ! -x $TOOLS/bin/$TARGET-gcc ] || ! grep -q '^EXIT 0' $LOG/toolchain$ARCH_SUFFIX.log 2>/dev/null; then
   step "cross toolchain ($TARGET)"

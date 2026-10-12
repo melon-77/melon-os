@@ -53,6 +53,7 @@ scripts/toolchain.sh    cross toolchain, part 1 (binutils, headers, gcc stage 1)
 scripts/toolchain-finish.sh  part 2 (musl, full gcc)
 scripts/melon-build     build ONE recipe -> signed .apk(s) in repo/x86_64, reindex, install into sysroot
 scripts/build-all.sh    build a list of recipes in order, logs to logs/pkg-<name>.log
+scripts/size-round.sh   one command for the desktop ISO size round: changed + translation packages, both ISOs, QEMU tests
 scripts/check-order.sh  every makedepends is built before the recipe that needs it (build-everything.sh runs it first)
 scripts/mkiso.sh        live/installer ISO: rootfs.sqfs (pristine apk-installed system, copied to disk by the
                         installers) + live.sqfs (small live-session layer) + a small repo of extras (VM guest tools,
@@ -680,6 +681,9 @@ Steps, in the order they ship. Each step is measured before it is called done, a
      About 40 MiB.
 3. **Left alone because they would cost functionality** (the owner's condition): text-to-speech (Plasma's "Speak Text"), a trimmed ICU data
    file, the kernel's driver set, a smaller emoji font, OpenCV in Spectacle. They are not in this plan unless the owner says otherwise.
+
+**To build and test all of this in one go:** `scripts/size-round.sh` (WSL, by absolute path, key plugged in; `packages`, `isos` and `tests` run one part; log `logs/size-round.log`).
+It builds the changed recipes, rebuilds every package whose `.apk` carries translations (found with `apk manifest`), builds both ISOs and runs the QEMU tests.
 
 Honest estimate with only the lossless cuts: about 534 MiB (about 560 MB). The last 60 MiB to reach 500 MB are choices with a price: the
 emoji font (9), ICU data (9), kernel drivers (8), TTS (5), Mesa's `hasvk` (5), or shipping the big firmware families

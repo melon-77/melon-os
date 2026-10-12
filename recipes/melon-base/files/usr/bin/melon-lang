@@ -18,10 +18,13 @@ case "${1:-status}" in
     else echo "Other languages: not installed. Run: sudo melon-lang all (needs the network)."; fi ;;
   all)    need_root "$@"; apk add melon-lang-more ;;
   remove) need_root "$@"; apk del melon-lang-more ;;
-  hint)   # one line at login when the chosen language isn't here; quiet otherwise
+  hint)   # one line when the chosen language isn't here (login hint, and the Plasma offer); nothing otherwise
     installed && exit 0
-    l=${LANG:-}
-    [ -n "$l" ] || l=$(sed -n 's/^LANG=//p' "${XDG_CONFIG_HOME:-$HOME/.config}/plasma-localerc" 2>/dev/null | head -n1)
+    cfg=${XDG_CONFIG_HOME:-$HOME/.config}/plasma-localerc
+    l=${LANGUAGE:-}; l=${l%%:*}
+    [ -n "$l" ] || l=$(sed -n 's/^LANGUAGE=//p' "$cfg" 2>/dev/null | head -n1 | sed 's/:.*//')
+    [ -n "$l" ] || l=${LANG:-}
+    [ -n "$l" ] || l=$(sed -n 's/^LANG=//p' "$cfg" 2>/dev/null | head -n1)
     b=${l%%[_@.]*}; case "$b" in ""|C|POSIX|en) exit 0 ;; esac
     case " $KEEP" in *" $b "*) exit 0 ;; esac
     echo "melon: translations for '$b' are not installed. Run: sudo melon-lang all" ;;

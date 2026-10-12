@@ -26,9 +26,9 @@ rootfs=$(blkid -s TYPE -o value "$rootdev"); [ -n "$rootfs" ] || rootfs=xfs
 cmdline="$rootspec rootfstype=$rootfs rw ${GRUB_CMDLINE_LINUX_DEFAULT:-quiet} ${GRUB_CMDLINE_LINUX}"
 # kernel path relative to the filesystem grub reads it from
 if [ "$bootdev" != "$rootdev" ]; then kpath=""; else kpath="/boot"; fi
-# the melon boot menu theme (from melon-desktop); gauntlet survivors (badge from the graphical installer) get the
+# the melon boot menu theme (melon-base, so every install has it); gauntlet survivors (badge from the graphical installer) get the
 # gold edition. /boot may be its own partition, so the theme is copied next to grub.cfg.
-theme=/usr/share/melon/grub/themes/melon
+theme=/usr/share/grub/themes/melon
 if [ -f /etc/melon/gauntlet-survivor ] && [ -f /usr/share/melon/.rewards/grub/themes/melon-gold/theme.txt ]; then
   theme=/usr/share/melon/.rewards/grub/themes/melon-gold
 fi

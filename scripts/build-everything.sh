@@ -90,6 +90,11 @@ if [ "$APK_ARCH" != x86 ]; then
   ALL="$ALL $EXTRA"
 fi
 
+# sources a new recipe needs (the Wayfire set of 12 October 2026, for one) are fetched and checked against
+# sources/MANIFEST.tsv; files already there are skipped
+step "sources"
+$M/scripts/fetch-sources.sh > $LOG/fetch-sources.log 2>&1 || echo "   some sources failed to download: grep FAIL $LOG/fetch-sources.log"
+
 step "build order"
 $M/scripts/check-order.sh || { echo "   reorder the lists above first"; exit 1; }
 

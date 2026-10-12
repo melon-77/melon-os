@@ -1,4 +1,4 @@
-# Qt and GTK apps should talk Wayland natively in the Plasma session
+# Qt and GTK apps should talk Wayland natively in a Wayland session (Wayfire, labwc, Plasma)
 if [ "$XDG_SESSION_TYPE" = wayland ]; then
   export QT_QPA_PLATFORM="wayland;xcb" MOZ_ENABLE_WAYLAND=1 SDL_VIDEODRIVER="wayland,x11"
 fi

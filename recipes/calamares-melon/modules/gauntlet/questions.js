@@ -972,12 +972,12 @@ var questions = [
  {
   "q": "Which desktop does melon ship?",
   "o": [
-   "KDE Plasma",
+   "LXQt on Wayfire",
    "GNOME",
    "Unity",
    "Windows 95"
   ],
-  "a": "KDE Plasma"
+  "a": "LXQt on Wayfire"
  },
  {
   "q": "What is 8 x 2?",

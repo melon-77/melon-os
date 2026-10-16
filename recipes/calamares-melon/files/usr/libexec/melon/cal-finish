@@ -102,6 +102,9 @@ chroot "$ROOT" grub-install --target=i386-pc --boot-directory=/boot "$disk" 2>&1
 [ -f "$ROOT/boot/grub/grub.cfg" ] || mkdir -p "$ROOT/boot/grub"
 MELON_ROOT_DEV="$rootdev" MELON_BOOT_DEV="$bootdev" chroot "$ROOT" melon-update-grub
 
+# the standard folders (Downloads, Documents, Pictures, ...) in the new home, so the first download has somewhere to go
+[ -z "$NEWUSER" ] || [ ! -x "$ROOT/usr/bin/xdg-user-dirs-update" ] || chroot "$ROOT" su -l -s /bin/sh "$NEWUSER" -c xdg-user-dirs-update || true
+
 # the survivor wallpapers, badge, gold look (login screen, colours, boot menu) and certificate (melon-rewards, from melon-desktop);
 # only for those who went through the final trial (the gauntlet page writes the file), never when it was skipped
 if [ -e /run/melon/.trial-passed ] && [ ! -e /run/melon/.gauntlet-skip ]; then

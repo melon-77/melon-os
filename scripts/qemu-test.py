@@ -326,6 +326,10 @@ if mode == 'desktop-install':
     svcs = count('n=0; for s in avahi-daemon cupsd; do sv check /var/service/$s >/dev/null 2>&1 && n=$((n+1)); done; echo $n')
     lpadm = count('id -Gn jcole | tr " " "\\n" | grep -cx lpadmin')
     ok &= svcs == 2 and lpadm == 1; step(f'printing on the installed system: {svcs}/2 services up, jcole in lpadmin: {lpadm == 1}')
+    # the standard folders exist in the new user's home (a download needs somewhere to go) and apps are told where they are
+    dirs = count('n=0; for d in Desktop Documents Downloads Music Pictures Videos; do [ -d /home/jcole/$d ] && n=$((n+1)); done; echo $n')
+    xdgd = count('grep -c "^XDG_DOWNLOAD_DIR=" /home/jcole/.config/user-dirs.dirs')
+    ok &= dirs == 6 and xdgd == 1; step(f'standard folders in jcole\'s home: {dirs}/6, XDG_DOWNLOAD_DIR set: {xdgd == 1}')
     # the gauntlet rewards through the unlock script (called by path; the command that starts it stays unnamed)
     out = sh('/usr/libexec/melon/.gold jcole; echo REW=$([ -s /etc/melon/gauntlet-survivor ] && echo badge)'
              '$(ls -d /usr/share/wallpapers/melon-survivor-* | wc -l)$([ -s /home/jcole/Pictures/melon-gauntlet-certificate.svg ] && echo cert)'

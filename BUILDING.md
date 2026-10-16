@@ -156,6 +156,13 @@ What's different from an Ubuntu build machine:
   built against Ubuntu's glibc, which melon doesn't have. `host-setup.sh` rebuilds the host tools, and
   `build-everything.sh` rebuilds the cross toolchain (about an hour or two) before carrying on with the packages,
   skipping every package already in `repo/`.
+- `scripts/env.sh` puts `/usr/local/bin` and `/usr/bin` ahead of `/bin` on PATH. Without that, a run under `doas` (whose
+  default PATH starts with `/bin`) let CMake find sysroot packages through `sysroot/lib`, a link to `usr/lib`, and their
+  include path came out as `sysroot/include`, which doesn't exist: glslang failed, and Mesa, Qt and all of Plasma after it.
+- BusyBox's own `dpkg-deb` applet can't read `.zst` data and unpacks nothing without an error, so `host-setup.sh`
+  installs its shim in `/usr/local/bin` even when that applet is there (certificates and fonts came out empty otherwise).
+- `fetch-sources.sh` keeps a git-tag source that is already good, and when the manifest has a checksum it takes GitHub's
+  own tarball first: its top directory (e.g. `SPIRV-LLVM-Translator-21.1.7/`, `cli-2.101.0/`) is what the recipes expect.
 - The loader is melon's own: `/lib/ld-musl-x86_64.so.1` is never pointed at the sysroot (AGENTS.md, rule 18).
   `/etc/ld-musl-x86_64.path` lists the system's library directories first and the sysroot's last.
 - Keep the build machine's own packages up to date from the online repository, and don't upgrade it from packages it

@@ -19,6 +19,11 @@ export SRC=$M/sources
 export WORK=$M/work$ARCH_SUFFIX
 export REPO=$M/repo
 export PATH=$TOOLS/bin:$PATH
+# /usr before / on PATH: doas without keepenv puts /bin:/sbin first, and CMake turns each PATH entry into a search
+# prefix, so a sysroot package config would be found through sysroot/lib (-> usr/lib) and point at sysroot/include,
+# which doesn't exist (glslang, then Mesa and everything above it, on melon's first native build, 16 October 2026).
+# /usr/local/bin first also lets host-setup.sh's dpkg-deb shim win over BusyBox's applet.
+export PATH=$TOOLS/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:$PATH
 # The build machine: Ubuntu (or WSL2 Ubuntu), or melon itself (BUILDING.md, "melon as the build machine").
 # On melon, `gcc -dumpmachine` is melon's own target triple, x86_64-melon-linux-musl; configure scripts would take the
 # cross toolchain for a native one, so the build machine calls itself <arch>-pc-linux-musl (AGENTS.md rule 53).

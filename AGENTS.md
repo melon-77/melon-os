@@ -749,7 +749,8 @@ Releases are named **melon <version> “<melon variety>”**, the varieties in a
 0.2 “Bailan”, then 0.3 “Cantaloupe”, 0.4 “Dudaim”, 0.5 “Esfahan”, 0.6 “Fukui”, 0.7 “Galia”, 0.8 “Honeydew”, … (the
 owner's choice, 29 September 2026). Tags are `v<version>` from 0.3 on (0.1 and 0.2 kept their date tags). A release
 is marked Latest, carries every ISO and `SHA256SUMS`,
-has notes written for users (what's new, which file to download, `doas apk upgrade` for installed systems), and the
+has notes written for users in the format in `docs/release-notes.md` (title, how to get it, what's new and coming next,
+where to report problems; no test or build details), and the
 release it replaces is retitled "(superseded)" with a link to the new one.
 
 The 32-bit edition has its own **pre-release**, not marked Latest, so the website's download button keeps pointing at

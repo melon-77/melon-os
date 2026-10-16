@@ -62,9 +62,8 @@ key is not on any build machine. Never commit `keys/*.rsa`.
 ## Releasing (every meaningful change gets all four, the owner's rule of 7 October)
 
 1. Build and test the ISOs (above). Release only what you tested; say plainly what could not be tested.
-2. **GitHub release** (`gh` is freshly logged in as `xbfj` on the PC): tag `v0.5`, title `melon 0.5 “Esfahan”`, notes written for users (what is new, which file
-   to download, `doas apk upgrade` for installed systems; the draft is `/mnt/project-files/releases/v0.5/NOTES.md` if the project files are reachable, else write
-   them from the PR descriptions), both ISOs plus `SHA256SUMS`, marked Latest. Retitle the 0.4 release "(superseded)" with a link to the new one.
+2. **GitHub release** (`gh` is freshly logged in as `xbfj` on the PC): tag `v0.5`, title `melon 0.5 “Esfahan”`, notes in the owner's short format
+   (`docs/release-notes.md`; the 0.5 text is `releases/v0.5/NOTES.md`: fill in the ISO dates and final sizes), both ISOs plus `SHA256SUMS`, marked Latest. Retitle the 0.4 release "(superseded)" with a link to the new one.
 3. **SourceForge** (owner `melaboton`, project `melonl`): `SF_USER=melaboton SF_PROJECT=melonl scripts/upload-isos.sh sourceforge v0.5 <isos>`.
    The old upload key lived in WSL and is gone: make a new one (`ssh-keygen -t ed25519 -C melon-build-pc`) and ask the owner to add the public half under
    their SourceForge account's SSH keys. `docs/iso-hosting.md` has the details. Downloads on the site use SourceForge first and keep GitHub alongside.

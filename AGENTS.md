@@ -742,6 +742,12 @@ that is the only place Ubuntu is still needed.
 - **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (`melon-flathub`), Steam, Firefox, VLC and
   Prism Launcher offered from Flathub on first login, GameMode. Still to do: gamepad and controller udev rules,
   MangoHud (`docs/stage2-plan.md`).
+- **The everyday desktop works out of the box (the owner's goal, 16 October 2026).** On a fresh install of any melon desktop,
+  USB automount, Wi-Fi, Bluetooth, sound, printing, suspend and lid close, screen lock, brightness and volume keys,
+  privilege prompts and a consistent look work with no setup afterwards. `docs/desktop-goals.md` has the checklist, what
+  `qemu-test.py` covers today (USB stick, Wi-Fi, printing) and what it doesn't (sound, Bluetooth, suspend, keys). A change
+  to the desktop plumbing updates that table in the same pull request; a desktop is not offered as an ISO edition until
+  every row works on it.
 - **Init: runit stays melon's init (the owner's decision).** dinit may one day become an *optional variant* the owner
   builds, never a switch forced on the whole OS. Don't start a dinit port. Improve runit instead:
   readiness through `./check` scripts, and a clear start order in run scripts (a small shared helper is being

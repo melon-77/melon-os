@@ -190,4 +190,7 @@ accept new packages.
 `sources/MANIFEST.tsv` lists every source file with its sha256 and where it comes from: upstream release
 tarballs and git tags, and for older recipes the Ubuntu source archive (being replaced by upstream as recipes are
 updated; new sources never come from Ubuntu, see AGENTS.md "Sources"). `scripts/fetch-sources.sh` downloads them; after
-adding a source, run `scripts/make-manifest.py` and commit the manifest.
+adding a source, run `scripts/make-manifest.py` and commit the manifest. A file that comes out empty counts as `FAIL`
+(git-tag sources have no fixed checksum, so before 16 October 2026 an empty one, from a `git archive` that failed, was
+reported `ok`). Running it with `doas` over a `sources/git/` that a user unpacked from a backup works: it passes git a
+`safe.directory` for each repository.

@@ -37,7 +37,7 @@ The tree has Xwayland and the X client libraries (libx11, libxcb, libxi, ...) bu
    menu, CMake), `mousepad`, `ristretto`, `xfce4-taskmanager`, `thunar-volman`, `gvfs` (trash and removable media in Thunar; UDisks2 exists),
    `xfce-polkit` (or `polkit-gnome`), `network-manager-applet` (+ `libnma`), `blueman` or `xfce4-bluetooth` equivalent (BlueZ exists).
    `xfce4-dev-tools` is only needed if a tarball needs `autoreconf`; release tarballs do not.
-4. **`melon-xfce`** (melon's defaults, like `melon-lxqt` and `melon-wayfire`): the dark grey-green look from AGENTS.md ("calm, the palette as
+4. **`melon-xfce`** (melon's defaults, like `melon-lxqt` and `melon-wayfire`): the look is designed in `docs/xfce-theme.md` (GTK theme, window frames, icons, fonts, panel layouts, one look across Qt, GTK and Flatpak); the dark grey-green look from AGENTS.md ("calm, the palette as
    accents": `#121714`, `#1b221d`, melon green `#6fbf4a` for selection, focus and links; the melon only on the menu button), panel layout,
    `/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/*.xml` defaults, the wallpaper `usr/share/wallpapers/melon`, `/usr/share/xsessions/xfce.desktop`,
    Qt following the GTK look (`QT_QPA_PLATFORMTHEME`, Calamares excepted), gold survivor look via xfconf (accent colour, lock screen),

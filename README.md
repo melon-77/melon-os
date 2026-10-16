@@ -83,6 +83,11 @@ workspaces. Wayfire's settings are in `~/.config/lxqt/wayland/lxqt-wayfire.ini` 
 **Plasma:** `sudo apk add melon-plasma`, then pick "Plasma (Wayland)" on the login screen. It brings back the Plasma set the
 desktop ISO used to carry (Dolphin, Konsole, Spectacle, Discover), with melon's Plasma colours.
 
+**Coming in 0.6: XFCE with a look of its own.** XFCE becomes the default desktop in 0.6 (`docs/xfce-desktop-plan.md`), and it
+won't look like stock XFCE: a libadwaita-style GTK theme in melon's colours, melon's own window frames, Papirus-Dark icons, Inter,
+a start menu with search and a dock-like taskbar, with Qt, GTK and Flatpak apps sharing one theme, font and cursor. The design
+and two layout mockups (top bar and dock, or one bottom taskbar) are in [`docs/xfce-theme.md`](docs/xfce-theme.md).
+
 **Look:** dark, calm surfaces with melon green used only as an accent (selection, focus, links, the lock screen's ring),
 a quiet gradient wallpaper, and the melon itself only on the menu button, the boot menu and the installer. The boot menu
 (GRUB) is the same on BIOS and UEFI, on the ISOs and on installed systems: a small melon, the entries in a readable font,

@@ -20,6 +20,14 @@ A from-scratch, rolling x86_64 distribution:
 | desktop | KDE Plasma 6 on Wayland; Flatpak for Steam and other glibc apps; more desktops as online installs |
 | 32-bit edition | i686 (Pentium M, Pentium 4, Atom netbooks such as the MSI Wind U100) with LXQt on Wayland (labwc) |
 
+## Goals
+
+- **The everyday desktop works out of the box** (the owner's goal, 16 October 2026): on a fresh install, USB drives mount,
+  Wi-Fi and Bluetooth connect, sound and the volume and brightness keys work, the lid suspends the laptop and the screen
+  locks, and printers are found, with no package to add and no service to enable. The checklist, what tests each item
+  today and the rules that follow are in [`docs/desktop-goals.md`](docs/desktop-goals.md).
+- Fast and small like the lean distributions, working as well as the mainstream ones.
+
 ## Layout
 
 ```

@@ -1,12 +1,12 @@
 pkgname=melon-xfce
 pkgver=0.1
 pkgrel=0
-pkgdesc="melon's XFCE look and defaults: the melon GTK theme and window frames, Papirus-Dark, Inter, a bottom taskbar with the Whisker menu and a dock, one look for Qt, GTK and Flatpak apps"
+pkgdesc="melon's XFCE look and defaults: the melon GTK theme and window frames, Papirus-Dark, Inter, a bottom taskbar with melon-menu and a dock, one look for Qt, GTK and Flatpak apps"
 license=MIT
 # docs/xfce-theme.md is the design. melon's XFCE defaults live in /etc/xdg/melon-xfce, which profile.d puts in front of
 # XDG_CONFIG_DIRS for the XFCE session (as Xubuntu does with /etc/xdg/xdg-xubuntu), so XFCE's own files in /etc/xdg stay
 # its packages' and nothing here conflicts with them. The window frames are drawn by art/xfwm4theme.py.
-# The XFCE packages themselves (xfwm4, xfce4-panel, whiskermenu, docklike, ...) join depends= when they are built
+# The XFCE packages themselves (xfwm4, xfce4-panel, docklike, ...) and melon-menu join depends= when they are built
 # (docs/xfce-desktop-plan.md); until then this package carries the look only.
 depends=(melon-desktop adw-gtk3 papirus-icon-theme font-inter font-jetbrains-mono)
 makedepends=(qt6-qtbase-dev)

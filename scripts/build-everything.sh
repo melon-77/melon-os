@@ -65,7 +65,8 @@ LXQT="fribidi cairo pango libsfdo seatd wlroots labwc libexif libfm-extra menu-c
 # Plasma set the desktop ISO used to carry, as one online install
 WAYFIRE="glm yyjson wf-config wayfire swaylock swayidle grim nm-tray xdg-desktop-portal-lxqt xdg-desktop-portal-wlr melon-wayfire"
 # melon's XFCE look (docs/xfce-theme.md): the GTK theme, icons and fonts, and melon-xfce (frames, defaults, the look check).
-# The XFCE desktop itself (docs/xfce-desktop-plan.md) is not built yet; melon-xfce carries the look until it is
+# The XFCE desktop itself (docs/xfce-desktop-plan.md) is not built yet; melon-xfce carries the look until it is.
+# melon-menu (the start menu, a GTK 3 program) joins this list after gtk3 when the XFCE build lands
 XFCE_LOOK="adw-gtk3 papirus-icon-theme font-inter font-jetbrains-mono melon-xfce"
 ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $DESKTOP_LIBS $STEP2 $NVIDIA $RUSTC $KDE $INSTALLERS $LXQT $WAYFIRE melon-lxqt melon-plasma $XFCE_LOOK | awk '!seen[$0]++')
 # The 32-bit (i686) edition, for old netbooks and laptops (the owner, 7 October 2026: LXQt as its desktop): the base

@@ -520,7 +520,9 @@ the serial port, so tests don't need a screen. The test also records the sound c
   Konsole profile Melon for `melon-plasma`. XFCE (the 0.6 default, `docs/xfce-theme.md`): `melon-xfce` holds the `melon` GTK theme
   (adw-gtk3-dark recoloured), its gold edition, the xfwm4 frames (drawn by `art/xfwm4theme.py`: keep the buttons opaque, and every
   window keeps minimise, maximise and close, the owner's rule of 16 October 2026) and the defaults in `/etc/xdg/melon-xfce`, which
-  `profile.d` puts first in `XDG_CONFIG_DIRS` for the XFCE session so nothing conflicts with XFCE's own files.
+  `profile.d` puts first in `XDG_CONFIG_DIRS` for the XFCE session so nothing conflicts with XFCE's own files. The taskbar is
+  two panels (a transparent centred one on top of the full-width one), so the apps sit in the screen's real centre; the start
+  menu is melon's own `melon-menu` (`recipes/melon-menu`, GTK 3), not Whisker.
   `melon-check-look` must pass: change the look in xsettings, gsettings and the GTK `settings.ini` together. The GRUB theme is in **melon-base** (`usr/share/grub/themes/melon`, so the
   console ISO, the desktop ISO and every install have it, BIOS and UEFI): one dark colour, no picture, a small melon,
   a centred menu with the selected entry in a thin green outline, a countdown and one help line. `art/grubtheme.py` draws

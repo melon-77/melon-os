@@ -2,6 +2,7 @@
 # melon-xfce-session: run at every XFCE login (autostart, melon-xfce).
 #  - the first time: melon's wallpaper on every monitor (xfdesktop keeps one setting per monitor, so no default file can
 #    name them); it tries again at the next login if the desktop wasn't up yet
+#  - the first time: the Super key opens the start menu (melon-menu); the standard folders in Thunar's sidebar
 #  - every time: melon's GTK theme copied into ~/.themes, where Flatpak apps can read it (the system-wide override from
 #    melon-xfce's install script shares ~/.themes read-only and sets GTK_THEME; inside the sandbox GTK finds a theme in
 #    ~/.themes, not in ~/.local/share/themes, whose path Flatpak remaps), refreshed when melon-xfce changes it
@@ -22,6 +23,21 @@ for t in adw-gtk3-dark melon melon-gold; do
   done
   rm -rf "$d/$t" && mv "$d/$t.new" "$d/$t"
 done
+# the Super key opens the start menu (melon-menu), once: a key the user binds differently later stays theirs
+if [ ! -e "$c/melon/xfce-super-key" ] && command -v xfconf-query >/dev/null; then
+  xfconf-query -c xfce4-keyboard-shortcuts -p /commands/custom/Super_L -n -t string -s melon-menu \
+    && : > "$c/melon/xfce-super-key"
+fi
+# the standard folders in the file manager's sidebar (GTK's bookmarks; Thunar lists Home, Desktop and Trash by itself), once
+if [ ! -e "$c/gtk-3.0/bookmarks" ] && [ ! -e "$c/melon/xfce-bookmarks" ]; then
+  mkdir -p "$c/gtk-3.0"
+  [ -r "$c/user-dirs.dirs" ] && . "$c/user-dirs.dirs"     # what xdg-user-dir reads
+  for k in DOCUMENTS DOWNLOAD MUSIC PICTURES VIDEOS; do
+    eval p=\${XDG_${k}_DIR:-}
+    [ -n "$p" ] && [ "$p" != "$HOME" ] && [ -d "$p" ] && printf 'file://%s\n' "$p" >> "$c/gtk-3.0/bookmarks"
+  done
+  : > "$c/melon/xfce-bookmarks"
+fi
 if [ ! -e "$c/melon/xfce-wallpaper" ]; then
   sleep 3   # xfdesktop names its settings after the monitors once it has started
   /usr/libexec/melon/melon-set-wallpaper /usr/share/wallpapers/melon && : > "$c/melon/xfce-wallpaper"

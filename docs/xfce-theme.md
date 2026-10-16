@@ -11,17 +11,20 @@ button, the boot menu and the installer.
 
 ## The layout: a bottom taskbar (the owner's pick, 16 October 2026)
 
-One panel at the bottom: the start menu (Whisker, with the melon) and the apps centred (docklike: pinned and running apps in
-one strip, a green bar under the active one), then the tray, sound, battery, notifications and a two-line clock at the
-right. Every window keeps **minimise, maximise and close** buttons (the owner: windows without them are "stupid and
+A taskbar at the bottom: the start button (the melon) and the apps centred on the screen (docklike: pinned and running apps
+in one strip, a green bar under the active one), the tray, sound, battery, notifications and a two-line clock at the right.
+The start menu is melon's own (`melon-menu`), built to the bottom-taskbar mockup: a rounded card centred above the taskbar
+with the search field, the pinned apps as a grid, the files opened last, and the user with settings, lock and power at the
+bottom. Every window keeps **minimise, maximise and close** buttons (the owner: windows without them are "stupid and
 inconvenient"): xfwm4's frames and the title bars GTK and libadwaita apps draw themselves, which show only close unless told.
 
-Screenshots of melon-xfce's files in a real XFCE session (XFCE 4.18 from Ubuntu 24.04 and docklike 0.4.2 on Xvfb, the
-closest the cloud session can run; melon's own XFCE build is still to come):
+Screenshots of melon-xfce's and melon-menu's files in a real XFCE session (XFCE 4.18 from Ubuntu 24.04 and docklike 0.4.2 on
+Xvfb, the closest the cloud session can run; melon's own XFCE build is still to come). Firefox, VLC, Steam and the other
+first-boot apps in the menu are stand-in launchers there, and the recent files are test files:
 
 ![XFCE with melon's look: Thunar with grey Papirus folders and a green selected place, the terminal in melon's colours, the bottom taskbar](images/xfce-real-desktop.png)
 
-![The start menu: search, favourites, categories, and the lock, log out and power buttons](images/xfce-real-menu.png)
+![The start menu: search, pinned apps, recent files, and the settings, lock and power buttons](images/xfce-real-menu.png)
 
 The first mockups (drawn with `art/xfce-mockup.py`, the real icons and font in HTML) show both layouts that were offered:
 [top bar and dock](images/xfce-layout-a.png) and [bottom taskbar](images/xfce-layout-b.png).
@@ -35,9 +38,10 @@ The first mockups (drawn with `art/xfce-mockup.py`, the real icons and font in H
 | Icons | **Papirus-Dark** with grey folders (`papirus-folders -C grey`, done at build time) | Complete (46 000 icons, every app melon ships), consistent, readable at 16 px. 21 MB compressed (xz), within the 45 MB "may go on an ISO" line. |
 | Fonts | **Inter** for the interface (10 pt), **JetBrains Mono** for terminals, Noto for everything else (already there) | Inter is the font of modern UIs (GNOME 48, many macOS-like setups). Subpixel off, slight hinting, greyscale antialiasing: the macOS/Windows 11 rendering. |
 | Cursor | **Adwaita** at 24 px | Neutral, crisp, already in GTK's stack; set everywhere (see "One look everywhere"). |
-| Panel | One 48 px bottom panel: two expanding separators centre the Whisker menu and docklike; systray, PulseAudio, power, notifications and the clock (time over date) at the right | `docklike` gives XFCE pinned and running apps in one strip, like the Windows 11 taskbar. It pins only apps every install has (Thunar, terminal, Mousepad, settings): a pinned Flatpak app that isn't installed yet shows as a blank gear. |
-| Start menu | **xfce4-whiskermenu-plugin**: user and lock/log out/power buttons on top, search, favourites as a grid, categories at the right; styled in `gtk.css` | XFCE's best menu, with search over apps and settings. Favourites name the first-boot Flatpak apps too: Whisker leaves out the ones not installed. Its window is square on X11 (GTK 3 can't round a popup without an RGBA visual). |
-| Panel look | Near-black `rgba(16,21,18,.88)` with a thin light line on top, rounded hover and pressed states for its buttons | No blur on X11 without picom; the colour is dark enough to read without it. |
+| Panel | Two 48 px panels at the bottom: panel 1 the full width (systray, PulseAudio, power, notifications and the clock, time over date, at the right), panel 2 on top of it, centred, transparent and as wide as its contents (the start button, then docklike) | XFCE's panel can't centre a group while other plugins sit at one end: two expanding separators split the space that's left, so the group sat half the tray's width left of centre. `docklike` gives XFCE pinned and running apps in one strip, like the Windows 11 taskbar. It pins only apps every install has (Thunar, terminal, Mousepad, settings): a pinned Flatpak app that isn't installed yet shows as a blank gear. |
+| Start menu | **melon-menu**, melon's own (one C file, GTK 3): a 640 px card with 14 px corners and its own shadow, centred above the taskbar; search over apps and settings (Enter starts the best match), "Pinned" as a six-column grid, "Recent" with the last four files and their folder and day, "All apps" as an A to Z list, the user's initial, name, settings, lock and a power menu (sleep, restart, shut down, log out) at the bottom; right click pins or unpins | Whisker, XFCE's usual menu, was tried first: its window is square on X11, it opens at the button's left edge rather than centred, and its layout (categories column, a row of coloured action icons) looked like a replica of a modern menu rather than one. melon-menu stays running hidden from login (autostart, `--background`), so the taskbar's button and the Super key open it at once; pins live in `melon/menu.conf` (`/etc/xdg/melon-xfce`, then the user's copy). |
+| Panel look | Near-black `#101512` with a thin light line on top (`panel.png`, drawn by `art/xfce-panel.py`: a theme border would be drawn twice over the centred panel), rounded hover and pressed states for its buttons | No blur on X11 without picom; the colour is dark enough to read without it. |
+| File manager | Thunar without its menu bar (its menu is a button in the toolbar then), the path as buttons, roomier sidebar rows, and Documents, Downloads, Music, Pictures and Videos in the sidebar (GTK bookmarks, written once at the first login) | Close to the mockup's Files window. |
 | Notifications | **xfce4-notifyd** with a melon theme: cards at top right, icon, bold title, dim body | Fits the panel and the menu. |
 | Terminal | xfce4-terminal in JetBrains Mono 11, the view colour as background, a 16-colour palette with melon green, no menu bar | The default black terminal was the one thing that still looked stock. |
 | Lock screen | **xfce4-screensaver**'s lock dialog, themed: the wallpaper dimmed, a clock, the user's picture and a password field with the green focus ring | The same ring as swaylock's on the Wayfire desktop. |
@@ -98,8 +102,8 @@ override and theme copy. One line per check; any mismatch fails the test with bo
 | `font-inter` | Inter | upstream release zip (github.com/rsms/inter) | about 2 MB (variable font only) |
 | `font-jetbrains-mono` | JetBrains Mono | upstream release zip | about 1 MB |
 | `xfce4-docklike-plugin` | the dock / taskbar strip | archive.xfce.org | < 1 MB |
-| `xfce4-whiskermenu-plugin` | start menu | archive.xfce.org (already in the XFCE plan) | < 1 MB |
-| `melon-xfce` | the `melon` GTK colours override, the xfwm4 theme, xfconf defaults (xsettings, xfwm4, panel layout, whiskermenu, notifyd, screensaver), gsettings override, `profile.d` environment, cursor default, Flatpak override, `melon-check-look` and its Qt probe | melon (art scripts in `art/`) | < 1 MB |
+| `melon-menu` | the start menu, its taskbar launcher (`melon-menu.desktop`, icon `melon-start`: melon.svg cropped to the fruit) and its autostart entry | melon (`recipes/melon-menu/melon-menu.c`) | < 0.1 MB |
+| `melon-xfce` | the `melon` GTK colours override, the xfwm4 theme, the taskbar background, xfconf defaults (xsettings, xfwm4, panel layout, Thunar, notifyd, screensaver), melon-menu's pins, gsettings override, `profile.d` environment, cursor default, Flatpak override, `melon-check-look` and its Qt probe | melon (art scripts in `art/`) | < 1 MB |
 
 About 26 MB on the desktop ISO for the whole look. Nothing here is Rust; `librsvg` (Rust, already in the XFCE plan) is what
 draws the SVG icons, so "remove everything built with Rust" takes the icons' rendering with it, as it takes the rest.
@@ -108,8 +112,9 @@ draws the SVG icons, so "remove everything built with Rust" takes the icons' ren
 
 Done (this pull request): the recipes `adw-gtk3`, `papirus-icon-theme` (grey folders), `font-inter`, `font-jetbrains-mono`
 and `melon-xfce` (`XFCE_LOOK` in `build-everything.sh`); the frames (`art/xfwm4theme.py`); the defaults in
-`/etc/xdg/melon-xfce` (xsettings, xfwm4, panel, Whisker, docklike, notifications, screen saver, desktop icons, terminal,
-GTK `settings.ini`); the gsettings override; the session setup; the gold edition for gauntlet survivors (`melon-gold`,
+`/etc/xdg/melon-xfce` (xsettings, xfwm4, the two-panel taskbar, docklike, Thunar, notifications, screen saver, desktop icons,
+terminal, GTK `settings.ini`, melon-menu's pins); the start menu (`recipes/melon-menu`); the gsettings override; the session
+setup (Super opens the menu, the sidebar bookmarks, the wallpaper); the gold edition for gauntlet survivors (`melon-gold`,
 through `melon-survivor-look`); XFCE in `melon-set-wallpaper`; the look check and its hook in `qemu-test.py`.
 
 For the XFCE build (`docs/xfce-desktop-plan.md`), so the look works there:
@@ -117,8 +122,9 @@ For the XFCE build (`docs/xfce-desktop-plan.md`), so the look works there:
   Qt apps keep Fusion's colours, and the look check fails on Qt.
 - `glib` compiles `/usr/share/glib-2.0/schemas` in a trigger, and `gtk3` updates icon caches under `/usr/share/icons` in one:
   melon-xfce and papirus-icon-theme can be installed before them.
-- `xfce4-docklike-plugin` (0.5.x, needs libxfce4windowing) and `xfce4-whiskermenu-plugin` in `gen-xfce-recipes.py`; then
-  melon-xfce's `depends=` gains the XFCE packages and `adwaita-icon-theme` (the cursor), and `desktop-packages.txt` lists it.
-- Super opens the start menu: melon-xfce's `package()` copies `xfce4-keyboard-shortcuts.xml` from xfce4-settings in the
-  sysroot into `/etc/xdg/melon-xfce` with `<Super>` bound to `xfce4-popup-whiskermenu` (as melon-lxqt does with LXQt's files).
+- `xfce4-docklike-plugin` (0.5.x, needs libxfce4windowing) in `gen-xfce-recipes.py`, and `melon-menu` in `build-everything.sh`
+  after `gtk3`; then melon-xfce's `depends=` gains the XFCE packages, `melon-menu` and `adwaita-icon-theme` (the cursor), and
+  `desktop-packages.txt` lists it. melon-menu runs `xflock4` and `xfce4-session-logout`, which XFCE brings.
+- Super opens the start menu: `melon-xfce-session` binds `Super_L` to `melon-menu` in `xfce4-keyboard-shortcuts` at the first
+  login (tested with XFCE 4.18's xfsettingsd); check that 4.20 still takes a bare `Super_L`.
 - Screenshots from `qemu-test.py desktop-install` replace the Ubuntu ones here.

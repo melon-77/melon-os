@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Start
+GenericName=Start menu
+Comment=Search and start apps, open recent files, lock or turn off the computer
+Icon=melon-start
+Exec=melon-menu
+NoDisplay=true
+StartupNotify=false

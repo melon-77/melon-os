@@ -1,8 +1,12 @@
 NAME="melon"
-PRETTY_NAME="melon Linux"
+PRETTY_NAME="melon 0.5"
 ID=melon
-VERSION_ID=rolling
+VERSION="0.5"
+VERSION_ID=0.5
 BUILD_ID=@BUILD_ID@
 ANSI_COLOR="1;38;5;212"
 LOGO=melon
-HOME_URL="https://example.invalid/melon"
+HOME_URL="https://melon-77.github.io/melon-os/"
+DOCUMENTATION_URL="https://github.com/melon-77/melon-os#readme"
+SUPPORT_URL="https://github.com/melon-77/melon-os/issues"
+BUG_REPORT_URL="https://github.com/melon-77/melon-os/issues"

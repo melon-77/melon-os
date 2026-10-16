@@ -504,6 +504,13 @@ the serial port, so tests don't need a screen. The test also records the sound c
   `theme.conf`), GRUB theme `usr/share/grub/themes/melon` in **melon-base** (every ISO and install has it; the gold edition is in melon-desktop's hidden rewards). The art generators are
   in `art/` (run from a checkout of the melon-art working directory with its fonts); `art/grubtheme.py` needs
   `grub-mkfont` (from Ubuntu's grub-common: `apt-get download grub-common` and `dpkg -x` it, no install needed).
+- **Release identity and the logo (16 October 2026, found on the owner's About page):** `/etc/os-release` (melon-base) names the release
+  (`PRETTY_NAME="melon 0.5"`, `VERSION_ID=0.5`) and points `HOME_URL`, `DOCUMENTATION_URL`, `SUPPORT_URL` and `BUG_REPORT_URL` at the
+  website and the repository, never at a placeholder; `/etc/lsb-release` and Calamares' `branding.desc` carry the same version. **Bump all three
+  with every release** (and `melon-base`'s `pkgrel`). KDE's About page and `melonfetch` read these. The distro logo (`LOGO=melon`) is
+  the icon `melon` in `hicolor`, **PNGs only** (16 to 512 px, made from `branding/melon-logo-512.png`): Qt's SVG renderer ignores the
+  clip path in the old 156 KB `melon.svg`, so the rind's veins were drawn outside the circle as a green square. Don't add an SVG
+  with clip paths back; the vector master stays in `branding/melon-logo.svg` and `art/logo.py`.
 - **Hidden owner commands** work like the console installer: `/etc/profile.d/zz-melon.sh` recognises them by the
   first 16 hex digits of their name's sha256 and nothing else. The same rules apply: never write their names in any
   file, comment, commit or test. `59c1a50f2e93bdc1` unlocks every gauntlet reward (`/usr/libexec/melon/.gold`,

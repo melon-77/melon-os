@@ -120,6 +120,9 @@ The desktop ISO is being slimmed from 794 MB by taking out only what nothing on 
   but that part): if you use such hardware, `sudo apk add linux-firmware-extra`. Installed systems that upgrade keep everything.
 - The kernel is stored once on the ISO, Breeze's default wallpaper is a high-quality JPEG, and the ISOs are squashed with zstd level 19.
 
+- Every desktop home now has Desktop, Documents, Downloads, Music, Pictures and Videos from the start (a fresh install had only
+  Desktop, so downloads had nowhere to go); an installed system that upgrades gets them at its next login.
+
 **NVIDIA graphics:** on a computer with an NVIDIA card (GTX 16/RTX 20 and newer), `melon-first-boot` offers the open
 driver (`sudo apk add linux-firmware-nvidia mesa-nvk`: nouveau with NVK, the desktop and games use the card) or NVIDIA's
 own kernel driver (`sudo apk add nvidia-open`: Flatpak games get NVIDIA's libraries from Flathub; the desktop can't use

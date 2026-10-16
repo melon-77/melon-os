@@ -515,6 +515,11 @@ the serial port, so tests don't need a screen. The test also records the sound c
 - **Live-only packages** (`/usr/share/melon/profiles/live-only`, e.g. `calamares-melon`) are in the
   desktop ISO's system image and both installers remove them from the new system. Both installers make
   the new system's `/etc/apk/world` match the chosen profile.
+- **Every desktop home has the standard folders** (found 16 October 2026 on the 0.5 test ISO: a fresh home had only Desktop, so Dolphin's
+  places showed Home, Desktop and Trash and a downloaded file went nowhere). The desktop profile lists `xdg-user-dirs` (and `melon-desktop`
+  depends on it); both installers run `xdg-user-dirs-update` as the new user (`.cold`, `cal-finish`), and `melon-desktop`'s autostart
+  `/etc/xdg/autostart/melon-user-dirs.desktop` does the same at login for installs from before (it only creates what is missing).
+  `qemu-test.py desktop-install` checks the six folders and `XDG_DOWNLOAD_DIR`. Dolphin and Flatpak apps read `~/.config/user-dirs.dirs`.
 - **Console installer: quick and deliberately hidden.** It lives at `/usr/libexec/melon/.cold`. It is started
   by typing its name in bash, which a `command_not_found_handle` in `/etc/profile.d/zz-melon.sh`
   recognises **by hash**. The owner decided the name must not be discoverable. Therefore:

@@ -70,6 +70,8 @@ site/                   the website: index.html, download/, style.css, gauntlet.
 art/site.py             draws site/assets/melon-pixel.svg (melonfetch's melon) and net.svg
 recipes/calamares-melon/    graphical installer branding + gauntlet (stage 2)
 recipes/melon-pinball/      melon's own pinball game (C++/SDL3); the game is a submodule (game/ = melon-77/melon-pinball)
+nspire/melon-run/           melon run, a tunnel runner for the TI-Nspire CX II in the calculator's Lua (not a melon package);
+                            build.sh runs the desktop tests (tools/sim.lua: a bot must finish all 30 levels) and Luna
 ```
 
 Not in git (see `.gitignore`): `sources/`, `work/`, `tools/`, `sysroot/`, `hosttools/`, `repo/`, `out/`,
@@ -802,6 +804,8 @@ that is the only place Ubuntu is still needed.
   always online installs, whatever their size**: Plasma stays the only desktop on the 64-bit ISO (issue #18, niri +
   Noctalia). The 32-bit desktop ISO carries LXQt instead of Plasma (the owner's decision); LXQt is in the 64-bit
   package repository too, as an online install.
+- **melon run (`nspire/melon-run`) is inspired by Run 3, not a port of it.** Run 3's levels, art, characters, story and
+  code belong to its author; never copy them (or anything extracted from its SWF) into this repository. Mechanics are fine.
 - **Decided, don't re-propose:** Nix is available but off by default (not on the ISOs, no service, only root trusted);
   foreign repos stay opt-in and tagged; the gauntlet's rewards are only for people who pass its final trial; melon's
   own games may live in their own melon-77 repositories as submodules.

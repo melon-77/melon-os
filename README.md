@@ -31,6 +31,7 @@ iso-files/init         live initramfs init
 branding/              logo
 site/                  the website (published to the gh-pages branch by scripts/publish-site.sh)
 art/site.py            draws the website's pixel melon and netting
+nspire/melon-run/      melon run, a tunnel-runner game for the TI-Nspire CX II calculator (Lua, .tns)
 recipes/calamares-melon/   graphical installer branding and the 200-question gauntlet
 ```
 
@@ -81,6 +82,13 @@ uses the same installers (Calamares with the gauntlet, the console installer). F
 Atom N270 with 2 GB of RAM (LXQt logs in through SDDM, printing works); the 32-bit packages are in the online
 repository (`packages/x86`); the ISOs are on the pre-release `i686-20261007`; a test on a real U100 comes next. NetHack and
 the QEMU guest agent aren't in the 32-bit edition yet.
+
+## TI-Nspire game: melon run
+
+`nspire/melon-run/` is a space-tunnel runner for the TI-Nspire CX II (16 October 2026), written in the calculator's own Lua
+(no Ndless needed): `build.sh` makes `melon-run.tns` to copy to the calculator. It is a fan game inspired by the gameplay of Run 3, with its own
+code, 30 generated levels, an Infinite mode and melon's runner; nothing is taken from the original game. A bot plays every
+level on the desktop as a test (`nspire/melon-run/build.sh`); it hasn't been tried on a real calculator yet.
 
 ## Developer tools
 

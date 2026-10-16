@@ -1,0 +1,47 @@
+/* melon: adw-gtk3-dark (the libadwaita look) in melon's colours. GTK resolves named colours after the whole sheet is
+   read, so the definitions below replace adw-gtk3's everywhere it uses them. docs/xfce-theme.md has the palette. */
+@import url("../../adw-gtk3-dark/gtk-3.0/gtk.css");
+@import url("melon-colours.css");
+
+/* the toolbar under a title bar takes the header colour, so the frame and the toolbar read as one bar */
+window > box > toolbar.primary-toolbar,
+.thunar toolbar, .thunar .location-bar {
+  background-color: @headerbar_bg_color;
+  border-bottom: 1px solid @headerbar_shade_color;
+}
+/* Thunar's sidebar: the selected place as a green pill, as in libadwaita's sidebars */
+.thunar .sidebar .view:selected, .thunar .sidebar row:selected {
+  background-color: @accent_bg_color; color: @accent_fg_color; border-radius: 8px;
+}
+/* softer corners for menus and popovers */
+menu, .menu, .context-menu { border-radius: 10px; }
+popover.background, popover > contents { border-radius: 12px; }
+
+/* ---- the taskbar (xfce4-panel) ---- */
+.xfce4-panel.background {
+  background-color: alpha(#101512, 0.88);
+  border-top: 1px solid alpha(white, 0.07);
+}
+.xfce4-panel button { border-radius: 8px; padding: 2px 6px; margin: 4px 1px; }
+.xfce4-panel button:hover { background-color: alpha(white, 0.08); }
+.xfce4-panel button:checked, .xfce4-panel button:active { background-color: alpha(white, 0.12); }
+/* the clock: time over date, both centred */
+#clock-button label { font-feature-settings: "tnum"; }
+
+/* ---- the start menu (Whisker menu) ---- */
+#whiskermenu-window {
+  background-color: alpha(#101512, 0.94);
+  border: 1px solid alpha(white, 0.08);
+  border-radius: 16px;
+  padding: 12px;
+}
+#whiskermenu-window entry {
+  border-radius: 10px; padding: 8px 12px; min-height: 22px;
+  background-color: alpha(white, 0.06); border: 1px solid alpha(white, 0.06);
+}
+#whiskermenu-window entry:focus-within { border-color: @accent_bg_color; box-shadow: none; }
+#whiskermenu-window treeview, #whiskermenu-window iconview { background-color: transparent; }
+#whiskermenu-window treeview:selected, #whiskermenu-window iconview:selected,
+#whiskermenu-window .view:hover { background-color: alpha(white, 0.08); color: @window_fg_color; border-radius: 8px; }
+#whiskermenu-window button { border-radius: 8px; }
+#whiskermenu-window button:checked { background-color: alpha(@accent_bg_color, 0.18); color: @accent_color; }

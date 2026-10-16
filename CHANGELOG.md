@@ -5,6 +5,13 @@ installed systems update with `doas apk upgrade`.
 
 ## Unreleased
 
+### XFCE's look, ready for 0.6 (16 October 2026)
+
+- The packages that will make XFCE (the default desktop from 0.6) look modern instead of stock: a libadwaita-style GTK theme in
+  melon's colours, melon's own window frames with minimise, maximise and close on every window, Papirus-Dark icons with grey
+  folders, Inter and JetBrains Mono, and a bottom taskbar with a searchable start menu and the apps centred. Qt, GTK and Flatpak
+  apps get the same theme, font and cursor, and a test checks it. XFCE itself isn't built yet, so nothing changes on 0.5 systems.
+
 ### Wayfire is the default desktop (12 October 2026)
 
 - The desktop ISO and the desktop profile of both installers now use **Wayfire** (Wayland) with LXQt's panel, menu,

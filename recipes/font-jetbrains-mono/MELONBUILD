@@ -1,0 +1,16 @@
+pkgname=font-jetbrains-mono
+pkgver=2.304
+pkgrel=0
+pkgdesc="JetBrains Mono, the terminal font of melon's XFCE desktop"
+license=OFL-1.1
+url=https://www.jetbrains.com/lp/mono/
+# upstream's release zip from download.jetbrains.com, sha512 as in Alpine's APKBUILD (font-jetbrains-mono 2.304)
+source=(JetBrainsMono-2.304.zip)
+builddir=$srcdir
+options=('!strip')
+package(){
+  python3 -m zipfile -e $srcdir/JetBrainsMono-2.304.zip x
+  install -d $pkgdir/usr/share/fonts/jetbrains-mono
+  install -m644 x/fonts/variable/*.ttf $pkgdir/usr/share/fonts/jetbrains-mono/
+  install -Dm644 x/OFL.txt $pkgdir/usr/share/licenses/font-jetbrains-mono/OFL.txt
+}

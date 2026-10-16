@@ -1,0 +1,21 @@
+# docklike reads this (XDG_CONFIG_DIRS/xfce4/panel/docklike.rc) until the user changes something; pinned apps by
+# desktop-file id (only apps every install has: Flatpak apps from the first-boot offer are pinned by the user), the green
+# bar under the active app, a dot under the others that run
+[user]
+pinned=thunar;xfce4-terminal;org.xfce.mousepad;xfce-settings-manager;
+showPreviews=true
+noWindowsListIfSingle=true
+onlyDisplayVisible=false
+onlyDisplayScreen=false
+showWindowCount=false
+middleButtonBehavior=1
+indicatorOrientation=0
+indicatorStyle=0
+inactiveIndicatorStyle=1
+indicatorColorFromTheme=false
+indicatorColor=rgb(111,191,74)
+inactiveColor=rgb(223,231,220)
+forceIconSize=true
+iconSize=30
+keyComboActive=true
+keyAloneActive=false

@@ -1,0 +1,23 @@
+/* melon's palette (AGENTS.md, "melon's look"); melon-gold replaces the accent only */
+@define-color window_bg_color #1b221d;
+@define-color window_fg_color #e6ece3;
+@define-color view_bg_color #141916;
+@define-color view_fg_color #e6ece3;
+@define-color headerbar_bg_color #202823;
+@define-color headerbar_fg_color #e6ece3;
+@define-color headerbar_backdrop_color #1b221d;
+@define-color sidebar_bg_color #18201b;
+@define-color sidebar_fg_color #e6ece3;
+@define-color sidebar_backdrop_color #161c18;
+@define-color card_bg_color rgba(255, 255, 255, 0.05);
+@define-color dialog_bg_color #222a25;
+@define-color popover_bg_color #222a25;
+@define-color popover_fg_color #e6ece3;
+@define-color accent_bg_color #6fbf4a;
+@define-color accent_fg_color #0b150c;
+@define-color accent_color #8fd06e;
+@define-color destructive_bg_color #e05d4f;
+@define-color destructive_fg_color white;
+@define-color destructive_color #f08a7e;
+@define-color theme_unfocused_fg_color #97a395;
+@define-color insensitive_fg_color #6d776b;

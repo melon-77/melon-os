@@ -64,7 +64,10 @@ LXQT="fribidi cairo pango libsfdo seatd wlroots labwc libexif libfm-extra menu-c
 # screenshots, network tray, portals); melon-wayfire before melon-lxqt, which depends on it on 64-bit. melon-plasma: the
 # Plasma set the desktop ISO used to carry, as one online install
 WAYFIRE="glm yyjson wf-config wayfire swaylock swayidle grim nm-tray xdg-desktop-portal-lxqt xdg-desktop-portal-wlr melon-wayfire"
-ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $DESKTOP_LIBS $STEP2 $NVIDIA $RUSTC $KDE $INSTALLERS $LXQT $WAYFIRE melon-lxqt melon-plasma | awk '!seen[$0]++')
+# melon's XFCE look (docs/xfce-theme.md): the GTK theme, icons and fonts, and melon-xfce (frames, defaults, the look check).
+# The XFCE desktop itself (docs/xfce-desktop-plan.md) is not built yet; melon-xfce carries the look until it is
+XFCE_LOOK="adw-gtk3 papirus-icon-theme font-inter font-jetbrains-mono melon-xfce"
+ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $DESKTOP_LIBS $STEP2 $NVIDIA $RUSTC $KDE $INSTALLERS $LXQT $WAYFIRE melon-lxqt melon-plasma $XFCE_LOOK | awk '!seen[$0]++')
 # The 32-bit (i686) edition, for old netbooks and laptops (the owner, 7 October 2026: LXQt as its desktop): the base
 # system, the libraries and services LXQt, SDDM and Calamares need, LLVM and Mesa (no Vulkan), the Qt and KDE Frameworks parts
 # LXQt and the installer use, labwc (wlroots) as the Wayland compositor, LXQt. No Plasma, Flatpak, NVIDIA, Rust or

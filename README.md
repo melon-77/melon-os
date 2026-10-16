@@ -84,9 +84,14 @@ workspaces. Wayfire's settings are in `~/.config/lxqt/wayland/lxqt-wayfire.ini` 
 desktop ISO used to carry (Dolphin, Konsole, Spectacle, Discover), with melon's Plasma colours.
 
 **Coming in 0.6: XFCE with a look of its own.** XFCE becomes the default desktop in 0.6 (`docs/xfce-desktop-plan.md`), and it
-won't look like stock XFCE: a libadwaita-style GTK theme in melon's colours, melon's own window frames, Papirus-Dark icons, Inter,
-a start menu with search and a dock-like taskbar, with Qt, GTK and Flatpak apps sharing one theme, font and cursor. The design
-and two layout mockups (top bar and dock, or one bottom taskbar) are in [`docs/xfce-theme.md`](docs/xfce-theme.md).
+won't look like stock XFCE: a libadwaita-style GTK theme in melon's colours, melon's own window frames (minimise, maximise and
+close on every window), Papirus-Dark icons with grey folders, Inter and JetBrains Mono, and one bottom taskbar with a searchable
+start menu and the apps centred (the owner's pick). Qt, GTK and Flatpak apps share one theme, font and cursor, and
+`melon-check-look` tests that in the desktop-install test once XFCE is on the ISO. The packages are in the tree (`melon-xfce`, `adw-gtk3`,
+`papirus-icon-theme`, `font-inter`, `font-jetbrains-mono`); XFCE itself is built next. Design and screenshots:
+[`docs/xfce-theme.md`](docs/xfce-theme.md).
+
+![melon's XFCE look](docs/images/xfce-real-desktop.png)
 
 **Look:** dark, calm surfaces with melon green used only as an accent (selection, focus, links, the lock screen's ring),
 a quiet gradient wallpaper, and the melon itself only on the menu button, the boot menu and the installer. The boot menu

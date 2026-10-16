@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=melon session setup
+Comment=melon's wallpaper on every monitor, and melon's theme for Flatpak apps
+Exec=/usr/libexec/melon/melon-xfce-session
+OnlyShowIn=XFCE;
+NoDisplay=true
+X-XFCE-Autostart-Override=true

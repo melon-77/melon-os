@@ -1,11 +1,25 @@
 #!/bin/sh
 # melon-set-wallpaper DIR: make a wallpaper package (DIR/contents/images/<w>x<h>.jpg, as in /usr/share/wallpapers) the
-# current user's wallpaper, in Plasma or in melon's default desktop (pcmanfm-qt draws the desktop in LXQt on Wayfire
+# current user's wallpaper, in Plasma, in XFCE (xfdesktop), or in LXQt (pcmanfm-qt draws the desktop on Wayfire
 # and on labwc). Fails while the desktop isn't up yet (Plasma), so autostart entries that call it can try again.
 d=${1%/}
 case ":${XDG_CURRENT_DESKTOP:-}:" in *:KDE:*) exec plasma-apply-wallpaperimage "$d/" ;; esac
 img=$d/contents/images/1920x1080.jpg; [ -f "$img" ] || img=$d
 [ -f "$img" ] || { echo "melon-set-wallpaper: no image in $d" >&2; exit 1; }
+# XFCE: xfdesktop keeps a wallpaper per monitor and workspace (/backdrop/screen0/monitor<name>/workspace0/last-image);
+# set every one it has made, or, before it has made any, one for each connected monitor. The largest image, zoomed.
+case ":${XDG_CURRENT_DESKTOP:-}:" in *:XFCE:*)
+  big=$(ls "$d"/contents/images/*x*.jpg 2>/dev/null | awk -F/ '{split($NF,a,"x"); print a[1]+0, $0}' | sort -n | tail -1 | cut -d' ' -f2-)
+  [ -n "$big" ] && img=$big
+  props=$(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep '/last-image$')
+  [ -n "$props" ] || props=$(xrandr --listactivemonitors 2>/dev/null | awk 'NR>1{print "/backdrop/screen0/monitor" $NF "/workspace0/last-image"}')
+  [ -n "$props" ] || { echo "melon-set-wallpaper: no monitor found yet" >&2; exit 1; }
+  for p in $props; do
+    xfconf-query -c xfce4-desktop -p "$p" -n -t string -s "$img" || exit 1
+    xfconf-query -c xfce4-desktop -p "${p%last-image}image-style" -n -t int -s 5
+  done
+  exit 0 ;;
+esac
 cfg=${XDG_CONFIG_HOME:-$HOME/.config}/pcmanfm-qt/lxqt/settings.conf
 mkdir -p "${cfg%/*}"
 [ -f "$cfg" ] || cp /etc/xdg/pcmanfm-qt/lxqt/settings.conf "$cfg" 2>/dev/null || printf '[Desktop]\n' > "$cfg"

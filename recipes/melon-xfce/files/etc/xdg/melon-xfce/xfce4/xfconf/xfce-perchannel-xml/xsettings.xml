@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- melon's look for GTK apps (xfsettingsd hands these to every GTK and X11 app through XSETTINGS); docs/xfce-theme.md.
+     melon-check-look compares what GTK, Qt and Flatpak apps really get with these values. -->
+<channel name="xsettings" version="1.0">
+  <property name="Net" type="empty">
+    <property name="ThemeName" type="string" value="melon"/>
+    <property name="IconThemeName" type="string" value="Papirus-Dark"/>
+    <property name="EnableEventSounds" type="bool" value="false"/>
+    <property name="EnableInputFeedbackSounds" type="bool" value="false"/>
+  </property>
+  <property name="Xft" type="empty">
+    <property name="Antialias" type="int" value="1"/>
+    <property name="Hinting" type="int" value="1"/>
+    <property name="HintStyle" type="string" value="hintslight"/>
+    <property name="RGBA" type="string" value="none"/>
+  </property>
+  <property name="Gtk" type="empty">
+    <property name="FontName" type="string" value="Inter 10"/>
+    <property name="MonospaceFontName" type="string" value="JetBrains Mono 10"/>
+    <property name="CursorThemeName" type="string" value="Adwaita"/>
+    <property name="CursorThemeSize" type="int" value="24"/>
+    <property name="DecorationLayout" type="string" value=":minimize,maximize,close"/>
+    <property name="DialogsUseHeader" type="bool" value="true"/>
+    <property name="MenuImages" type="bool" value="true"/>
+    <property name="ButtonImages" type="bool" value="false"/>
+  </property>
+</channel>

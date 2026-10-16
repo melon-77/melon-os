@@ -1,0 +1,10 @@
+#!/bin/sh
+# Flatpak apps get melon's GTK theme: GTK_THEME names it and ~/.themes (where the session copies it) is shared read-only.
+# A system-wide override, so every app gets it, Flathub's and the user's own; `flatpak override --reset` undoes it.
+if command -v flatpak >/dev/null 2>&1; then
+  flatpak override --system --env=GTK_THEME=melon --filesystem='~/.themes:ro' --filesystem=xdg-config/gtk-3.0:ro \
+    --filesystem=xdg-config/gtk-4.0:ro >/dev/null 2>&1 || true
+fi
+# the gsettings override (GTK 4, libadwaita and the settings portal read it)
+command -v glib-compile-schemas >/dev/null 2>&1 && glib-compile-schemas /usr/share/glib-2.0/schemas >/dev/null 2>&1
+exit 0

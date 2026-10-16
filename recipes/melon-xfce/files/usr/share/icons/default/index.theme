@@ -1,0 +1,5 @@
+[Icon Theme]
+# the cursor for anything that doesn't read XSETTINGS or XCURSOR_THEME (X11's own fallback): Adwaita, as in the session
+Name=Default
+Comment=Default cursor theme (melon-xfce)
+Inherits=Adwaita

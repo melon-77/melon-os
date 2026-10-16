@@ -1,0 +1,29 @@
+#!/bin/sh
+# melon-xfce-session: run at every XFCE login (autostart, melon-xfce).
+#  - the first time: melon's wallpaper on every monitor (xfdesktop keeps one setting per monitor, so no default file can
+#    name them); it tries again at the next login if the desktop wasn't up yet
+#  - every time: melon's GTK theme copied into ~/.themes, where Flatpak apps can read it (the system-wide override from
+#    melon-xfce's install script shares ~/.themes read-only and sets GTK_THEME; inside the sandbox GTK finds a theme in
+#    ~/.themes, not in ~/.local/share/themes, whose path Flatpak remaps), refreshed when melon-xfce changes it
+d=$HOME/.themes; c=${XDG_CONFIG_HOME:-$HOME/.config}
+mkdir -p "$d" "$c/melon"
+# Only the GTK parts: a copy of xfwm4's frames here would hide newer ones from /usr/share/themes until the next login.
+for t in adw-gtk3-dark melon melon-gold; do
+  [ -d /usr/share/themes/$t ] || continue
+  same=1
+  for p in index.theme gtk-3.0 gtk-4.0; do
+    [ -e /usr/share/themes/$t/$p ] || continue
+    diff -rq /usr/share/themes/$t/$p "$d/$t/$p" >/dev/null 2>&1 || same=
+  done
+  [ -n "$same" ] && [ ! -e "$d/$t/xfwm4" ] && continue
+  rm -rf "$d/$t.new"; mkdir -p "$d/$t.new"
+  for p in index.theme gtk-3.0 gtk-4.0; do
+    [ -e /usr/share/themes/$t/$p ] && cp -r /usr/share/themes/$t/$p "$d/$t.new/"
+  done
+  rm -rf "$d/$t" && mv "$d/$t.new" "$d/$t"
+done
+if [ ! -e "$c/melon/xfce-wallpaper" ]; then
+  sleep 3   # xfdesktop names its settings after the monitors once it has started
+  /usr/libexec/melon/melon-set-wallpaper /usr/share/wallpapers/melon && : > "$c/melon/xfce-wallpaper"
+fi
+exit 0

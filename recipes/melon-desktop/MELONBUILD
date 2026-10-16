@@ -1,6 +1,6 @@
 pkgname=melon-desktop
 pkgver=0.1
-pkgrel=17
+pkgrel=18
 pkgdesc="melon desktop: melon's calm dark look (wallpapers, SDDM theme, Plasma defaults for those who add Plasma), desktop services, first-login app offer, the gauntlet rewards"
 license=MIT
 # The desktop package list itself lives in scripts/desktop-packages.txt (the ISO profile), so this

@@ -815,3 +815,7 @@ grim-1.5.0.tar.gz	9e72a98f7621b1f5741b405b8dbd447acf7d300ddb12667ec526db1ce6154e
 nm-tray-0.5.1.tar.gz	482ff25dff752ca5e43e9e475afab95fbb28da88e3c87bc4afa3d789a99d5aac	url	https://github.com/palinek/nm-tray/archive/refs/tags/0.5.1.tar.gz
 xdg-desktop-portal-lxqt-1.4.0.tar.xz	4468a068130e5f66a3f61d02833429b71c49b714332f3cf49c540b8d689661c7	url	https://github.com/lxqt/xdg-desktop-portal-lxqt/releases/download/1.4.0/xdg-desktop-portal-lxqt-1.4.0.tar.xz
 xdg-desktop-portal-wlr-0.8.4.tar.gz	41b9683acae9415005d7b62d801e34946cb95da5eaaa83528c7085759a635187	url	https://github.com/emersion/xdg-desktop-portal-wlr/releases/download/v0.8.4/xdg-desktop-portal-wlr-0.8.4.tar.gz
+adw-gtk3v6.5.tar.xz	a81780fadfc432be0fc3d89c4ebb41aa28e4f032d42c36f9789c57dd10cfa41c	url	https://github.com/lassekongo83/adw-gtk3/releases/download/v6.5/adw-gtk3v6.5.tar.xz
+papirus-icon-theme-20250201.tar.gz	01a7a07293db9e22437b96fae9d7fd8dad74c33c5460af8c86227973cb3a9846	url	https://github.com/PapirusDevelopmentTeam/papirus-icon-theme/archive/20250201.tar.gz
+Inter-4.1.zip	9883fdd4a49d4fb66bd8177ba6625ef9a64aa45899767dde3d36aa425756b11e	url	https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip
+JetBrainsMono-2.304.zip	6f6376c6ed2960ea8a963cd7387ec9d76e3f629125bc33d1fdcd7eb7012f7bbf	url	https://download.jetbrains.com/fonts/JetBrainsMono-2.304.zip

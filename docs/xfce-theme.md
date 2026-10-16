@@ -9,39 +9,40 @@ It keeps melon's existing rules (AGENTS.md, "melon's look"): dark grey-green sur
 only where it means something (selection, focus, links, the lock screen's ring), and the melon itself only on the menu
 button, the boot menu and the installer.
 
-## Mockups
+## The layout: a bottom taskbar (the owner's pick, 16 October 2026)
 
-Both are drawn with the real pieces (Inter, Papirus-Dark, the palette below) in HTML and rendered at 1920x1080
-(`art/xfce-mockup.py`). Thunar, the terminal and the panel are what XFCE can actually do with the packages listed under
-"Packages"; nothing in them needs a patched XFCE.
+One panel at the bottom: the start menu (Whisker, with the melon) and the apps centred (docklike: pinned and running apps in
+one strip, a green bar under the active one), then the tray, sound, battery, notifications and a two-line clock at the
+right. Every window keeps **minimise, maximise and close** buttons (the owner: windows without them are "stupid and
+inconvenient"): xfwm4's frames and the title bars GTK and libadwaita apps draw themselves, which show only close unless told.
 
-**Layout A, top bar and dock** (macOS-like):
+Screenshots of melon-xfce's files in a real XFCE session (XFCE 4.18 from Ubuntu 24.04 and docklike 0.4.2 on Xvfb, the
+closest the cloud session can run; melon's own XFCE build is still to come):
 
-![Layout A: a slim top bar with the menu, window title, clock and tray; a floating dock at the bottom](images/xfce-layout-a.png)
+![XFCE with melon's look: Thunar with grey Papirus folders and a green selected place, the terminal in melon's colours, the bottom taskbar](images/xfce-real-desktop.png)
 
-**Layout B, bottom taskbar** (Windows 11 and KDE-like), with the start menu open:
+![The start menu: search, favourites, categories, and the lock, log out and power buttons](images/xfce-real-menu.png)
 
-![Layout B: one bottom panel with centred app icons, tray and clock on the right, a start menu with search, pinned apps and recent files](images/xfce-layout-b.png)
-
-Both share everything except the panel. The owner picks one as the default; the other can be offered as a one-click switch
-later (`xfce4-panel-profiles`).
+The first mockups (drawn with `art/xfce-mockup.py`, the real icons and font in HTML) show both layouts that were offered:
+[top bar and dock](images/xfce-layout-a.png) and [bottom taskbar](images/xfce-layout-b.png).
 
 ## The pieces
 
 | Part | Choice | Why |
 |---|---|---|
 | GTK theme | **adw-gtk3-dark**, recoloured to melon's palette with a `gtk.css` override (`@define-color` for window, view, headerbar, sidebar, accent) | The libadwaita look for GTK 3 apps: flat, rounded, modern. 1.3 MB. Upstream keeps it current with GNOME; melon only changes colours, so updates stay a version bump. |
-| Window frames | **melon's own xfwm4 theme** (`melon`), drawn by `art/xfwm4theme.py` | xfwm4 themes are XPM/PNG pieces. Ours: a 40 px title bar in the header colour so it joins the app's toolbar, 11 px rounded top corners, centred title in Inter Semibold, three small round buttons (close turns red on hover, the others light up grey), a 1 px border, no gradients. |
+| Window frames | **melon's own xfwm4 theme** (`melon`), drawn by `art/xfwm4theme.py` | xfwm4 themes are PNG/XPM pieces. Ours: a 36 px title bar in the header colour, 10 px rounded top corners, centred title in Inter Semi-Bold, three round buttons (minimise, maximise, close; close turns red under the pointer), a thin light outline, no gradients. Buttons are opaque: without the compositor xfwm4 turns partial alpha into a 1-bit mask, which cut a first version's minimise line and the circles away. |
 | Icons | **Papirus-Dark** with grey folders (`papirus-folders -C grey`, done at build time) | Complete (46 000 icons, every app melon ships), consistent, readable at 16 px. 21 MB compressed (xz), within the 45 MB "may go on an ISO" line. |
 | Fonts | **Inter** for the interface (10 pt), **JetBrains Mono** for terminals, Noto for everything else (already there) | Inter is the font of modern UIs (GNOME 48, many macOS-like setups). Subpixel off, slight hinting, greyscale antialiasing: the macOS/Windows 11 rendering. |
 | Cursor | **Adwaita** at 24 px | Neutral, crisp, already in GTK's stack; set everywhere (see "One look everywhere"). |
-| Panel | Layout A: a 32 px top panel (Whisker menu with the melon, window title, clock in the middle, tray) and a dock (`xfce4-docklike-plugin`) in a second, auto-sized, floating panel. Layout B: one 52 px bottom panel with the Whisker menu and docklike centred, tray and a two-line clock on the right. | `docklike` is the plugin that gives XFCE pinned and running apps in one strip with dots for running windows, like a dock or the Windows 11 taskbar. |
-| Start menu | **xfce4-whiskermenu-plugin**, styled with `gtk.css` (rounded 16 px, search on top, favourites as a grid, recent files, user and power buttons at the bottom) | XFCE's best menu, with search over apps, files and settings. |
-| Panel look | Glass: `rgba(16,21,18,.70)` background; under X11 the blur needs a compositor, so xfwm4's own compositor gives the transparency and drop shadows (no blur), and the colour is dark enough to read without it | Real blur needs picom; it's an option for later, not needed for the look. |
-| Notifications | **xfce4-notifyd** with a melon theme: rounded cards at top right, icon, bold title, dim body | Fits the panel and the menu. |
+| Panel | One 48 px bottom panel: two expanding separators centre the Whisker menu and docklike; systray, PulseAudio, power, notifications and the clock (time over date) at the right | `docklike` gives XFCE pinned and running apps in one strip, like the Windows 11 taskbar. It pins only apps every install has (Thunar, terminal, Mousepad, settings): a pinned Flatpak app that isn't installed yet shows as a blank gear. |
+| Start menu | **xfce4-whiskermenu-plugin**: user and lock/log out/power buttons on top, search, favourites as a grid, categories at the right; styled in `gtk.css` | XFCE's best menu, with search over apps and settings. Favourites name the first-boot Flatpak apps too: Whisker leaves out the ones not installed. Its window is square on X11 (GTK 3 can't round a popup without an RGBA visual). |
+| Panel look | Near-black `rgba(16,21,18,.88)` with a thin light line on top, rounded hover and pressed states for its buttons | No blur on X11 without picom; the colour is dark enough to read without it. |
+| Notifications | **xfce4-notifyd** with a melon theme: cards at top right, icon, bold title, dim body | Fits the panel and the menu. |
+| Terminal | xfce4-terminal in JetBrains Mono 11, the view colour as background, a 16-colour palette with melon green, no menu bar | The default black terminal was the one thing that still looked stock. |
 | Lock screen | **xfce4-screensaver**'s lock dialog, themed: the wallpaper dimmed, a clock, the user's picture and a password field with the green focus ring | The same ring as swaylock's on the Wayfire desktop. |
 | Login screen | SDDM's `melon` theme stays | Already calm and dark. |
-| Wallpaper | The existing quiet dark gradient (`art/wallpaper.py`), with a little more depth: two soft green and teal glows, as in the mockups | Gives the glass panel something to sit on; still no picture, no pattern. |
+| Wallpaper | The existing quiet dark gradient (`art/wallpaper.py`), set on every monitor at the first login (`melon-set-wallpaper`) | Still no picture, no pattern. |
 | Window effects | xfwm4 compositor on: shadows under windows and menus, no fading delays, no wobbly anything | Shadows are most of what makes windows look "modern". |
 
 ## Palette
@@ -73,19 +74,20 @@ XFCE desktop meets it:
   excepted (it keeps its own branding). Qt picks the cursor up from `XCURSOR_THEME`/`XCURSOR_SIZE`.
 - **Cursor everywhere:** `/usr/share/icons/default/index.theme` inherits Adwaita (X11's fallback, used by Xwayland apps
   and anything that ignores xsettings), and `XCURSOR_THEME=Adwaita XCURSOR_SIZE=24` in the session.
-- **Flatpak:** a system-wide override (`/var/lib/flatpak/overrides/global`) sets `GTK_THEME=adw-gtk3-dark`, and
-  `melon-first-boot` installs `org.gtk.Gtk3theme.adw-gtk3-dark` from Flathub along with the apps it offers; GTK 4 Flatpak
-  apps read the colour scheme and accent through `xdg-desktop-portal-gtk`'s settings portal, which reads the same gsettings.
-  Fonts and icons come from the host through `--filesystem=xdg-data/icons:ro` and fontconfig's host font sharing, which
-  Flatpak does by default.
+- **Flatpak:** melon-xfce's install script adds a system-wide override, `GTK_THEME=melon` and `~/.themes` shared
+  read-only, and `melon-xfce-session` copies the GTK parts of `melon`, `melon-gold` and `adw-gtk3-dark` into `~/.themes` at
+  each login (inside the sandbox GTK finds themes in `~/.themes`; Flatpak remaps `~/.local/share`). Only the GTK parts: a copy
+  of the xfwm4 frames there would hide newer ones in `/usr/share/themes`. GTK 4 Flatpak apps read the colour scheme through
+  the settings portal; fonts come from the host, which Flatpak shares by default. X11 apps in the sandbox get XSETTINGS from
+  the X server like any other.
 
-**Automated check** (`scripts/check-look.sh`, run by `qemu-test.py desktop` and `desktop-install` inside the logged-in
-session): it reads `xfconf-query -c xsettings` (theme, icons, font, cursor), `gsettings get org.gnome.desktop.interface`
-(colour scheme, font, cursor), the session's `QT_QPA_PLATFORMTHEME`, `XCURSOR_THEME` and `/usr/share/icons/default/index.theme`,
-asks a small Qt program (`qtpaths`-style probe in `melon-xfce`: prints `QApplication::font()`, the style and
-`QIcon::themeName()`) and a GTK one (`gtk-query-settings`) what they really got, and `flatpak override --show` for the
-global override. Any mismatch fails the test with the two values side by side. The screenshot (`logs/qemu-desktop.ppm`)
-is still for a human to look at.
+**Automated check:** `/usr/libexec/melon/melon-check-look` (melon-xfce), which `qemu-test.py desktop-install` runs in the
+logged-in user's session on any desktop that ships it. It compares xfconf's settings with what each toolkit really gets:
+GTK 3 (`gtk-query-settings`), GTK 4 and Flatpak (`gsettings`), Qt (`melon-look-probe-qt`, a small Qt program in melon-xfce
+that prints the font, icon theme and palette a Qt app received), the X cursor (`XCURSOR_*`, the `Xcursor.theme` resource,
+`/usr/share/icons/default/index.theme`), the window buttons (xfwm4's layout and GTK's decoration layout) and Flatpak's
+override and theme copy. One line per check; any mismatch fails the test with both values. In the Ubuntu session above all
+28 checks passed (the Qt probe ran with Qt 6.12; Qt 6.4's GTK theme doesn't pass GTK's colours on, which the check catches).
 
 ## Packages
 
@@ -97,17 +99,26 @@ is still for a human to look at.
 | `font-jetbrains-mono` | JetBrains Mono | upstream release zip | about 1 MB |
 | `xfce4-docklike-plugin` | the dock / taskbar strip | archive.xfce.org | < 1 MB |
 | `xfce4-whiskermenu-plugin` | start menu | archive.xfce.org (already in the XFCE plan) | < 1 MB |
-| `melon-xfce` | the `melon` GTK colours override, the xfwm4 theme, xfconf defaults (xsettings, xfwm4, panel layout, whiskermenu, notifyd, screensaver), gsettings override, `profile.d` environment, cursor default, Flatpak global override, `check-look.sh` | melon (art scripts in `art/`) | < 1 MB |
+| `melon-xfce` | the `melon` GTK colours override, the xfwm4 theme, xfconf defaults (xsettings, xfwm4, panel layout, whiskermenu, notifyd, screensaver), gsettings override, `profile.d` environment, cursor default, Flatpak override, `melon-check-look` and its Qt probe | melon (art scripts in `art/`) | < 1 MB |
 
 About 26 MB on the desktop ISO for the whole look. Nothing here is Rust; `librsvg` (Rust, already in the XFCE plan) is what
 draws the SVG icons, so "remove everything built with Rust" takes the icons' rendering with it, as it takes the rest.
 
-## Order of work
+## What is done, and what the XFCE build still has to do
 
-1. The owner picks layout A or B.
-2. Recipes: `adw-gtk3`, `papirus-icon-theme`, `font-inter`, `font-jetbrains-mono`, `xfce4-docklike-plugin` (the last in
-   `gen-xfce-recipes.py` with the other XFCE tarballs). Versions and checksums are taken on the build machine (the cloud
-   session can't reach GitHub release pages or archive.xfce.org); the mockups used Alpine's builds of the same releases.
-3. `art/xfwm4theme.py` draws the xfwm4 theme; `melon-xfce` carries it with the colour override and the defaults.
-4. `scripts/check-look.sh` and its hook in `qemu-test.py`.
-5. Screenshots from a real XFCE session (`qemu-test.py desktop`) replace the mockups here and in the README.
+Done (this pull request): the recipes `adw-gtk3`, `papirus-icon-theme` (grey folders), `font-inter`, `font-jetbrains-mono`
+and `melon-xfce` (`XFCE_LOOK` in `build-everything.sh`); the frames (`art/xfwm4theme.py`); the defaults in
+`/etc/xdg/melon-xfce` (xsettings, xfwm4, panel, Whisker, docklike, notifications, screen saver, desktop icons, terminal,
+GTK `settings.ini`); the gsettings override; the session setup; the gold edition for gauntlet survivors (`melon-gold`,
+through `melon-survivor-look`); XFCE in `melon-set-wallpaper`; the look check and its hook in `qemu-test.py`.
+
+For the XFCE build (`docs/xfce-desktop-plan.md`), so the look works there:
+- `qt6-qtbase` with `-DFEATURE_gtk3=ON` (in `gen-kde-recipes.py`, after `gtk3` is built): without Qt's GTK platform theme
+  Qt apps keep Fusion's colours, and the look check fails on Qt.
+- `glib` compiles `/usr/share/glib-2.0/schemas` in a trigger, and `gtk3` updates icon caches under `/usr/share/icons` in one:
+  melon-xfce and papirus-icon-theme can be installed before them.
+- `xfce4-docklike-plugin` (0.5.x, needs libxfce4windowing) and `xfce4-whiskermenu-plugin` in `gen-xfce-recipes.py`; then
+  melon-xfce's `depends=` gains the XFCE packages and `adwaita-icon-theme` (the cursor), and `desktop-packages.txt` lists it.
+- Super opens the start menu: melon-xfce's `package()` copies `xfce4-keyboard-shortcuts.xml` from xfce4-settings in the
+  sysroot into `/etc/xdg/melon-xfce` with `<Super>` bound to `xfce4-popup-whiskermenu` (as melon-lxqt does with LXQt's files).
+- Screenshots from `qemu-test.py desktop-install` replace the Ubuntu ones here.

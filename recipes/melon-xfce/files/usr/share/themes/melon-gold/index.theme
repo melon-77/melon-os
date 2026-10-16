@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=melon-gold
+Comment=melon's dark theme with a gold accent (gauntlet survivors)
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=melon-gold
+MetacityTheme=melon
+IconTheme=Papirus-Dark
+CursorTheme=Adwaita

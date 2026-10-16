@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- melon's taskbar (the owner's pick, 16 October 2026): one panel at the bottom, the start menu and the apps centred
+     (Whisker menu with the melon, then docklike: pinned and running apps in one strip), tray, sound, battery,
+     notifications and the clock at the right. The same layout is panel/default.xml next to this directory. -->
+<channel name="xfce4-panel" version="1.0">
+  <property name="configver" type="int" value="2"/>
+  <property name="panels" type="array">
+    <value type="int" value="1"/>
+    <property name="dark-mode" type="bool" value="true"/>
+    <property name="panel-1" type="empty">
+      <property name="position" type="string" value="p=8;x=0;y=0"/>
+      <property name="length" type="double" value="100"/>
+      <property name="position-locked" type="bool" value="true"/>
+      <property name="size" type="uint" value="48"/>
+      <property name="icon-size" type="uint" value="24"/>
+      <property name="nrows" type="uint" value="1"/>
+      <property name="mode" type="uint" value="0"/>
+      <property name="background-style" type="uint" value="0"/>
+      <property name="enter-opacity" type="uint" value="100"/>
+      <property name="leave-opacity" type="uint" value="100"/>
+      <property name="plugin-ids" type="array">
+        <value type="int" value="1"/>
+        <value type="int" value="2"/>
+        <value type="int" value="3"/>
+        <value type="int" value="4"/>
+        <value type="int" value="5"/>
+        <value type="int" value="6"/>
+        <value type="int" value="7"/>
+        <value type="int" value="8"/>
+        <value type="int" value="9"/>
+      </property>
+    </property>
+  </property>
+  <property name="plugins" type="empty">
+    <property name="plugin-1" type="string" value="separator">
+      <property name="expand" type="bool" value="true"/>
+      <property name="style" type="uint" value="0"/>
+    </property>
+    <property name="plugin-2" type="string" value="whiskermenu">
+      <property name="button-icon" type="string" value="melon"/>
+      <property name="show-button-title" type="bool" value="false"/>
+      <property name="view-mode" type="int" value="0"/>
+      <property name="default-category" type="int" value="0"/>
+      <property name="position-search-alternate" type="bool" value="false"/>
+      <property name="position-commands-alternate" type="bool" value="false"/>
+      <property name="position-categories-alternate" type="bool" value="false"/>
+      <property name="position-categories-horizontal" type="bool" value="false"/>
+      <property name="category-show-name" type="bool" value="true"/>
+      <property name="launcher-show-description" type="bool" value="false"/>
+      <property name="launcher-icon-size" type="int" value="4"/>
+      <property name="category-icon-size" type="int" value="1"/>
+      <property name="profile-shape" type="int" value="0"/>
+      <property name="menu-width" type="int" value="640"/>
+      <property name="menu-height" type="int" value="600"/>
+      <property name="recent-items-max" type="int" value="8"/>
+      <property name="show-command-settings" type="bool" value="true"/>
+      <property name="show-command-lockscreen" type="bool" value="true"/>
+      <property name="show-command-switchuser" type="bool" value="false"/>
+      <property name="show-command-logoutuser" type="bool" value="true"/>
+      <property name="show-command-restart" type="bool" value="true"/>
+      <property name="show-command-shutdown" type="bool" value="true"/>
+      <property name="show-command-suspend" type="bool" value="true"/>
+      <property name="show-command-hibernate" type="bool" value="false"/>
+      <property name="show-command-logout" type="bool" value="false"/>
+      <property name="show-command-menueditor" type="bool" value="false"/>
+      <property name="show-command-profile" type="bool" value="false"/>
+      <property name="favorites" type="array">
+        <value type="string" value="org.mozilla.firefox.desktop"/>
+        <value type="string" value="thunar.desktop"/>
+        <value type="string" value="xfce4-terminal.desktop"/>
+        <value type="string" value="org.xfce.mousepad.desktop"/>
+        <value type="string" value="org.videolan.VLC.desktop"/>
+        <value type="string" value="com.valvesoftware.Steam.desktop"/>
+        <value type="string" value="org.xfce.ristretto.desktop"/>
+        <value type="string" value="xfce-settings-manager.desktop"/>
+        <value type="string" value="xfce4-taskmanager.desktop"/>
+        <value type="string" value="melon-pinball.desktop"/>
+      </property>
+    </property>
+    <property name="plugin-3" type="string" value="docklike"/>
+    <property name="plugin-4" type="string" value="separator">
+      <property name="expand" type="bool" value="true"/>
+      <property name="style" type="uint" value="0"/>
+    </property>
+    <property name="plugin-5" type="string" value="systray">
+      <property name="square-icons" type="bool" value="true"/>
+      <property name="icon-size" type="int" value="18"/>
+      <property name="hide-new-items" type="bool" value="false"/>
+    </property>
+    <property name="plugin-6" type="string" value="pulseaudio">
+      <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
+      <property name="show-notifications" type="bool" value="true"/>
+    </property>
+    <property name="plugin-7" type="string" value="power-manager-plugin"/>
+    <property name="plugin-8" type="string" value="notification-plugin"/>
+    <property name="plugin-9" type="string" value="clock">
+      <property name="mode" type="uint" value="2"/>
+      <property name="digital-layout" type="uint" value="1"/>
+      <property name="digital-time-format" type="string" value="%H:%M"/>
+      <property name="digital-date-format" type="string" value="%d/%m/%Y"/>
+      <property name="digital-time-font" type="string" value="Inter 10"/>
+      <property name="digital-date-font" type="string" value="Inter 9"/>
+      <property name="tooltip-format" type="string" value="%A %d %B %Y"/>
+    </property>
+  </property>
+</channel>

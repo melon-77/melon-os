@@ -1,0 +1,17 @@
+pkgname=font-inter
+pkgver=4.1
+pkgrel=0
+pkgdesc="Inter, the interface font of melon's XFCE desktop"
+license=OFL-1.1
+url=https://rsms.me/inter/
+# upstream's release zip, sha512 as in Alpine's APKBUILD (font-inter 4.1)
+source=(Inter-4.1.zip)
+builddir=$srcdir
+options=('!strip')
+package(){
+  python3 -m zipfile -e $srcdir/Inter-4.1.zip x
+  # the variable fonts only: every weight in two files (the static TTF/OTF sets would add 30 MB)
+  install -Dm644 x/InterVariable.ttf $pkgdir/usr/share/fonts/inter/InterVariable.ttf
+  install -Dm644 x/InterVariable-Italic.ttf $pkgdir/usr/share/fonts/inter/InterVariable-Italic.ttf
+  install -Dm644 x/LICENSE.txt $pkgdir/usr/share/licenses/font-inter/LICENSE.txt
+}

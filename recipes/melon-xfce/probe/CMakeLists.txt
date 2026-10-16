@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.16)
+project(melon-look-probe-qt CXX)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+add_executable(melon-look-probe-qt probe.cpp)
+target_link_libraries(melon-look-probe-qt Qt6::Widgets)
+install(TARGETS melon-look-probe-qt DESTINATION libexec/melon)

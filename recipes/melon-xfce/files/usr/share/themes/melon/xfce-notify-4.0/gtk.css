@@ -1,0 +1,17 @@
+/* melon's notifications (xfce4-notifyd): a rounded dark card, bold title, dim body, green progress bars */
+#XfceNotifyWindow {
+  background-color: rgba(16, 21, 18, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px;
+  color: #e6ece3;
+}
+#XfceNotifyWindow:hover { background-color: rgba(24, 31, 27, 0.96); }
+#XfceNotifyWindow #summary { font-weight: 600; color: #e6ece3; }
+#XfceNotifyWindow #body { color: #97a395; }
+#XfceNotifyWindow button {
+  background: rgba(255, 255, 255, 0.07); color: #e6ece3; border: none; border-radius: 8px; padding: 4px 10px;
+}
+#XfceNotifyWindow button:hover { background: rgba(255, 255, 255, 0.13); }
+#XfceNotifyWindow progressbar progress { background-color: #6fbf4a; border-radius: 3px; }
+#XfceNotifyWindow progressbar trough { background-color: rgba(255, 255, 255, 0.1); border-radius: 3px; }

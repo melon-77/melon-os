@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=melon
+Comment=melon's dark theme: adw-gtk3-dark in melon's colours, melon's window frames
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=melon
+MetacityTheme=melon
+IconTheme=Papirus-Dark
+CursorTheme=Adwaita
+ButtonLayout=:minimize,maximize,close

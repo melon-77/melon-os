@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- notifications as rounded cards at the top right, in melon's theme (usr/share/themes/melon/xfce-notify-4.0) -->
+<channel name="xfce4-notifyd" version="1.0">
+  <property name="theme" type="string" value="melon"/>
+  <property name="notify-location" type="uint" value="2"/>
+  <property name="initial-opacity" type="double" value="1.0"/>
+  <property name="do-fadeout" type="bool" value="true"/>
+  <property name="do-slideout" type="bool" value="false"/>
+  <property name="expire-timeout" type="int" value="6"/>
+  <property name="notification-log" type="bool" value="true"/>
+  <property name="log-level" type="uint" value="0"/>
+</channel>

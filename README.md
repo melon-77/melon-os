@@ -84,6 +84,11 @@ Atom N270 with 2 GB of RAM (LXQt logs in through SDDM, printing works); the 32-b
 repository (`packages/x86`); the ISOs are on the pre-release `i686-20261007`; a test on a real U100 comes next. NetHack and
 the QEMU guest agent aren't in the 32-bit edition yet.
 
+## Release identity
+
+`/etc/os-release` says `melon 0.5` with the website and the repository as its links (it used to say "melon rolling" and a placeholder
+address), and the melon logo in the About page is a set of plain PNGs, so it no longer shows as a clipped green square.
+
 ## Developer tools
 
 Compilers and build tools come from the package repository (they're not on the ISOs), for example:

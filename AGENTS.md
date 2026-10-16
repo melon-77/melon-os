@@ -1,7 +1,8 @@
 # Contributing to melon (instructions for agents)
 
 This file is for AI agents (and humans) who work on melon. Read it fully before changing anything.
-`CLAUDE.md` points here.
+`CLAUDE.md` points here. **Taking over from another session? Read `HANDOFF.md` next**: current state, how to build, sign and
+release natively on melon, and the owner's standing rules.
 
 ## What melon is
 
@@ -519,7 +520,9 @@ the serial port, so tests don't need a screen. The test also records the sound c
   places showed Home, Desktop and Trash and a downloaded file went nowhere). The desktop profile lists `xdg-user-dirs` (and `melon-desktop`
   depends on it); both installers run `xdg-user-dirs-update` as the new user (`.cold`, `cal-finish`), and `melon-desktop`'s autostart
   `/etc/xdg/autostart/melon-user-dirs.desktop` does the same at login for installs from before (it only creates what is missing).
-  `qemu-test.py desktop-install` checks the six folders and `XDG_DOWNLOAD_DIR`. Dolphin and Flatpak apps read `~/.config/user-dirs.dirs`.
+  `qemu-test.py desktop-install` checks the six folders and `XDG_DOWNLOAD_DIR`. Dolphin and Flatpak apps read `~/.config/user-dirs.dirs`. Dolphin's Places panel
+  lists Documents, Downloads, Music, Pictures and Videos by itself for every folder that exists when it first creates a home's places file (checked in KIO 6.29's
+  `kfileplacesmodel.cpp`); a home whose places file already exists keeps its places.
 - **Console installer: quick and deliberately hidden.** It lives at `/usr/libexec/melon/.cold`. It is started
   by typing its name in bash, which a `command_not_found_handle` in `/etc/profile.d/zz-melon.sh`
   recognises **by hash**. The owner decided the name must not be discoverable. Therefore:

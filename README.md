@@ -84,6 +84,15 @@ Atom N270 with 2 GB of RAM (LXQt logs in through SDDM, printing works); the 32-b
 repository (`packages/x86`); the ISOs are on the pre-release `i686-20261007`; a test on a real U100 comes next. NetHack and
 the QEMU guest agent aren't in the 32-bit edition yet.
 
+## Welcome and updates
+
+The first login opens a **Welcome** window (your files, apps and games, help); closing it starts the Flathub app offer
+(`melon-first-boot`) as before. The **Updates** page, or the tray icon that appears when something is ready, installs
+updates with one button and a password prompt: `melon-welcome` (`recipes/melon-welcome`, Qt Widgets) reads
+`/var/lib/melon/updates.txt`, which the root service `melon-update-check` fills a couple of minutes after boot and every six
+hours with `apk update` and `apk list -u`. The button runs `pkexec /usr/libexec/melon/melon-update-run --upgrade`. It is
+the same as `doas apk upgrade`, with a window around it. "Update melon" is also in the launcher.
+
 ## Release identity
 
 `/etc/os-release` says `melon 0.5` with the website and the repository as its links (it used to say "melon rolling" and a placeholder

@@ -43,7 +43,7 @@ DESKTOP_LIBS="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio lib
   qemu-guest-agent open-vm-tools hvtools melon-vm-guest"
 # AppStream has Qt bindings (Discover), and Flatpak and the portal build against AppStream: right after Qt
 KDE=$(python3 $M/scripts/gen-kde-recipes.py | sed "s/\bqt6-qtbase\b/qt6-qtbase appstream flatpak xdg-desktop-portal/")
-INSTALLERS="kpmcore calamares calamares-melon melon-desktop"
+INSTALLERS="kpmcore calamares calamares-melon melon-welcome melon-desktop"
 # a compiler and binutils that run on melon (the cross toolchain in tools/ only runs on the build machine)
 DEVTOOLS="mpc binutils gcc make pkgconf patch"
 # the build tools melon's own recipes need, so melon can build melon (self-hosting, step 1)
@@ -78,7 +78,7 @@ if [ "$APK_ARCH" = x86 ]; then
     kf6-kwindowsystem kf6-kguiaddons kf6-kdbusaddons kf6-kcrash kf6-kidletime kf6-solid kf6-breeze-icons layer-shell-qt
     libkscreen sddm"
   ALL=$(printf '%s\n' $BASE $PLUMBING nethack $SIMPLE_X86 efivar efibootmgr $DESKTOP_LIBS_X86 $QT_X86 $KDE_X86 $LXQT kpmcore calamares \
-    calamares-melon melon-desktop | awk '!seen[$0]++' | grep -vx qemu-guest-agent)   # QEMU 11 has no 32-bit x86 hosts
+    calamares-melon melon-welcome melon-desktop | awk '!seen[$0]++' | grep -vx qemu-guest-agent)   # QEMU 11 has no 32-bit x86 hosts
 fi
 # recipes nobody listed yet go at the end (64-bit only)
 if [ "$APK_ARCH" != x86 ]; then

@@ -511,6 +511,18 @@ the serial port, so tests don't need a screen. The test also records the sound c
   the icon `melon` in `hicolor`, **PNGs only** (16 to 512 px, made from `branding/melon-logo-512.png`): Qt's SVG renderer ignores the
   clip path in the old 156 KB `melon.svg`, so the rind's veins were drawn outside the circle as a green square. Don't add an SVG
   with clip paths back; the vector master stays in `branding/melon-logo.svg` and `art/logo.py`.
+- **Welcome and updates (`recipes/melon-welcome`, the owner asked 16 October 2026):** one Qt Widgets program, `melon-welcome`
+  (`--autostart` from `/etc/xdg/autostart`, KDE only; `--updates`; `--screenshot out.png [page]` draws a page with
+  `QT_QPA_PLATFORM=offscreen`, which is how it is checked without a screen). It never installs by itself. The runit service
+  `melon-update-check` (root, in `desktop.services`, and linked once by `melon-welcome`'s post-install/post-upgrade so installed
+  systems get it, marker `/var/lib/melon/update-check-enabled`: whoever removes the link keeps it off) runs
+  `melon-update-run --check` two minutes after boot, every six hours and when a user asks, by creating
+  `/var/lib/melon/updates-ctl/request-<uid>` (a sticky directory: that is how "Check now" works without a password). The result is
+  `/var/lib/melon/updates.txt` (`checked <epoch>`, `count <n>`, package names, `failed <epoch>` when the server couldn't be reached).
+  Installing is `pkexec /usr/libexec/melon/melon-update-run --upgrade`, authorised by `org.melon.update.policy` (admin password,
+  kept for a while). The window closing for the first time starts `melon-first-boot`, which is why melon-desktop no longer has its
+  own autostart entry for it. The live session's user gets nothing (the program exits for `live`). `qemu-test.py desktop-install`
+  checks the service, a request and the policy file. Not yet seen on a real desktop: the tray icon and notification, the password prompt.
 - **Hidden owner commands** work like the console installer: `/etc/profile.d/zz-melon.sh` recognises them by the
   first 16 hex digits of their name's sha256 and nothing else. The same rules apply: never write their names in any
   file, comment, commit or test. `59c1a50f2e93bdc1` unlocks every gauntlet reward (`/usr/libexec/melon/.gold`,

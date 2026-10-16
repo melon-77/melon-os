@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Update melon
+GenericName=Software updates
+Comment=Install the latest updates for melon
+Exec=melon-welcome --updates
+Icon=system-software-update
+Categories=System;
+Keywords=update;upgrade;apk;software;

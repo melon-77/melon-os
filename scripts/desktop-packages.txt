@@ -10,7 +10,7 @@ plasma-nm plasma-pa bluedevil breeze kscreenlocker polkit-kde-agent-1 xdg-deskto
 kde-cli-tools plasma-systemmonitor kinfocenter kf6-breeze-icons kf6-qqc2-desktop-style kf6-kimageformats
 sddm sddm-kcm
 # apps
-dolphin konsole kde-spectacle plasma-discover nano
+dolphin konsole kde-spectacle plasma-discover nano melon-welcome
 # melon's own games
 melon-pinball
 # services

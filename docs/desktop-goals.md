@@ -18,6 +18,10 @@ homework. Report it with `sudo melon-hwreport` attached.
 
 ## The checklist
 
+The checks for sound to screenshots were written on 16 October 2026 in a cloud session with no ISO or KVM, so none has run: they report
+`GOAL ok` or `GOAL FAIL` lines without failing the run (`chk(..., soft=True)` in `qemu-test.py`). Make one hard after it has passed on the
+build machine, and fix what fails.
+
 "Checked by" says what tests the row today. `qemu-test.py desktop` and `desktop-install` are described in `AGENTS.md`
 ("Testing"). Rows marked *not yet* have no automated check; that is open work, not a claim that they're broken.
 
@@ -26,13 +30,13 @@ homework. Report it with `sudo melon-hwreport` attached.
 | USB drives | Plugging in a stick mounts it for the logged-in user, no password prompt | UDisks2, polkit, udevd | `qemu-test.py desktop` (a USB stick mounts through UDisks2) |
 | Wi-Fi and wired network | The desktop lists networks and joins one (WPA2 at least) | NetworkManager and the desktop's network applet | `qemu-test.py desktop` (`nmcli` online, WPA2 on mac80211_hwsim radios) |
 | Printing | A network printer is found and a page prints | CUPS | `qemu-test.py desktop` (a text file prints to a virtual IPP Everywhere printer) |
-| Sound | Output and input devices appear, the volume control works | PipeWire and WirePlumber, started with the session | *not yet* (the test only records the installer music) |
-| Bluetooth | The desktop pairs and connects a device | BlueZ and the desktop's Bluetooth applet | *not yet* |
-| Suspend and lock | Closing the lid or pressing the power button does what the desktop's power settings say; the screen locks | elogind, the desktop's power management and screen locker | *not yet* |
-| Brightness and volume keys | The keys on the keyboard change brightness and volume, with an on-screen indicator | the desktop's shortcuts and the kernel's keyboard and backlight drivers | *not yet* |
-| Privilege prompts | Settings that need an administrator ask for a password instead of failing | polkit and the desktop's authentication agent | *not yet* |
-| Notifications, file manager, screenshots | They exist and open | the desktop's own | *not yet* |
-| Look | Fonts, cursor and theme are the same in Qt apps, GTK apps and Flatpak apps | `melon-desktop`, `melon-lxqt`, Flatpak's theme extensions | *not yet* |
+| Sound | Output and input devices appear, the volume control works | PipeWire and WirePlumber, started with the session | `desktop-install`: `4 sound devices`, `4 volume control` (written, not run yet) |
+| Bluetooth | The desktop pairs and connects a device | BlueZ and the desktop's Bluetooth applet | `desktop-install`: `5 bluetooth stack` (bluetoothd and the pairing wizard; pairing needs a controller; written, not run yet) |
+| Suspend and lock | Closing the lid or pressing the power button does what the desktop's power settings say; the screen locks | elogind, the desktop's power management and screen locker | `desktop-install`: `6 suspend and power off offered`, `6 screen lock` (written, not run yet) |
+| Brightness and volume keys, power profiles | The keys on the keyboard change brightness and volume, with an on-screen indicator; the power profiles (power saver, balanced, performance) can be switched | the desktop's shortcuts, the kernel's keyboard and backlight drivers, powerdevil, power-profiles-daemon (enabled in the desktop profile) | `desktop-install`: `7 volume key`, `7 power management service`, `7 power profiles` (written, not run yet; QEMU can't send the brightness keys) |
+| Privilege prompts | Settings that need an administrator ask for a password instead of failing | polkit and the desktop's authentication agent | `desktop-install`: `8 privilege prompts` (setuid `pkexec` and the polkit agent in the session; written, not run yet) |
+| Notifications, file manager, screenshots | They exist and open | the desktop's own | `desktop-install`: `9 notifications`, `9 file manager`, `9 screenshot` (written, not run yet) |
+| Look | Fonts, cursor and theme are the same in Qt apps, GTK apps and Flatpak apps; the About page shows the melon version and logo | `melon-desktop`, `melon-lxqt`, `/etc/os-release`, Flatpak's theme extensions | *not yet* (the About page and logo were fixed on 16 October 2026: `os-release` says melon 0.5, the logo is PNG) |
 
 ## Rules that follow from the goal
 

@@ -36,6 +36,8 @@ recipes/calamares-melon/   graphical installer branding and the 200-question gau
 
 ## Building
 
+Someone (or a Claude Code session) taking over the build and release work: start with [`HANDOFF.md`](HANDOFF.md).
+
 Sources come from upstream releases (`scripts/fetch-sources.sh`, into `sources/`; older recipes still use the Ubuntu
 source archive's copies of the same tarballs, and new ones come straight from upstream). Then:
 

@@ -135,7 +135,7 @@ cross toolchain before it carries on with the packages; finished packages in `re
 melon builds itself. On a melon install (desktop or console profile), starting with no checkout:
 
 1. `doas apk upgrade`, then `doas apk add git` (git is in the online repository, not on the ISOs).
-2. `git clone -b testing https://github.com/melon-77/melon-os ~/melon`, then `cd ~/melon`.
+2. `git clone --recurse-submodules -b testing https://github.com/melon-77/melon-os ~/melon`, then `cd ~/melon` (melon-pinball's game is a submodule; in an existing checkout, `git submodule update --init`).
 3. If you are moving from an old build machine, copy its `keys/`, `sources/`, `repo/` and `sysroot/` into `~/melon`
    (not `tools/` or `hosttools/`, see below). Otherwise put the signing key in `keys/` ("The signing key" below).
 4. `doas scripts/host-setup.sh` (it lists any build tool melon's repository doesn't have; if a step fails, it prints

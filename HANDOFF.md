@@ -23,6 +23,19 @@ then this file. `CLAUDE.md` points to both. Everything here is current as of thi
   `/dev/kvm` should work and `qemu-test.py desktop-install` can finally run for real), the NVIDIA modules on a real card, the 32-bit edition on the
   owner's MSI Wind U100.
 
+## Added after the first handoff (16 October 2026)
+
+- **Welcome window, Update button, tray notice:** `recipes/melon-welcome` (AGENTS.md, "Welcome and updates"). melon-desktop depends on it. It was compiled and
+  its pages drawn offscreen in a cloud session, never run on a real desktop: on the first Plasma boot, look at the Welcome window, the Updates page,
+  the tray icon when `/var/lib/melon/updates.txt` lists packages, and the password prompt of "Update melon".
+- **About page and logo:** `/etc/os-release` says `melon 0.5` with real links and the logo is PNG only (AGENTS.md, "Release identity and the logo"). Change
+  `os-release`, `lsb-release` and Calamares' `branding.desc` with every release.
+- **Publish three packages online with the next `scripts/publish-repo.sh`:** `rpcsvc-proto`, `python3-jinja2` and `python3-pyparsing`. Their recipes exist and
+  are in the build lists, but the online repository doesn't have them, so `host-setup.sh` carries stopgaps (rpcgen built from `sources/` into
+  `/usr/local/bin`, Jinja2 and pyparsing copied from their sdists). After they are published, delete those stopgaps from `host-setup.sh` so a new build
+  machine installs them with `apk add` like every other tool.
+- **Desktop goals:** `docs/desktop-goals.md` (PR #79) and the checks for it in `qemu-test.py` (PR #81). They are soft until one has passed on a machine with KVM.
+
 ## Build setup on melon
 
 Follow `BUILDING.md`, "melon as the build machine": `doas apk upgrade && doas apk add git`, clone `https://github.com/melon-77/melon-os` (branch

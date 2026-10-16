@@ -1,0 +1,10 @@
+#!/bin/sh
+# switch the update check on once: systems installed before it existed get it when they upgrade. Whoever removes the link
+# afterwards keeps it off, because the marker stays.
+m=/var/lib/melon/update-check-enabled
+if [ ! -e $m ]; then
+  mkdir -p /var/service /var/lib/melon
+  [ -e /var/service/melon-update-check ] || ln -s /etc/sv/melon-update-check /var/service/melon-update-check
+  : > $m
+fi
+exit 0

@@ -1,0 +1,21 @@
+pkgname=melon-welcome
+pkgver=0.1
+pkgrel=0
+pkgdesc="melon welcome window, update button and update notice in the tray"
+license=MIT
+url=https://github.com/melon-77/melon-os
+makedepends=(qt6-qtbase-dev)
+depends=(melon-base polkit apk-tools)
+builddir=$srcdir
+# one Qt Widgets program (src/main.cpp); the rest is melon's own files: the root service that looks for updates,
+# the helper that installs them (run through pkexec, policy in org.melon.update.policy), the autostart and menu entries
+build(){
+  cmake_setup -S $startdir/src -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake
+  ninja -C build -j$JOBS
+}
+package(){
+  DESTDIR=$pkgdir ninja -C build install
+  cp -a $startdir/files/. $pkgdir/
+  chmod 755 $pkgdir/etc/sv/*/run $pkgdir/etc/sv/*/log/run $pkgdir/usr/libexec/melon/*
+  mkdir -p $pkgdir/var/log/melon-update-check
+}

@@ -1,11 +1,11 @@
 pkgname=melon-desktop
 pkgver=0.1
-pkgrel=20
-pkgdesc="melon desktop: Plasma defaults, melon dark theme, wallpapers, splash, SDDM and GRUB look, desktop services, first-login app offer"
+pkgrel=21
+pkgdesc="melon desktop: Plasma defaults, melon dark theme, wallpapers, splash, SDDM and GRUB look, desktop services, Welcome window and first-login app offer (through melon-welcome)"
 license=MIT
 # The desktop package list itself lives in scripts/desktop-packages.txt (the ISO profile), so this
 # package only carries melon's own files and can be built before the whole desktop stack exists.
-depends=(melon-base xdg-user-dirs)
+depends=(melon-base xdg-user-dirs melon-welcome)
 builddir=$srcdir
 options=(keepdirs)
 package(){

@@ -58,7 +58,7 @@ if [ -n "$DESKTOP_PKGS" ]; then
   printf '%s\n' $PKGS $(printf '%s\n' $DESKTOP_PKGS | grep -vxF "${LIVE_ONLY:-@none@}") > $ROOT/usr/share/melon/profiles/desktop
   # services for the desktop profile: udev replaces mdev, NetworkManager replaces the dhcp/wpa services
   # (only the ones the profile's packages ship: the 32-bit edition has no CUPS, Avahi or power-profiles-daemon)
-  for s in -mdevd -dhcp udevd dbus elogind polkitd NetworkManager bluetoothd power-profiles-daemon zram sddm avahi-daemon cupsd; do
+  for s in -mdevd -dhcp udevd dbus elogind polkitd NetworkManager bluetoothd power-profiles-daemon zram sddm avahi-daemon cupsd melon-update-check; do
     case $s in -*) echo $s ;; *) [ ! -d $ROOT/etc/sv/$s ] || echo $s ;; esac
   done > $ROOT/usr/share/melon/profiles/desktop.services
 fi

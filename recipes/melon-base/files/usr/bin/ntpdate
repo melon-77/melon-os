@@ -1,0 +1,8 @@
+#!/bin/sh
+# ntpdate SERVER...: set the clock once from an NTP server, for programs that look for ntpdate (Plasma's Date & Time page
+# offers "Set date and time automatically" only when it finds it). BusyBox's ntpd does the query; the ntpd service keeps
+# the clock right the rest of the time.
+args=
+for s in "$@"; do case $s in -*) ;; *) args="$args -p $s" ;; esac; done
+[ -n "$args" ] || args="-p pool.ntp.org"
+exec ntpd -n -q $args

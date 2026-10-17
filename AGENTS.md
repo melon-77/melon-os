@@ -411,6 +411,14 @@ Rebuilding the kernel takes about an hour on 2 cores.
     `configure-remote` is `auth_admin`, unlike the installs wheel gets without one), and `melon-flathub` only adds it when
     someone removed it. The package also creates the `flatpak` system account its system helper runs `revokefs-fuse` as
     (upstream's `sysusers.d` file, which melon drops); without it every system install warned that the user doesn't exist.
+64. **Time zones need `tzdata`** (IANA's data, built with the build machine's `zic`; on every ISO since 0.5.1). Until then melon had no
+    `/usr/share/zoneinfo`: every system ran on UTC, Plasma's Date & Time page listed no zones and could not save one (its helper
+    links `/etc/localtime` to `/usr/share/zoneinfo/<zone>`), and browsers reported UTC, which Cloudflare's browser check holds against
+    a connection from another zone. A new system starts on UTC (`tzdata`'s post-install links it; the package never ships
+    `/etc/localtime`, which is the owner's choice). The same page offers "Set date and time automatically" only when it finds
+    `ntpdate` or `rdate`, so `melon-base` has a small `ntpdate` that asks BusyBox's `ntpd` once; the `ntpd` service keeps the clock
+    right the rest of the time. 12- or 24-hour time is per user: Region & Language writes `LC_TIME` to `plasma-localerc`, which
+    Plasma exports at login (Qt reads it; musl itself has no locale data), and the clock applet has its own 12/24-hour switch.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but

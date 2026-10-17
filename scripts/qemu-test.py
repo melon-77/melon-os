@@ -291,6 +291,14 @@ if mode == 'desktop-install':
     stable = pid and count(greeter) == pid and count("loginctl list-sessions --no-legend | awk '$3==\"sddm\" && $6==\"active\"' | wc -l") == 1
     ok &= bool(stable); step('greeter after 20 s: ' + ('same process, active session' if stable else 'RESTARTED OR NO SESSION'))
     mon(f'screendump {M}/logs/qemu-desktop-greeter.ppm'); time.sleep(3)
+    # time zones: tzdata is installed, a new system is on UTC, and a zone chosen the way Plasma's Date & Time page does it
+    # (a link to /usr/share/zoneinfo) is what the system uses; jcole's clock gets 12-hour US time through Region & Language's
+    # setting (LOOK at the clock in logs/qemu-desktop-installed.ppm: "PM" or "AM", New York time)
+    tz = count('n=0; [ -s /usr/share/zoneinfo/America/New_York ] && n=$((n+1)); [ "$(readlink /etc/localtime)" = /usr/share/zoneinfo/UTC ] && n=$((n+1));'
+               ' ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime; case $(date +%Z) in EDT|EST) n=$((n+1)) ;; esac;'
+               ' [ -x /usr/bin/ntpdate ] && n=$((n+1)); echo $n')
+    sh("printf '[Formats]\\nLANG=C.UTF-8\\nLC_TIME=en_US.UTF-8\\n' > /home/jcole/.config/plasma-localerc; chown jcole: /home/jcole/.config/plasma-localerc")
+    ok &= tz == 4; step(f'time zones: {tz}/4 (tzdata, UTC by default, a chosen zone is used, ntpdate for "set automatically")')
     if not HAVE_KVM: time.sleep(90)   # emulated CPU: the greeter's password field takes a while to take keys
     for ch in 'melonuser':
         mon(f'sendkey {ch}'); time.sleep(0.15)

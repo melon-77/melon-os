@@ -98,6 +98,10 @@ so neither Discover nor the first-login offer asks for a password just to set it
 
 ## Fixed in 0.5.1
 
+Time zones work: melon had no time zone data, so the clock was always UTC and Plasma's Date & Time page could neither list nor save a
+zone. `tzdata` is now on both ISOs, "Set date and time automatically" is offered (melon has an `ntpdate` for it), and 12- or 24-hour
+time follows Region & Language's time format or the clock's own setting.
+
 melon 0.5 had lost the setuid bit on its password checkers when it was built (polkit's helper, `pkexec`, PAM's `unix_chkpwd`), so every
 password window failed: adding Flathub, Discover, the "Update melon" button, unlocking the screen. 0.5.1 puts them back, adds the
 `flatpak` system user Flatpak's installs warned about, and makes desktops installed with the console installer leave Wi-Fi to

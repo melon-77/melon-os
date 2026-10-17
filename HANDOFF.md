@@ -10,7 +10,7 @@ then this file. `CLAUDE.md` points to both. Everything here is current as of thi
 - **melon 0.5 "Esfahan" was released on 17 October 2026 and turned back into a pre-release the same day** (the owner's decision): the
   native build had taken the setuid bit off pkexec, polkit's helper and PAM's `unix_chkpwd` (AGENTS.md rule 62), so every password
   prompt on its desktop failed. **melon 0.5.1** fixes that, ships Flathub preconfigured with the `flatpak` system account (rule 63) and
-  stops desktop installs from the console installer running a second Wi-Fi stack next to NetworkManager; its notes are
+  stops desktop installs from the console installer running a second Wi-Fi stack next to NetworkManager, and adds time zones (`tzdata`, rule 64); its notes are
   `releases/v0.5.1/NOTES.md`, its branch `release-0.5.1` (PR into `claude/release-0.5-plasma`). Test 0.5.1 changes in a VM, never on the
   owner's PC.
 - How 0.5 was built (17 October 2026, on the owner's PC running melon: the first full native build).

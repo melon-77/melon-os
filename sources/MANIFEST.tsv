@@ -593,6 +593,8 @@ lm-sensors-3.6.2.tar.gz	-	link	deb/lm-sensors_3.6.2.orig.tar.gz
 lua-5.4.8.tar.gz	-	link	deb/lua5.4_5.4.8.orig.tar.gz
 lvm2-2.03.31.tar.xz	-	link	deb/lvm2_2.03.31.orig.tar.xz
 flathub-20261017.flatpakrepo	3371dd250e61d9e1633630073fefda153cd4426f72f4afa0c3373ae2e8fea03a	url	https://dl.flathub.org/repo/flathub.flatpakrepo
+tzcode2026e.tar.gz	cc3d27ca2a0d8399504551b920970d80af83bfb9c216e8082a15491921935d54	url	https://data.iana.org/time-zones/releases/tzcode2026e.tar.gz
+tzdata2026e.tar.gz	b26882805f26aac59d5b222978e6580484b834ccdc98be89df2f05a6dc53a652	url	https://data.iana.org/time-zones/releases/tzdata2026e.tar.gz
 make-4.4.1.tar.gz	dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3	url	https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz
 mesa-26.0.8.tar.xz	-	link	deb/mesa_26.0.8.orig.tar.xz
 milou-6.6.4.tar.xz	-	link	deb/milou_6.6.4.orig.tar.xz

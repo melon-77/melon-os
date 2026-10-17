@@ -7,21 +7,25 @@ then this file. `CLAUDE.md` points to both. Everything here is current as of thi
 ## Where things stand
 
 - **melon 0.4 "Dudaim"** is the latest published release (Plasma desktop, GitHub + SourceForge, site points to it).
-- **melon 0.5 "Esfahan" is not built, not released.** The owner's decision (12 October 2026): 0.5 ships with **Plasma** as the default desktop. Its branch is
+- **melon 0.5 "Esfahan" is built and tested, not yet released** (17 October 2026, on the owner's PC running melon: the first full native build).
+  Desktop ISO 626 MB, console ISO 248 MB (0.4: 794 / 380 MB). Both pass `size-round.sh tests` with KVM, including `desktop-install`: Calamares installs,
+  SDDM and Plasma log in, the welcome app's update notice answers, no system files belong to `nobody`. The owner's decision (12 October 2026): 0.5 ships with **Plasma** as the default desktop. Its branch is
   `claude/release-0.5-plasma`: the size round (PR #75: firmware split, one kernel copy on the ISO, JPEG wallpaper, zstd 19; every translation kept, see
   AGENTS.md "Desktop ISO size"), the superkernel (PR #76, `linux-melon` pkgrel 6 and `nvidia-open` pkgrel 2), the new calm GRUB menu (from #77), and the fix
   for missing standard folders (Downloads, Documents, ... now created by both installers; found 16 October 2026). Release name "Esfahan" was
   proposed, not confirmed by the owner: ask once when you publish.
-  Measured before the Plasma decision (the combined branch with Wayfire): desktop ISO 512 MB, console ISO 251 MB (0.4: 794 / 380 MB); the Plasma
-  desktop ISO will be larger (about 620 MB measured on 12 October). The owner accepted 612 MB desktop / 243 MB console as the size goal.
+  The owner accepted 612 MB desktop / 243 MB console as the size goal; the welcome app and Plasma put the desktop ISO a little over it.
+  The native build needed the fixes in PR #85 (BUILDING.md, "melon as the build machine"), and the release text is in the owner's new short format (PR #87,
+  `docs/release-notes.md`, `releases/v0.5/NOTES.md`).
 - **Wayfire + LXQt as the default desktop was tried and dropped** (owner, 12 October 2026: "lxqt kind of just hates working correctly without a
   decade of setup"). That work is PR #77 / branch `claude/release-0.5` (online `melon-lxqt` later). **XFCE is planned as the default for 0.6**:
-  `docs/xfce-desktop-plan.md` on branch `claude/xfce-desktop` (needs Xorg and GTK 3 first: neither is in the tree). Not started beyond the plan.
+  `docs/xfce-desktop-plan.md` on branch `claude/xfce-desktop` (needs Xorg and GTK 3 first: neither is in the tree). The look is done: PR #82 (theme,
+  centred taskbar, melon's own start menu `melon-menu`, Thunar tidied), tested on Ubuntu's XFCE; XFCE itself isn't built for melon yet. The owner
+  confirmed on 16 October 2026: 0.5 ships with Plasma.
 - Open work to merge: PRs #75, #76, #77 target `testing`. Merge #75 and #76 with the Plasma branch's content in mind (the Plasma branch contains #75, #76 and
   the GRUB commit of #77, so merge that branch instead of the three separately); #77 stays open for the LXQt online install.
-- Not yet verified anywhere: the Plasma desktop ISO's login and session (QEMU without KVM never gets Plasma up; the PC now boots melon natively, so
-  `/dev/kvm` should work and `qemu-test.py desktop-install` can finally run for real), the NVIDIA modules on a real card, the 32-bit edition on the
-  owner's MSI Wind U100.
+- Not yet verified anywhere: the NVIDIA modules on a real card, the 32-bit edition on the owner's MSI Wind U100. (Plasma's login and session now pass
+  `qemu-test.py desktop-install` under KVM on the owner's PC.)
 
 ## Added after the first handoff (16 October 2026)
 
@@ -42,8 +46,10 @@ Follow `BUILDING.md`, "melon as the build machine": `doas apk upgrade && doas ap
 `claude/release-0.5-plasma` for 0.5), `doas scripts/host-setup.sh`, then `doas scripts/build-everything.sh`.
 
 - Never point `/lib/ld-musl-x86_64.so.1` at the sysroot on melon (rule 18); `host-setup.sh` handles the loader path.
-- A native build from nothing takes many hours (toolchain, Qt, Plasma, Mesa and LLVM, the kernel is about an hour on 2 cores). Check whether the old
-  `repo/`, `sources/` and `sysroot/` survived on a disk first (copy `keys/`, `sources/`, `repo/`, `sysroot/`; not `tools/` or `hosttools/`, BUILDING.md says why).
+- A native build from nothing takes many hours: about 7½ hours of compiling on the owner's PC (Ryzen 7 5800U, 16 threads, 15 W; the long ones are LLVM,
+  Rust, the kernel, Qt and Plasma). Check whether an old `repo/`, `sources/` and `sysroot/` survived first (copy `keys/`, `sources/`, `repo/`, `sysroot/`;
+  `tools/` and `hosttools/` too when the old machine was melon, not when it was Ubuntu: BUILDING.md says why). The owner keeps a backup of the build on
+  the MELONLOGS memory card (`melon-backup/`).
   Otherwise `scripts/fetch-sources.sh` re-downloads and checks every source against `sources/MANIFEST.tsv`.
 - Run builds detached so a closed terminal does not kill them (WSL lost a run that way on 12 October): `setsid nohup scripts/build-everything.sh > logs/build.out 2>&1 &`
   or inside `tmux`. Poll the log sparingly; every poll costs the owner usage. `build-everything.sh` resumes where it stopped and skips what is in `repo/`.
@@ -55,18 +61,19 @@ Follow `BUILDING.md`, "melon as the build machine": `doas apk upgrade && doas ap
 
 ## Signing key
 
-`keys/melon-signing.rsa` (the everyday key) is on the owner's USB stick, used **in place**: `export MELON_SIGN_KEY=/path/on/the/stick/melon-signing.rsa`
+`keys/melon-signing.rsa` (the everyday key) is on the owner's MELONLOGS memory card (`/run/media/lal/MELONLOGS/melon-backup/melon-keys-20261001/`; mount it
+with `udisksctl mount -b /dev/mmcblk0p1` after a reboot), used **in place**: `export MELON_SIGN_KEY=/path/on/the/card/melon-signing.rsa`
 (honoured by `build-everything.sh`, `melon-build` and `mkiso.sh`; never copy it into the repo or `keys/`). It must be plugged in to sign. The offline backup
-key is not on any build machine. Never commit `keys/*.rsa`.
+key belongs on no build machine (on 16 October 2026 an unencrypted copy sat next to the everyday key on the card; the owner knows). Never commit `keys/*.rsa`.
 
 ## Releasing (every meaningful change gets all four, the owner's rule of 7 October)
 
 1. Build and test the ISOs (above). Release only what you tested; say plainly what could not be tested.
-2. **GitHub release** (`gh` is freshly logged in as `xbfj` on the PC): tag `v0.5`, title `melon 0.5 “Esfahan”`, notes in the owner's short format
-   (`docs/release-notes.md`; the 0.5 text is `releases/v0.5/NOTES.md`: fill in the ISO dates and final sizes), both ISOs plus `SHA256SUMS`, marked Latest. Retitle the 0.4 release "(superseded)" with a link to the new one.
-3. **SourceForge** (owner `melaboton`, project `melonl`): `SF_USER=melaboton SF_PROJECT=melonl scripts/upload-isos.sh sourceforge v0.5 <isos>`.
-   The old upload key lived in WSL and is gone: make a new one (`ssh-keygen -t ed25519 -C melon-build-pc`) and ask the owner to add the public half under
-   their SourceForge account's SSH keys. `docs/iso-hosting.md` has the details. Downloads on the site use SourceForge first and keep GitHub alongside.
+2. **GitHub release** (`gh` is freshly logged in as `xbfj` on the PC): tag `v0.5`, title `melon 0.5 “Esfahan”`, notes written for users (what is new, which file
+   to download, `doas apk upgrade` for installed systems; the draft is `/mnt/project-files/releases/v0.5/NOTES.md` if the project files are reachable, else write
+   them from the PR descriptions), both ISOs plus `SHA256SUMS`, marked Latest. Retitle the 0.4 release "(superseded)" with a link to the new one.
+3. **SourceForge: not any more.** The owner dropped it on 17 October 2026 ("the slowest thing ever"): new releases are on GitHub only and the site's
+   buttons for them point there. (0.5's ISOs did reach SourceForge's `v0.5` folder first; the upload key `~/.ssh/id_ed25519_sourceforge` stays on the PC.)
 4. **Website**: `scripts/site-release.py update --tag v0.5` (it reads sizes and checksums from the release), commit `site/`, pull request into `testing`, then
    `scripts/publish-site.sh` (or a PR into `gh-pages`) after it merges. Never edit the `<!-- release:... -->` regions by hand or `gh-pages` directly.
 5. **Online package repo**: `scripts/publish-repo.sh` force-pushes `repo/<arch>/` to the `packages` branch, so start from its current contents when a machine has built

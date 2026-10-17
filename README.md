@@ -70,7 +70,7 @@ melon in the first screen is `melonfetch`'s own, redrawn by `art/site.py`. The s
 distros, melon included, against your answers. Change the site through a pull request to `testing` like everything else;
 after it is merged, `scripts/publish-site.sh` puts `site/` on `gh-pages`. The site's download page lists each ISO with its
 size and SHA-256, read from `site/releases.json`: after a release, `scripts/site-release.py update --tag <tag>` refreshes it (the 32-bit pre-release too: `update --tag i686-<date> --editions x86-desktop,x86-console`); `docs/iso-hosting.md` compares free file hosts for the ISOs (SourceForge, Internet Archive, Cloudflare R2) and
-`scripts/upload-isos.sh` uploads to them. The download buttons point to SourceForge (project `melonl`).
+`scripts/upload-isos.sh` uploads to them. The download buttons point to the GitHub releases (0.4 and earlier also to SourceForge, project `melonl`).
 
 ## 32-bit edition (old netbooks)
 
@@ -135,6 +135,8 @@ The desktop ISO is being slimmed from 794 MB by taking out only what nothing on 
   phone and router Wi-Fi chips, big server network cards) moves to `linux-firmware-extra`, and the ISOs install `linux-firmware-pc` (all
   but that part): if you use such hardware, `sudo apk add linux-firmware-extra`. Installed systems that upgrade keep everything.
 - The kernel is stored once on the ISO, Breeze's default wallpaper is a high-quality JPEG, and the ISOs are squashed with zstd level 19.
+
+The 0.5 build: desktop ISO 626 MB (from 794 MB), console ISO 248 MB (from 380 MB).
 
 - Every desktop home now has Desktop, Documents, Downloads, Music, Pictures and Videos from the start (a fresh install had only
   Desktop, so downloads had nowhere to go); an installed system that upgrades gets them at its next login.

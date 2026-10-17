@@ -135,9 +135,10 @@ cross toolchain before it carries on with the packages; finished packages in `re
 melon builds itself. On a melon install (desktop or console profile), starting with no checkout:
 
 1. `doas apk upgrade`, then `doas apk add git` (git is in the online repository, not on the ISOs).
-2. `git clone -b testing https://github.com/melon-77/melon-os ~/melon`, then `cd ~/melon`.
+2. `git clone --recurse-submodules -b testing https://github.com/melon-77/melon-os ~/melon`, then `cd ~/melon` (melon-pinball's game is a submodule; in an existing checkout, `git submodule update --init`).
 3. If you are moving from an old build machine, copy its `keys/`, `sources/`, `repo/` and `sysroot/` into `~/melon`
-   (not `tools/` or `hosttools/`, see below). Otherwise put the signing key in `keys/` ("The signing key" below).
+   (from a melon build machine also `tools/` and `hosttools/`, into the same path: that saves rebuilding the toolchain and Qt's
+   host tools; from Ubuntu or WSL not those two, see below). Otherwise put the signing key in `keys/` ("The signing key" below).
 4. `doas scripts/host-setup.sh` (it lists any build tool melon's repository doesn't have; if a step fails, it prints
    the end of `logs/host-setup.log`, where the full output of its builds goes)
 5. `doas scripts/build-everything.sh` (it uses every core; for fewer, `doas env JOBS=10 scripts/build-everything.sh`:
@@ -156,6 +157,13 @@ What's different from an Ubuntu build machine:
   built against Ubuntu's glibc, which melon doesn't have. `host-setup.sh` rebuilds the host tools, and
   `build-everything.sh` rebuilds the cross toolchain (about an hour or two) before carrying on with the packages,
   skipping every package already in `repo/`.
+- `scripts/env.sh` puts `/usr/local/bin` and `/usr/bin` ahead of `/bin` on PATH. Without that, a run under `doas` (whose
+  default PATH starts with `/bin`) let CMake find sysroot packages through `sysroot/lib`, a link to `usr/lib`, and their
+  include path came out as `sysroot/include`, which doesn't exist: glslang failed, and Mesa, Qt and all of Plasma after it.
+- BusyBox's own `dpkg-deb` applet can't read `.zst` data and unpacks nothing without an error, so `host-setup.sh`
+  installs its shim in `/usr/local/bin` even when that applet is there (certificates and fonts came out empty otherwise).
+- `fetch-sources.sh` keeps a git-tag source that is already good, and when the manifest has a checksum it takes GitHub's
+  own tarball first: its top directory (e.g. `SPIRV-LLVM-Translator-21.1.7/`, `cli-2.101.0/`) is what the recipes expect.
 - The loader is melon's own: `/lib/ld-musl-x86_64.so.1` is never pointed at the sysroot (AGENTS.md, rule 18).
   `/etc/ld-musl-x86_64.path` lists the system's library directories first and the sysroot's last.
 - Keep the build machine's own packages up to date from the online repository, and don't upgrade it from packages it

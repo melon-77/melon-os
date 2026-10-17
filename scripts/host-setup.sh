@@ -96,8 +96,10 @@ melon_deps(){
   step "running melon binaries from the sysroot (rule 18 in AGENTS.md, melon variant)"
   printf '%s\n' /usr/local/lib /usr/lib "$M/sysroot/usr/lib" > /etc/ld-musl-x86_64.path
 
-  # recipes unpack Ubuntu .debs (firmware, fonts, certificates, OVMF) with `dpkg-deb -x`; melon has no dpkg
-  if ! command -v dpkg-deb >/dev/null; then
+  # recipes unpack Ubuntu .debs (firmware, fonts, certificates, OVMF) with `dpkg-deb -x`; melon has no dpkg.
+  # BusyBox's dpkg-deb applet (in melon's BusyBox since 1.37.0-r1) can't read data.tar.zst and unpacks nothing
+  # without an error, so the shim replaces it too
+  if ! command -v dpkg-deb >/dev/null || [ "$(readlink -f "$(command -v dpkg-deb)")" = "$(readlink -f /bin/busybox)" ]; then
     cat > /usr/local/bin/dpkg-deb <<'SHIM'
 #!/bin/sh
 # dpkg-deb -x <deb> <dir>, the only form melon's recipes use (melon as the build machine; scripts/host-setup.sh)

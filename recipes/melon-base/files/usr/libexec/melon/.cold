@@ -15,7 +15,7 @@
 # This is the quick installer. The desktop ISO's advertised installer is Calamares
 # (with the melon gauntlet); this one installs the same thing in a handful of prompts.
 #   MELON_PROFILE=base     console system
-#   MELON_PROFILE=desktop  everything the desktop ISO installs (Wayfire with LXQt, Flatpak, ...)
+#   MELON_PROFILE=desktop  everything the desktop ISO installs (KDE Plasma, Wayland, Flatpak, ...)
 set -e
 PATH=/usr/bin
 REPO=${MELON_REPO:-/media/melon/melon/repo}
@@ -243,8 +243,10 @@ if [ -f /usr/share/melon/profiles/$MELON_PROFILE.services ]; then
   done
 fi
 if [ -n "${MELON_WIFI_SSID:-}" ]; then
-  if [ -d $TARGET/etc/NetworkManager ]; then
-    # desktop: NetworkManager owns Wi-Fi, so hand it the network instead of wpa_supplicant's own config
+  if [ -d $TARGET/etc/sv/NetworkManager ]; then
+    # desktop: NetworkManager owns Wi-Fi, so hand it the network instead of wpa_supplicant's own config (asked by its service:
+    # NetworkManager creates /etc/NetworkManager only when it first runs, so desktop installs used to get wpa_supplicant and
+    # dhcp-wifi next to NetworkManager, two Wi-Fi stacks on one card)
     NMC=$TARGET/etc/NetworkManager/system-connections; mkdir -p $NMC
     cat > "$NMC/melon-wifi.nmconnection" <<EOF
 [connection]

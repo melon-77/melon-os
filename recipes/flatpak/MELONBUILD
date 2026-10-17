@@ -1,10 +1,11 @@
 pkgname=flatpak
 pkgver=1.16.6
-pkgrel=1
+pkgrel=2
 pkgdesc="Application sandboxing and distribution (runs Steam, Firefox and other glibc apps on melon)"
 license=LGPL-2.1-or-later
 url=https://flatpak.org
-source=(flatpak-1.16.6.tar.xz)
+# flathub-*.flatpakrepo: Flathub's official repo file (dl.flathub.org/repo/flathub.flatpakrepo, with its signing key 6E5C05D979C76DAF93C081354184DD4D907A7CAE)
+source=(flatpak-1.16.6.tar.xz flathub-20261017.flatpakrepo)
 makedepends=(glib-dev ostree-dev libarchive-dev appstream-dev json-glib-dev gpgme-dev libxml2-dev libseccomp-dev polkit-dev
   curl-dev fuse3-dev zstd-dev libcap-dev gdk-pixbuf-dev wayland-dev wayland-protocols bubblewrap xdg-dbus-proxy libxau-dev)
 subpackages=(flatpak-dev)
@@ -17,6 +18,8 @@ build(){ meson_setup -Dsystem_bubblewrap=bwrap -Dsystem_dbus_proxy=xdg-dbus-prox
    -Dwayland_security_context=enabled -Dsystem_install_dir=/var/lib/flatpak build
   ninja -C build; }
 package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/lib/systemd $pkgdir/usr/lib/sysusers.d
-  # Flathub is added on first use from its official repo file (which carries its signing key), see melon-flathub
+  # Flathub comes preconfigured: Flatpak applies the repo files in remotes.d by itself, and the post-install script adds it
+  # right away as root, so adding it never asks for a password (it failed with "ConfigureRemote not allowed for user")
+  install -Dm644 $srcdir/flathub-20261017.flatpakrepo $pkgdir/usr/share/flatpak/remotes.d/flathub.flatpakrepo
   install -Dm755 $startdir/melon-flathub $pkgdir/usr/bin/melon-flathub
 }

@@ -1,6 +1,6 @@
 pkgname=polkit
 pkgver=127
-pkgrel=1
+pkgrel=2
 pkgdesc="Authorization framework for privileged actions (polkit, duktape JS engine)"
 license=LGPL-2.0-or-later
 url=https://github.com/polkit-org/polkit

@@ -10,4 +10,9 @@ fi
 if [ -f /boot/grub/grub.cfg ] && [ -x /usr/bin/melon-update-grub ] && grep -qs '^desktop-image' /boot/grub/themes/melon/theme.txt; then
   /usr/bin/melon-update-grub || true
 fi
+# desktop installs from the console installer with a Wi-Fi network got wpa_supplicant and dhcp-wifi next to NetworkManager
+# (two Wi-Fi stacks fighting over one card, before melon-base pkgrel 44): NetworkManager keeps the card, the other two go
+if [ -L /var/service/NetworkManager ]; then
+  for s in dhcp-wifi wpa_supplicant; do [ ! -L /var/service/$s ] || rm -f /var/service/$s; done
+fi
 exit 0

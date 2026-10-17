@@ -5,6 +5,8 @@
 set -e
 if ! flatpak remotes --system --columns=name 2>/dev/null | grep -qx flathub; then
   echo "Adding Flathub..."
-  flatpak remote-add --system --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  # the package's copy of Flathub's repo file (the post-install script normally added it already); the web copy otherwise
+  f=/usr/share/flatpak/remotes.d/flathub.flatpakrepo; [ -f $f ] || f=https://dl.flathub.org/repo/flathub.flatpakrepo
+  flatpak remote-add --system --if-not-exists flathub $f
 fi
 if [ "$1" = install ]; then shift; [ $# -gt 0 ] && exec flatpak install --system -y flathub "$@"; fi

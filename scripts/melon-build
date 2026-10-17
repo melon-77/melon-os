@@ -242,10 +242,14 @@ normalise(){ local d=$1
   # The checkout's own group counts as the builder's too: a melon home is setgid with group users (100), so every file
   # under work/ got gid 100 and every directory the setgid bit, and installed systems had 635 files of group nobody
   # (melon's first native build, 16 October 2026). Those directories lose the inherited setgid bit as well.
+  # chown clears setuid and setgid on files, even as root, so a file's setuid bit is put back afterwards (rule 62: on melon's
+  # native 0.5 build pkexec, polkit-agent-helper-1, unix_chkpwd and fusermount3 lost it, and every password prompt failed);
+  # setgid stays off, as the group is root's now
   local cg; cg=$(stat -c %g "$M")
-  find "$d" -exec stat -c '%u %g %n' {} + | while read -r u g f; do
+  find "$d" -exec stat -c '%u %g %a %n' {} + | while read -r u g a f; do
     if [ "$u" -gt 999 ] || [ "$g" -gt 999 ] || { [ "$cg" != 0 ] && [ "$g" = "$cg" ]; }; then
-      chown -h 0:0 "$f"; [ -L "$f" ] || [ ! -d "$f" ] || chmod g-s "$f"; fi; done
+      chown -h 0:0 "$f"
+      if [ -L "$f" ]; then :; elif [ -d "$f" ]; then chmod g-s "$f"; else chmod "$a" "$f"; chmod g-s "$f"; fi; fi; done
 }
 
 # ---------- package metadata + creation ----------

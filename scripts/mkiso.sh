@@ -18,13 +18,13 @@ PKGS=${PKGS:-"melon-base linux-melon linux-firmware-pc wpa_supplicant xfsprogs g
 _p=; for x in $PKGS; do
   if ls $M/repo/$APK_ARCH/$x-[0-9]*.apk >/dev/null 2>&1; then _p="$_p $x"; else echo "warning: $x is not built for $APK_ARCH, left out"; fi
 done; PKGS=${_p# }
-# MELON_EDITION=desktop: the desktop live ISO (LXQt on Wayfire; on labwc for 32-bit). Its system image already contains the desktop (the installers
+# MELON_EDITION=desktop: the desktop live ISO (Plasma; LXQt on labwc for 32-bit). Its system image already contains the desktop (the installers
 # copy it as is) plus the live-only installer packages, which both installers remove from the new system.
 EDITION=${MELON_EDITION:-console}
 DESKTOP_PKGS=${DESKTOP_PKGS:-}
 LIVE_ONLY=
 if [ "$EDITION" = desktop ]; then
-  # the 32-bit edition has its own list (LXQt on labwc instead of Wayfire): desktop-packages-x86.txt
+  # the 32-bit edition has its own list (LXQt on labwc instead of Plasma): desktop-packages-x86.txt
   _list=$M/scripts/desktop-packages$ARCH_SUFFIX.txt; [ -f $_list ] || _list=$M/scripts/desktop-packages.txt
   DESKTOP_PKGS=${DESKTOP_PKGS:-$(grep -v '^#' $_list | xargs)}
   LIVE_ONLY=${LIVE_ONLY:-calamares-melon}
@@ -76,7 +76,7 @@ if [ "$EDITION" = desktop ]; then
   for s in getty-tty2 getty-tty3 getty-ttyS0 syslogd klogd udevd dbus elogind polkitd NetworkManager bluetoothd \
            power-profiles-daemon zram sddm avahi-daemon cupsd qemu-ga vmtoolsd hv_kvp_daemon hv_vss_daemon hv_fcopy_uio_daemon; do
     [ ! -d $ROOT/etc/sv/$s ] || ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
-  # the live user: logs in automatically to LXQt (on Wayfire, labwc on the 32-bit edition; Plasma if a custom list has it), may use doas without a password, has the installer on the desktop
+  # the live user: logs in automatically to Plasma (LXQt on labwc on the 32-bit edition), may use doas without a password, has the installer on the desktop
   awk -F: '$1!="live"' $ROOT/etc/passwd > $LIVE/etc/passwd; echo 'live:x:1000:1000:melon live:/home/live:/bin/bash' >> $LIVE/etc/passwd
   awk -F: '$1!="live"' $LIVE/etc/shadow > $LIVE/etc/shadow.t; echo 'live::20000:0:99999:7:::' >> $LIVE/etc/shadow.t
   mv $LIVE/etc/shadow.t $LIVE/etc/shadow; chmod 640 $LIVE/etc/shadow

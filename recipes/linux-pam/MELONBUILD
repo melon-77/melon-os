@@ -1,5 +1,6 @@
 pkgname=linux-pam
 pkgver=1.7.0
+pkgrel=1
 pkgdesc="Pluggable Authentication Modules (needed by SDDM, the screen locker and elogind)"
 license="BSD-3-Clause OR GPL-2.0-or-later"
 url=https://github.com/linux-pam/linux-pam

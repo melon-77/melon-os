@@ -61,6 +61,7 @@ URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA
     'rustc-1.98.1-src.tar.xz': 'https://static.rust-lang.org/dist/rustc-1.98.1-src.tar.xz',
     'rustc-1.98.1-x86_64-unknown-linux-musl.tar.xz': 'https://static.rust-lang.org/dist/rustc-1.98.1-x86_64-unknown-linux-musl.tar.xz',
     'cargo-1.98.1-x86_64-unknown-linux-musl.tar.xz': 'https://static.rust-lang.org/dist/cargo-1.98.1-x86_64-unknown-linux-musl.tar.xz',
+    'flathub-20261017.flatpakrepo': 'https://dl.flathub.org/repo/flathub.flatpakrepo',   # Flathub's repo file as of that day (it has no versions)
     'make-4.4.1.tar.gz': 'https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz',
     # self-hosting build tools (GNU tarballs checked against gnu-keyring.gpg, file against its .asc)
     'm4-1.4.21.tar.xz': 'https://ftp.gnu.org/gnu/m4/m4-1.4.21.tar.xz',

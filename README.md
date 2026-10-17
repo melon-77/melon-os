@@ -93,9 +93,19 @@ updates with one button and a password prompt: `melon-welcome` (`recipes/melon-w
 hours with `apk update` and `apk list -u`. The button runs `pkexec /usr/libexec/melon/melon-update-run --upgrade`. It is
 the same as `doas apk upgrade`, with a window around it. "Update melon" is also in the launcher.
 
+Flathub comes preconfigured (since 0.5.1): the `flatpak` package carries Flathub's own repo file and adds it when it is installed,
+so neither Discover nor the first-login offer asks for a password just to set it up.
+
+## Fixed in 0.5.1
+
+melon 0.5 had lost the setuid bit on its password checkers when it was built (polkit's helper, `pkexec`, PAM's `unix_chkpwd`), so every
+password window failed: adding Flathub, Discover, the "Update melon" button, unlocking the screen. 0.5.1 puts them back, adds the
+`flatpak` system user Flatpak's installs warned about, and makes desktops installed with the console installer leave Wi-Fi to
+NetworkManager alone (they also ran wpa_supplicant and a DHCP client on the same card). `doas apk upgrade` fixes an installed 0.5.
+
 ## Release identity
 
-`/etc/os-release` says `melon 0.5` with the website and the repository as its links (it used to say "melon rolling" and a placeholder
+`/etc/os-release` says `melon 0.5.1` with the website and the repository as its links (it used to say "melon rolling" and a placeholder
 address), and the melon logo in the About page is a set of plain PNGs, so it no longer shows as a clipped green square.
 
 ## Developer tools

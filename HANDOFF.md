@@ -6,8 +6,14 @@ then this file. `CLAUDE.md` points to both. Everything here is current as of thi
 
 ## Where things stand
 
-- **melon 0.4 "Dudaim"** is the latest published release (Plasma desktop, GitHub + SourceForge, site points to it).
-- **melon 0.5 "Esfahan" is built and tested, not yet released** (17 October 2026, on the owner's PC running melon: the first full native build).
+- **melon 0.4 "Dudaim"** is the latest release again (Plasma desktop, GitHub + SourceForge, site points to it).
+- **melon 0.5 "Esfahan" was released on 17 October 2026 and turned back into a pre-release the same day** (the owner's decision): the
+  native build had taken the setuid bit off pkexec, polkit's helper and PAM's `unix_chkpwd` (AGENTS.md rule 62), so every password
+  prompt on its desktop failed. **melon 0.5.1** fixes that, ships Flathub preconfigured with the `flatpak` system account (rule 63) and
+  stops desktop installs from the console installer running a second Wi-Fi stack next to NetworkManager; its notes are
+  `releases/v0.5.1/NOTES.md`, its branch `release-0.5.1` (PR into `claude/release-0.5-plasma`). Test 0.5.1 changes in a VM, never on the
+  owner's PC.
+- How 0.5 was built (17 October 2026, on the owner's PC running melon: the first full native build).
   Desktop ISO 626 MB, console ISO 248 MB (0.4: 794 / 380 MB). Both pass `size-round.sh tests` with KVM, including `desktop-install`: Calamares installs,
   SDDM and Plasma log in, the welcome app's update notice answers, no system files belong to `nobody`. The owner's decision (12 October 2026): 0.5 ships with **Plasma** as the default desktop. Its branch is
   `claude/release-0.5-plasma`: the size round (PR #75: firmware split, one kernel copy on the ISO, JPEG wallpaper, zstd 19; every translation kept, see
@@ -61,7 +67,8 @@ Follow `BUILDING.md`, "melon as the build machine": `doas apk upgrade && doas ap
 
 ## Signing key
 
-`keys/melon-signing.rsa` (the everyday key) is on the owner's MELONLOGS memory card (`/run/media/lal/MELONLOGS/melon-backup/melon-keys-20261001/`; mount it
+`keys/melon-signing.rsa` (the everyday key) is on the owner's MELONLOGS memory card (`/run/media/<user>/MELONLOGS/melon-backup/melon-keys-20261001/`,
+the user being `hi` since the PC's reinstall of 17 October 2026; mount it
 with `udisksctl mount -b /dev/mmcblk0p1` after a reboot), used **in place**: `export MELON_SIGN_KEY=/path/on/the/card/melon-signing.rsa`
 (honoured by `build-everything.sh`, `melon-build` and `mkiso.sh`; never copy it into the repo or `keys/`). It must be plugged in to sign. The offline backup
 key belongs on no build machine (on 16 October 2026 an unencrypted copy sat next to the everyday key on the card; the owner knows). Never commit `keys/*.rsa`.

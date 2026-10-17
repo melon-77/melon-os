@@ -23,7 +23,7 @@ Already on melon? Run `doas apk upgrade` and restart.
 
 ## Coming next
 
-- **melon 0.6:** XFCE as the default desktop, with a modern theme of its own.
+- More polish for the desktop, and fixes from your reports.
 - More apps in the online package repository.
 
 ## Problems?

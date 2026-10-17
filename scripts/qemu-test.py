@@ -326,6 +326,65 @@ if mode == 'desktop-install':
     svcs = count('n=0; for s in avahi-daemon cupsd; do sv check /var/service/$s >/dev/null 2>&1 && n=$((n+1)); done; echo $n')
     lpadm = count('id -Gn jcole | tr " " "\\n" | grep -cx lpadmin')
     ok &= svcs == 2 and lpadm == 1; step(f'printing on the installed system: {svcs}/2 services up, jcole in lpadmin: {lpadm == 1}')
+    # docs/desktop-goals.md, items 4 to 9: what the person at the desktop expects to work out of the box, checked in jcole's
+    # running Plasma session (so not on the 32-bit LXQt edition). These checks are new: until a run on a machine has shown a
+    # check passes, `chk(..., soft=True)` reports a failure without failing the run; make it hard (soft=False) after that.
+    if not i686:
+        def chk(name, good, detail='', soft=True):
+            global ok
+            step(f'goal {name}: ' + ('OK' if good else 'FAILED') + (f' ({detail})' if detail else '') +
+                 (' [new check, not yet proven on a machine: does not fail the run]' if soft and not good else ''))
+            if not soft: ok &= good
+        sh('pid=$(ps -o pid,user,comm | awk \'$2=="jcole" && $3=="plasmashell"{print $1}\' | head -1)')
+        sh("e=$(tr '\\0' '\\n' < /proc/$pid/environ | grep -E '^(DBUS_SESSION_BUS_ADDRESS|WAYLAND_DISPLAY|XDG_RUNTIME_DIR|XDG_CURRENT_DESKTOP)=' | tr '\\n' ' ')")
+        def ses(c, timeout=90):                     # a command as jcole, inside the running session (no double quotes in c)
+            return sh(f'su -s /bin/sh jcole -c "env $e {c}"', timeout)
+        def ses_n(c, timeout=90):                   # the number a pipeline prints
+            m = _re.search(r'N=(\d+)', ses(f'{c} | sed s/^/N=/', timeout)); return int(m.group(1)) if m else 0
+        bus = 'dbus-send --print-reply --dest='
+        # 4 sound: PipeWire lists the sound card's output and input, and the volume control changes the volume
+        n = ses_n('wpctl status | grep -c vol:')
+        chk('4 sound devices', n >= 1, f'{n} audio nodes with a volume in wpctl status')
+        vol = ses('wpctl set-volume @DEFAULT_AUDIO_SINK@ 40%; wpctl get-volume @DEFAULT_AUDIO_SINK@')
+        chk('4 volume control', 'Volume: 0.40' in vol, vol.strip().splitlines()[-1] if vol.strip() else 'no answer')
+        # 5 Bluetooth: bluetoothd runs and owns its bus name, and the desktop has a pairing wizard (a controller needs hardware)
+        bt = sh('sv check /var/service/bluetoothd >/dev/null 2>&1 && echo BT=up; ls /usr/bin | grep -c bluedevil | sed s/^/BTW=/')
+        chk('5 bluetooth stack', 'BT=up' in bt and _re.search(r'BTW=[1-9]', bt) is not None, 'bluetoothd up, bluedevil installed (pairing itself needs a controller)')
+        # 6 suspend and lock: logind offers suspend and power off, and locking the session starts the screen locker
+        can = sh('dbus-send --system --print-reply --dest=org.freedesktop.login1 /org/freedesktop/login1 '
+                 'org.freedesktop.login1.Manager.CanSuspend | grep string; dbus-send --system --print-reply --dest=org.freedesktop.login1 '
+                 '/org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff | grep string')
+        chk('6 suspend and power off offered', len(_re.findall(r'string "(?:yes|challenge)"', can)) == 2, can.replace('\r', '').strip().replace('\n', ' '))
+        # 7 volume keys through KDE's global shortcuts (QEMU can send the volume keys, not the brightness keys), the power
+        # service that handles brightness
+        ses('wpctl set-volume @DEFAULT_AUDIO_SINK@ 40%')
+        mon('sendkey volumeup'); time.sleep(3)
+        v2 = ses('wpctl get-volume @DEFAULT_AUDIO_SINK@')
+        chk('7 volume key', _re.search(r'Volume: 0\.4[1-9]|Volume: 0\.[5-9]', v2) is not None, v2.strip().splitlines()[-1] if v2.strip() else 'no answer')
+        pm = ses(f'{bus}org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.NameHasOwner string:org.kde.Solid.PowerManagement | grep boolean')
+        chk('7 power management service (brightness keys)', 'boolean true' in pm, pm.strip().splitlines()[-1] if pm.strip() else 'no answer')
+        # 7 power profiles: power-profiles-daemon owns its bus name (Plasma's battery and power button menus use it) and reports a profile
+        pp = sh('dbus-send --system --print-reply --dest=net.hadess.PowerProfiles /net/hadess/PowerProfiles org.freedesktop.DBus.Properties.Get '
+                'string:net.hadess.PowerProfiles string:ActiveProfile | grep string; ps -o args | grep -c "[/]power-profiles-daemon" | sed s/^/PPD=/')
+        chk('7 power profiles', _re.search(r'string "(?:balanced|performance|power-saver)"', pp) is not None and 'PPD=1' in pp,
+            pp.replace('\r', '').strip().replace('\n', ' ') or 'no answer')
+        # 8 privilege prompts: pkexec is setuid and Plasma's polkit agent is running to ask for the password
+        pk = sh('[ -u /usr/bin/pkexec ] && echo PKX=1; ps -o user,args | grep -c "[p]olkit-kde" | sed s/^/AG=/')
+        chk('8 privilege prompts', 'PKX=1' in pk and _re.search(r'AG=[1-9]', pk) is not None, 'pkexec is setuid, a polkit agent runs in the session')
+        # 9 notifications, file manager, screenshots
+        nt = ses(f'{bus}org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications.Notify '
+                 'string:melon-test uint32:0 string: string:melon string:hello array:string: array:string: dict:string:string: int32:2000 | grep uint32')
+        chk('9 notifications', 'uint32' in nt, 'the notification service answered')
+        ses("sh -c 'nohup dolphin /home/jcole >/dev/null 2>&1 &'"); time.sleep(10)
+        dol = count("ps -o user,comm | awk '$1==\"jcole\" && $2==\"dolphin\"' | wc -l")
+        chk('9 file manager', dol >= 1, 'Dolphin opened'); sh('pkill -u jcole -x dolphin; true')
+        ses('spectacle -b -n -f -o /tmp/melon-shot.png', 120)
+        shot = count('[ -s /tmp/melon-shot.png ] && echo 1 || echo 0')
+        chk('9 screenshot', shot == 1, 'Spectacle saved a picture of the screen')
+        lk = ses('loginctl lock-session'); time.sleep(8)
+        locked = count("ps -o user,comm | awk '$1==\"jcole\" && $2~/kscreenlocker/' | wc -l")
+        chk('6 screen lock', locked >= 1, 'kscreenlocker_greet started when the session was locked')
+        ses('loginctl unlock-session'); time.sleep(5)
     # the gauntlet rewards through the unlock script (called by path; the command that starts it stays unnamed)
     out = sh('/usr/libexec/melon/.gold jcole; echo REW=$([ -s /etc/melon/gauntlet-survivor ] && echo badge)'
              '$(ls -d /usr/share/wallpapers/melon-survivor-* | wc -l)$([ -s /home/jcole/Pictures/melon-gauntlet-certificate.svg ] && echo cert)'

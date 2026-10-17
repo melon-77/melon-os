@@ -201,5 +201,8 @@ sed -i '/^#THEME#$/d' $ISO/boot/grub/grub.cfg
 mkdir -p $M/out
 if [ "$EDITION" = desktop ]; then rm -f $M/out/melon-desktop-*-$ISOARCH.iso; else rm -f $M/out/melon-2*-$ISOARCH.iso; fi
 $M/hosttools/grub$ARCH_SUFFIX/bin/grub-mkrescue -o $OUTISO $ISO -- -volid MELON 2>&1 | grep -v -E '^xorriso|^Drive|^Media|^libisofs|^Added|^ISO image|^Writing|^Written|^$' || true
+# grub-mkrescue leaves out a platform it can't find without failing (a host GRUB built for another checkout path did that to
+# both): an ISO without El Torito boot images boots nowhere ("No bootable device")
+xorriso -indev $OUTISO -report_el_torito plain 2>/dev/null | grep -q 'El Torito boot img' || { echo "mkiso: $OUTISO has no boot images (host GRUB: run scripts/hostgrub.sh)" >&2; rm -f $OUTISO; exit 1; }
 ( cd $M/out && sha256sum melon-*.iso > SHA256SUMS )
 ls -la $OUTISO

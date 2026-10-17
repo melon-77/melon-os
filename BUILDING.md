@@ -138,7 +138,10 @@ melon builds itself. On a melon install (desktop or console profile), starting w
 2. `git clone --recurse-submodules -b testing https://github.com/melon-77/melon-os ~/melon`, then `cd ~/melon` (melon-pinball's game is a submodule; in an existing checkout, `git submodule update --init`).
 3. If you are moving from an old build machine, copy its `keys/`, `sources/`, `repo/` and `sysroot/` into `~/melon`
    (from a melon build machine also `tools/` and `hosttools/`, into the same path: that saves rebuilding the toolchain and Qt's
-   host tools; from Ubuntu or WSL not those two, see below). Otherwise put the signing key in `keys/` ("The signing key" below).
+   host tools; from Ubuntu or WSL not those two, see below). The same path means the same user name too: after the owner's PC was
+   reinstalled as `hi` instead of `lal` (17 October 2026), `build-everything.sh` rebuilt the cross toolchain by itself, and the host
+   GRUB in `hosttools/grub` wrote ISOs with no boot images until `host-setup.sh` learned to rebuild it when its path differs
+   (`mkiso.sh` now stops on such an ISO). Otherwise put the signing key in `keys/` ("The signing key" below).
 4. `doas scripts/host-setup.sh` (it lists any build tool melon's repository doesn't have; if a step fails, it prints
    the end of `logs/host-setup.log`, where the full output of its builds goes)
 5. `doas scripts/build-everything.sh` (it uses every core; for fewer, `doas env JOBS=10 scripts/build-everything.sh`:

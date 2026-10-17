@@ -1,0 +1,7 @@
+#!/bin/sh
+# Flathub is preconfigured: its official repo file (with Flathub's signing key) is in /usr/share/flatpak/remotes.d, which
+# Flatpak applies by itself when it first opens the system installation. Doing that here, as root, means nobody needs the
+# "configure software repositories" password for it, and Discover lists Flathub from the start. No network is needed.
+[ -f /usr/share/flatpak/remotes.d/flathub.flatpakrepo ] || exit 0
+flatpak remote-add --system --if-not-exists flathub /usr/share/flatpak/remotes.d/flathub.flatpakrepo >/dev/null 2>&1 || true
+exit 0

@@ -186,7 +186,9 @@ if [ ! -x $M/hosttools/bin/mesa_clc ]; then
 fi
 
 step "GRUB for building ISOs"
-[ -x $M/hosttools/grub/bin/grub-mkrescue ] || $M/scripts/hostgrub.sh
+# its directories are compiled in: a hosttools/ copied from a checkout at another path (a melon PC reinstalled with a new user
+# name) finds no platform files and writes ISOs that don't boot, without an error, so build it again then
+grep -qF "$M/hosttools/grub/lib/grub" $M/hosttools/grub/bin/grub-mkrescue 2>/dev/null || $M/scripts/hostgrub.sh
 
 step "Python 3.14 (cross-building melon's Python needs the same version on the host)"
 [ -x $M/hosttools/python/bin/python3.14 ] || $M/scripts/host-python.sh

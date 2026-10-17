@@ -179,8 +179,9 @@ Rebuilding the kernel takes about an hour on 2 cores.
     the pattern: it kills your shell too. Find the PID and kill that.
 22. **Edit scripts that may be running (`melon-build`, `mkiso.sh`, queue scripts) through a temporary file
     and `mv`.** bash reads scripts while running them, so an in-place edit corrupts a running build.
-23. **Never type keys or checksums from memory.** The Flathub key is downloaded from Flathub's own
-    `.flatpakrepo` at first use; Alpine's public keys in `melon-base` were fetched from Alpine's aports
+23. **Never type keys or checksums from memory.** The Flathub key comes in Flathub's own `.flatpakrepo`, downloaded from
+    `dl.flathub.org` as a source (`sources/flathub-<date>.flatpakrepo`, checked by the manifest; key fingerprint
+    `6E5C05D979C76DAF93C081354184DD4D907A7CAE`, the same as the remote installed systems already had); Alpine's public keys in `melon-base` were fetched from Alpine's aports
     and checked against the sha512sums in Alpine's `alpine-keys` APKBUILD.
 24. **musl ships `libc.musl-<arch>.so.1`** (a symlink to the loader), the library name Alpine binaries link
     against. That's what lets opt-in `@alpine` packages run on melon.
@@ -272,6 +273,7 @@ Rebuilding the kernel takes about an hour on 2 cores.
     gives root every file owned by an account from 1000 up, and every file of the checkout's own group (a melon home is setgid
     with group `users`, so on a melon build machine every file got gid 100 and every directory the setgid bit; those lose it);
     system accounts a recipe sets on purpose (below 1000) stay. The desktop-install test fails if anything under `/usr` or `/etc` belongs to `nobody`.
+    That `chown` cleared setuid bits until melon 0.5.1 (rule 62).
 46. **Rust recipes cross-compile with the build machine's Rust** (`scripts/host-rust.sh` puts upstream's release
     binaries in `hosttools/rust`, with the standard library for `$RUST_TARGET`). melon-build points cargo at
     `x86_64-unknown-linux-musl`, links with melon's gcc and passes `-C target-feature=-crt-static -C link-self-contained=no` in
@@ -395,6 +397,28 @@ Rebuilding the kernel takes about an hour on 2 cores.
     base-profile install from the desktop ISO keeps `melon-vm-guest` in a VM: `.cold` adds it to the wanted list before it removes what
     the profile doesn't include. Translations are never split off or dropped to save space (the owner, 12 October 2026: the size work
     removes only what nothing uses).
+62. **`chown` clears setuid and setgid, even when root runs it.** Rule 45's owner fix in `melon-build` chowned every file of the
+    checkout's group, and on melon's first native build (0.5, 17 October 2026) that took the setuid bit off `pkexec`,
+    `polkit-agent-helper-1` and PAM's `unix_chkpwd`. Nothing failed at build time, and the ISO tests passed; on a real desktop
+    every polkit password prompt failed ("Flatpak system operation ConfigureRemote not allowed for user" when adding Flathub,
+    Discover, the Update button) and so did every PAM check a user makes of their own password. `melon-build` now puts a
+    file's mode back after the chown (setgid stays off: the group is root's then). Programs that must be setuid
+    get it in `package()` (`linux-pam`, polkit's meson install) or in a post-install script (`fuse3`, `nethack`);
+    `qemu-test.py desktop-install` checks doas, pkexec, the polkit helper, `unix_chkpwd` and `fusermount3`, and that
+    `unix_chkpwd` accepts a user's own password.
+63. **Flathub ships preconfigured.** `flatpak` carries Flathub's repo file in `/usr/share/flatpak/remotes.d/` and its post-install
+    adds the remote as root, so no one is asked for the "configure software repositories" password (polkit's
+    `configure-remote` is `auth_admin`, unlike the installs wheel gets without one), and `melon-flathub` only adds it when
+    someone removed it. The package also creates the `flatpak` system account its system helper runs `revokefs-fuse` as
+    (upstream's `sysusers.d` file, which melon drops); without it every system install warned that the user doesn't exist.
+64. **Time zones need `tzdata`** (IANA's data, built with the build machine's `zic`; on every ISO since 0.5.1). Until then melon had no
+    `/usr/share/zoneinfo`: every system ran on UTC, Plasma's Date & Time page listed no zones and could not save one (its helper
+    links `/etc/localtime` to `/usr/share/zoneinfo/<zone>`), and browsers reported UTC, which Cloudflare's browser check holds against
+    a connection from another zone. `melon-base` depends on it from pkgrel 45, so older systems get it with `apk upgrade`. A new system starts on UTC (`tzdata`'s post-install links it; the package never ships
+    `/etc/localtime`, which is the owner's choice). The same page offers "Set date and time automatically" only when it finds
+    `ntpdate` or `rdate`, so `melon-base` has a small `ntpdate` that asks BusyBox's `ntpd` once; the `ntpd` service keeps the clock
+    right the rest of the time. 12- or 24-hour time is per user: Region & Language writes `LC_TIME` to `plasma-localerc`, which
+    Plasma exports at login (Qt reads it; musl itself has no locale data), and the clock applet has its own 12/24-hour switch.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but
@@ -586,7 +610,10 @@ the serial port, so tests don't need a screen. The test also records the sound c
 - **Profiles** live in `/usr/share/melon/profiles/` on the live system: `<name>` is the package list,
   `<name>.services` the runit services (`name` enables one, `-name` drops a base service). `mkiso.sh`
   writes them. The desktop profile swaps `mdevd`/`dhcp` for `udevd` and NetworkManager, and the
-  installer gives NetworkManager the Wi-Fi network instead of wpa_supplicant.
+  installer gives NetworkManager the Wi-Fi network instead of wpa_supplicant. (`.cold` decides that by the target's
+  `/etc/sv/NetworkManager`. Up to 0.5 it looked for `/etc/NetworkManager`, which NetworkManager only creates when it first runs,
+  so desktop installs with Wi-Fi also got `wpa_supplicant` and `dhcp-wifi`: two Wi-Fi stacks on one card. `melon-base` pkgrel 44
+  removes those two links on systems where NetworkManager is enabled.)
 - **Other distros' repos are opt-in only.** Both installers offer Alpine as the tagged repo `@alpine`
   (`melon-repo enable alpine`); apk only uses it for packages asked for as `name@alpine`. Void isn't
   offered (xbps, not apk). Never make a foreign repo untagged or on by default.
@@ -736,6 +763,7 @@ Measured on 12 October 2026 (a build of this PR on the WSL machine, with the tra
 must be hardware a PC doesn't have, and stays one `apk add` away.
 
 The 0.5 release build (17 October 2026, natively on melon, Plasma plus the welcome app): desktop ISO 626 MB, console ISO 248 MB.
+0.5 went back to a pre-release the same day (its packages had lost their setuid bits, rule 62) and 0.5.1 replaces it.
 
 ## Package repository (online)
 
@@ -834,7 +862,7 @@ that is the only place Ubuntu is still needed.
   test waits 90 s before typing when there is no KVM: the greeter ignores keys for a while on an emulated CPU). When
   Ubuntu's source tool can't find an old version, its `orig` tarballs are still in `archive.ubuntu.com/ubuntu/pool/`
   (same sha256 as the manifest). Next: a test on the owner's U100 (`sudo melon-hwreport` for Wi-Fi and graphics).
-- **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (`melon-flathub`), Steam, Firefox, VLC and
+- **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (preconfigured since 0.5.1, rule 63), Steam, Firefox, VLC and
   Prism Launcher offered from Flathub on first login, GameMode. Still to do: gamepad and controller udev rules,
   MangoHud (`docs/stage2-plan.md`).
 - **Init: runit stays melon's init (the owner's decision).** dinit may one day become an *optional variant* the owner

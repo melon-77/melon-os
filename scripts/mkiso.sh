@@ -13,18 +13,18 @@ ROOT=$WORK/liveroot LIVE=$WORK/livelayer ISO=$WORK/iso INITRD=$WORK/initrd
 DATE=$(date -u +%Y%m%d)   # UTC: WSL keeps Windows' time zone, which gave ISOs the day before's date
 ISOARCH=$([ $MELON_ARCH = x86 ] && echo i686 || echo x86_64)
 OUTISO=$M/out/melon-$DATE-$ISOARCH.iso
-PKGS=${PKGS:-"melon-base linux-melon linux-firmware-pc wpa_supplicant xfsprogs grub zstd openssl ca-certificates cryptsetup ncurses-terminfo musl-utils alsa-utils mpg123 kmod efibootmgr nethack"}
+PKGS=${PKGS:-"melon-base linux-melon linux-firmware-pc wpa_supplicant xfsprogs grub zstd openssl ca-certificates tzdata cryptsetup ncurses-terminfo musl-utils alsa-utils mpg123 kmod efibootmgr nethack"}
 # leave out optional packages that haven't been built for this architecture yet (with a warning)
 _p=; for x in $PKGS; do
   if ls $M/repo/$APK_ARCH/$x-[0-9]*.apk >/dev/null 2>&1; then _p="$_p $x"; else echo "warning: $x is not built for $APK_ARCH, left out"; fi
 done; PKGS=${_p# }
-# MELON_EDITION=desktop: the desktop live ISO (LXQt on Wayfire; on labwc for 32-bit). Its system image already contains the desktop (the installers
+# MELON_EDITION=desktop: the desktop live ISO (Plasma; LXQt on labwc for 32-bit). Its system image already contains the desktop (the installers
 # copy it as is) plus the live-only installer packages, which both installers remove from the new system.
 EDITION=${MELON_EDITION:-console}
 DESKTOP_PKGS=${DESKTOP_PKGS:-}
 LIVE_ONLY=
 if [ "$EDITION" = desktop ]; then
-  # the 32-bit edition has its own list (LXQt on labwc instead of Wayfire): desktop-packages-x86.txt
+  # the 32-bit edition has its own list (LXQt on labwc instead of Plasma): desktop-packages-x86.txt
   _list=$M/scripts/desktop-packages$ARCH_SUFFIX.txt; [ -f $_list ] || _list=$M/scripts/desktop-packages.txt
   DESKTOP_PKGS=${DESKTOP_PKGS:-$(grep -v '^#' $_list | xargs)}
   LIVE_ONLY=${LIVE_ONLY:-calamares-melon}
@@ -76,7 +76,7 @@ if [ "$EDITION" = desktop ]; then
   for s in getty-tty2 getty-tty3 getty-ttyS0 syslogd klogd udevd dbus elogind polkitd NetworkManager bluetoothd \
            power-profiles-daemon zram sddm avahi-daemon cupsd qemu-ga vmtoolsd hv_kvp_daemon hv_vss_daemon hv_fcopy_uio_daemon; do
     [ ! -d $ROOT/etc/sv/$s ] || ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
-  # the live user: logs in automatically to LXQt (on Wayfire, labwc on the 32-bit edition; Plasma if a custom list has it), may use doas without a password, has the installer on the desktop
+  # the live user: logs in automatically to Plasma (LXQt on labwc on the 32-bit edition), may use doas without a password, has the installer on the desktop
   awk -F: '$1!="live"' $ROOT/etc/passwd > $LIVE/etc/passwd; echo 'live:x:1000:1000:melon live:/home/live:/bin/bash' >> $LIVE/etc/passwd
   awk -F: '$1!="live"' $LIVE/etc/shadow > $LIVE/etc/shadow.t; echo 'live::20000:0:99999:7:::' >> $LIVE/etc/shadow.t
   mv $LIVE/etc/shadow.t $LIVE/etc/shadow; chmod 640 $LIVE/etc/shadow
@@ -201,5 +201,8 @@ sed -i '/^#THEME#$/d' $ISO/boot/grub/grub.cfg
 mkdir -p $M/out
 if [ "$EDITION" = desktop ]; then rm -f $M/out/melon-desktop-*-$ISOARCH.iso; else rm -f $M/out/melon-2*-$ISOARCH.iso; fi
 $M/hosttools/grub$ARCH_SUFFIX/bin/grub-mkrescue -o $OUTISO $ISO -- -volid MELON 2>&1 | grep -v -E '^xorriso|^Drive|^Media|^libisofs|^Added|^ISO image|^Writing|^Written|^$' || true
+# grub-mkrescue leaves out a platform it can't find without failing (a host GRUB built for another checkout path did that to
+# both): an ISO without El Torito boot images boots nowhere ("No bootable device")
+xorriso -indev $OUTISO -report_el_torito plain 2>/dev/null | grep -q 'El Torito boot img' || { echo "mkiso: $OUTISO has no boot images (host GRUB: run scripts/hostgrub.sh)" >&2; rm -f $OUTISO; exit 1; }
 ( cd $M/out && sha256sum melon-*.iso > SHA256SUMS )
 ls -la $OUTISO

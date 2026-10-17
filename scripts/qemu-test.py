@@ -263,7 +263,8 @@ if mode == 'desktop-install':
     p.expect(PROMPT, timeout=900); step('logged in on the live desktop ISO')
     sh('stty cols 160 rows 50; export TERM=vt100')
     sh(f'export MELON_DISK={DISKNAME} MELON_HOSTNAME=melondesk MELON_ROOTPW=melonroot MELON_USER=jcole '
-       'MELON_USERPW=melonuser MELON_PROFILE=desktop MELON_YES=1 MELON_SERIAL=1 MELON_ENCRYPT=n')
+       'MELON_USERPW=melonuser MELON_PROFILE=desktop MELON_YES=1 MELON_SERIAL=1 MELON_ENCRYPT=n '
+       'MELON_WIFI_SSID=melontest MELON_WIFI_PSK=melonwifi1')   # no such network: only where the installer puts it is checked
     out = sh('/usr/libexec/melon/.cold', timeout=3600)
     ok = 'melon is installed' in out
     step(f'desktop install: {"OK" if ok else "FAILED"}')
@@ -290,6 +291,14 @@ if mode == 'desktop-install':
     stable = pid and count(greeter) == pid and count("loginctl list-sessions --no-legend | awk '$3==\"sddm\" && $6==\"active\"' | wc -l") == 1
     ok &= bool(stable); step('greeter after 20 s: ' + ('same process, active session' if stable else 'RESTARTED OR NO SESSION'))
     mon(f'screendump {M}/logs/qemu-desktop-greeter.ppm'); time.sleep(3)
+    # time zones: tzdata is installed, a new system is on UTC, and a zone chosen the way Plasma's Date & Time page does it
+    # (a link to /usr/share/zoneinfo) is what the system uses; jcole's clock gets 12-hour US time through Region & Language's
+    # setting (LOOK at the clock in logs/qemu-desktop-installed.ppm: "PM" or "AM", New York time)
+    tz = count('n=0; [ -s /usr/share/zoneinfo/America/New_York ] && n=$((n+1)); [ "$(readlink /etc/localtime)" = /usr/share/zoneinfo/UTC ] && n=$((n+1));'
+               ' ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime; case $(date +%Z) in EDT|EST) n=$((n+1)) ;; esac;'
+               ' [ -x /usr/bin/ntpdate ] && n=$((n+1)); echo $n')
+    sh("printf '[Formats]\\nLANG=C.UTF-8\\nLC_TIME=en_US.UTF-8\\n' > /home/jcole/.config/plasma-localerc; chown jcole: /home/jcole/.config/plasma-localerc")
+    ok &= tz == 4; step(f'time zones: {tz}/4 (tzdata, UTC by default, a chosen zone is used, ntpdate for "set automatically")')
     if not HAVE_KVM: time.sleep(90)   # emulated CPU: the greeter's password field takes a while to take keys
     for ch in 'melonuser':
         mon(f'sendkey {ch}'); time.sleep(0.15)
@@ -322,6 +331,22 @@ if mode == 'desktop-install':
     # packaged files owned by the build machine's account arrive as nobody's (rule 45)
     nob = count('find /usr /etc -xdev \\( -user 65534 -o -group 65534 \\) | wc -l')
     ok &= nob == 0; step('system files owned by nobody: ' + ('none' if nob == 0 else f'{nob} FOUND'))
+    # the password checkers stay setuid root (rule 62: the native 0.5 build lost the bit, and every polkit prompt, Flathub
+    # and the Update button included, failed), and PAM really checks a user's own password with it, as the screen locker does
+    suid = count('n=0; for f in /usr/bin/doas /usr/bin/pkexec /usr/lib/polkit-1/polkit-agent-helper-1 /usr/bin/unix_chkpwd'
+                 '$([ -e /usr/bin/fusermount3 ] && echo " /usr/bin/fusermount3"); do [ -u $f ] && [ "$(stat -c %U $f)" = root ] && n=$((n+1)); done; echo $n')
+    nsuid = count('n=4; [ -e /usr/bin/fusermount3 ] && n=5; echo $n')
+    pw = count("su -s /bin/sh jcole -c 'printf \"melonuser\\0\" | /usr/bin/unix_chkpwd jcole nullok' && echo 1 || echo 0")
+    ok &= suid == nsuid and pw == 1
+    step(f'setuid password checkers: {suid}/{nsuid}, a user\'s own password checks out: {pw == 1}')
+    # Flatpak's system helper has its account (revokefs-fuse runs as it) and Flathub is there without anyone typing a password
+    if not i686:
+        fp = count('n=0; grep -q "^flatpak:" /etc/passwd && n=$((n+1)); flatpak remotes --system --columns=name | grep -qx flathub && n=$((n+1)); echo $n')
+        ok &= fp == 2; step('flatpak: ' + ('system helper account, Flathub preconfigured' if fp == 2 else f'MISSING ({fp}/2: account, Flathub)'))
+    # the installer's Wi-Fi network went to NetworkManager, not to a second Wi-Fi stack (wpa_supplicant + dhcp-wifi) next to it
+    wifi = count('[ -f /etc/NetworkManager/system-connections/melon-wifi.nmconnection ] && [ ! -e /var/service/wpa_supplicant ]'
+                 ' && [ ! -e /var/service/dhcp-wifi ] && echo 1 || echo 0')
+    ok &= wifi == 1; step('Wi-Fi from the installer: ' + ('NetworkManager only' if wifi == 1 else 'SECOND WI-FI STACK OR NO CONNECTION FILE'))
     # the desktop profile's services, and the user may manage printers
     svcs = count('n=0; for s in avahi-daemon cupsd; do sv check /var/service/$s >/dev/null 2>&1 && n=$((n+1)); done; echo $n')
     lpadm = count('id -Gn jcole | tr " " "\\n" | grep -cx lpadmin')

@@ -414,7 +414,7 @@ Rebuilding the kernel takes about an hour on 2 cores.
 64. **Time zones need `tzdata`** (IANA's data, built with the build machine's `zic`; on every ISO since 0.5.1). Until then melon had no
     `/usr/share/zoneinfo`: every system ran on UTC, Plasma's Date & Time page listed no zones and could not save one (its helper
     links `/etc/localtime` to `/usr/share/zoneinfo/<zone>`), and browsers reported UTC, which Cloudflare's browser check holds against
-    a connection from another zone. A new system starts on UTC (`tzdata`'s post-install links it; the package never ships
+    a connection from another zone. `melon-base` depends on it from pkgrel 45, so older systems get it with `apk upgrade`. A new system starts on UTC (`tzdata`'s post-install links it; the package never ships
     `/etc/localtime`, which is the owner's choice). The same page offers "Set date and time automatically" only when it finds
     `ntpdate` or `rdate`, so `melon-base` has a small `ntpdate` that asks BusyBox's `ntpd` once; the `ntpd` service keeps the clock
     right the rest of the time. 12- or 24-hour time is per user: Region & Language writes `LC_TIME` to `plasma-localerc`, which

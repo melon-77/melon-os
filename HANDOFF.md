@@ -21,7 +21,7 @@ then this file. `CLAUDE.md` points to both. Everything here is current as of thi
   decade of setup"). That work is PR #77 / branch `claude/release-0.5` (online `melon-lxqt` later). **XFCE is planned as the default for 0.6**:
   `docs/xfce-desktop-plan.md` on branch `claude/xfce-desktop` (needs Xorg and GTK 3 first: neither is in the tree). The look is done: PR #82 (theme,
   centred taskbar, melon's own start menu `melon-menu`, Thunar tidied), tested on Ubuntu's XFCE; XFCE itself isn't built for melon yet. The owner
-  confirmed on 16 October 2026: 0.5 ships with Plasma, XFCE comes in 0.6.
+  confirmed on 16 October 2026: 0.5 ships with Plasma.
 - Open work to merge: PRs #75, #76, #77 target `testing`. Merge #75 and #76 with the Plasma branch's content in mind (the Plasma branch contains #75, #76 and
   the GRUB commit of #77, so merge that branch instead of the three separately); #77 stays open for the LXQt online install.
 - Not yet verified anywhere: the NVIDIA modules on a real card, the 32-bit edition on the owner's MSI Wind U100. (Plasma's login and session now pass

@@ -1,0 +1,16 @@
+--- a/src/solver.c
++++ b/src/solver.c
+@@ -227,8 +227,12 @@
+ 				 !pkg->ss.pkg_available);
+ 
+ 			repos = get_pkg_repos(db, pkg);
++			/* an empty package counts as untagged only when no repository carries it (a local virtual package):
++			 * Alpine's empty meta packages (ncurses-libs, gnupg) in an opt-in @alpine repository passed as
++			 * allowed, so with a newer version than melon's they made `apk upgrade` pick them and then fail
++			 * on the masked libraries they pull in */
+ 			pkg->ss.tag_preferred = pkg->filename_ndx ||
+-				(pkg->installed_size == 0) ||
++				(pkg->installed_size == 0 && pkg->repos == 0) ||
+ 				(repos & ss->default_repos);
+ 			pkg->ss.tag_ok =
+ 				pkg->ss.tag_preferred ||

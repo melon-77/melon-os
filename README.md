@@ -98,6 +98,10 @@ so neither Discover nor the first-login offer asks for a password just to set it
 
 ## Fixed in 0.5.1
 
+`apk upgrade` works with the opt-in Alpine repository enabled (`melon-repo enable alpine`): apk took Alpine's empty `ncurses-libs`
+and `gnupg` meta packages for melon's and gave up, so those systems got no updates at all (apk-tools pkgrel 2 fixes it, and it
+installs itself first).
+
 Time zones work: melon had no time zone data, so the clock was always UTC and Plasma's Date & Time page could neither list nor save a
 zone. `tzdata` is now on both ISOs, "Set date and time automatically" is offered (melon has an `ntpdate` for it), and 12- or 24-hour
 time follows Region & Language's time format or the clock's own setting.

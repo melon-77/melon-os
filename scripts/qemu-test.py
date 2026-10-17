@@ -347,6 +347,13 @@ if mode == 'desktop-install':
     wifi = count('[ -f /etc/NetworkManager/system-connections/melon-wifi.nmconnection ] && [ ! -e /var/service/wpa_supplicant ]'
                  ' && [ ! -e /var/service/dhcp-wifi ] && echo 1 || echo 0')
     ok &= wifi == 1; step('Wi-Fi from the installer: ' + ('NetworkManager only' if wifi == 1 else 'SECOND WI-FI STACK OR NO CONNECTION FILE'))
+    # with the opt-in @alpine repository on, a plain `apk upgrade` still works (Alpine's empty meta packages such as
+    # ncurses-libs and gnupg, newer than melon's, made it fail until apk-tools pkgrel 2); needs the VM's internet
+    if not offline and not i686:
+        upg = count('melon-repo enable alpine >/dev/null 2>&1; apk update >/dev/null 2>&1;'
+                    ' if apk policy ncurses-libs 2>/dev/null | grep -q alpine; then apk upgrade --simulate >/dev/null 2>&1 && echo 1 || echo 0; else echo 2; fi;'
+                    ' melon-repo disable alpine >/dev/null 2>&1')
+        ok &= upg != 0; step('apk upgrade with @alpine enabled: ' + {1: 'works', 2: 'not checked (Alpine unreachable)'}.get(upg, 'FAILS'))
     # the desktop profile's services, and the user may manage printers
     svcs = count('n=0; for s in avahi-daemon cupsd; do sv check /var/service/$s >/dev/null 2>&1 && n=$((n+1)); done; echo $n')
     lpadm = count('id -Gn jcole | tr " " "\\n" | grep -cx lpadmin')

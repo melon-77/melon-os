@@ -419,6 +419,13 @@ Rebuilding the kernel takes about an hour on 2 cores.
     `ntpdate` or `rdate`, so `melon-base` has a small `ntpdate` that asks BusyBox's `ntpd` once; the `ntpd` service keeps the clock
     right the rest of the time. 12- or 24-hour time is per user: Region & Language writes `LC_TIME` to `plasma-localerc`, which
     Plasma exports at login (Qt reads it; musl itself has no locale data), and the clock applet has its own 12/24-hour switch.
+65. **apk counted any empty package as untagged** (`installed_size == 0` in the solver's pinning check, meant for local virtual
+    packages). Alpine ships `ncurses-libs` and `gnupg` as empty meta packages, newer than melon's packages of the same name, so on a
+    system with the opt-in `@alpine` repository enabled a plain `apk upgrade` (and the Update button) picked them, then failed on the
+    masked libraries they pull in ("unable to select packages ... masked in: @alpine"); named upgrades still worked, which hid it.
+    `recipes/apk-tools/0001-tagged-repo-empty-packages.patch` (pkgrel 2) keeps that exception for empty packages no repository
+    carries. apk upgrades itself before anything else, so affected systems recover with an ordinary `apk upgrade`;
+    `qemu-test.py desktop-install` enables `@alpine` and checks that `apk upgrade` still resolves.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but

@@ -1,0 +1,26 @@
+pkgname=papirus-icon-theme
+pkgver=20250201
+pkgrel=0
+pkgdesc="Papirus and Papirus-Dark icon themes, with grey folders (melon's XFCE desktop)"
+license=GPL-3.0-only
+url=https://github.com/PapirusDevelopmentTeam/papirus-icon-theme
+# the tag's tarball, sha512 as in Alpine's APKBUILD (papirus-icon-theme 20250201)
+source=(papirus-icon-theme-20250201.tar.gz)
+builddir=$srcdir/papirus-icon-theme-$pkgver
+depends=(hicolor-icon-theme)
+options=('!strip')
+triggers_papirus_icon_theme=(/usr/share/icons/Papirus /usr/share/icons/Papirus-Dark)
+package(){
+  # Papirus-Dark only holds what differs from Papirus (symbolic and small sizes) and inherits the rest; ePapirus,
+  # ePapirus-Dark (elementary's panel) and Papirus-Light aren't used by any melon desktop
+  install -d $pkgdir/usr/share/icons
+  cp -a Papirus Papirus-Dark $pkgdir/usr/share/icons/
+  # grey folders: what papirus-folders -C grey does, the default folder icons point at the grey set instead of the blue one
+  find $pkgdir/usr/share/icons -type l -path '*/places/*' | while read -r l; do
+    case ${l##*/} in *-blue*) continue;; esac   # the blue set's own links stay as they are
+    t=$(readlink "$l"); case $t in *-blue-*|*-blue.svg) ;; *) continue;; esac
+    g=$(printf %s "$t" | sed 's/-blue\([-.]\)/-grey\1/'); [ -e "${l%/*}/$g" ] && ln -sfn "$g" "$l"
+  done
+  [ "$(readlink $pkgdir/usr/share/icons/Papirus/64x64/places/folder.svg)" = folder-grey.svg ]
+  find $pkgdir/usr/share/icons -type f -exec chmod 644 {} +
+}

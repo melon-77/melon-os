@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Thunar as melon's file manager: no menu bar (Thunar then shows its menu as a button in the toolbar), the path as
+     buttons, the places at the left, folders first. -->
+<channel name="thunar" version="1.0">
+  <property name="last-menubar-visible" type="bool" value="false"/>
+  <property name="last-location-bar" type="string" value="ThunarLocationButtons"/>
+  <property name="last-side-pane" type="string" value="ThunarShortcutsPane"/>
+  <property name="last-view" type="string" value="ThunarIconView"/>
+  <property name="last-icon-view-zoom-level" type="string" value="THUNAR_ZOOM_LEVEL_100_PERCENT"/>
+  <property name="last-separator-position" type="int" value="200"/>
+  <property name="last-window-width" type="int" value="1000"/>
+  <property name="last-window-height" type="int" value="660"/>
+  <property name="misc-folders-first" type="bool" value="true"/>
+  <property name="misc-single-click" type="bool" value="false"/>
+  <property name="misc-thumbnail-mode" type="string" value="THUNAR_THUMBNAIL_MODE_ONLY_LOCAL"/>
+  <property name="misc-date-style" type="string" value="THUNAR_DATE_STYLE_SHORT"/>
+  <property name="shortcuts-icon-size" type="string" value="THUNAR_ICON_SIZE_16"/>
+  <property name="tree-icon-size" type="string" value="THUNAR_ICON_SIZE_16"/>
+</channel>

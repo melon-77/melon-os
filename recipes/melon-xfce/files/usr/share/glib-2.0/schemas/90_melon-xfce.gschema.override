@@ -1,0 +1,18 @@
+# GTK 4 / libadwaita apps and Flatpak apps (through xdg-desktop-portal-gtk's settings) read the look from here, not from
+# XSETTINGS: the same values as /etc/xdg/melon-xfce/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
+[org.gnome.desktop.interface]
+color-scheme='prefer-dark'
+accent-color='green'
+gtk-theme='melon'
+icon-theme='Papirus-Dark'
+font-name='Inter 10'
+document-font-name='Inter 10'
+monospace-font-name='JetBrains Mono 10'
+cursor-theme='Adwaita'
+cursor-size=24
+font-antialiasing='grayscale'
+font-hinting='slight'
+
+[org.gnome.desktop.wm.preferences]
+button-layout=':minimize,maximize,close'
+titlebar-font='Inter Semi-Bold 10'

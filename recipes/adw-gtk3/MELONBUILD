@@ -1,0 +1,17 @@
+pkgname=adw-gtk3
+pkgver=6.5
+pkgrel=0
+pkgdesc="The libadwaita look for GTK 3 apps (light and dark); melon-xfce's \"melon\" theme recolours it"
+license=LGPL-2.1-or-later
+url=https://github.com/lassekongo83/adw-gtk3
+# upstream's release asset: the theme with its CSS already compiled from SASS (melon has no sass compiler). Checked against
+# Alpine, which builds 6.5 from the source tarball: its adw-gtk3 6.5-r1 package holds byte-identical files.
+source=(adw-gtk3v6.5.tar.xz)
+builddir=$srcdir
+options=('!strip')
+package(){
+  install -d $pkgdir/usr/share/themes
+  cp -r $srcdir/adw-gtk3 $srcdir/adw-gtk3-dark $pkgdir/usr/share/themes/
+  # the GTK 4 part is for apps that don't use libadwaita; libadwaita apps follow the colour scheme (gsettings) instead
+  find $pkgdir/usr/share/themes -type f -exec chmod 644 {} +
+}

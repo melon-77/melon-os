@@ -1,0 +1,67 @@
+#!/bin/sh
+# melon-check-look: does every toolkit get the same look? (docs/desktop-goals.md, "Look"; docs/xfce-theme.md)
+# Run inside the user's XFCE session (DISPLAY, DBUS_SESSION_BUS_ADDRESS set). Compares what xfconf says with what GTK 3,
+# GTK 4 / Flatpak (gsettings), Qt (melon-look-probe-qt), the X cursor and Flatpak's override really get, prints one line
+# per check and exits 1 if anything differs. qemu-test.py desktop-install runs it after logging in.
+fail=0
+check(){  # check WHAT EXPECTED GOT
+  if [ "$2" = "$3" ]; then printf 'ok    %-28s %s\n' "$1" "$3"
+  else printf 'FAIL  %-28s expected "%s", got "%s"\n' "$1" "$2" "$3"; fail=1; fi
+}
+x(){ xfconf-query -c xsettings -p "$1" 2>/dev/null; }
+gs(){ gsettings get org.gnome.desktop.interface "$1" 2>/dev/null | sed "s/^'//; s/'\$//"; }
+gq(){ gtk-query-settings 2>/dev/null | sed -n "s/^ *$1: *//p" | sed 's/^"//; s/"$//' | head -1; }
+
+theme=$(x /Net/ThemeName); icons=$(x /Net/IconThemeName); font=$(x /Gtk/FontName)
+cursor=$(x /Gtk/CursorThemeName); csize=$(x /Gtk/CursorThemeSize)
+# the session's settings are melon's (a gauntlet survivor's theme is melon-gold)
+case $theme in melon|melon-gold) check 'xfconf theme' "$theme" "$theme";; *) check 'xfconf theme' melon "$theme";; esac
+check 'xfconf icons' Papirus-Dark "$icons"
+check 'xfconf font' 'Inter 10' "$font"
+check 'xfconf cursor' Adwaita "$cursor"
+# GTK 3 apps, through XSETTINGS
+check 'GTK 3 theme' "$theme" "$(gq gtk-theme-name)"
+check 'GTK 3 icons' "$icons" "$(gq gtk-icon-theme-name)"
+check 'GTK 3 font' "$font" "$(gq gtk-font-name)"
+check 'GTK 3 cursor' "$cursor" "$(gq gtk-cursor-theme-name)"
+# every window keeps its minimise, maximise and close buttons (the owner, 16 October 2026): the frames xfwm4 draws, and
+# the title bars GTK 3, GTK 4 and libadwaita apps draw themselves
+check 'xfwm4 buttons' '|HMC' "$(xfconf-query -c xfwm4 -p /general/button_layout 2>/dev/null)"
+check 'GTK title bar buttons' ':minimize,maximize,close' "$(x /Gtk/DecorationLayout)"
+check 'GTK 3 title bar buttons' ':minimize,maximize,close' "$(gq gtk-decoration-layout)"
+check 'gsettings title bar buttons' ':minimize,maximize,close' "$(gsettings get org.gnome.desktop.wm.preferences button-layout 2>/dev/null | sed "s/^'//; s/'\$//")"
+# GTK 4, libadwaita and Flatpak apps (the settings portal reads these)
+check 'gsettings colour scheme' prefer-dark "$(gs color-scheme)"
+check 'gsettings icons' "$icons" "$(gs icon-theme)"
+check 'gsettings font' "$font" "$(gs font-name)"
+check 'gsettings cursor' "$cursor" "$(gs cursor-theme)"
+# Qt apps: the GTK platform theme hands them the GTK theme's colours, its font and its icons
+qt=$(QT_QPA_PLATFORM=xcb /usr/libexec/melon/melon-look-probe-qt 2>/dev/null)
+q(){ printf '%s\n' "$qt" | sed -n "s/^$1=//p"; }
+check 'Qt platform theme' gtk3 "${QT_QPA_PLATFORMTHEME:-}"
+check 'Qt font' "${font% *}" "$(q font-family)"
+check 'Qt icons' "$icons" "$(q icons)"
+accent=#6fbf4a; [ "$theme" = melon-gold ] && accent=#e8b64a
+check 'Qt selection colour' "$accent" "$(q highlight)"
+# Qt takes the window colour from a GTK widget's background, which can be a shade off melon's (#181e1a for #1b221d):
+# melon's dark grey-green means within 8 of it in each channel
+near(){ awk -v a="$1" -v b="$2" 'function h(s,i){return index("0123456789abcdef",substr(s,i,1))*16+index("0123456789abcdef",substr(s,i+1,1))-17}
+  BEGIN{a=tolower(a); b=tolower(b); if (length(b)!=7) exit 1; for(i=2;i<7;i+=2){d=h(a,i)-h(b,i); if(d<0)d=-d; if(d>8) exit 1}}'; }
+w=$(q window); near '#1b221d' "$w" && check 'Qt window colour' 'melon dark' 'melon dark' || check 'Qt window colour' '#1b221d' "$w"
+# the X cursor (Qt, Xwayland and anything that ignores XSETTINGS)
+check 'XCURSOR_THEME' "$cursor" "${XCURSOR_THEME:-}"
+check 'XCURSOR_SIZE' "$csize" "${XCURSOR_SIZE:-}"
+check 'X resource Xcursor.theme' "$cursor" "$(xrdb -query 2>/dev/null | sed -n 's/^Xcursor\.theme:[[:space:]]*//p')"
+check 'default cursor' "Inherits=$cursor" "$(grep '^Inherits=' /usr/share/icons/default/index.theme 2>/dev/null)"
+# Flatpak apps: the system-wide override and the theme copy they read
+if command -v flatpak >/dev/null; then
+  ov=$(flatpak override --system --show 2>/dev/null)
+  case $ov in *"GTK_THEME=$theme"*|*"GTK_THEME=melon"*) g=yes;; *) g=no;; esac
+  check 'Flatpak GTK_THEME override' yes "$g"
+  case $ov in *"~/.themes:ro"*|*"/.themes:ro"*) g=yes;; *) g=no;; esac
+  check 'Flatpak sees the themes' yes "$g"
+  [ -s "$HOME/.themes/melon/gtk-3.0/gtk.css" ] && [ -s "$HOME/.themes/adw-gtk3-dark/gtk-3.0/gtk.css" ] && g=yes || g=no
+  check 'theme copy for Flatpak' yes "$g"
+fi
+[ $fail = 0 ] && echo 'LOOK-OK' || echo 'LOOK-MISMATCH'
+exit $fail

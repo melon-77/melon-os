@@ -1,0 +1,17 @@
+pkgname=melon-menu
+pkgver=0.1
+pkgrel=0
+pkgdesc="melon's start menu for XFCE: search, pinned apps, recent files, lock and power"
+license=MIT
+# melon's own program (docs/xfce-theme.md, "The start menu"): one C file against GTK 3. The taskbar's melon button
+# (a launcher in melon-xfce's panel layout) and the Super key run it; the autostart entry keeps it running hidden.
+source=(melon-menu.c)
+makedepends=(gtk3-dev)
+builddir=$srcdir
+build(){
+  $CC $CFLAGS -o melon-menu melon-menu.c $(pkg-config --cflags --libs gtk+-3.0 gio-unix-2.0 gdk-x11-3.0) $LDFLAGS
+}
+package(){
+  install -Dm755 melon-menu $pkgdir/usr/bin/melon-menu
+  cp -a $startdir/files/. $pkgdir/
+}

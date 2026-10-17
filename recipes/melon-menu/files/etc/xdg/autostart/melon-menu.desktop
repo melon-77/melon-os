@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=melon menu
+Comment=Keeps the start menu ready, so it opens at once
+Exec=melon-menu --background
+OnlyShowIn=XFCE;
+NoDisplay=true
+X-XFCE-Autostart-Override=true

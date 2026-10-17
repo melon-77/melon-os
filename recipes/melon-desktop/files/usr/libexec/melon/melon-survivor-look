@@ -3,9 +3,17 @@
 # autostart from melon-rewards, removed when this succeeds) or right away by the unlock.
 #   melon's default desktop (LXQt on Wayfire): gold as the accent colour, a gold ring on the lock screen, "the other side"
 #   as wallpaper.
+#   XFCE (melon-xfce): the melon-gold GTK theme (the gold accent in GTK, Qt and Flatpak apps).
 #   Plasma (an optional install): the gold colours, Plasma style and Konsole profile, the golden melon on the lock screen.
 case ":${XDG_CURRENT_DESKTOP:-}:" in *:KDE:*) plasma=1 ;; *) plasma= ;; esac
-if [ -n "$plasma" ]; then
+case ":${XDG_CURRENT_DESKTOP:-}:" in *:XFCE:*) xfce=1 ;; *) xfce= ;; esac
+if [ -n "$xfce" ]; then
+  # XFCE (melon-xfce): the gold edition of melon's GTK theme, which Qt apps follow too; Flatpak apps get it from ~/.themes
+  xfconf-query -c xsettings -p /Net/ThemeName -s melon-gold || exit 1
+  command -v gsettings >/dev/null && gsettings set org.gnome.desktop.interface gtk-theme melon-gold 2>/dev/null
+  command -v gsettings >/dev/null && gsettings set org.gnome.desktop.interface accent-color yellow 2>/dev/null
+  command -v flatpak >/dev/null && flatpak override --user --env=GTK_THEME=melon-gold 2>/dev/null
+elif [ -n "$plasma" ]; then
   plasma-apply-colorscheme MelonGold >/dev/null 2>&1
   plasma-apply-desktoptheme melon-gold >/dev/null 2>&1
   kwriteconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile MelonGold.profile

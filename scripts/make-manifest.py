@@ -139,6 +139,12 @@ URL = {  # upstream downloads (Ubuntu 26.04 has NetHack 3.6.7 and Cataclysm: DDA
     'nm-tray-0.5.1.tar.gz': 'https://github.com/palinek/nm-tray/archive/refs/tags/0.5.1.tar.gz',
     'xdg-desktop-portal-lxqt-1.4.0.tar.xz': 'https://github.com/lxqt/xdg-desktop-portal-lxqt/releases/download/1.4.0/xdg-desktop-portal-lxqt-1.4.0.tar.xz',
     'xdg-desktop-portal-wlr-0.8.4.tar.gz': 'https://github.com/emersion/xdg-desktop-portal-wlr/releases/download/v0.8.4/xdg-desktop-portal-wlr-0.8.4.tar.gz',
+    # melon's XFCE look (docs/xfce-theme.md), each checked against Alpine's sha512sums; adw-gtk3's release asset (CSS already
+    # compiled) holds the same files as Alpine's adw-gtk3 6.5 package, built from the source tarball
+    'adw-gtk3v6.5.tar.xz': 'https://github.com/lassekongo83/adw-gtk3/releases/download/v6.5/adw-gtk3v6.5.tar.xz',
+    'papirus-icon-theme-20250201.tar.gz': 'https://github.com/PapirusDevelopmentTeam/papirus-icon-theme/archive/20250201.tar.gz',
+    'Inter-4.1.zip': 'https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip',
+    'JetBrainsMono-2.304.zip': 'https://download.jetbrains.com/fonts/JetBrainsMono-2.304.zip',
     'pyparsing-3.3.3.tar.gz': 'https://files.pythonhosted.org/packages/e4/11/b213bebff182584360cb8d17c72c1677fec5c5c228de439e63bcf8ab1c8f/pyparsing-3.3.3.tar.gz',
     'jinja2-3.1.6.tar.gz': 'https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz',
     'pyyaml-6.0.3.tar.gz': 'https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz',

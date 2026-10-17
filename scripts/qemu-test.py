@@ -327,6 +327,14 @@ if mode == 'desktop-install':
     svcs = count('n=0; for s in avahi-daemon cupsd; do sv check /var/service/$s >/dev/null 2>&1 && n=$((n+1)); done; echo $n')
     lpadm = count('id -Gn jcole | tr " " "\\n" | grep -cx lpadmin')
     ok &= svcs == 2 and lpadm == 1; step(f'printing on the installed system: {svcs}/2 services up, jcole in lpadmin: {lpadm == 1}')
+    # one look across Qt, GTK and Flatpak apps (docs/desktop-goals.md, "Look"): on a desktop that ships melon-check-look (XFCE),
+    # run it in jcole's session and fail on any toolkit that doesn't get melon's theme, font, icons and cursor
+    if count('[ -x /usr/libexec/melon/melon-check-look ] && echo 1 || echo 0') == 1:
+        sh(f"pid=$(ps -o pid,user,comm | awk '$2==\"jcole\" && $3==\"{desk}\"{{print $1}}' | head -1)")
+        sh("e=$(tr '\\0' '\\n' < /proc/$pid/environ | grep -E '^(DISPLAY|XAUTHORITY|DBUS_SESSION_BUS_ADDRESS|XDG_RUNTIME_DIR|XDG_CURRENT_DESKTOP|XDG_CONFIG_DIRS|QT_QPA_PLATFORMTHEME|XCURSOR_THEME|XCURSOR_SIZE)=' | tr '\\n' ' ')")
+        look = sh('su -s /bin/sh jcole -c "env $e /usr/libexec/melon/melon-check-look" 2>&1 | tail -40')
+        same = 'LOOK-OK' in look; ok &= same
+        step('one look in Qt, GTK and Flatpak apps: ' + ('theme, font, icons and cursor match' if same else 'MISMATCH\n' + look[-2000:]))
     # the gauntlet rewards through the unlock script (called by path; the command that starts it stays unnamed)
     out = sh('/usr/libexec/melon/.gold jcole; echo REW=$([ -s /etc/melon/gauntlet-survivor ] && echo badge)'
              '$(ls -d /usr/share/wallpapers/melon-survivor-* | wc -l)$([ -s /home/jcole/Pictures/melon-gauntlet-certificate.svg ] && echo cert)'

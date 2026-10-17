@@ -1,0 +1,29 @@
+/* melon: adw-gtk3-dark (the libadwaita look) in melon's colours. GTK resolves named colours after the whole sheet is
+   read, so the definitions below replace adw-gtk3's everywhere it uses them. docs/xfce-theme.md has the palette. */
+@import url("../../adw-gtk3-dark/gtk-3.0/gtk.css");
+@import url("melon-colours.css");
+
+/* the toolbar under a title bar takes the header colour, so the frame and the toolbar read as one bar */
+window > box > toolbar.primary-toolbar,
+.thunar toolbar, .thunar .location-bar {
+  background-color: @headerbar_bg_color;
+  border-bottom: 1px solid @headerbar_shade_color;
+}
+/* Thunar's sidebar: roomier rows, the selected place as a green pill, as in libadwaita's sidebars */
+.thunar .sidebar treeview.view { padding: 4px 3px; }
+.thunar .sidebar .view:selected, .thunar .sidebar row:selected {
+  background-color: @accent_bg_color; color: @accent_fg_color; border-radius: 8px;
+}
+/* softer corners for menus and popovers */
+menu, .menu, .context-menu { border-radius: 10px; }
+popover.background, popover > contents { border-radius: 12px; }
+
+/* ---- the taskbar (xfce4-panel) ---- */
+/* melon-xfce's panels set their own backgrounds (panel.png with its light top line, a transparent centre panel); this is
+   for panels someone adds. No border: its width would stay when the panel's own settings make its colour transparent. */
+.xfce4-panel.background { background-color: #101512; border-width: 0; }
+.xfce4-panel button { border-radius: 8px; padding: 2px 6px; margin: 4px 1px; }
+.xfce4-panel button:hover { background-color: alpha(white, 0.08); }
+.xfce4-panel button:checked, .xfce4-panel button:active { background-color: alpha(white, 0.12); }
+/* the clock: time over date, both centred */
+#clock-button label { font-feature-settings: "tnum"; }

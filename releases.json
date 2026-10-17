@@ -1,8 +1,8 @@
 {
-  "version": "0.5",
+  "version": "0.5.1",
   "name": "Esfahan",
   "date": "2026-10-17",
-  "tag": "v0.5",
+  "tag": "v0.5.1",
   "repo": "melon-77/melon-os",
   "mirrors": [
     {
@@ -68,17 +68,17 @@
   "files": {
     "desktop": {
       "file": "melon-desktop-20261017-x86_64.iso",
-      "size": 626063360,
-      "sha256": "e9553b1b63696611d36ab3efb9e3017e0afa93457e258c50e334072689ed9575",
-      "tag": "v0.5",
-      "url": "https://github.com/melon-77/melon-os/releases/download/v0.5/melon-desktop-20261017-x86_64.iso"
+      "size": 626214912,
+      "sha256": "5aea139060349994662252548c55db71d782834599c7ebd10f83dd84107bfccf",
+      "tag": "v0.5.1",
+      "url": "https://github.com/melon-77/melon-os/releases/download/v0.5.1/melon-desktop-20261017-x86_64.iso"
     },
     "console": {
       "file": "melon-20261017-x86_64.iso",
-      "size": 248041472,
-      "sha256": "401459b8df52ced49a6e232e4e2a07d2eb4635dbd1e73dab8769676a75cf267d",
-      "tag": "v0.5",
-      "url": "https://github.com/melon-77/melon-os/releases/download/v0.5/melon-20261017-x86_64.iso"
+      "size": 248201216,
+      "sha256": "ef8541cd49e492e4cb85f51e960b95d01130a322aef33993fcc88b3d135a2ffc",
+      "tag": "v0.5.1",
+      "url": "https://github.com/melon-77/melon-os/releases/download/v0.5.1/melon-20261017-x86_64.iso"
     },
     "x86-desktop": {
       "file": "melon-desktop-20261007-i686.iso",

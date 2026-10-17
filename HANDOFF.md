@@ -72,9 +72,8 @@ key belongs on no build machine (on 16 October 2026 an unencrypted copy sat next
 2. **GitHub release** (`gh` is freshly logged in as `xbfj` on the PC): tag `v0.5`, title `melon 0.5 “Esfahan”`, notes written for users (what is new, which file
    to download, `doas apk upgrade` for installed systems; the draft is `/mnt/project-files/releases/v0.5/NOTES.md` if the project files are reachable, else write
    them from the PR descriptions), both ISOs plus `SHA256SUMS`, marked Latest. Retitle the 0.4 release "(superseded)" with a link to the new one.
-3. **SourceForge** (owner `melaboton`, project `melonl`): `SF_USER=melaboton SF_PROJECT=melonl scripts/upload-isos.sh sourceforge v0.5 <isos>`.
-   The old upload key lived in WSL and is gone: make a new one (`ssh-keygen -t ed25519 -C melon-build-pc`) and ask the owner to add the public half under
-   their SourceForge account's SSH keys. `docs/iso-hosting.md` has the details. Downloads on the site use SourceForge first and keep GitHub alongside.
+3. **SourceForge: not any more.** The owner dropped it on 17 October 2026 ("the slowest thing ever"): new releases are on GitHub only and the site's
+   buttons for them point there. (0.5's ISOs did reach SourceForge's `v0.5` folder first; the upload key `~/.ssh/id_ed25519_sourceforge` stays on the PC.)
 4. **Website**: `scripts/site-release.py update --tag v0.5` (it reads sizes and checksums from the release), commit `site/`, pull request into `testing`, then
    `scripts/publish-site.sh` (or a PR into `gh-pages`) after it merges. Never edit the `<!-- release:... -->` regions by hand or `gh-pages` directly.
 5. **Online package repo**: `scripts/publish-repo.sh` force-pushes `repo/<arch>/` to the `packages` branch, so start from its current contents when a machine has built

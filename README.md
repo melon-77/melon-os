@@ -104,7 +104,7 @@ Compilers and build tools come from the package repository (they're not on the I
 
 ```sh
 sudo apk add gcc g++ make pkgconf      # also offered on first login
-sudo apk add clang go cmake meson git github-cli
+sudo apk add clang go cmake meson git github-cli openssh   # openssh: ssh, scp, sftp, ssh-keygen
 sudo apk add qemu ovmf                  # virtual machines with KVM, BIOS and UEFI
 ```
 

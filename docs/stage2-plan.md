@@ -17,7 +17,7 @@ Built from the owner's answers in `docs/desktop-config.txt`. Decisions made with
 | Devices / sessions | eudev, elogind, D-Bus, polkit (duktape backend), Linux-PAM (SDDM and the screen locker need it) |
 | Graphics | Mesa: radeonsi + RADV (AMD), iris + ANV (Intel), nouveau (NVIDIA GL; NVK once Rust exists), llvmpipe. LLVM for radeonsi/llvmpipe |
 | Display | Wayland + Xwayland (no separate X11 session) |
-| Desktop | Plasma **minimal**: KWin, plasma-workspace, plasma-desktop, systemsettings, kscreen, powerdevil, plasma-nm, plasma-pa, bluedevil, breeze, kscreenlocker, polkit agent, xdg-desktop-portal-kde |
+| Desktop | **Since 12 October 2026: Wayfire with LXQt's shell** (panel, runner, notifications, PCManFM-Qt, QTerminal), swaylock/swayidle, nm-tray, the LXQt and wlroots portals (`scripts/desktop-packages.txt`); Plasma became the online install `melon-plasma`. Until then: Plasma **minimal**: KWin, plasma-workspace, plasma-desktop, systemsettings, kscreen, powerdevil, plasma-nm, plasma-pa, bluedevil, breeze, kscreenlocker, polkit agent, xdg-desktop-portal-kde |
 | Login | SDDM with a melon theme |
 | Apps | Dolphin, Konsole, Alacritty (needs Rust), nano, Spectacle, System Monitor, Discover (Flatpak backend) |
 | From Flathub on first boot | Firefox, VLC, Steam, Prism Launcher |

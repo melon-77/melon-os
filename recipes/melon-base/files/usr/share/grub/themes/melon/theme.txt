@@ -1,0 +1,52 @@
+# melon's boot menu
+title-text: ""
+desktop-color: "#121714"
+terminal-font: "DejaVu Sans Mono Regular 16"
+terminal-box: "term_*.png"
+
++ image {
+  left = 50%-24
+  top = 24%-24
+  width = 48
+  height = 48
+  file = "logo.png"
+}
++ boot_menu {
+  left = 20%
+  top = 32%
+  width = 60%
+  height = 46%
+  item_font = "Noto Sans Regular 20"
+  selected_item_font = "Noto Sans Regular 20"
+  item_color = "#b9c4b5"
+  selected_item_color = "#f2f6ef"
+  item_height = 40
+  item_padding = 18
+  item_spacing = 6
+  icon_width = 0
+  icon_height = 0
+  item_icon_space = 0
+  selected_item_pixmap_style = "select_*.png"
+  scrollbar = false
+}
++ label {
+  id = "__timeout__"
+  left = 20%
+  top = 80%
+  width = 60%
+  height = 24
+  align = "center"
+  text = "Starting in %d s"
+  font = "Noto Sans Regular 16"
+  color = "#6f7d6c"
+}
++ label {
+  left = 0
+  top = 100%-56
+  width = 100%
+  height = 24
+  align = "center"
+  text = "Enter to start   ·   e to edit   ·   c for a command line"
+  font = "Noto Sans Regular 16"
+  color = "#6f7d6c"
+}

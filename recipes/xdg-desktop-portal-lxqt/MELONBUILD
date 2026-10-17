@@ -1,0 +1,11 @@
+pkgname=xdg-desktop-portal-lxqt
+pkgver=1.4.0
+pkgrel=0
+pkgdesc="LXQt's portal: file open and save dialogs for Flatpak apps"
+license=LGPL-2.1-or-later
+url=https://lxqt-project.org
+source=(xdg-desktop-portal-lxqt-1.4.0.tar.xz)
+makedepends=(qt6-qtbase-dev libfm-qt-dev kf6-kwindowsystem-dev xdg-desktop-portal-dev)
+depends=(xdg-desktop-portal)
+build(){ cmake_setup -B build -DQT_HOST_PATH=$M/hosttools/qt6 -DQT_HOST_PATH_CMAKE_DIR=$M/hosttools/qt6/lib/cmake; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

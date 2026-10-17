@@ -4,10 +4,10 @@
   qemu-test.py live  <iso> <disk.img> [--uefi]   boot the ISO, run the quick installer onto disk.img
   qemu-test.py disk  <disk.img> [--uefi]         boot the installed disk and check the system
   qemu-test.py toram <iso> <disk.img>            boot with "copy to RAM", eject the CD, then use and install
-  qemu-test.py desktop <desktop-iso>             boot the desktop ISO with graphics: services up, Plasma running,
+  qemu-test.py desktop <desktop-iso>             boot the desktop ISO with graphics: services up, the desktop running,
                                                  a USB stick mounts through UDisks2, screenshot in logs/qemu-desktop.png
   qemu-test.py desktop-install <desktop-iso> <disk.img>   install the desktop profile, boot the installed disk
-                                                 with graphics, log in through SDDM: greeter stays up, Plasma starts
+                                                 with graphics, log in through SDDM: greeter stays up, the desktop starts
   qemu-test.py dualboot <iso> <disk.img>         a fake Windows disk (EFI partition, MSR, NTFS C:, free space): install
                                                  alongside on UEFI, boot melon from the firmware's boot menu, Windows in
                                                  GRUB, and nothing of Windows' changed
@@ -79,7 +79,7 @@ if mode == 'desktop':
     subprocess.run(['mkfs.vfat', '-F', '32', '-n', 'MELONUSB', '--offset', '2048', usb, str((64 << 20) // 1024 - 1024)],
                    check=True, stdout=subprocess.DEVNULL)
     subprocess.run(['mcopy', '-i', f'{usb}@@1M', '-', '::hello.txt'], input=b'hello from the stick\n', check=True)
-    # a real graphics card for KWin; the serial port stays the test's console
+    # a real graphics card for the compositor; the serial port stays the test's console
     cmd = [c for c in cmd if c != '-nographic'] + ['-display', 'none', '-serial', 'stdio', '-device', 'virtio-vga', '-m', '4096',
                                                  '-cdrom', iso, '-boot', 'd', '-device', 'qemu-xhci,id=xhci',
                                                  '-drive', f'if=none,id=stick,format=raw,file={usb}', '-device', 'usb-storage,bus=xhci.0,drive=stick']
@@ -174,19 +174,22 @@ if mode == 'desktop':
     flap = _re.search(r'FLAP=([^\r\n]*)', flapping); flap = flap.group(1).strip() if flap else '?'
     ok &= flap == ''; step('services: ' + ('none restarting in a loop' if flap == '' else f'RESTARTING: {flap}'))
     found = False
-    for _ in range(40):                            # KWin and plasmashell after SDDM's autologin
-        out = sh('ps -o comm | grep -qx kwin_wayland && ps -o comm | grep -qx plasmashell && echo PLASMA-UP || echo waiting')
-        if 'PLASMA-UP' in out: found = True; break
+    # the compositor and the desktop's shell after SDDM's autologin: Wayfire and LXQt's panel (labwc on the 32-bit edition)
+    wm = 'labwc' if i686 else 'wayfire'
+    for _ in range(40):
+        out = sh(f'ps -o comm | grep -qx {wm} && ps -o comm | grep -qx lxqt-panel && echo DESKTOP-UP || echo waiting')
+        if 'DESKTOP-UP' in out: found = True; break
         time.sleep(5)
     time.sleep(20)                                  # let the desktop finish drawing
     # still there after settling, and inside a real logind session (a crash loop can look alive for a moment)
     out = sh('echo SESSIONS=$(loginctl list-sessions --no-legend 2>/dev/null | grep -c seat0) '
-             'KWIN=$(ps -o comm | grep -cx kwin_wayland) SHELL=$(ps -o comm | grep -cx plasmashell)')
+             f'WM=$(ps -o comm | grep -cx {wm}) SHELL=$(ps -o comm | grep -cx lxqt-panel)')
     import re as _re
-    v = dict(_re.findall(r'(SESSIONS|KWIN|SHELL)=(\d+)', out))
-    stable = found and all(int(v.get(k, '0')) > 0 for k in ('SESSIONS', 'KWIN', 'SHELL')); ok &= stable
-    step(f"Plasma after 20 s: sessions={v.get('SESSIONS')} kwin={v.get('KWIN')} plasmashell={v.get('SHELL')}")
-    # Plasma's device list asks UDisks2 over D-Bus, which starts udisksd; then mount the stick the same way Dolphin does
+    v = dict(_re.findall(r'(SESSIONS|WM|SHELL)=(\d+)', out))
+    stable = found and all(int(v.get(k, '0')) > 0 for k in ('SESSIONS', 'WM', 'SHELL')); ok &= stable
+    step(f"desktop after 20 s: sessions={v.get('SESSIONS')} {wm}={v.get('WM')} lxqt-panel={v.get('SHELL')}")
+    # the file manager's device list asks UDisks2 over D-Bus, which starts udisksd; then mount the stick the same way
+    # PCManFM-Qt does
     out = sh('echo UDISKSD=$(ps -o comm | grep -cx udisksd)')
     started = 'UDISKSD=1' in out; ok &= started; step('udisksd started by D-Bus activation: ' + ('yes' if started else 'NO'))
     out = sh('dev=$(doas blkid -L MELONUSB); echo "stick: $dev"; doas udisksctl mount -b $dev && '
@@ -194,7 +197,7 @@ if mode == 'desktop':
     mounted = 'hello from the stick' in out and 'Mounted' in out; ok &= mounted
     step('USB stick through UDisks2: ' + ('mounted, file read, unmounted' if mounted else 'FAILED'))
     if not mounted: print(out[-2000:])
-    # codecs: a second of video through each encoder Spectacle's screen recorder (KPipeWire) asks ffmpeg for,
+    # codecs: a second of video through each encoder screen recorders (OBS from Flathub, Spectacle with melon-plasma) ask ffmpeg for,
     # Opus audio, and PipeWire's Bluetooth codecs
     out = sh('cd /tmp; for e in libvpx-vp9:webm libx264:mp4 libwebp_anim:webp; do ffmpeg -v error -f lavfi '
              '-i testsrc=duration=1:size=320x240:rate=10 -c:v ${e%:*} -y rec.${e#*:} && [ -s rec.${e#*:} ] && echo ENC-OK ${e%:*}; done; '
@@ -220,7 +223,7 @@ if mode == 'desktop':
     online = _re.search(r'(^|[\r\n])connected', out) is not None; ok &= online   # (bash's bracketed-paste codes end in \r)
     step('nmcli: ' + ('NetworkManager connected' if online else 'NOT CONNECTED'))
     if not online: print(repr(out[-600:]))
-    # Wi-Fi the way Plasma's network applet does it (NetworkManager, which starts wpa_supplicant over D-Bus) on two
+    # Wi-Fi the way the network applet (nm-tray) does it (NetworkManager, which starts wpa_supplicant over D-Bus) on two
     # virtual radios: wlan1 is a WPA2 access point run by a separate wpa_supplicant, NetworkManager joins it with wlan0
     ap = ("printf '%s\\n' 'network={' 'ssid=\"melontest\"' 'mode=2' 'frequency=2437' 'key_mgmt=WPA-PSK' 'proto=RSN' "
           "'pairwise=CCMP' 'psk=\"melonwifi\"' '}' > /tmp/ap.conf")
@@ -270,14 +273,14 @@ if mode == 'desktop-install':
     if not ok: print(out[-3000:])
     p.sendline('poweroff'); p.expect(pexpect.EOF, timeout=300)
     if not ok: sys.exit(1)
-    # second boot: the installed disk, with a graphics card for SDDM and KWin; the serial port stays the test's console
+    # second boot: the installed disk, with a graphics card for SDDM and the desktop; the serial port stays the test's console
     cmd = [c for c in base if c != '-nographic'] + ['-display', 'none', '-serial', 'stdio', '-device', 'virtio-vga'] \
           + disk_args(disk) + ['-boot', 'c']
     p = pexpect.spawn(cmd[0], cmd[1:], encoding='utf-8', codec_errors='replace', timeout=600)
     p.logfile_read = log
     p.expect('login:', timeout=900); p.sendline('root'); p.expect('assword:'); p.sendline('melonroot')
     p.expect(PROMPT, timeout=120); step('logged in on the installed desktop (serial console)')
-    time.sleep(15)                                  # SDDM and KWin are starting: typing now can lose characters
+    time.sleep(15)                                  # SDDM and its compositor are starting: typing now can lose characters
     sh('stty cols 160 rows 50; export TERM=vt100')
     # (comm is cut to 15 characters: sddm-greeter-qt6 shows as sddm-greeter-qt)
     greeter = "ps -o pid,comm | awk '$2 ~ /^sddm-greeter/{print $1}' | head -1"
@@ -294,9 +297,9 @@ if mode == 'desktop-install':
     for ch in 'melonuser':
         mon(f'sendkey {ch}'); time.sleep(0.15)
     mon('sendkey ret'); step('typed the password into the greeter')
-    time.sleep(3); mon(f'screendump {M}/logs/qemu-desktop-splash.ppm')   # Plasma's loading screen
-    # the desktop's shell: Plasma's plasmashell, or on the 32-bit edition LXQt's panel (on labwc)
-    desk = 'lxqt-panel' if i686 else 'plasmashell'
+    time.sleep(3); mon(f'screendump {M}/logs/qemu-desktop-splash.ppm')   # the session starting
+    # the desktop's shell, LXQt's panel, on Wayfire (on labwc on the 32-bit edition)
+    desk = 'lxqt-panel'
     shell = f"ps -o user,comm | awk '$1==\"jcole\" && $2==\"{desk}\"' | wc -l"
     for _ in range(60):
         if count(shell): break
@@ -304,11 +307,9 @@ if mode == 'desktop-install':
     time.sleep(20)                                  # let the desktop finish drawing
     sess = count("loginctl list-sessions --no-legend | awk '$3==\"jcole\" && $6==\"active\"' | wc -l")
     up = count(shell) == 1 and sess == 1; ok &= up
-    if i686:
-        lab = count("ps -o user,comm | awk '$1==\"jcole\" && $2==\"labwc\"' | wc -l"); up &= lab == 1; ok &= lab == 1
-        step(f'LXQt for jcole after 20 s: lxqt-panel={count(shell)} labwc={lab} active sessions={sess}')
-    else:
-        step(f'Plasma for jcole after 20 s: plasmashell={count(shell)} active sessions={sess}')
+    wm = 'labwc' if i686 else 'wayfire'
+    lab = count(f"ps -o user,comm | awk '$1==\"jcole\" && $2==\"{wm}\"' | wc -l"); up &= lab == 1; ok &= lab == 1
+    step(f'LXQt for jcole after 20 s: lxqt-panel={count(shell)} {wm}={lab} active sessions={sess}')
     mime = count('[ -s /usr/share/mime/mime.cache ] && echo 1 || echo 0') == 1; ok &= mime
     # a service runit keeps restarting shows as "down: 1s, normally up, want up" (polkitd did, raced by D-Bus activation)
     flapping = sh('sv status /var/service/* 2>&1 | grep "want up" | cut -d: -f2 | xargs echo FLAP=')
@@ -334,18 +335,15 @@ if mode == 'desktop-install':
     rew = 'REW=badge3certgoldsddm' in out; ok &= rew
     step('gauntlet rewards: ' + ('badge, 3 survivor wallpapers, certificate, gold boot menu, gold login screen' if rew else f'MISSING {out[-300:]!r}'))
     # the gold look in jcole's running session (what a survivor's first login runs), read back from jcole's config;
-    # it is Plasma's look (colours, Plasma style, Konsole), so not on the 32-bit LXQt edition
-    if not i686:
-        sh("pid=$(ps -o pid,user,comm | awk '$2==\"jcole\" && $3==\"plasmashell\"{print $1}' | head -1)")
-        sh("e=$(tr '\\0' '\\n' < /proc/$pid/environ | grep -E '^(DBUS_SESSION_BUS_ADDRESS|WAYLAND_DISPLAY|XDG_RUNTIME_DIR)=' | tr '\\n' ' ')")
-        look = sh('su -s /bin/sh jcole -c "env $e /usr/libexec/melon/melon-survivor-look"; echo LOOK=$?; '
-                  'su -s /bin/sh jcole -c \'kreadconfig6 --file kdeglobals --group General --key ColorScheme; '
-                  'kreadconfig6 --file plasmarc --group Theme --key name; '
-                  'kreadconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile; '
-                  'kreadconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image --group General --key Image\' '
-                  '| tr "\\n" " " | sed "s/^/GOLD=/"')
-        gold = 'LOOK=0' in look and 'GOLD=MelonGold melon-gold MelonGold.profile /usr/share/wallpapers/melon-survivor-gold/' in look
-        ok &= gold; step('gold look in the session: ' + ('colours, Plasma style, Konsole, lock screen, wallpaper' if gold else f'MISSING {look[-300:]!r}'))
+    # in LXQt: the gold accent in LXQt's palette, the gold ring on the lock screen, the portal as wallpaper
+    sh("pid=$(ps -o pid,user,comm | awk '$2==\"jcole\" && $3==\"lxqt-panel\"{print $1}' | head -1)")
+    sh("e=$(tr '\\0' '\\n' < /proc/$pid/environ | grep -E '^(DBUS_SESSION_BUS_ADDRESS|WAYLAND_DISPLAY|XDG_RUNTIME_DIR|XDG_CURRENT_DESKTOP)=' | tr '\\n' ' ')")
+    look = sh('su -s /bin/sh jcole -c "env $e /usr/libexec/melon/melon-survivor-look"; echo LOOK=$?; '
+              'su -s /bin/sh jcole -c \'grep -h -e "^highlight_color=" ~/.config/lxqt/lxqt.conf; grep -c e8b64aff ~/.config/swaylock/config 2>/dev/null; '
+              'grep -h "^Wallpaper=" ~/.config/pcmanfm-qt/lxqt/settings.conf\' | tr "\\n" " " | sed "s/^/GOLD=/"')
+    ring = '' if i686 else r'[1-9]\d* '            # swaylock comes with Wayfire (64-bit)
+    gold = 'LOOK=0' in look and _re.search(r'GOLD=highlight_color=#e8b64a ' + ring + r'Wallpaper=/usr/share/wallpapers/melon-survivor-portal/', look) is not None
+    ok &= gold; step('gold look in the session: ' + ('gold accent, lock screen ring, wallpaper' if gold else f'MISSING {look[-300:]!r}'))
     time.sleep(10); mon(f'screendump {M}/logs/qemu-desktop-installed.ppm'); time.sleep(3)
     # the gold login screen: back to the greeter (this ends jcole's session)
     sh('sv restart sddm')

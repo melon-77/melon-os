@@ -1,7 +1,7 @@
 pkgname=lxqt-wayland-session
 pkgver=0.4.0
-pkgrel=0
-pkgdesc="LXQt Wayland session files (labwc, kwin_wayland, ... as compositor)"
+pkgrel=1
+pkgdesc="LXQt Wayland session files (Wayfire, labwc, ... as compositor)"
 license="LGPL-2.1-or-later (see sources)"
 url=https://lxqt-project.org
 source=(lxqt-wayland-session-0.4.0.tar.xz)

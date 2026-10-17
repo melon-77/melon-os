@@ -56,11 +56,15 @@ NVIDIA="linux-firmware-nvidia mesa-nvk nvidia-open"
 BUILDTOOLS2="lz4 ninja cmake meson git nasm tcl rsync
   python3-markupsafe python3-jinja2 python3-pyparsing python3-mako python3-yaml python3-packaging python3-ptyprocess python3-pexpect python3-libxml2 itstool
   xorriso mtools scdoc dtc dwarves publicsuffix rpcsvc-proto"
-# LXQt on labwc (wlroots): the 32-bit edition's desktop (X86 below); on 64-bit an extra desktop from the online repository
-# (scripts/gen-lxqt-recipes.py), with melon's LXQt defaults
+# LXQt (scripts/gen-lxqt-recipes.py): the shell of melon's default desktop (on Wayfire, 64-bit) and of the 32-bit edition
+# (on labwc, X86 below); labwc also draws the login screen on both
 LXQT="fribidi cairo pango libsfdo seatd wlroots labwc libexif libfm-extra menu-cache xdg-user-dirs libxscrnsaver libproc2
-  $(python3 $M/scripts/gen-lxqt-recipes.py) melon-lxqt"
-ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $DESKTOP_LIBS $STEP2 $NVIDIA $RUSTC $KDE $INSTALLERS $LXQT | awk '!seen[$0]++')
+  $(python3 $M/scripts/gen-lxqt-recipes.py)"
+# Wayfire, the default desktop's compositor since 12 October 2026, and what melon's Wayfire session uses (lock screen, idle,
+# screenshots, network tray, portals); melon-wayfire before melon-lxqt, which depends on it on 64-bit. melon-plasma: the
+# Plasma set the desktop ISO used to carry, as one online install
+WAYFIRE="glm yyjson wf-config wayfire swaylock swayidle grim nm-tray xdg-desktop-portal-lxqt xdg-desktop-portal-wlr melon-wayfire"
+ALL=$(printf '%s\n' $BASE $PLUMBING $DEVTOOLS $BUILDTOOLS $APPS $GAMES $SIMPLE $BUILDTOOLS2 $GETTEXT $RUST $DESKTOP_LIBS $STEP2 $NVIDIA $RUSTC $KDE $INSTALLERS $LXQT $WAYFIRE melon-lxqt melon-plasma | awk '!seen[$0]++')
 # The 32-bit (i686) edition, for old netbooks and laptops (the owner, 7 October 2026: LXQt as its desktop): the base
 # system, the libraries and services LXQt, SDDM and Calamares need, LLVM and Mesa (no Vulkan), the Qt and KDE Frameworks parts
 # LXQt and the installer use, labwc (wlroots) as the Wayland compositor, LXQt. No Plasma, Flatpak, NVIDIA, Rust or
@@ -77,7 +81,7 @@ if [ "$APK_ARCH" = x86 ]; then
   KDE_X86="extra-cmake-modules plasma-wayland-protocols polkit-qt-1 kf6-kcoreaddons kf6-kconfig kf6-ki18n kf6-kwidgetsaddons
     kf6-kwindowsystem kf6-kguiaddons kf6-kdbusaddons kf6-kcrash kf6-kidletime kf6-solid kf6-breeze-icons layer-shell-qt
     libkscreen sddm"
-  ALL=$(printf '%s\n' $BASE $PLUMBING nethack $SIMPLE_X86 efivar efibootmgr $DESKTOP_LIBS_X86 $QT_X86 $KDE_X86 $LXQT kpmcore calamares \
+  ALL=$(printf '%s\n' $BASE $PLUMBING nethack $SIMPLE_X86 efivar efibootmgr $DESKTOP_LIBS_X86 $QT_X86 $KDE_X86 $LXQT melon-lxqt kpmcore calamares \
     calamares-melon melon-desktop | awk '!seen[$0]++' | grep -vx qemu-guest-agent)   # QEMU 11 has no 32-bit x86 hosts
 fi
 # recipes nobody listed yet go at the end (64-bit only)

@@ -1,0 +1,19 @@
+pkgname=wayfire
+pkgver=0.11.0
+pkgrel=0
+pkgdesc="Wayfire, a modular Wayland compositor (the window manager of melon's default desktop)"
+license=MIT
+url=https://wayfire.org
+source=(wayfire-0.11.0.tar.xz)
+subpackages=(wayfire-dev)
+makedepends=(wlroots-dev wf-config-dev glm yyjson-dev cairo-dev pango-dev libjpeg-turbo-dev libpng-dev libinput-dev
+  libxkbcommon-dev pixman-dev wayland-dev wayland-protocols libdrm-dev mesa-dev eudev-dev libxml2-dev libxcb-dev xwayland)
+depends=(xwayland)
+# system wlroots 0.20 and wf-config (no subprojects: they would want git at configure time); musl has backtrace() in no
+# library, which Wayfire already handles (src/debug.cpp)
+build(){ meson_setup -Duse_system_wlroots=enabled -Duse_system_wfconfig=enabled -Dxwayland=enabled -Dtests=disabled \
+  -Denable_openmp=false -Dbuild_locales=disabled -Dvulkan_effects=false build; ninja -C build -j$JOBS; }
+# no bare "Wayfire" login session: SDDM would offer an empty Wayfire next to melon's desktop (LXQt starts Wayfire itself,
+# startlxqtwayland, as it starts labwc on the 32-bit edition). The default wayfire.ini is kept for reference.
+package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/wayland-sessions $pkgdir/usr/share/doc
+  install -Dm644 wayfire.ini $pkgdir/usr/share/wayfire/wayfire.ini.default; }

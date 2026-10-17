@@ -1,0 +1,5 @@
+#!/bin/sh
+# melon-screenshot: the Print key in melon's desktop. Saves the whole screen to ~/Pictures/Screenshots.
+dir=$(xdg-user-dir PICTURES 2>/dev/null); [ -n "$dir" ] && [ "$dir" != "$HOME" ] || dir=$HOME/Pictures
+dir=$dir/Screenshots; mkdir -p "$dir"
+exec grim "$dir/screenshot-$(date +%Y-%m-%d-%H%M%S).png"

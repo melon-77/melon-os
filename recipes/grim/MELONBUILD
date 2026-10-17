@@ -1,0 +1,11 @@
+pkgname=grim
+pkgver=1.5.0
+pkgrel=0
+pkgdesc="Screenshots on Wayland (the Print key in melon's desktop)"
+license=MIT
+url=https://gitlab.freedesktop.org/emersion/grim
+source=(grim-1.5.0.tar.gz)
+builddir=$srcdir/grim-v1.5.0
+makedepends=(wayland-dev wayland-protocols pixman-dev libpng-dev libjpeg-turbo-dev)
+build(){ meson_setup -Djpeg=enabled -Dman-pages=disabled build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

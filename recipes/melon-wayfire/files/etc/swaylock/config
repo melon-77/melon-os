@@ -1,0 +1,30 @@
+# melon's lock screen (swaylock): the desktop's dark colour, a thin ring that turns melon green while you type.
+# Your own settings go in ~/.config/swaylock/config (that file replaces this one).
+color=121714
+indicator-radius=72
+indicator-thickness=6
+font=Noto Sans
+show-failed-attempts
+ignore-empty-password
+inside-color=121714ff
+inside-clear-color=121714ff
+inside-ver-color=121714ff
+inside-wrong-color=121714ff
+ring-color=2a332dff
+ring-clear-color=2a332dff
+ring-ver-color=6fbf4aff
+ring-wrong-color=d9705fff
+line-color=00000000
+line-clear-color=00000000
+line-ver-color=00000000
+line-wrong-color=00000000
+separator-color=00000000
+key-hl-color=6fbf4aff
+bs-hl-color=d9705fff
+text-color=e6ece3ff
+text-clear-color=e6ece3ff
+text-ver-color=e6ece3ff
+text-wrong-color=e6ece3ff
+text-caps-lock-color=e6ece3ff
+caps-lock-key-hl-color=e8b64aff
+caps-lock-bs-hl-color=d9705fff

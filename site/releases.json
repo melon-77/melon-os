@@ -1,8 +1,8 @@
 {
-  "version": "0.4",
-  "name": "Dudaim",
-  "date": "2026-10-09",
-  "tag": "v0.4",
+  "version": "0.5",
+  "name": "Esfahan",
+  "date": "2026-10-17",
+  "tag": "v0.5",
   "repo": "melon-77/melon-os",
   "mirrors": [
     {
@@ -67,18 +67,18 @@
   },
   "files": {
     "desktop": {
-      "file": "melon-desktop-20261009-x86_64.iso",
-      "size": 793604096,
-      "sha256": "ef5ed5223a2e16b1fb9f448db1edfb7380afd844b67c3bb16022dff42fe47d16",
-      "tag": "v0.4",
-      "url": "https://github.com/melon-77/melon-os/releases/download/v0.4/melon-desktop-20261009-x86_64.iso"
+      "file": "melon-desktop-20261017-x86_64.iso",
+      "size": 626063360,
+      "sha256": "e9553b1b63696611d36ab3efb9e3017e0afa93457e258c50e334072689ed9575",
+      "tag": "v0.5",
+      "url": "https://github.com/melon-77/melon-os/releases/download/v0.5/melon-desktop-20261017-x86_64.iso"
     },
     "console": {
-      "file": "melon-20261009-x86_64.iso",
-      "size": 380301312,
-      "sha256": "870d04794b07ce21a968dff22f924281ffafc5f5587f8d2e899ea907db710cbf",
-      "tag": "v0.4",
-      "url": "https://github.com/melon-77/melon-os/releases/download/v0.4/melon-20261009-x86_64.iso"
+      "file": "melon-20261017-x86_64.iso",
+      "size": 248041472,
+      "sha256": "401459b8df52ced49a6e232e4e2a07d2eb4635dbd1e73dab8769676a75cf267d",
+      "tag": "v0.5",
+      "url": "https://github.com/melon-77/melon-os/releases/download/v0.5/melon-20261017-x86_64.iso"
     },
     "x86-desktop": {
       "file": "melon-desktop-20261007-i686.iso",

@@ -1,0 +1,38 @@
+#!/bin/sh
+# melon-update-run --check | --upgrade: the root helper of melon-welcome and of the update-check service.
+#   --check    apk update, then write /var/lib/melon/updates.txt: "checked <epoch>", "count <n>", one package name per line;
+#              when the index can't be fetched, add "failed <epoch>" and keep the last answer
+#   --upgrade  apk update, apk upgrade, write the file again; says MELON-RESTART when the kernel was part of it
+# The file is readable by everyone: the tray notice and the Welcome window read it as the user.
+state=/var/lib/melon/updates.txt
+now=$(date +%s)
+mkdir -p /var/lib/melon
+
+names() { apk list -u 2>/dev/null | awk '{print $1}' | sed -E 's/-[0-9][^ ]*-r[0-9]+$//'; }
+write_state() {     # the package names are on stdin
+  tmp=$state.new
+  cat > "$tmp.list"
+  { echo "checked $now"; echo "count $(wc -l < "$tmp.list" | tr -d ' ')"; cat "$tmp.list"; } > "$tmp"
+  rm -f "$tmp.list"; chmod 644 "$tmp"; mv "$tmp" "$state"
+}
+failed() {
+  { grep -v '^failed ' "$state" 2>/dev/null; echo "failed $now"; } > "$state.new"; chmod 644 "$state.new"; mv "$state.new" "$state"
+  exit 1
+}
+
+case $1 in
+  --check)
+    apk update >/dev/null 2>&1 || failed
+    names | write_state ;;
+  --upgrade)
+    echo "Looking for updates..."
+    apk update || failed
+    names > /tmp/melon-update.$$
+    echo "Installing updates (this can take a few minutes)..."
+    if ! apk upgrade; then rm -f /tmp/melon-update.$$; echo "The update did not finish. Nothing is broken: try again, or ask for help."; exit 1; fi
+    names | write_state
+    if grep -qx 'linux-melon' /tmp/melon-update.$$; then echo "MELON-RESTART: the kernel was updated; restart the computer to use it."; fi
+    rm -f /tmp/melon-update.$$
+    echo "Done." ;;
+  *) echo "usage: melon-update-run --check | --upgrade" >&2; exit 2 ;;
+esac

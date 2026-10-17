@@ -13,18 +13,18 @@ ROOT=$WORK/liveroot LIVE=$WORK/livelayer ISO=$WORK/iso INITRD=$WORK/initrd
 DATE=$(date -u +%Y%m%d)   # UTC: WSL keeps Windows' time zone, which gave ISOs the day before's date
 ISOARCH=$([ $MELON_ARCH = x86 ] && echo i686 || echo x86_64)
 OUTISO=$M/out/melon-$DATE-$ISOARCH.iso
-PKGS=${PKGS:-"melon-base linux-melon linux-firmware wpa_supplicant xfsprogs grub zstd openssl ca-certificates cryptsetup ncurses-terminfo musl-utils alsa-utils mpg123 kmod efibootmgr nethack"}
+PKGS=${PKGS:-"melon-base linux-melon linux-firmware-pc wpa_supplicant xfsprogs grub zstd openssl ca-certificates cryptsetup ncurses-terminfo musl-utils alsa-utils mpg123 kmod efibootmgr nethack"}
 # leave out optional packages that haven't been built for this architecture yet (with a warning)
 _p=; for x in $PKGS; do
   if ls $M/repo/$APK_ARCH/$x-[0-9]*.apk >/dev/null 2>&1; then _p="$_p $x"; else echo "warning: $x is not built for $APK_ARCH, left out"; fi
 done; PKGS=${_p# }
-# MELON_EDITION=desktop: the Plasma live ISO. Its system image already contains the desktop (the installers
+# MELON_EDITION=desktop: the desktop live ISO (LXQt on Wayfire; on labwc for 32-bit). Its system image already contains the desktop (the installers
 # copy it as is) plus the live-only installer packages, which both installers remove from the new system.
 EDITION=${MELON_EDITION:-console}
 DESKTOP_PKGS=${DESKTOP_PKGS:-}
 LIVE_ONLY=
 if [ "$EDITION" = desktop ]; then
-  # the 32-bit edition has its own list (LXQt instead of Plasma): desktop-packages-x86.txt
+  # the 32-bit edition has its own list (LXQt on labwc instead of Wayfire): desktop-packages-x86.txt
   _list=$M/scripts/desktop-packages$ARCH_SUFFIX.txt; [ -f $_list ] || _list=$M/scripts/desktop-packages.txt
   DESKTOP_PKGS=${DESKTOP_PKGS:-$(grep -v '^#' $_list | xargs)}
   LIVE_ONLY=${LIVE_ONLY:-calamares-melon}
@@ -58,11 +58,13 @@ if [ -n "$DESKTOP_PKGS" ]; then
   printf '%s\n' $PKGS $(printf '%s\n' $DESKTOP_PKGS | grep -vxF "${LIVE_ONLY:-@none@}") > $ROOT/usr/share/melon/profiles/desktop
   # services for the desktop profile: udev replaces mdev, NetworkManager replaces the dhcp/wpa services
   # (only the ones the profile's packages ship: the 32-bit edition has no CUPS, Avahi or power-profiles-daemon)
-  for s in -mdevd -dhcp udevd dbus elogind polkitd NetworkManager bluetoothd power-profiles-daemon zram sddm avahi-daemon cupsd; do
+  for s in -mdevd -dhcp udevd dbus elogind polkitd NetworkManager bluetoothd power-profiles-daemon zram sddm avahi-daemon cupsd melon-update-check; do
     case $s in -*) echo $s ;; *) [ ! -d $ROOT/etc/sv/$s ] || echo $s ;; esac
   done > $ROOT/usr/share/melon/profiles/desktop.services
 fi
-cp $ROOT/boot/vmlinuz-melon $ISO/boot/vmlinuz
+# the kernel is on the ISO once, in melon/ (so `toram` copies it too): GRUB loads it from there and the installers put it on the new
+# system's /boot, because rootfs.sqfs leaves it out (it would be a second 12 MB copy)
+cp $ROOT/boot/vmlinuz-melon $ISO/melon/vmlinuz
 
 step "live layer"
 mkdir -p $LIVE/etc/sv/getty-tty1 $LIVE/etc/sv/getty-ttyS0 $LIVE/var/service $LIVE/etc/apk $LIVE/usr/share/melon
@@ -74,7 +76,7 @@ if [ "$EDITION" = desktop ]; then
   for s in getty-tty2 getty-tty3 getty-ttyS0 syslogd klogd udevd dbus elogind polkitd NetworkManager bluetoothd \
            power-profiles-daemon zram sddm avahi-daemon cupsd qemu-ga vmtoolsd hv_kvp_daemon hv_vss_daemon hv_fcopy_uio_daemon; do
     [ ! -d $ROOT/etc/sv/$s ] || ln -sfn /etc/sv/$s $LIVE/var/service/$s; done
-  # the live user: logs in automatically to Plasma (LXQt on the 32-bit edition), may use doas without a password, has the installer on the desktop
+  # the live user: logs in automatically to LXQt (on Wayfire, labwc on the 32-bit edition; Plasma if a custom list has it), may use doas without a password, has the installer on the desktop
   awk -F: '$1!="live"' $ROOT/etc/passwd > $LIVE/etc/passwd; echo 'live:x:1000:1000:melon live:/home/live:/bin/bash' >> $LIVE/etc/passwd
   awk -F: '$1!="live"' $LIVE/etc/shadow > $LIVE/etc/shadow.t; echo 'live::20000:0:99999:7:::' >> $LIVE/etc/shadow.t
   mv $LIVE/etc/shadow.t $LIVE/etc/shadow; chmod 640 $LIVE/etc/shadow
@@ -105,7 +107,9 @@ cat > $LIVE/etc/motd <<'MOTD'
 MOTD
 
 step "squashfs"
-mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet
+# zstd level 19 with 512 KiB blocks: about 20 MB smaller than level 15 with 128 KiB blocks on the desktop image (measured on
+# the 0.4 contents; 1 MiB blocks save 5 MB more but make every small read decompress more), the same speed to read
+mksquashfs $ROOT $ISO/melon/rootfs.sqfs -comp zstd -Xcompression-level 19 -b 512K -noappend -quiet -e boot/vmlinuz-melon
 mksquashfs $LIVE $ISO/melon/live.sqfs -comp zstd -Xcompression-level 15 -noappend -quiet   # built as root; /home/live keeps its owner
 
 step "package repository (extras only; the base system comes from rootfs.sqfs)"
@@ -114,9 +118,15 @@ mkdir -p $ISO/melon/repo/$APK_ARCH
 # a second copy cost about 460 MB on the ISO and on every installed system; anything else comes from the online repo)
 # always carry the small, commonly wanted extras so an offline install can still add them
 extras="melon-base bash busybox musl apk-tools"
-# guest tools, which the installers add when they run inside a VM
-ls $M/repo/$APK_ARCH/melon-vm-guest-[0-9]*.apk >/dev/null 2>&1 && extras="$extras melon-vm-guest"
+# guest tools, which the installers add when they run inside a VM. The desktop image has them in rootfs.sqfs already, so only
+# the package itself goes in the index (the installers still run `apk add melon-vm-guest`); a second copy of its dependencies
+# (glib, OpenSSL, ...) cost 11 MB
+vmg=
+if ls $M/repo/$APK_ARCH/melon-vm-guest-[0-9]*.apk >/dev/null 2>&1; then
+  case " $PKGS $DESKTOP_PKGS " in *" melon-vm-guest "*) vmg=melon-vm-guest ;; *) extras="$extras melon-vm-guest" ;; esac
+fi
 apkx fetch --recursive --output $ISO/melon/repo/$APK_ARCH $extras >/dev/null
+[ -z "$vmg" ] || apkx fetch --output $ISO/melon/repo/$APK_ARCH $vmg >/dev/null
 ( cd $ISO/melon/repo/$APK_ARCH && $APK --keys-dir $M/keys/trusted --sign-key "${MELON_SIGN_KEY:-$M/keys/melon-signing.rsa}" mkndx -d "melon $DATE" -o Packages.adb *.apk )
 
 step "initramfs"
@@ -132,6 +142,7 @@ set timeout=5
 set default=0
 # serial console only where there is a serial port (most VMs and PCs have none)
 if serial --unit=0 --speed=115200; then
+  set melon_serial=serial
   terminal_input console serial
   terminal_output console serial
 fi
@@ -154,33 +165,39 @@ fi
 insmod all_video
 # the kernel starts in the firmware's own mode (VGA text on BIOS, so its first messages and errors
 # stay visible; the GOP framebuffer on UEFI)
+# without the theme (no graphics mode): white on black, the selected entry in melon green
 set menu_color_normal=light-gray/black
 set menu_color_highlight=black/light-green
+#THEME#
 menuentry 'melon live' {
-  linux /boot/vmlinuz quiet
+  linux /melon/vmlinuz quiet
   initrd /boot/initramfs.img
 }
 menuentry 'melon live (copy to RAM)' {
-  linux /boot/vmlinuz quiet toram
+  linux /melon/vmlinuz quiet toram
   initrd /boot/initramfs.img
 }
 menuentry 'melon live (safe graphics)' {
-  linux /boot/vmlinuz nomodeset
+  linux /melon/vmlinuz nomodeset
   initrd /boot/initramfs.img
 }
 menuentry 'melon live (serial console)' {
-  linux /boot/vmlinuz console=tty0 console=ttyS0,115200
+  linux /melon/vmlinuz console=tty0 console=ttyS0,115200
   initrd /boot/initramfs.img
 }
 CFG
 # the 32-bit edition runs on any x86 CPU: no 64-bit check
 [ $MELON_ARCH != x86 ] || sed -i '/^# melon is 64-bit/,/^fi$/d' $ISO/boot/grub/grub.cfg
-# desktop edition: the melon boot menu theme (from melon-desktop)
-if [ -f $ROOT/usr/share/melon/grub/themes/melon/theme.txt ]; then
-  mkdir -p $ISO/boot/grub/themes && cp -r $ROOT/usr/share/melon/grub/themes/melon $ISO/boot/grub/themes/
-  fonts=$(cd $ISO/boot/grub/themes/melon && for f in *.pf2; do printf 'loadfont /boot/grub/themes/melon/%s; ' $f; done)
-  sed -i "s|^insmod all_video\$|insmod all_video\nif loadfont unicode; then set gfxmode=auto; insmod gfxterm; insmod png; terminal_output gfxterm serial; ${fonts}set theme=/boot/grub/themes/melon/theme.txt; fi|" $ISO/boot/grub/grub.cfg
+# melon's boot menu theme (from melon-base, so on both ISOs, BIOS and UEFI): graphics mode where the firmware has one, the
+# serial port next to it when there is one (the tests' console), and the plain text menu above when there's no graphics
+if [ -f $ROOT/usr/share/grub/themes/melon/theme.txt ]; then
+  mkdir -p $ISO/boot/grub/themes && cp -r $ROOT/usr/share/grub/themes/melon $ISO/boot/grub/themes/
+  fonts=$(cd $ISO/boot/grub/themes/melon && for f in *.pf2; do printf '  loadfont /boot/grub/themes/melon/%s\n' $f; done)
+  theme=$(printf 'if loadfont unicode; then\n  set gfxmode=auto\n  insmod gfxterm\n  insmod png\n  terminal_output gfxterm $melon_serial\n%s\n  set theme=/boot/grub/themes/melon/theme.txt\nfi' "$fonts")
+  awk -v t="$theme" '$0 == "#THEME#" { print t; next } { print }' $ISO/boot/grub/grub.cfg > $ISO/boot/grub/grub.cfg.t
+  mv $ISO/boot/grub/grub.cfg.t $ISO/boot/grub/grub.cfg
 fi
+sed -i '/^#THEME#$/d' $ISO/boot/grub/grub.cfg
 mkdir -p $M/out
 if [ "$EDITION" = desktop ]; then rm -f $M/out/melon-desktop-*-$ISOARCH.iso; else rm -f $M/out/melon-2*-$ISOARCH.iso; fi
 $M/hosttools/grub$ARCH_SUFFIX/bin/grub-mkrescue -o $OUTISO $ISO -- -volid MELON 2>&1 | grep -v -E '^xorriso|^Drive|^Media|^libisofs|^Added|^ISO image|^Writing|^Written|^$' || true

@@ -1,0 +1,18 @@
+#!/bin/sh
+# melon-update-check (the runit service of the same name): looks for updates two minutes after boot, then every six hours
+# (every half hour after a failure, e.g. no network), and when someone asks: melon-welcome's "Check now" creates
+# /var/lib/melon/updates-ctl/request-<uid>. It only looks (apk update, apk list -u) and writes /var/lib/melon/updates.txt;
+# installing is melon-update-run --upgrade, which a person starts and authorises.
+ctl=/var/lib/melon/updates-ctl
+mkdir -p "$ctl" && chmod 1777 "$ctl"
+rm -f "$ctl"/request-*
+next=120
+while :; do
+  sleep 10
+  next=$((next - 10))
+  set -- "$ctl"/request-*
+  if [ -e "$1" ]; then rm -f "$ctl"/request-*; next=0; fi
+  if [ "$next" -le 0 ]; then
+    if timeout 300 /usr/libexec/melon/melon-update-run --check; then next=21600; else next=1800; fi
+  fi
+done

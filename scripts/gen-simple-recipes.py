@@ -120,13 +120,15 @@ ROWS = [
 ]
 
 # pkgrel for recipes whose build changed without a version change (rule 6 in AGENTS.md)
-PKGREL = {'sqlite': 1, 'npth': 1, 'libjpeg-turbo': 1, 'networkmanager': 2, 'power-profiles-daemon': 1, 'libxkbcommon': 1, 'fuse3': 1, 'ostree': 1, 'pipewire': 2,
+PKGREL = {'sqlite': 1, 'npth': 1, 'libjpeg-turbo': 1, 'networkmanager': 2, 'power-profiles-daemon': 2, 'libxkbcommon': 1, 'fuse3': 1, 'ostree': 1, 'pipewire': 2,
           'shared-mime-info': 1}
 # extra MELONBUILD lines (the scripts they name live next to the generated MELONBUILD)
 EXTRA = {
     # rebuild the MIME cache whenever a package adds definitions (shared-mime-info.trigger); without it
     # Qt/KDE don't know common types like text/html
     'shared-mime-info': ['triggers_shared_mime_info=(/usr/share/mime/packages)'],
+    # upstream's powerprofilesctl needs PyGObject, which melon doesn't have; melon's own (files/usr/bin) talks D-Bus through gdbus
+    'power-profiles-daemon': ['package(){ DESTDIR=$pkgdir ninja -C build install; rm -rf $pkgdir/usr/share/doc $pkgdir/usr/share/man; cp -a $startdir/files/. $pkgdir/; }'],
 }
 
 def recipe(r):

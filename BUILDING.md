@@ -137,7 +137,8 @@ melon builds itself. On a melon install (desktop or console profile), starting w
 1. `doas apk upgrade`, then `doas apk add git` (git is in the online repository, not on the ISOs).
 2. `git clone --recurse-submodules -b testing https://github.com/melon-77/melon-os ~/melon`, then `cd ~/melon` (melon-pinball's game is a submodule; in an existing checkout, `git submodule update --init`).
 3. If you are moving from an old build machine, copy its `keys/`, `sources/`, `repo/` and `sysroot/` into `~/melon`
-   (not `tools/` or `hosttools/`, see below). Otherwise put the signing key in `keys/` ("The signing key" below).
+   (from a melon build machine also `tools/` and `hosttools/`, into the same path: that saves rebuilding the toolchain and Qt's
+   host tools; from Ubuntu or WSL not those two, see below). Otherwise put the signing key in `keys/` ("The signing key" below).
 4. `doas scripts/host-setup.sh` (it lists any build tool melon's repository doesn't have; if a step fails, it prints
    the end of `logs/host-setup.log`, where the full output of its builds goes)
 5. `doas scripts/build-everything.sh` (it uses every core; for fewer, `doas env JOBS=10 scripts/build-everything.sh`:

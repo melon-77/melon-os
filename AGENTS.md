@@ -456,7 +456,8 @@ Logs go to `logs/qemu-*.log`. The tests use KVM when it really works (`qemu-test
 (`-accel tcg,thread=multi -cpu max`) and everything is slow. Measured on a Ryzen 7 5800U under Windows 10 (4 vCPUs, no KVM, 9 October 2026):
 the console `live` install takes 77 s, `disk` and `disk --uefi` about 40 s each, and the desktop ISO boots and takes a login on
 the serial console in 25 s, but the Plasma desktop tests (`desktop`, `desktop-install`) were not usable there (another session saw
-Plasma not start in 15 minutes): run those on a machine with KVM. Use generous timeouts. The ISO's GRUB and the installed system both use
+Plasma not start in 15 minutes): run those on a machine with KVM. With KVM (the owner's PC running melon, 17 October 2026) the whole
+`size-round.sh tests` run, console and `desktop-install`, takes about 5 minutes and passes. Use generous timeouts. The ISO's GRUB and the installed system both use
 the serial port, so tests don't need a screen. The test also records the sound card output to
 `logs/audio-capture.wav`, which lets you check that the installer music really plays.
 
@@ -733,6 +734,8 @@ Steps, in the order they ship. Each step is measured before it is called done, a
 Measured on 12 October 2026 (a build of this PR on the WSL machine, with the translation split, which only breeze had): desktop ISO
 612 MB, console ISO 243 MB. **Never trade away Wi-Fi, graphics, audio or network drivers for a PC to save bytes**; whatever leaves the ISO
 must be hardware a PC doesn't have, and stays one `apk add` away.
+
+The 0.5 release build (17 October 2026, natively on melon, Plasma plus the welcome app): desktop ISO 626 MB, console ISO 248 MB.
 
 ## Package repository (online)
 

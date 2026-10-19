@@ -16,7 +16,7 @@ then this file. `CLAUDE.md` points to both. Everything here is current as of thi
 - **melon 0.5.2** (19 October 2026, PR #94) fixes the graphical installer, which failed on every 0.5 and 0.5.1 desktop ISO
   (setgid directories in the image, AGENTS.md rule 67), and Calamares' DES password hashes (rule 68). Notes: `releases/v0.5.2/NOTES.md`.
 - How 0.5 was built (17 October 2026, on the owner's PC running melon: the first full native build).
-  Desktop ISO 626 MB, console ISO 248 MB (0.4: 794 / 380 MB). Both pass `size-round.sh tests` with KVM, including `desktop-install`: Calamares installs,
+  Desktop ISO 626 MB, console ISO 248 MB (0.4: 794 / 380 MB). Both pass `size-round.sh tests` with KVM, including `desktop-install`: the console installer installs the desktop (no test drives Calamares),
   SDDM and Plasma log in, the welcome app's update notice answers, no system files belong to `nobody`. The owner's decision (12 October 2026): 0.5 ships with **Plasma** as the default desktop. Its branch is
   `claude/release-0.5-plasma`: the size round (PR #75: firmware split, one kernel copy on the ISO, JPEG wallpaper, zstd 19; every translation kept, see
   AGENTS.md "Desktop ISO size"), the superkernel (PR #76, `linux-melon` pkgrel 6 and `nvidia-open` pkgrel 2), the new calm GRUB menu (from #77), and the fix

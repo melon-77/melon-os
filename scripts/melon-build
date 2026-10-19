@@ -250,6 +250,9 @@ normalise(){ local d=$1
     if [ "$u" -gt 999 ] || [ "$g" -gt 999 ] || { [ "$cg" != 0 ] && [ "$g" = "$cg" ]; }; then
       chown -h 0:0 "$f"
       if [ -L "$f" ]; then :; elif [ -d "$f" ]; then chmod g-s "$f"; else chmod "$a" "$f"; chmod g-s "$f"; fi; fi; done
+  # no package wants a setgid directory, but one a recipe gives a system group (polkit's rules.d, polkitd) kept the inherited
+  # bit above (rule 67)
+  find "$d" -type d -perm -2000 -exec chmod g-s {} +
 }
 
 # ---------- package metadata + creation ----------

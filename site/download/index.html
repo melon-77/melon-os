@@ -27,23 +27,23 @@
 
 <main>
 <section class="block first">
-  <p class="eyebrow"><!-- release:eyebrow -->melon 0.5.1 &ldquo;Esfahan&rdquo; &middot; 17 October 2026<!-- /release:eyebrow --></p>
+  <p class="eyebrow"><!-- release:eyebrow -->melon 0.5.2 &ldquo;Esfahan&rdquo; &middot; 19 October 2026<!-- /release:eyebrow --></p>
   <h1 class="page-h">Download melon</h1>
   <p class="lead small">Pick a file, write it to a USB stick, boot it. The desktop ISO is a live session and installer in one, so you can try melon before you install it.
     Builds are test releases for now.</p>
 
   <ul class="isos files"><!-- release:files -->
     <li id="desktop">
-      <div class="iso-name"><b>melon desktop</b><span>x86_64 &middot; 626,214,912 bytes (about 626 MB)</span></div>
-      <p>KDE Plasma on Wayland, live session and graphical installer. <code>melon-desktop-20261017-x86_64.iso</code><br>
-        <span class="sum">SHA-256 <code>5aea139060349994662252548c55db71d782834599c7ebd10f83dd84107bfccf</code></span></p>
-      <a class="btn small" href="https://github.com/melon-77/melon-os/releases/download/v0.5.1/melon-desktop-20261017-x86_64.iso" download>Download</a>
+      <div class="iso-name"><b>melon desktop</b><span>x86_64 &middot; 626,405,376 bytes (about 626 MB)</span></div>
+      <p>KDE Plasma on Wayland, live session and graphical installer. <code>melon-desktop-20261019-x86_64.iso</code><br>
+        <span class="sum">SHA-256 <code>2b717d6fd52d30a559e771d2f3090641441dd18121cae57824c15551f3b933e8</code></span></p>
+      <a class="btn small" href="https://github.com/melon-77/melon-os/releases/download/v0.5.2/melon-desktop-20261019-x86_64.iso" download>Download</a>
     </li>
     <li id="console">
-      <div class="iso-name"><b>melon console</b><span>x86_64 &middot; 248,201,216 bytes (about 248 MB)</span></div>
-      <p>No desktop, with a quick text installer. <code>melon-20261017-x86_64.iso</code><br>
-        <span class="sum">SHA-256 <code>ef8541cd49e492e4cb85f51e960b95d01130a322aef33993fcc88b3d135a2ffc</code></span></p>
-      <a class="btn small ghost" href="https://github.com/melon-77/melon-os/releases/download/v0.5.1/melon-20261017-x86_64.iso" download>Download</a>
+      <div class="iso-name"><b>melon console</b><span>x86_64 &middot; 248,393,728 bytes (about 248 MB)</span></div>
+      <p>No desktop, with a quick text installer. <code>melon-20261019-x86_64.iso</code><br>
+        <span class="sum">SHA-256 <code>f786203ad897d934c9dd044573101aad9d1c0abfde0cf009f21c6691cbc0cd32</code></span></p>
+      <a class="btn small ghost" href="https://github.com/melon-77/melon-os/releases/download/v0.5.2/melon-20261019-x86_64.iso" download>Download</a>
     </li>
     <li id="x86-desktop">
       <div class="iso-name"><b>melon 32-bit desktop</b><span>i686 &middot; LXQt &middot; test build &middot; 632,825,856 bytes (about 633 MB)</span></div>
@@ -60,26 +60,26 @@
       <a class="btn small ghost" href="https://sourceforge.net/projects/melonl/files/i686-20261007/melon-20261007-i686.iso/download" download>Download</a>
     </li>
   <!-- /release:files --></ul>
-  <p class="note"><!-- release:note -->Most of these files are downloaded from SourceForge; the rest are on GitHub for now, and every file is also there. The checksum is the same wherever you get a file. The checksums are also in <a href="https://github.com/melon-77/melon-os/releases/download/v0.5.1/SHA256SUMS"><code>SHA256SUMS</code></a> (melon 0.5.1), <a href="https://sourceforge.net/projects/melonl/files/i686-20261007/SHA256SUMS/download"><code>SHA256SUMS</code></a> (i686-20261007).<!-- /release:note --></p>
+  <p class="note"><!-- release:note -->Most of these files are downloaded from SourceForge; the rest are on GitHub for now, and every file is also there. The checksum is the same wherever you get a file. The checksums are also in <a href="https://github.com/melon-77/melon-os/releases/download/v0.5.2/SHA256SUMS"><code>SHA256SUMS</code></a> (melon 0.5.2), <a href="https://sourceforge.net/projects/melonl/files/i686-20261007/SHA256SUMS/download"><code>SHA256SUMS</code></a> (i686-20261007).<!-- /release:note --></p>
 </section>
 
 <section class="block">
   <h2>Check it</h2>
   <p class="lead small">A download can break on the way, and a checksum tells you whether yours is whole. Compare the result with the SHA-256 above.</p>
 <pre class="code"><span class="c"># Linux and macOS</span>
-sha256sum <!-- release:file1 -->melon-desktop-20261017-x86_64.iso<!-- /release:file1 -->
+sha256sum <!-- release:file1 -->melon-desktop-20261019-x86_64.iso<!-- /release:file1 -->
 <span class="c"># or, with SHA256SUMS next to the files</span>
 sha256sum -c --ignore-missing SHA256SUMS
 
 <span class="c"># Windows (PowerShell)</span>
-Get-FileHash <!-- release:file2 -->melon-desktop-20261017-x86_64.iso<!-- /release:file2 --> -Algorithm SHA256</pre>
+Get-FileHash <!-- release:file2 -->melon-desktop-20261019-x86_64.iso<!-- /release:file2 --> -Algorithm SHA256</pre>
 </section>
 
 <section class="block">
   <h2>Write it to a USB stick</h2>
   <p class="lead small">Use <a href="https://rufus.ie">Rufus</a>, <a href="https://etcher.balena.io">balenaEtcher</a> or <a href="https://www.ventoy.net">Ventoy</a>, or on Linux:</p>
 <pre class="code"><span class="c"># replace sdX with your stick, and check with lsblk first: dd overwrites it</span>
-doas dd if=<!-- release:file3 -->melon-desktop-20261017-x86_64.iso<!-- /release:file3 --> of=/dev/sdX bs=4M status=progress conv=fsync</pre>
+doas dd if=<!-- release:file3 -->melon-desktop-20261019-x86_64.iso<!-- /release:file3 --> of=/dev/sdX bs=4M status=progress conv=fsync</pre>
   <p class="note">Keeping Windows? Shrink it first and leave at least 20 GB free: <a href="../#install">the install steps</a>. Older releases are on the
     <a href="https://github.com/melon-77/melon-os/releases">releases page</a>.</p>
 </section>

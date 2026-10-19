@@ -444,6 +444,10 @@ Rebuilding the kernel takes about an hour on 2 cores.
     which keeps only the first 8 characters of a password, and BusyBox's `login` refused every such account on a text console (SDDM
     still let people in, through PAM). `$6$` is what musl, PAM and BusyBox all check. Accounts made by Calamares before the fix keep
     their DES hash until the password is changed (`passwd`).
+69. **Calamares' "Encrypt system" must leave `/boot` alone.** Calamares encrypts every partition of `partitionLayout` unless the entry
+    says `noEncrypt: true`; it encrypted the FAT `/boot` too, and the new system didn't boot ("No bootable device"). melon's design is
+    a plain `/boot` with an initramfs that unlocks `/` (rule 28), so `partition.conf` marks `/boot` `noEncrypt` and turns off
+    Calamares' warning about an unencrypted `/boot` (calamares-melon pkgrel 17).
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but

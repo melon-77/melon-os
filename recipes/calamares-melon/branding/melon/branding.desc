@@ -12,9 +12,9 @@ navigation: widget
 strings:
     productName:         melon Linux
     shortProductName:    melon
-    version:             0.5.1
-    shortVersion:        0.5.1
-    versionedName:       melon Linux 0.5.1
+    version:             0.5.2
+    shortVersion:        0.5.2
+    versionedName:       melon Linux 0.5.2
     shortVersionedName:  melon
     bootloaderEntryName: melon
     productUrl:          https://melon-77.github.io/melon-os/

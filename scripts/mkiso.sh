@@ -35,6 +35,10 @@ apkx(){ $APK --arch $APK_ARCH --keys-dir $M/keys/trusted --repositories-file /de
 
 step "system layer (what gets installed)"
 rm -rf $ROOT $LIVE $ISO $INITRD; mkdir -p $ROOT $LIVE $ISO/boot/grub $ISO/melon $INITRD
+# The checkout may sit in a setgid home (a melon home is setgid, group users): every directory made under it would inherit
+# the setgid bit, and the images with them. Calamares then failed copying the system, as the vfat /boot refuses a setgid
+# directory (unsquashfs exit 2), and installed systems got a setgid / owned by group users (rule 67).
+for d in $ROOT $LIVE $ISO $INITRD; do find $d -type d -exec chmod g-s {} +; chgrp -R root $d; done
 if [ "$EDITION" = desktop ]; then
   _p=; for x in $DESKTOP_PKGS $LIVE_ONLY; do
     if ls $M/repo/$APK_ARCH/$x-[0-9]*.apk >/dev/null 2>&1; then _p="$_p $x"; else echo "warning: $x is not built for $APK_ARCH, left out"; fi

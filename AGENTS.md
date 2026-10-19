@@ -431,6 +431,19 @@ Rebuilding the kernel takes about an hour on 2 cores.
     unmount by a user failed ("failed to open /etc/mtab"): once 0.5.1 gave Flatpak its system helper account, each system install
     of an app left `revokefs-fuse` mounts behind in `/var/tmp/flatpak-cache-*` and warned "Could not unmount revokefs-fuse
     filesystem". `qemu-test.py desktop-install` checks the link.
+67. **The images must not inherit the checkout's setgid bit.** A melon home is setgid with group `users`, so every directory
+    `mkiso.sh` made under `work/` (and every directory apk created inside them) was setgid, and `/` belonged to `users`: 2359 setgid
+    directories in 0.5.1's desktop image. Calamares mounts the new vfat `/boot` before it unpacks the system, vfat refuses a setgid
+    directory, and `unsquashfs` stopped with exit code 2: every graphical install from the 0.5 and 0.5.1 desktop ISOs failed ("Command
+    unsquashfs finished with exit code 2"; the tests drive only the console installer, which never saw it). `mkiso.sh` clears the bit
+    and gives the work directories to root before installing, `melon-build` clears it on every packaged directory (polkit's
+    `rules.d`, which belongs to `polkitd`, had kept it: polkit pkgrel 3), and `qemu-test.py desktop-install` fails on any setgid
+    directory or a `/` not owned by root. Rule 45 is the same problem for packages.
+68. **Calamares hashes passwords with SHA-512** (`recipes/calamares/sha512-without-gensalt.patch`, pkgrel 1). musl has no
+    `crypt_gensalt`, so Calamares made its own salt with yescrypt's `$y$`, which musl's `crypt()` doesn't know: it fell back to DES,
+    which keeps only the first 8 characters of a password, and BusyBox's `login` refused every such account on a text console (SDDM
+    still let people in, through PAM). `$6$` is what musl, PAM and BusyBox all check. Accounts made by Calamares before the fix keep
+    their DES hash until the password is changed (`passwd`).
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but

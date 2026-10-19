@@ -351,6 +351,10 @@ if mode == 'desktop-install':
     # without it every Flatpak install left revokefs-fuse mounts behind ("Could not unmount revokefs-fuse filesystem")
     mt = count('[ "$(readlink /etc/mtab)" = /proc/self/mounts ] && grep -q " / " /etc/mtab && echo 1 || echo 0')
     ok &= mt == 1; step('/etc/mtab: ' + ('the kernel\'s mount list' if mt == 1 else 'MISSING (fusermount3 cannot unmount)'))
+    # no setgid directories outside /home (homes are setgid on purpose) and / owned by root: the images once inherited the build checkout's setgid bit, and Calamares could
+    # not unpack onto the vfat /boot (rule 67)
+    sg = count('n=$(find / -xdev -path /home -prune -o -type d -perm -2000 -print | wc -l); [ "$n" = 0 ] && [ "$(stat -c %g /)" = 0 ] && echo 1 || echo 0')
+    ok &= sg == 1; step('directories: ' + ('no setgid bits, / is root\'s' if sg == 1 else 'SETGID DIRECTORIES OR / NOT ROOT\'S'))
     # with the opt-in @alpine repository on, a plain `apk upgrade` still works (Alpine's empty meta packages such as
     # ncurses-libs and gnupg, newer than melon's, made it fail until apk-tools pkgrel 2); needs the VM's internet
     if not offline and not i686:

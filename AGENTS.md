@@ -426,6 +426,11 @@ Rebuilding the kernel takes about an hour on 2 cores.
     `recipes/apk-tools/0001-tagged-repo-empty-packages.patch` (pkgrel 2) keeps that exception for empty packages no repository
     carries. apk upgrades itself before anything else, so affected systems recover with an ordinary `apk upgrade`;
     `qemu-test.py desktop-install` enables `@alpine` and checks that `apk upgrade` still resolves.
+66. **`/etc/mtab` must exist** (melon-base ships it as a link to `/proc/self/mounts`, pkgrel 46). musl's `_PATH_MOUNTED` is
+    `/etc/mtab`, and `fusermount3` reads it to check that a FUSE mount belongs to the user before unmounting it. Without it every
+    unmount by a user failed ("failed to open /etc/mtab"): once 0.5.1 gave Flatpak its system helper account, each system install
+    of an app left `revokefs-fuse` mounts behind in `/var/tmp/flatpak-cache-*` and warned "Could not unmount revokefs-fuse
+    filesystem". `qemu-test.py desktop-install` checks the link.
 
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but

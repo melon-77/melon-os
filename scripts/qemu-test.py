@@ -347,6 +347,10 @@ if mode == 'desktop-install':
     wifi = count('[ -f /etc/NetworkManager/system-connections/melon-wifi.nmconnection ] && [ ! -e /var/service/wpa_supplicant ]'
                  ' && [ ! -e /var/service/dhcp-wifi ] && echo 1 || echo 0')
     ok &= wifi == 1; step('Wi-Fi from the installer: ' + ('NetworkManager only' if wifi == 1 else 'SECOND WI-FI STACK OR NO CONNECTION FILE'))
+    # /etc/mtab is the kernel's mount list: musl's fusermount3 reads it to check a user's FUSE mount before unmounting it, and
+    # without it every Flatpak install left revokefs-fuse mounts behind ("Could not unmount revokefs-fuse filesystem")
+    mt = count('[ "$(readlink /etc/mtab)" = /proc/self/mounts ] && grep -q " / " /etc/mtab && echo 1 || echo 0')
+    ok &= mt == 1; step('/etc/mtab: ' + ('the kernel\'s mount list' if mt == 1 else 'MISSING (fusermount3 cannot unmount)'))
     # with the opt-in @alpine repository on, a plain `apk upgrade` still works (Alpine's empty meta packages such as
     # ncurses-libs and gnupg, newer than melon's, made it fail until apk-tools pkgrel 2); needs the VM's internet
     if not offline and not i686:

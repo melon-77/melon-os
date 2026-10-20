@@ -1,0 +1,12 @@
+pkgname=swayidle
+pkgver=1.9.0
+pkgrel=0
+pkgdesc="Idle manager for Wayland: locks the screen after a while and before sleep"
+license=MIT
+url=https://github.com/swaywm/swayidle
+source=(swayidle-1.9.0.tar.gz)
+makedepends=(wayland-dev wayland-protocols elogind-dev)
+# elogind: "before-sleep" (lock before suspend) comes from logind's PrepareForSleep signal
+build(){ meson_setup -Dlogind=enabled -Dlogind-provider=elogind -Dman-pages=disabled -Dzsh-completions=false \
+  -Dfish-completions=false build; ninja -C build -j$JOBS; }
+package(){ DESTDIR=$pkgdir ninja -C build install; }

@@ -1,0 +1,17 @@
+pkgname=melon-plasma
+pkgver=1
+pkgrel=0
+pkgdesc="KDE Plasma as melon's desktop until October 2026: Plasma on Wayland with Dolphin, Konsole, Spectacle and Discover (pick \"Plasma (Wayland)\" on the login screen)"
+license=MIT
+# Wayfire with LXQt's shell is the default desktop since 12 October 2026 (scripts/desktop-packages.txt); this brings back
+# the Plasma set the desktop ISO used to carry. melon-desktop already holds melon's Plasma defaults (colours, Konsole
+# profile, Plasma style), so it looks like melon from the first login.
+depends=(melon-desktop kwin plasma-workspace plasma-desktop plasma-integration systemsettings kscreen powerdevil
+  plasma-nm plasma-pa bluedevil breeze kscreenlocker polkit-kde-agent-1 xdg-desktop-portal-kde milou
+  kde-cli-tools plasma-systemmonitor kinfocenter kf6-breeze-icons kf6-qqc2-desktop-style kf6-kimageformats sddm-kcm
+  dolphin konsole kde-spectacle plasma-discover print-manager
+  qt6-qtlocation kf6-kded kactivitymanagerd plasma5support ksystemstats kf6-kquickcharts kf6-kunitconversion
+  kf6-threadweaver)
+builddir=$srcdir
+package(){ mkdir -p $pkgdir/usr/share/melon/desktops
+  echo "KDE Plasma: sudo apk add melon-plasma, then pick Plasma (Wayland) on the login screen" > $pkgdir/usr/share/melon/desktops/plasma; }

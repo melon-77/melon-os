@@ -13,7 +13,7 @@ import "trial.js" as T
 
 Rectangle {
     id: page
-    color: "#16301c"
+    color: "#141916"
     anchors.fill: parent
 
     readonly property int trialSeconds: 90
@@ -120,14 +120,14 @@ Rectangle {
             Layout.fillWidth: true
             Label {
                 text: page.phase === "trial" ? "The final trial" : "Gauntlet"
-                color: page.phase === "trial" ? "#f0d27a" : "#f0a35e"; font.pixelSize: 26; font.bold: true
+                color: page.phase === "trial" ? "#f0d27a" : "#6fbf4a"; font.pixelSize: 26; font.bold: true
             }
             Item { Layout.fillWidth: true }
             Label {
                 text: page.phase === "trial"
                       ? "question " + (page.tindex + 1) + " of " + page.ttotal + (page.tindex >= page.ttotal - page.finale ? "  (finale: no mistakes)" : "")
                       : "question " + Math.min(page.index + 1, page.total) + " of " + page.total
-                color: "#e9f5e1"; font.pixelSize: 16
+                color: "#e6ece3"; font.pixelSize: 16
             }
         }
 
@@ -149,7 +149,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.topMargin: 10
             text: page.shownText(page.current)
-            color: "#e9f5e1"; font.pixelSize: 24
+            color: "#e6ece3"; font.pixelSize: 24
             wrapMode: Text.WordWrap
         }
 
@@ -162,7 +162,7 @@ Rectangle {
                 onClicked: page.chosen = modelData
                 font.pixelSize: 18
                 contentItem: Text {
-                    text: parent.text; font: parent.font; color: "#e9f5e1"
+                    text: parent.text; font: parent.font; color: "#e6ece3"
                     leftPadding: parent.indicator.width + parent.spacing
                     verticalAlignment: Text.AlignVCenter
                 }
@@ -206,7 +206,7 @@ Rectangle {
         Label {
             Layout.alignment: Qt.AlignHCenter
             text: "You made it through the gauntlet."
-            color: "#f0a35e"; font.pixelSize: 32; font.bold: true
+            color: "#6fbf4a"; font.pixelSize: 32; font.bold: true
         }
         Label {
             Layout.fillWidth: true
@@ -215,7 +215,7 @@ Rectangle {
                 + "90 seconds each, shuffled every time. A wrong answer or running out of time sends you back 10, and the last 20 "
                 + "must be flawless. Get through it and you earn the survivor rewards: melon in gold (colours, login screen, "
                 + "boot menu), three wallpapers, a certificate and a badge. You can walk away at any point; melon installs either way."
-            color: "#e9f5e1"; font.pixelSize: 17
+            color: "#e6ece3"; font.pixelSize: 17
         }
         Button {
             Layout.alignment: Qt.AlignHCenter
@@ -232,7 +232,7 @@ Rectangle {
             text: "Also offer Alpine's packages (opt-in, as apk add name@alpine)"
             font.pixelSize: 16
             contentItem: Text {
-                text: parent.text; font: parent.font; color: "#e9f5e1"
+                text: parent.text; font: parent.font; color: "#e6ece3"
                 leftPadding: parent.indicator.width + parent.spacing
                 verticalAlignment: Text.AlignVCenter
             }
@@ -244,7 +244,7 @@ Rectangle {
             text: "Remove everything built with Rust, and whatever depends on it (no safeguards; earns a wallpaper)"
             font.pixelSize: 16
             contentItem: Text {
-                text: parent.text; font: parent.font; color: "#e9f5e1"
+                text: parent.text; font: parent.font; color: "#e6ece3"
                 leftPadding: parent.indicator.width + parent.spacing
                 verticalAlignment: Text.AlignVCenter
             }
@@ -271,7 +271,7 @@ Rectangle {
             Layout.topMargin: 10
             horizontalAlignment: Text.AlignHCenter
             text: "Your rewards come with the install: melon in gold (colours, login screen and boot menu),\nthree survivor wallpapers, a certificate in your Pictures folder, and a badge in melonfetch.\n\nPress Next to continue."
-            color: "#e9f5e1"; font.pixelSize: 18
+            color: "#e6ece3"; font.pixelSize: 18
         }
     }
 }

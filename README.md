@@ -17,7 +17,7 @@ A from-scratch, rolling x86_64 distribution:
 | boot | GRUB 2.14, one ISO and one install that boot on both BIOS and UEFI |
 | root fs | XFS (FAT32 `/boot`) |
 | shell | bash 5.3 |
-| desktop | KDE Plasma 6 on Wayland; Flatpak for Steam and other glibc apps; more desktops as online installs |
+| desktop | Wayfire (Wayland) with LXQt's panel, launcher and file manager; Flatpak for Steam and other glibc apps; KDE Plasma and more desktops as online installs |
 | 32-bit edition | i686 (Pentium M, Pentium 4, Atom netbooks such as the MSI Wind U100) with LXQt on Wayland (labwc) |
 
 ## Layout
@@ -59,6 +59,44 @@ Packages are signed with `keys/melon-signing.rsa` (not committed; generate your 
 Boot the ISO. The graphical installer (desktop ISO) is Calamares. There is also a quick console
 installer for people who know its name (it got a new name, song and intro art on 8 October 2026; the old name no longer works).
 
+## Desktop
+
+Since 12 October 2026 melon's desktop is **Wayfire**, a light Wayland compositor, with LXQt's panel, application menu,
+launcher, notifications and file manager on top (LXQt's own Wayfire session). It starts quicker and takes much less room
+on the ISO than KDE Plasma, which it replaces as the default. What comes with it:
+
+| | |
+|---|---|
+| panel and menu | LXQt panel at the bottom: the melon menu button, task list, tray (network, volume, battery), clock |
+| launcher | Alt+Space (LXQt runner), or the Super key for the menu |
+| notifications | LXQt's notification daemon |
+| files, terminal | PCManFM-Qt (also draws the desktop and wallpaper), QTerminal |
+| network, sound, Bluetooth | nm-tray (NetworkManager), the panel's volume control and pavucontrol-qt (PipeWire) |
+| lock screen | swaylock, after 10 minutes idle (swayidle), before sleep, or Super+L |
+| screenshots | Print (grim, into `~/Pictures/Screenshots`) |
+| login | SDDM with melon's theme, on labwc |
+
+Keys: Super+Enter terminal, Super+E files, Super+W all windows, Super+arrows to tile, Ctrl+Super+Left/Right to switch
+workspaces. Wayfire's settings are in `~/.config/lxqt/wayland/lxqt-wayfire.ini` (copied from
+`/etc/xdg/lxqt/wayland/lxqt-wayfire.ini` on the first login).
+
+**Plasma:** `sudo apk add melon-plasma`, then pick "Plasma (Wayland)" on the login screen. It brings back the Plasma set the
+desktop ISO used to carry (Dolphin, Konsole, Spectacle, Discover), with melon's Plasma colours.
+
+**Look:** dark, calm surfaces with melon green used only as an accent (selection, focus, links, the lock screen's ring),
+a quiet gradient wallpaper, and the melon itself only on the menu button, the boot menu and the installer. The boot menu
+(GRUB) is the same on BIOS and UEFI, on the ISOs and on installed systems: a small melon, the entries in a readable font,
+the selected one outlined in green, a countdown and one line of help.
+
+![melon's boot menu](docs/images/grub-menu.png)
+
+**Size and start-up time:** the 0.4 desktop ISO with Plasma was 793.6 MB. Plasma, its apps and the KDE libraries only they
+used come to about 110 to 145 MB of compressed packages; the Wayfire and LXQt set that replaces them is about 15 MB, so
+the next desktop ISO should be roughly 120 MB smaller (the exact number comes with the first ISO built with it). To measure
+start-up time on an installed system, run `melon-boottime` after logging in: it lists when `sddm`, `wayfire`,
+`lxqt-session`, `lxqt-panel` and `pcmanfm-qt` started, counted from the kernel's start (with Plasma it showed `kwin_wayland`
+and `plasmashell`).
+
 ## Website
 
 [melon-77.github.io/melon-os](https://melon-77.github.io/melon-os/) is the `site/` folder, served from the `gh-pages` branch.
@@ -73,7 +111,7 @@ size and SHA-256, read from `site/releases.json`: after a release, `scripts/site
 ## 32-bit edition (old netbooks)
 
 melon also builds for 32-bit PCs with SSE2 (Pentium M, Pentium 4, Intel Atom: the MSI Wind U100 and similar netbooks).
-Its desktop is **LXQt** on Wayland with the labwc compositor, lighter than Plasma and comfortable in 1–2 GB of RAM,
+Its desktop is the same **LXQt** shell as the 64-bit edition, on the even lighter labwc compositor, comfortable in 1–2 GB of RAM,
 with zram swap and drivers for every graphics and network chip an old 32-bit netbook or laptop is likely to have: Intel GMA, old Radeon (r300, r600) and GeForce (nouveau) graphics; Atheros, Ralink, Realtek, Intel 3945/4965 and Broadcom Wi-Fi, USB Wi-Fi sticks and the usual wired chips; the MSI Wind's Fn keys and radio switch (msi-laptop). It
 uses the same installers (Calamares with the gauntlet, the console installer). Flatpak and the NVIDIA drivers are
 64-bit only. Build it with `MELON_ARCH=x86` (`BUILDING.md`); the ISOs are `melon-*-i686.iso` and

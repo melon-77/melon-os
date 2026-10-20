@@ -805,3 +805,13 @@ seatd-0.9.3.tar.gz	-	git	https://github.com/kennylevinsen/seatd 0.9.3
 labwc-0.20.2.tar.gz	-	git	https://github.com/labwc/labwc 0.20.2
 libXScrnSaver-1.2.3.tar.gz	4f74e7e412144591d8e0616db27f433cfc9f45aae6669c6c4bb03e6bf9be809a	url	https://www.x.org/releases/individual/lib/libXScrnSaver-1.2.3.tar.gz
 procps-ng-4.0.7.tar.xz	9d2021f47a4501c667862c9942a92d1953694b21d11bcd1702e83eb594e3d67d	url	https://downloads.sourceforge.net/project/procps-ng/Production/procps-ng-4.0.7.tar.xz
+glm-1.0.3.tar.gz	6775e47231a446fd086d660ecc18bcd076531cfedd912fbd66e576b118607001	url	https://github.com/g-truc/glm/archive/refs/tags/1.0.3.tar.gz
+yyjson-0.12.0.tar.gz	b16246f617b2a136c78d73e5e2647c6f1de1313e46678062985bdcf1f40bb75d	url	https://github.com/ibireme/yyjson/archive/0.12.0.tar.gz
+wf-config-0.11.0.tar.xz	b7721326ade8d42b25ecd2d572e5deb853b1327672608472854c6473bc8d2514	url	https://github.com/WayfireWM/wf-config/releases/download/v0.11.0/wf-config-0.11.0.tar.xz
+wayfire-0.11.0.tar.xz	29dc95468c4f954341c9ecbad889b661eb849bdb96fb47e19c9d6edc8d49640b	url	https://github.com/WayfireWM/wayfire/releases/download/v0.11.0/wayfire-0.11.0.tar.xz
+swaylock-1.8.6.tar.gz	904376fd012bfff888d042606539c677d90e11f8beeeccc50a9fe387fc41a686	url	https://github.com/swaywm/swaylock/archive/v1.8.6.tar.gz
+swayidle-1.9.0.tar.gz	161f5827b8c79bc486a472d27690e98d75da6615bb2dee9f24393cbbb13af656	url	https://github.com/swaywm/swayidle/archive/v1.9.0.tar.gz
+grim-1.5.0.tar.gz	9e72a98f7621b1f5741b405b8dbd447acf7d300ddb12667ec526db1ce6154eaa	url	https://gitlab.freedesktop.org/emersion/grim/-/archive/v1.5.0/grim-v1.5.0.tar.gz
+nm-tray-0.5.1.tar.gz	482ff25dff752ca5e43e9e475afab95fbb28da88e3c87bc4afa3d789a99d5aac	url	https://github.com/palinek/nm-tray/archive/refs/tags/0.5.1.tar.gz
+xdg-desktop-portal-lxqt-1.4.0.tar.xz	4468a068130e5f66a3f61d02833429b71c49b714332f3cf49c540b8d689661c7	url	https://github.com/lxqt/xdg-desktop-portal-lxqt/releases/download/1.4.0/xdg-desktop-portal-lxqt-1.4.0.tar.xz
+xdg-desktop-portal-wlr-0.8.4.tar.gz	41b9683acae9415005d7b62d801e34946cb95da5eaaa83528c7085759a635187	url	https://github.com/emersion/xdg-desktop-portal-wlr/releases/download/v0.8.4/xdg-desktop-portal-wlr-0.8.4.tar.gz

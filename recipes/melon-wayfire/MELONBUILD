@@ -1,0 +1,15 @@
+pkgname=melon-wayfire
+pkgver=0.1
+pkgrel=0
+pkgdesc="melon's default desktop on Wayfire: Wayfire's settings, lock screen, screenshots, network tray and portals"
+license=MIT
+# The 64-bit desktop (scripts/desktop-packages.txt, the owner's decision of 12 October 2026: Wayfire instead of Plasma).
+# LXQt brings the panel, launcher, notifications and file manager (melon-lxqt, which on x86_64 names Wayfire as the
+# compositor); this package is what Wayfire itself needs around it. startlxqtwayland copies
+# /etc/xdg/lxqt/wayland/lxqt-wayfire.ini to the user's config on the first login (recipes/lxqt-wayland-session's patch).
+depends=(wayfire swaylock swayidle grim nm-tray xdg-desktop-portal-lxqt xdg-desktop-portal-wlr xdg-user-dirs)
+builddir=$srcdir
+package(){
+  cp -a $startdir/files/. $pkgdir/
+  chmod 755 $pkgdir/usr/bin/*
+}

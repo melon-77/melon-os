@@ -2,8 +2,8 @@
 # every gauntlet reward at once, for testing (started by a hidden command: /etc/profile.d/zz-melon.sh)
 if [ "$(id -u)" != 0 ]; then
   doas /usr/libexec/melon/.gold "$(id -un)" || exit 1
-  # the running Plasma session gets the gold look right away
-  if command -v plasma-apply-wallpaperimage >/dev/null && [ -n "${WAYLAND_DISPLAY:-}${DISPLAY:-}" ]; then
+  # the running desktop gets the gold look right away
+  if [ -n "${WAYLAND_DISPLAY:-}${DISPLAY:-}" ]; then
     /usr/libexec/melon/melon-survivor-look && rm -f ~/.config/autostart/melon-survivor.desktop
   fi
   printf '\033[1;33mgauntlet rewards unlocked:\033[0m the survivor wallpapers, the gold look, login screen and boot menu, your certificate in ~/Pictures\n'

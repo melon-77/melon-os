@@ -1,21 +1,44 @@
 pkgname=melon-lxqt
 pkgver=0.1
-pkgrel=1
-pkgdesc="melon's LXQt defaults: LXQt on labwc (Wayland), melon wallpaper, Breeze icons, SDDM greeter on labwc"
+pkgrel=2
+pkgdesc="melon's LXQt defaults: the panel, launcher and file manager of melon's desktop (on Wayfire, or labwc on 32-bit), melon's dark palette, SDDM greeter on labwc"
 license=MIT
-# the 32-bit edition's desktop (scripts/desktop-packages-x86.txt); on 64-bit an extra desktop from the online repository.
-# LXQt reads a settings file from the first XDG config directory that has one, so the /etc/xdg copies below are
-# LXQt's own defaults (from the sysroot) with melon's changes, not partial files.
+# LXQt is the shell of both desktops: on x86_64 on Wayfire (melon-wayfire, the default desktop since 12 October 2026), on the
+# 32-bit edition on labwc (scripts/desktop-packages-x86.txt). LXQt reads a settings file from the first XDG config directory
+# that has one, so the /etc/xdg copies below are LXQt's own defaults (from the sysroot) with melon's changes, not partial files.
 depends=(melon-desktop lxqt-session lxqt-wayland-session labwc)
+[ "$APK_ARCH" = x86 ] || depends+=(melon-wayfire)
 makedepends=(lxqt-session pcmanfm-qt)
 builddir=$srcdir
 package(){
   cp -a $startdir/files/. $pkgdir/
   install -d $pkgdir/etc/xdg/lxqt $pkgdir/etc/xdg/pcmanfm-qt/lxqt
-  # labwc as the compositor, so startlxqtwayland doesn't ask on the first login
-  sed 's/^\[General\]$/[General]\ncompositor=labwc\nwindow_manager=labwc/' $SYSROOT/usr/share/lxqt/session.conf > $pkgdir/etc/xdg/lxqt/session.conf
-  grep -q '^compositor=labwc' $pkgdir/etc/xdg/lxqt/session.conf
+  # the compositor, so startlxqtwayland doesn't ask on the first login: Wayfire, or labwc on the 32-bit edition (lighter
+  # on the GMA 950 of a netbook); the screen locker for "Lock screen" in the menu (swaylock comes with melon-wayfire)
+  local wm=wayfire lock='lock_command_wayland=swaylock -f'
+  [ "$APK_ARCH" != x86 ] || { wm=labwc; lock=; }
+  sed "s/^\[General\]$/[General]\ncompositor=$wm\nwindow_manager=$wm${lock:+\\n$lock}/" $SYSROOT/usr/share/lxqt/session.conf > $pkgdir/etc/xdg/lxqt/session.conf
+  grep -q "^compositor=$wm" $pkgdir/etc/xdg/lxqt/session.conf
+  # the dark LXQt theme with melon's palette: dark grey-green surfaces, light text, the melon green only where it means
+  # something (selection, focus, links)
   sed -e 's/^theme=.*/theme=dark/' -e 's/^icon_theme=.*/icon_theme=breeze-dark/' $SYSROOT/usr/share/lxqt/lxqt.conf > $pkgdir/etc/xdg/lxqt/lxqt.conf
+  cat >> $pkgdir/etc/xdg/lxqt/lxqt.conf <<'PAL'
+
+[Palette]
+window_color=#1b221d
+base_color=#141916
+highlight_color=#6fbf4a
+window_text_color=#e6ece3
+text_color=#e6ece3
+highlighted_text_color=#0b150c
+link_color=#8fd06e
+link_visited_color=#b4c9a8
+tooltip_base_color=#232b26
+tooltip_text_color=#e6ece3
+PAL
+  # (the panel's layout, with the melon menu button, is in lxqt-panel's own /etc/xdg/lxqt/panel.conf: gen-lxqt-recipes.py)
+  # the calm wallpaper (melon-desktop), no desktop icons but the home folder and the trash
   sed -e 's|^Wallpaper=.*|Wallpaper=/usr/share/wallpapers/melon/contents/images/1920x1080.jpg|' -e 's/^WallpaperMode=.*/WallpaperMode=zoom/' \
+      -e 's/^DesktopShortcuts=.*/DesktopShortcuts=Home, Trash/' -e 's/^BgColor=.*/BgColor=#121714/' \
       -e 's/^IconThemeName=.*/IconThemeName=breeze-dark/' $SYSROOT/usr/share/pcmanfm-qt/lxqt/settings.conf > $pkgdir/etc/xdg/pcmanfm-qt/lxqt/settings.conf
 }

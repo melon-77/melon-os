@@ -21,7 +21,7 @@ for d in /proc/[0-9]*; do
   read -r line < "$d/stat" 2>/dev/null || continue
   comm=${line#*(}; comm=${comm%%)*}
   case $comm in
-    udevd|dbus-daemon|elogind|polkitd|NetworkManager|bluetoothd|sddm|sddm-helper|sddm-greeter*|kwin_wayland|plasma_session|plasmashell) ;;
+    udevd|dbus-daemon|elogind|polkitd|NetworkManager|bluetoothd|sddm|sddm-helper|sddm-greeter*|kwin_wayland|plasma_session|plasmashell|wayfire|lxqt-session|lxqt-panel|pcmanfm-qt) ;;
     *) continue ;;
   esac
   set -- ${line#*) }

@@ -50,7 +50,6 @@ export CHOST CBUILD
 conf_flags="--host=$CHOST --build=$CBUILD --prefix=/usr --sysconfdir=/etc --localstatedir=/var --mandir=/usr/share/man --infodir=/usr/share/info --libdir=/usr/lib --bindir=/usr/bin --sbindir=/usr/bin --libexecdir=/usr/libexec"
 
 # meson cross file
-mkdir -p "$WORK"   # a fresh checkout has no work/ yet
 MESON_CROSS=$WORK/meson-cross.ini
 cat > $MESON_CROSS <<EOF
 [binaries]
@@ -240,8 +239,20 @@ normalise(){ local d=$1
   # name, and a system without that account gets them as nobody (rule 45). Root owns them; system accounts a recipe
   # chose on purpose (uid/gid below 1000: cups' lp, dbus' messagebus) stay.
   # (stat, not find -uid/-gid: BusyBox find on a melon build machine has neither; stat -c reads the link itself, like chown -h)
-  find "$d" -exec stat -c '%u %g %n' {} + | while read -r u g f; do
-    if [ "$u" -gt 999 ] || [ "$g" -gt 999 ]; then chown -h 0:0 "$f"; fi; done
+  # The checkout's own group counts as the builder's too: a melon home is setgid with group users (100), so every file
+  # under work/ got gid 100 and every directory the setgid bit, and installed systems had 635 files of group nobody
+  # (melon's first native build, 16 October 2026). Those directories lose the inherited setgid bit as well.
+  # chown clears setuid and setgid on files, even as root, so a file's setuid bit is put back afterwards (rule 62: on melon's
+  # native 0.5 build pkexec, polkit-agent-helper-1, unix_chkpwd and fusermount3 lost it, and every password prompt failed);
+  # setgid stays off, as the group is root's now
+  local cg; cg=$(stat -c %g "$M")
+  find "$d" -exec stat -c '%u %g %a %n' {} + | while read -r u g a f; do
+    if [ "$u" -gt 999 ] || [ "$g" -gt 999 ] || { [ "$cg" != 0 ] && [ "$g" = "$cg" ]; }; then
+      chown -h 0:0 "$f"
+      if [ -L "$f" ]; then :; elif [ -d "$f" ]; then chmod g-s "$f"; else chmod "$a" "$f"; chmod g-s "$f"; fi; fi; done
+  # no package wants a setgid directory, but one a recipe gives a system group (polkit's rules.d, polkitd) kept the inherited
+  # bit above (rule 67)
+  find "$d" -type d -perm -2000 -exec chmod g-s {} +
 }
 
 # ---------- package metadata + creation ----------

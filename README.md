@@ -36,6 +36,8 @@ recipes/calamares-melon/   graphical installer branding and the 200-question gau
 
 ## Building
 
+Someone (or a Claude Code session) taking over the build and release work: start with [`HANDOFF.md`](HANDOFF.md).
+
 Sources come from upstream releases (`scripts/fetch-sources.sh`, into `sources/`; older recipes still use the Ubuntu
 source archive's copies of the same tarballs, and new ones come straight from upstream). Then:
 
@@ -68,7 +70,7 @@ melon in the first screen is `melonfetch`'s own, redrawn by `art/site.py`. The s
 distros, melon included, against your answers. Change the site through a pull request to `testing` like everything else;
 after it is merged, `scripts/publish-site.sh` puts `site/` on `gh-pages`. The site's download page lists each ISO with its
 size and SHA-256, read from `site/releases.json`: after a release, `scripts/site-release.py update --tag <tag>` refreshes it (the 32-bit pre-release too: `update --tag i686-<date> --editions x86-desktop,x86-console`); `docs/iso-hosting.md` compares free file hosts for the ISOs (SourceForge, Internet Archive, Cloudflare R2) and
-`scripts/upload-isos.sh` uploads to them. The download buttons point to SourceForge (project `melonl`).
+`scripts/upload-isos.sh` uploads to them. The download buttons point to the GitHub releases (0.4 and earlier also to SourceForge, project `melonl`).
 
 ## 32-bit edition (old netbooks)
 
@@ -81,6 +83,38 @@ uses the same installers (Calamares with the gauntlet, the console installer). F
 Atom N270 with 2 GB of RAM (LXQt logs in through SDDM, printing works); the 32-bit packages are in the online
 repository (`packages/x86`); the ISOs are on the pre-release `i686-20261007`; a test on a real U100 comes next. NetHack and
 the QEMU guest agent aren't in the 32-bit edition yet.
+
+## Welcome and updates
+
+The first login opens a **Welcome** window (your files, apps and games, help); closing it starts the Flathub app offer
+(`melon-first-boot`) as before. The **Updates** page, or the tray icon that appears when something is ready, installs
+updates with one button and a password prompt: `melon-welcome` (`recipes/melon-welcome`, Qt Widgets) reads
+`/var/lib/melon/updates.txt`, which the root service `melon-update-check` fills a couple of minutes after boot and every six
+hours with `apk update` and `apk list -u`. The button runs `pkexec /usr/libexec/melon/melon-update-run --upgrade`. It is
+the same as `doas apk upgrade`, with a window around it. "Update melon" is also in the launcher.
+
+Flathub comes preconfigured (since 0.5.1): the `flatpak` package carries Flathub's own repo file and adds it when it is installed,
+so neither Discover nor the first-login offer asks for a password just to set it up.
+
+## Fixed in 0.5.1
+
+`apk upgrade` works with the opt-in Alpine repository enabled (`melon-repo enable alpine`): apk took Alpine's empty `ncurses-libs`
+and `gnupg` meta packages for melon's and gave up, so those systems got no updates at all (apk-tools pkgrel 2 fixes it, and it
+installs itself first).
+
+Time zones work: melon had no time zone data, so the clock was always UTC and Plasma's Date & Time page could neither list nor save a
+zone. `tzdata` is now on both ISOs, "Set date and time automatically" is offered (melon has an `ntpdate` for it), and 12- or 24-hour
+time follows Region & Language's time format or the clock's own setting.
+
+melon 0.5 had lost the setuid bit on its password checkers when it was built (polkit's helper, `pkexec`, PAM's `unix_chkpwd`), so every
+password window failed: adding Flathub, Discover, the "Update melon" button, unlocking the screen. 0.5.1 puts them back, adds the
+`flatpak` system user Flatpak's installs warned about, and makes desktops installed with the console installer leave Wi-Fi to
+NetworkManager alone (they also ran wpa_supplicant and a DHCP client on the same card). `doas apk upgrade` fixes an installed 0.5.
+
+## Release identity
+
+`/etc/os-release` says `melon 0.5.1` with the website and the repository as its links (it used to say "melon rolling" and a placeholder
+address), and the melon logo in the About page is a set of plain PNGs, so it no longer shows as a clipped green square.
 
 ## Developer tools
 
@@ -109,6 +143,21 @@ device to be probed: it mounts as soon as the disks are there and lets the graph
 services start (`melon.udev=sync` on the kernel command line brings the old, slower order back if a machine misbehaves), and
 services that wait for each other check every 20 ms instead of every 0.42 s. `melon-boottime` shows where a boot's time went:
 the milestones of stage 1 and when the main daemons started, to 10 ms.
+
+## Smaller ISOs
+
+The desktop ISO is being slimmed from 794 MB by taking out only what nothing on a PC uses; what leaves the ISO stays one command away
+(details and measurements in AGENTS.md, "Desktop ISO size"). In the repository now:
+
+- Intel Wi-Fi firmware keeps the one version the kernel loads, and firmware for hardware that is not in PCs and laptops (SoC boards,
+  phone and router Wi-Fi chips, big server network cards) moves to `linux-firmware-extra`, and the ISOs install `linux-firmware-pc` (all
+  but that part): if you use such hardware, `sudo apk add linux-firmware-extra`. Installed systems that upgrade keep everything.
+- The kernel is stored once on the ISO, Breeze's default wallpaper is a high-quality JPEG, and the ISOs are squashed with zstd level 19.
+
+The 0.5 build: desktop ISO 626 MB (from 794 MB), console ISO 248 MB (from 380 MB).
+
+- Every desktop home now has Desktop, Documents, Downloads, Music, Pictures and Videos from the start (a fresh install had only
+  Desktop, so downloads had nowhere to go); an installed system that upgrades gets them at its next login.
 
 **NVIDIA graphics:** on a computer with an NVIDIA card (GTX 16/RTX 20 and newer), `melon-first-boot` offers the open
 driver (`sudo apk add linux-firmware-nvidia mesa-nvk`: nouveau with NVK, the desktop and games use the card) or NVIDIA's

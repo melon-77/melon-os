@@ -263,7 +263,8 @@ if mode == 'desktop-install':
     p.expect(PROMPT, timeout=900); step('logged in on the live desktop ISO')
     sh('stty cols 160 rows 50; export TERM=vt100')
     sh(f'export MELON_DISK={DISKNAME} MELON_HOSTNAME=melondesk MELON_ROOTPW=melonroot MELON_USER=jcole '
-       'MELON_USERPW=melonuser MELON_PROFILE=desktop MELON_YES=1 MELON_SERIAL=1 MELON_ENCRYPT=n')
+       'MELON_USERPW=melonuser MELON_PROFILE=desktop MELON_YES=1 MELON_SERIAL=1 MELON_ENCRYPT=n '
+       'MELON_WIFI_SSID=melontest MELON_WIFI_PSK=melonwifi1')   # no such network: only where the installer puts it is checked
     out = sh('/usr/libexec/melon/.cold', timeout=3600)
     ok = 'melon is installed' in out
     step(f'desktop install: {"OK" if ok else "FAILED"}')
@@ -290,6 +291,14 @@ if mode == 'desktop-install':
     stable = pid and count(greeter) == pid and count("loginctl list-sessions --no-legend | awk '$3==\"sddm\" && $6==\"active\"' | wc -l") == 1
     ok &= bool(stable); step('greeter after 20 s: ' + ('same process, active session' if stable else 'RESTARTED OR NO SESSION'))
     mon(f'screendump {M}/logs/qemu-desktop-greeter.ppm'); time.sleep(3)
+    # time zones: tzdata is installed, a new system is on UTC, and a zone chosen the way Plasma's Date & Time page does it
+    # (a link to /usr/share/zoneinfo) is what the system uses; jcole's clock gets 12-hour US time through Region & Language's
+    # setting (LOOK at the clock in logs/qemu-desktop-installed.ppm: "PM" or "AM", New York time)
+    tz = count('n=0; [ -s /usr/share/zoneinfo/America/New_York ] && n=$((n+1)); [ "$(readlink /etc/localtime)" = /usr/share/zoneinfo/UTC ] && n=$((n+1));'
+               ' ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime; case $(date +%Z) in EDT|EST) n=$((n+1)) ;; esac;'
+               ' [ -x /usr/bin/ntpdate ] && n=$((n+1)); echo $n')
+    sh("printf '[Formats]\\nLANG=C.UTF-8\\nLC_TIME=en_US.UTF-8\\n' > /home/jcole/.config/plasma-localerc; chown jcole: /home/jcole/.config/plasma-localerc")
+    ok &= tz == 4; step(f'time zones: {tz}/4 (tzdata, UTC by default, a chosen zone is used, ntpdate for "set automatically")')
     if not HAVE_KVM: time.sleep(90)   # emulated CPU: the greeter's password field takes a while to take keys
     for ch in 'melonuser':
         mon(f'sendkey {ch}'); time.sleep(0.15)
@@ -322,10 +331,57 @@ if mode == 'desktop-install':
     # packaged files owned by the build machine's account arrive as nobody's (rule 45)
     nob = count('find /usr /etc -xdev \\( -user 65534 -o -group 65534 \\) | wc -l')
     ok &= nob == 0; step('system files owned by nobody: ' + ('none' if nob == 0 else f'{nob} FOUND'))
+    # the password checkers stay setuid root (rule 62: the native 0.5 build lost the bit, and every polkit prompt, Flathub
+    # and the Update button included, failed), and PAM really checks a user's own password with it, as the screen locker does
+    suid = count('n=0; for f in /usr/bin/doas /usr/bin/pkexec /usr/lib/polkit-1/polkit-agent-helper-1 /usr/bin/unix_chkpwd'
+                 '$([ -e /usr/bin/fusermount3 ] && echo " /usr/bin/fusermount3"); do [ -u $f ] && [ "$(stat -c %U $f)" = root ] && n=$((n+1)); done; echo $n')
+    nsuid = count('n=4; [ -e /usr/bin/fusermount3 ] && n=5; echo $n')
+    pw = count("su -s /bin/sh jcole -c 'printf \"melonuser\\0\" | /usr/bin/unix_chkpwd jcole nullok' && echo 1 || echo 0")
+    ok &= suid == nsuid and pw == 1
+    step(f'setuid password checkers: {suid}/{nsuid}, a user\'s own password checks out: {pw == 1}')
+    # Flatpak's system helper has its account (revokefs-fuse runs as it) and Flathub is there without anyone typing a password
+    if not i686:
+        fp = count('n=0; grep -q "^flatpak:" /etc/passwd && n=$((n+1)); flatpak remotes --system --columns=name | grep -qx flathub && n=$((n+1)); echo $n')
+        ok &= fp == 2; step('flatpak: ' + ('system helper account, Flathub preconfigured' if fp == 2 else f'MISSING ({fp}/2: account, Flathub)'))
+    # the installer's Wi-Fi network went to NetworkManager, not to a second Wi-Fi stack (wpa_supplicant + dhcp-wifi) next to it
+    wifi = count('[ -f /etc/NetworkManager/system-connections/melon-wifi.nmconnection ] && [ ! -e /var/service/wpa_supplicant ]'
+                 ' && [ ! -e /var/service/dhcp-wifi ] && echo 1 || echo 0')
+    ok &= wifi == 1; step('Wi-Fi from the installer: ' + ('NetworkManager only' if wifi == 1 else 'SECOND WI-FI STACK OR NO CONNECTION FILE'))
+    # /etc/mtab is the kernel's mount list: musl's fusermount3 reads it to check a user's FUSE mount before unmounting it, and
+    # without it every Flatpak install left revokefs-fuse mounts behind ("Could not unmount revokefs-fuse filesystem")
+    mt = count('[ "$(readlink /etc/mtab)" = /proc/self/mounts ] && grep -q " / " /etc/mtab && echo 1 || echo 0')
+    ok &= mt == 1; step('/etc/mtab: ' + ('the kernel\'s mount list' if mt == 1 else 'MISSING (fusermount3 cannot unmount)'))
+    # no setgid directories outside /home (homes are setgid on purpose) and / owned by root: the images once inherited the build checkout's setgid bit, and Calamares could
+    # not unpack onto the vfat /boot (rule 67)
+    sg = count('n=$(find / -xdev -path /home -prune -o -type d -perm -2000 -print | wc -l); [ "$n" = 0 ] && [ "$(stat -c %g /)" = 0 ] && echo 1 || echo 0')
+    ok &= sg == 1; step('directories: ' + ('no setgid bits, / is root\'s' if sg == 1 else 'SETGID DIRECTORIES OR / NOT ROOT\'S'))
+    # with the opt-in @alpine repository on, a plain `apk upgrade` still works (Alpine's empty meta packages such as
+    # ncurses-libs and gnupg, newer than melon's, made it fail until apk-tools pkgrel 2); needs the VM's internet
+    if not offline and not i686:
+        upg = count('melon-repo enable alpine >/dev/null 2>&1; apk update >/dev/null 2>&1;'
+                    ' if apk policy ncurses-libs 2>/dev/null | grep -q alpine; then apk upgrade --simulate >/dev/null 2>&1 && echo 1 || echo 0; else echo 2; fi;'
+                    ' melon-repo disable alpine >/dev/null 2>&1')
+        ok &= upg != 0; step('apk upgrade with @alpine enabled: ' + {1: 'works', 2: 'not checked (Alpine unreachable)'}.get(upg, 'FAILS'))
     # the desktop profile's services, and the user may manage printers
     svcs = count('n=0; for s in avahi-daemon cupsd; do sv check /var/service/$s >/dev/null 2>&1 && n=$((n+1)); done; echo $n')
     lpadm = count('id -Gn jcole | tr " " "\\n" | grep -cx lpadmin')
     ok &= svcs == 2 and lpadm == 1; step(f'printing on the installed system: {svcs}/2 services up, jcole in lpadmin: {lpadm == 1}')
+    # the standard folders exist in the new user's home (a download needs somewhere to go) and apps are told where they are
+    dirs = count('n=0; for d in Desktop Documents Downloads Music Pictures Videos; do [ -d /home/jcole/$d ] && n=$((n+1)); done; echo $n')
+    xdgd = count('grep -c "^XDG_DOWNLOAD_DIR=" /home/jcole/.config/user-dirs.dirs')
+    ok &= dirs == 6 and xdgd == 1; step(f'standard folders in jcole\'s home: {dirs}/6, XDG_DOWNLOAD_DIR set: {xdgd == 1}')
+    # the update notice: the root service is up, and a request from the user (what "Check now" does) gets an answer in updates.txt,
+    # a list of what can be upgraded or a note that the package server couldn't be reached (the test VM may be offline)
+    upd = count('sv check /var/service/melon-update-check >/dev/null 2>&1 && echo 1 || echo 0')
+    sh('rm -f /var/lib/melon/updates.txt; su -l -s /bin/sh jcole -c "touch /var/lib/melon/updates-ctl/request-1000"')
+    ans = 0
+    for _ in range(12):
+        time.sleep(5)
+        ans = count('grep -cE "^(checked|failed) " /var/lib/melon/updates.txt 2>/dev/null; true')
+        if ans: break
+    pol = count('[ -f /usr/share/polkit-1/actions/org.melon.update.policy ] && [ -x /usr/libexec/melon/melon-update-run ] && echo 1 || echo 0')
+    ok &= upd == 1 and ans >= 1 and pol == 1
+    step(f'update notice: service up {upd == 1}, answers a request {ans >= 1}, polkit policy and helper present {pol == 1}')
     # the gauntlet rewards through the unlock script (called by path; the command that starts it stays unnamed)
     out = sh('/usr/libexec/melon/.gold jcole; echo REW=$([ -s /etc/melon/gauntlet-survivor ] && echo badge)'
              '$(ls -d /usr/share/wallpapers/melon-survivor-* | wc -l)$([ -s /home/jcole/Pictures/melon-gauntlet-certificate.svg ] && echo cert)'
@@ -432,7 +488,7 @@ elif mode == 'toram':
     step('waiting for GRUB')
     p.expect('melon live', timeout=300); time.sleep(1)
     p.send('c'); p.expect('grub>', timeout=60)
-    for line in ['linux /boot/vmlinuz toram console=tty0 console=ttyS0,115200', 'initrd /boot/initramfs.img', 'boot']:
+    for line in ['linux /melon/vmlinuz toram console=tty0 console=ttyS0,115200', 'initrd /boot/initramfs.img', 'boot']:
         for ch in line: p.send(ch); time.sleep(0.08)   # GRUB drops keys that arrive too fast
         p.send('\r'); time.sleep(1)
     p.expect('copying .* MiB to RAM', timeout=600); step('copying to RAM')

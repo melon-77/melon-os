@@ -2,14 +2,14 @@
 # build-everything.sh: build melon from nothing on a prepared host (scripts/host-setup.sh first).
 #   toolchain -> base system -> plumbing -> libraries and services -> Qt/KDE/Plasma -> installers -> ISOs
 # Resumable: run it again after an interruption; finished packages are skipped and a package that was
-# interrupted mid-build continues where it stopped. Needs keys/melon-signing.rsa (see BUILDING.md).
+# interrupted mid-build continues where it stopped. Needs the signing key: keys/melon-signing.rsa, or the file MELON_SIGN_KEY names (see BUILDING.md).
 #   JOBS=16 scripts/build-everything.sh
 #   MELON_ARCH=x86 scripts/build-everything.sh    the 32-bit edition: LXQt on labwc instead of Plasma (X86 below)
 set -uo pipefail
 . "$(dirname "$(readlink -f "$0")")/env.sh"
 LOG=$M/logs; mkdir -p $LOG $REPO/$APK_ARCH
 step(){ printf '\033[1;35m== %s  %s\033[0m\n' "$(date +%H:%M)" "$*"; }
-[ -f $M/keys/melon-signing.rsa ] || { echo "keys/melon-signing.rsa is missing (see BUILDING.md)" >&2; exit 1; }
+[ -f "${MELON_SIGN_KEY:-$M/keys/melon-signing.rsa}" ] || { echo "the signing key is missing: keys/melon-signing.rsa, or the file MELON_SIGN_KEY names (see BUILDING.md)" >&2; exit 1; }
 
 if [ ! -x $TOOLS/bin/$TARGET-gcc ] || ! grep -q '^EXIT 0' $LOG/toolchain$ARCH_SUFFIX.log 2>/dev/null; then
   step "cross toolchain ($TARGET)"
@@ -21,7 +21,7 @@ fi
 
 BASE="melon-layout linux-headers musl gcc-runtime zlib zstd xz openssl apk-tools busybox ncurses bash runit util-linux
   userspace-rcu inih bsd-compat-headers xfsprogs grub libnl3 expat dbus wpa_supplicant alsa-lib alsa-utils mpg123 kmod
-  opendoas ca-certificates linux-firmware melon-base melon-sounds linux-melon"
+  opendoas ca-certificates tzdata linux-firmware melon-base melon-sounds linux-melon"
 PLUMBING="libffi pcre2 glib libcap duktape linux-pam eudev elogind polkit argp-standalone musl-fts musl-obstack elfutils
   sqlite json-c popt device-mapper cryptsetup dosfstools squashfs-tools e2fsprogs bzip2 hunspell attr acl lm-sensors libogg libvorbis
   libtool sound-theme-freedesktop libcanberra icu boost-headers python3 readline keyutils gmp mpfr
@@ -43,7 +43,7 @@ DESKTOP_LIBS="libbytesize libnvme libatasmart libblockdev udisks2 pulseaudio lib
   qemu-guest-agent open-vm-tools hvtools melon-vm-guest"
 # AppStream has Qt bindings (Discover), and Flatpak and the portal build against AppStream: right after Qt
 KDE=$(python3 $M/scripts/gen-kde-recipes.py | sed "s/\bqt6-qtbase\b/qt6-qtbase appstream flatpak xdg-desktop-portal/")
-INSTALLERS="kpmcore calamares calamares-melon melon-desktop"
+INSTALLERS="kpmcore calamares calamares-melon melon-welcome melon-desktop"
 # a compiler and binutils that run on melon (the cross toolchain in tools/ only runs on the build machine)
 DEVTOOLS="mpc binutils gcc make pkgconf patch"
 # the build tools melon's own recipes need, so melon can build melon (self-hosting, step 1)
@@ -78,13 +78,18 @@ if [ "$APK_ARCH" = x86 ]; then
     kf6-kwindowsystem kf6-kguiaddons kf6-kdbusaddons kf6-kcrash kf6-kidletime kf6-solid kf6-breeze-icons layer-shell-qt
     libkscreen sddm"
   ALL=$(printf '%s\n' $BASE $PLUMBING nethack $SIMPLE_X86 efivar efibootmgr $DESKTOP_LIBS_X86 $QT_X86 $KDE_X86 $LXQT kpmcore calamares \
-    calamares-melon melon-desktop | awk '!seen[$0]++' | grep -vx qemu-guest-agent)   # QEMU 11 has no 32-bit x86 hosts
+    calamares-melon melon-welcome melon-desktop | awk '!seen[$0]++' | grep -vx qemu-guest-agent)   # QEMU 11 has no 32-bit x86 hosts
 fi
 # recipes nobody listed yet go at the end (64-bit only)
 if [ "$APK_ARCH" != x86 ]; then
   EXTRA=$(ls $M/recipes | grep -vxF -f <(printf '%s\n' $ALL))
   ALL="$ALL $EXTRA"
 fi
+
+# sources a new recipe needs (the Wayfire set of 12 October 2026, for one) are fetched and checked against
+# sources/MANIFEST.tsv; files already there are skipped
+step "sources"
+$M/scripts/fetch-sources.sh > $LOG/fetch-sources.log 2>&1 || echo "   some sources failed to download: grep FAIL $LOG/fetch-sources.log"
 
 step "build order"
 $M/scripts/check-order.sh || { echo "   reorder the lists above first"; exit 1; }

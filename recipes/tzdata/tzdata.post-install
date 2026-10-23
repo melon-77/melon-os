@@ -1,0 +1,4 @@
+#!/bin/sh
+# a new system starts on UTC; Plasma's Date & Time page (or `ln -sf /usr/share/zoneinfo/<Area>/<City> /etc/localtime`) changes it
+[ -e /etc/localtime ] || [ -L /etc/localtime ] || ln -s /usr/share/zoneinfo/UTC /etc/localtime
+exit 0

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Welcome to melon
+GenericName=Welcome and tips
+Comment=Your files, apps and games, and help
+Exec=melon-welcome
+Icon=melon
+Categories=System;
+Keywords=welcome;help;start;melon;

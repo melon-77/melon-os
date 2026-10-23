@@ -10,7 +10,7 @@ plasma-nm plasma-pa bluedevil breeze kscreenlocker polkit-kde-agent-1 xdg-deskto
 kde-cli-tools plasma-systemmonitor kinfocenter kf6-breeze-icons kf6-qqc2-desktop-style kf6-kimageformats
 sddm sddm-kcm
 # apps
-dolphin konsole kde-spectacle plasma-discover nano
+dolphin konsole kde-spectacle plasma-discover nano melon-welcome
 # melon's own games
 melon-pinball
 # services
@@ -26,6 +26,8 @@ cups cups-filters avahi print-manager
 e2fsprogs xz bzip2 ffmpeg
 # Calamares shrinks NTFS (Windows) for "Install alongside" with ntfsresize
 ntfs-3g
+# the standard folders (Downloads, Documents, Pictures, ...) in every home
+xdg-user-dirs
 # fonts
 melon-fonts hicolor-icon-theme shared-mime-info
 # Flatpak (Firefox, VLC, Steam and Prism come from Flathub on first boot) and gaming

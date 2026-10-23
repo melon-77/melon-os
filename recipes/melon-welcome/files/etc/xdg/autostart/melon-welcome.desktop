@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=melon Welcome and updates
+Comment=Shows the Welcome window on the first login and tells you in the tray when updates are ready
+Exec=melon-welcome --autostart
+Icon=melon
+NoDisplay=true
+X-KDE-autostart-phase=2
+OnlyShowIn=KDE;

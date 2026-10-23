@@ -1,0 +1,15 @@
+Without crypt_gensalt (musl has none) Calamares salted with "$y$" (yescrypt), which musl's crypt() does not know:
+it fell back to DES, so passwords were cut to 8 characters and BusyBox login refused them. SHA-512 ($6$), as the
+function's own comment says, is what musl, PAM and BusyBox all verify.
+
+--- a/src/modules/users/SetPasswordJob.cpp
++++ b/src/modules/users/SetPasswordJob.cpp
+@@ -64,7 +64,7 @@
+         cWarning() << "Entropy data for salt is low-quality.";
+     }
+ 
+-    salt_string.insert( 0, "$y$" );
++    salt_string.insert( 0, "$6$" );
+     salt_string.append( '$' );
+     return salt_string;
+ }

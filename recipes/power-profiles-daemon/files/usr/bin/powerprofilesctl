@@ -1,0 +1,19 @@
+#!/bin/sh
+# powerprofilesctl for melon: upstream's is Python with PyGObject, which melon doesn't have (no gobject-introspection),
+# so this talks to power-profiles-daemon over D-Bus with glib's gdbus. Same commands for everyday use:
+#   powerprofilesctl [list] | get | set power-saver|balanced|performance | version
+dest=org.freedesktop.UPower.PowerProfiles path=/org/freedesktop/UPower/PowerProfiles
+prop(){ gdbus call --system --dest $dest --object-path $path --method org.freedesktop.DBus.Properties.Get $dest "$1"; }
+case ${1:-list} in
+  get) prop ActiveProfile | sed "s/^(<'\(.*\)'>,)$/\1/" ;;
+  set) [ -n "$2" ] || { echo "usage: powerprofilesctl set power-saver|balanced|performance" >&2; exit 2; }
+       gdbus call --system --dest $dest --object-path $path --method org.freedesktop.DBus.Properties.Set \
+         $dest ActiveProfile "<'$2'>" >/dev/null ;;
+  list) active=$(prop ActiveProfile | sed "s/^(<'\(.*\)'>,)$/\1/")
+        for p in performance balanced power-saver; do
+          prop Profiles | grep -q "'Profile': <'$p'>" || continue
+          [ "$p" = "$active" ] && echo "* $p:" || echo "  $p:"
+        done ;;
+  version) prop Version | sed "s/^(<'\(.*\)'>,)$/\1/" ;;
+  *) echo "usage: powerprofilesctl [list|get|set PROFILE|version]" >&2; exit 2 ;;
+esac

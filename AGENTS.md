@@ -1,7 +1,8 @@
 # Contributing to melon (instructions for agents)
 
 This file is for AI agents (and humans) who work on melon. Read it fully before changing anything.
-`CLAUDE.md` points here.
+`CLAUDE.md` points here. **Taking over from another session? Read `HANDOFF.md` next**: current state, how to build, sign and
+release natively on melon, and the owner's standing rules.
 
 ## What melon is
 
@@ -53,6 +54,7 @@ scripts/toolchain.sh    cross toolchain, part 1 (binutils, headers, gcc stage 1)
 scripts/toolchain-finish.sh  part 2 (musl, full gcc)
 scripts/melon-build     build ONE recipe -> signed .apk(s) in repo/x86_64, reindex, install into sysroot
 scripts/build-all.sh    build a list of recipes in order, logs to logs/pkg-<name>.log
+scripts/size-round.sh   one command for the desktop ISO size round: changed packages, both ISOs, QEMU tests
 scripts/check-order.sh  every makedepends is built before the recipe that needs it (build-everything.sh runs it first)
 scripts/mkiso.sh        live/installer ISO: rootfs.sqfs (pristine apk-installed system, copied to disk by the
                         installers) + live.sqfs (small live-session layer) + a small repo of extras (VM guest tools,
@@ -177,8 +179,9 @@ Rebuilding the kernel takes about an hour on 2 cores.
     the pattern: it kills your shell too. Find the PID and kill that.
 22. **Edit scripts that may be running (`melon-build`, `mkiso.sh`, queue scripts) through a temporary file
     and `mv`.** bash reads scripts while running them, so an in-place edit corrupts a running build.
-23. **Never type keys or checksums from memory.** The Flathub key is downloaded from Flathub's own
-    `.flatpakrepo` at first use; Alpine's public keys in `melon-base` were fetched from Alpine's aports
+23. **Never type keys or checksums from memory.** The Flathub key comes in Flathub's own `.flatpakrepo`, downloaded from
+    `dl.flathub.org` as a source (`sources/flathub-<date>.flatpakrepo`, checked by the manifest; key fingerprint
+    `6E5C05D979C76DAF93C081354184DD4D907A7CAE`, the same as the remote installed systems already had); Alpine's public keys in `melon-base` were fetched from Alpine's aports
     and checked against the sha512sums in Alpine's `alpine-keys` APKBUILD.
 24. **musl ships `libc.musl-<arch>.so.1`** (a symlink to the loader), the library name Alpine binaries link
     against. That's what lets opt-in `@alpine` packages run on melon.
@@ -267,8 +270,10 @@ Rebuilding the kernel takes about an hour on 2 cores.
 45. **Packaged files must not keep the builder's account.** `cp -a $startdir/files/.` keeps the checkout's owner;
     apk records that account's name, and on a melon system without it the files become `nobody`'s. Service run
     scripts, `/etc/profile.d` and the installer's helpers were writable by `nobody`, then run by root. `melon-build`
-    gives root every file owned by an account from 1000 up; system accounts a recipe sets on purpose (below 1000)
-    stay. The desktop-install test fails if anything under `/usr` or `/etc` belongs to `nobody`.
+    gives root every file owned by an account from 1000 up, and every file of the checkout's own group (a melon home is setgid
+    with group `users`, so on a melon build machine every file got gid 100 and every directory the setgid bit; those lose it);
+    system accounts a recipe sets on purpose (below 1000) stay. The desktop-install test fails if anything under `/usr` or `/etc` belongs to `nobody`.
+    That `chown` cleared setuid bits until melon 0.5.1 (rule 62).
 46. **Rust recipes cross-compile with the build machine's Rust** (`scripts/host-rust.sh` puts upstream's release
     binaries in `hosttools/rust`, with the standard library for `$RUST_TARGET`). melon-build points cargo at
     `x86_64-unknown-linux-musl`, links with melon's gcc and passes `-C target-feature=-crt-static -C link-self-contained=no` in
@@ -388,6 +393,58 @@ Rebuilding the kernel takes about an hour on 2 cores.
     the Linux disk, never from `/mnt/c`; and on Windows 10 there is no KVM, so QEMU tests are slow software emulation. A signing
     key kept on a USB stick is used in place through `MELON_SIGN_KEY` (`melon-build` and `mkiso.sh` read it), never copied.
 
+61. **The desktop ISO's extras repo holds `melon-vm-guest` alone, not the libraries it needs** (they are in its system image). So the
+    base-profile install from the desktop ISO keeps `melon-vm-guest` in a VM: `.cold` adds it to the wanted list before it removes what
+    the profile doesn't include. Translations are never split off or dropped to save space (the owner, 12 October 2026: the size work
+    removes only what nothing uses).
+62. **`chown` clears setuid and setgid, even when root runs it.** Rule 45's owner fix in `melon-build` chowned every file of the
+    checkout's group, and on melon's first native build (0.5, 17 October 2026) that took the setuid bit off `pkexec`,
+    `polkit-agent-helper-1` and PAM's `unix_chkpwd`. Nothing failed at build time, and the ISO tests passed; on a real desktop
+    every polkit password prompt failed ("Flatpak system operation ConfigureRemote not allowed for user" when adding Flathub,
+    Discover, the Update button) and so did every PAM check a user makes of their own password. `melon-build` now puts a
+    file's mode back after the chown (setgid stays off: the group is root's then). Programs that must be setuid
+    get it in `package()` (`linux-pam`, polkit's meson install) or in a post-install script (`fuse3`, `nethack`);
+    `qemu-test.py desktop-install` checks doas, pkexec, the polkit helper, `unix_chkpwd` and `fusermount3`, and that
+    `unix_chkpwd` accepts a user's own password.
+63. **Flathub ships preconfigured.** `flatpak` carries Flathub's repo file in `/usr/share/flatpak/remotes.d/` and its post-install
+    adds the remote as root, so no one is asked for the "configure software repositories" password (polkit's
+    `configure-remote` is `auth_admin`, unlike the installs wheel gets without one), and `melon-flathub` only adds it when
+    someone removed it. The package also creates the `flatpak` system account its system helper runs `revokefs-fuse` as
+    (upstream's `sysusers.d` file, which melon drops); without it every system install warned that the user doesn't exist.
+64. **Time zones need `tzdata`** (IANA's data, built with the build machine's `zic`; on every ISO since 0.5.1). Until then melon had no
+    `/usr/share/zoneinfo`: every system ran on UTC, Plasma's Date & Time page listed no zones and could not save one (its helper
+    links `/etc/localtime` to `/usr/share/zoneinfo/<zone>`), and browsers reported UTC, which Cloudflare's browser check holds against
+    a connection from another zone. `melon-base` depends on it from pkgrel 45, so older systems get it with `apk upgrade`. A new system starts on UTC (`tzdata`'s post-install links it; the package never ships
+    `/etc/localtime`, which is the owner's choice). The same page offers "Set date and time automatically" only when it finds
+    `ntpdate` or `rdate`, so `melon-base` has a small `ntpdate` that asks BusyBox's `ntpd` once; the `ntpd` service keeps the clock
+    right the rest of the time. 12- or 24-hour time is per user: Region & Language writes `LC_TIME` to `plasma-localerc`, which
+    Plasma exports at login (Qt reads it; musl itself has no locale data), and the clock applet has its own 12/24-hour switch.
+65. **apk counted any empty package as untagged** (`installed_size == 0` in the solver's pinning check, meant for local virtual
+    packages). Alpine ships `ncurses-libs` and `gnupg` as empty meta packages, newer than melon's packages of the same name, so on a
+    system with the opt-in `@alpine` repository enabled a plain `apk upgrade` (and the Update button) picked them, then failed on the
+    masked libraries they pull in ("unable to select packages ... masked in: @alpine"); named upgrades still worked, which hid it.
+    `recipes/apk-tools/0001-tagged-repo-empty-packages.patch` (pkgrel 2) keeps that exception for empty packages no repository
+    carries. apk upgrades itself before anything else, so affected systems recover with an ordinary `apk upgrade`;
+    `qemu-test.py desktop-install` enables `@alpine` and checks that `apk upgrade` still resolves.
+66. **`/etc/mtab` must exist** (melon-base ships it as a link to `/proc/self/mounts`, pkgrel 46). musl's `_PATH_MOUNTED` is
+    `/etc/mtab`, and `fusermount3` reads it to check that a FUSE mount belongs to the user before unmounting it. Without it every
+    unmount by a user failed ("failed to open /etc/mtab"): once 0.5.1 gave Flatpak its system helper account, each system install
+    of an app left `revokefs-fuse` mounts behind in `/var/tmp/flatpak-cache-*` and warned "Could not unmount revokefs-fuse
+    filesystem". `qemu-test.py desktop-install` checks the link.
+67. **The images must not inherit the checkout's setgid bit.** A melon home is setgid with group `users`, so every directory
+    `mkiso.sh` made under `work/` (and every directory apk created inside them) was setgid, and `/` belonged to `users`: 2359 setgid
+    directories in 0.5.1's desktop image. Calamares mounts the new vfat `/boot` before it unpacks the system, vfat refuses a setgid
+    directory, and `unsquashfs` stopped with exit code 2: every graphical install from the 0.5 and 0.5.1 desktop ISOs failed ("Command
+    unsquashfs finished with exit code 2"; the tests drive only the console installer, which never saw it). `mkiso.sh` clears the bit
+    and gives the work directories to root before installing, `melon-build` clears it on every packaged directory (polkit's
+    `rules.d`, which belongs to `polkitd`, had kept it: polkit pkgrel 3), and `qemu-test.py desktop-install` fails on any setgid
+    directory or a `/` not owned by root. Rule 45 is the same problem for packages.
+68. **Calamares hashes passwords with SHA-512** (`recipes/calamares/sha512-without-gensalt.patch`, pkgrel 1). musl has no
+    `crypt_gensalt`, so Calamares made its own salt with yescrypt's `$y$`, which musl's `crypt()` doesn't know: it fell back to DES,
+    which keeps only the first 8 characters of a password, and BusyBox's `login` refused every such account on a text console (SDDM
+    still let people in, through PAM). `$6$` is what musl, PAM and BusyBox all check. Accounts made by Calamares before the fix keep
+    their DES hash until the password is changed (`passwd`).
+
 To resume a failed long build without unpacking again (for example the kernel):
 `MELON_KEEP_SRC=1 scripts/melon-build linux-melon`. `build-everything.sh` does that by itself (`MELON_AUTO_RESUME=1`), but
 only while the recipe and its patches are the ones the tree was unpacked with (`work/pkg/<name>/.prepared` holds their
@@ -448,7 +505,8 @@ Logs go to `logs/qemu-*.log`. The tests use KVM when it really works (`qemu-test
 (`-accel tcg,thread=multi -cpu max`) and everything is slow. Measured on a Ryzen 7 5800U under Windows 10 (4 vCPUs, no KVM, 9 October 2026):
 the console `live` install takes 77 s, `disk` and `disk --uefi` about 40 s each, and the desktop ISO boots and takes a login on
 the serial console in 25 s, but the Plasma desktop tests (`desktop`, `desktop-install`) were not usable there (another session saw
-Plasma not start in 15 minutes): run those on a machine with KVM. Use generous timeouts. The ISO's GRUB and the installed system both use
+Plasma not start in 15 minutes): run those on a machine with KVM. With KVM (the owner's PC running melon, 17 October 2026) the whole
+`size-round.sh tests` run, console and `desktop-install`, takes about 5 minutes and passes. Use generous timeouts. The ISO's GRUB and the installed system both use
 the serial port, so tests don't need a screen. The test also records the sound card output to
 `logs/audio-capture.wav`, which lets you check that the installer music really plays.
 
@@ -494,9 +552,28 @@ the serial port, so tests don't need a screen. The test also records the sound c
   (`cal-finish`, and the unlock command below).
 - **melon's look (melon-desktop):** Plasma style `melon`, colours MelonDark, Konsole profile Melon, SDDM theme `melon`
   (its own QML, `usr/share/sddm/themes/melon`; the gold edition reuses the same `Main.qml` with another
-  `theme.conf`), GRUB theme `usr/share/melon/grub/themes/melon` (the desktop ISO uses it too). The art generators are
+  `theme.conf`), GRUB theme `usr/share/grub/themes/melon` in **melon-base** (every ISO and install has it; the gold edition is in melon-desktop's hidden rewards). The art generators are
   in `art/` (run from a checkout of the melon-art working directory with its fonts); `art/grubtheme.py` needs
   `grub-mkfont` (from Ubuntu's grub-common: `apt-get download grub-common` and `dpkg -x` it, no install needed).
+- **Release identity and the logo (16 October 2026, found on the owner's About page):** `/etc/os-release` (melon-base) names the release
+  (`PRETTY_NAME="melon 0.5"`, `VERSION_ID=0.5`) and points `HOME_URL`, `DOCUMENTATION_URL`, `SUPPORT_URL` and `BUG_REPORT_URL` at the
+  website and the repository, never at a placeholder; `/etc/lsb-release` and Calamares' `branding.desc` carry the same version. **Bump all three
+  with every release** (and `melon-base`'s `pkgrel`). KDE's About page and `melonfetch` read these. The distro logo (`LOGO=melon`) is
+  the icon `melon` in `hicolor`, **PNGs only** (16 to 512 px, made from `branding/melon-logo-512.png`): Qt's SVG renderer ignores the
+  clip path in the old 156 KB `melon.svg`, so the rind's veins were drawn outside the circle as a green square. Don't add an SVG
+  with clip paths back; the vector master stays in `branding/melon-logo.svg` and `art/logo.py`.
+- **Welcome and updates (`recipes/melon-welcome`, the owner asked 16 October 2026):** one Qt Widgets program, `melon-welcome`
+  (`--autostart` from `/etc/xdg/autostart`, KDE only; `--updates`; `--screenshot out.png [page]` draws a page with
+  `QT_QPA_PLATFORM=offscreen`, which is how it is checked without a screen). It never installs by itself. The runit service
+  `melon-update-check` (root, in `desktop.services`, and linked once by `melon-welcome`'s post-install/post-upgrade so installed
+  systems get it, marker `/var/lib/melon/update-check-enabled`: whoever removes the link keeps it off) runs
+  `melon-update-run --check` two minutes after boot, every six hours and when a user asks, by creating
+  `/var/lib/melon/updates-ctl/request-<uid>` (a sticky directory: that is how "Check now" works without a password). The result is
+  `/var/lib/melon/updates.txt` (`checked <epoch>`, `count <n>`, package names, `failed <epoch>` when the server couldn't be reached).
+  Installing is `pkexec /usr/libexec/melon/melon-update-run --upgrade`, authorised by `org.melon.update.policy` (admin password,
+  kept for a while). The window closing for the first time starts `melon-first-boot`, which is why melon-desktop no longer has its
+  own autostart entry for it. The live session's user gets nothing (the program exits for `live`). `qemu-test.py desktop-install`
+  checks the service, a request and the policy file. Not yet seen on a real desktop: the tray icon and notification, the password prompt.
 - **Hidden owner commands** work like the console installer: `/etc/profile.d/zz-melon.sh` recognises them by the
   first 16 hex digits of their name's sha256 and nothing else. The same rules apply: never write their names in any
   file, comment, commit or test. `59c1a50f2e93bdc1` unlocks every gauntlet reward (`/usr/libexec/melon/.gold`,
@@ -509,6 +586,13 @@ the serial port, so tests don't need a screen. The test also records the sound c
 - **Live-only packages** (`/usr/share/melon/profiles/live-only`, e.g. `calamares-melon`) are in the
   desktop ISO's system image and both installers remove them from the new system. Both installers make
   the new system's `/etc/apk/world` match the chosen profile.
+- **Every desktop home has the standard folders** (found 16 October 2026 on the 0.5 test ISO: a fresh home had only Desktop, so Dolphin's
+  places showed Home, Desktop and Trash and a downloaded file went nowhere). The desktop profile lists `xdg-user-dirs` (and `melon-desktop`
+  depends on it); both installers run `xdg-user-dirs-update` as the new user (`.cold`, `cal-finish`), and `melon-desktop`'s autostart
+  `/etc/xdg/autostart/melon-user-dirs.desktop` does the same at login for installs from before (it only creates what is missing).
+  `qemu-test.py desktop-install` checks the six folders and `XDG_DOWNLOAD_DIR`. Dolphin and Flatpak apps read `~/.config/user-dirs.dirs`. Dolphin's Places panel
+  lists Documents, Downloads, Music, Pictures and Videos by itself for every folder that exists when it first creates a home's places file (checked in KIO 6.29's
+  `kfileplacesmodel.cpp`); a home whose places file already exists keeps its places.
 - **Console installer: quick and deliberately hidden.** It lives at `/usr/libexec/melon/.cold`. It is started
   by typing its name in bash, which a `command_not_found_handle` in `/etc/profile.d/zz-melon.sh`
   recognises **by hash**. The owner decided the name must not be discoverable. Therefore:
@@ -551,7 +635,10 @@ the serial port, so tests don't need a screen. The test also records the sound c
 - **Profiles** live in `/usr/share/melon/profiles/` on the live system: `<name>` is the package list,
   `<name>.services` the runit services (`name` enables one, `-name` drops a base service). `mkiso.sh`
   writes them. The desktop profile swaps `mdevd`/`dhcp` for `udevd` and NetworkManager, and the
-  installer gives NetworkManager the Wi-Fi network instead of wpa_supplicant.
+  installer gives NetworkManager the Wi-Fi network instead of wpa_supplicant. (`.cold` decides that by the target's
+  `/etc/sv/NetworkManager`. Up to 0.5 it looked for `/etc/NetworkManager`, which NetworkManager only creates when it first runs,
+  so desktop installs with Wi-Fi also got `wpa_supplicant` and `dhcp-wifi`: two Wi-Fi stacks on one card. `melon-base` pkgrel 44
+  removes those two links on systems where NetworkManager is enabled.)
 - **Other distros' repos are opt-in only.** Both installers offer Alpine as the tagged repo `@alpine`
   (`melon-repo enable alpine`); apk only uses it for packages asked for as `name@alpine`. Void isn't
   offered (xbps, not apk). Never make a foreign repo untagged or on by default.
@@ -607,6 +694,19 @@ others' reads to decompress. `config-melon` now asks for `SQUASHFS_COMPILE_DECOM
 (one decompressor per CPU, straight into the page cache; `linux-melon` pkgrel 5, and `nvidia-open` pkgrel 1 with it, rule 51).
 Installed systems don't use squashfs, so only the ISO sessions and installs gain.
 
+**The "superkernel" round (the owner asked for a kernel tuned for speed and fast boot, 12 October 2026; `linux-melon` pkgrel 6, `nvidia-open` pkgrel 2
+with it, rule 51).** Found by merging `config-melon` into kernel 7.0's defconfig: eBPF ran in the interpreter (`BPF_JIT` off), there were no
+transparent huge pages, no multi-gen LRU, no autogroup, no BFQ, no PSI, and zswap compressed with lzo. `config-melon` now turns those on
+(THP only on request through `madvise`, so nothing changes for programs that don't ask; each option was checked to survive `olddefconfig`).
+Nothing is taken away: mitigations, debug and tracing facilities, drivers and the boot-critical built-ins (disk controllers, XFS, FAT,
+squashfs, USB storage) stay as they were. The kernel is a small part of boot (kernel to `/init` was 2.4 s under software emulation, most of it
+decompression and driver initcalls), so expect the gain at run time (memory pressure, browsers, games) more than at boot. To go further,
+measure first: boot once with `initcall_debug` on the kernel command line and run `scripts/kernel-boot-profile.sh` for the slowest
+initcalls, then `melon-boottime` before and after. Cmdline ideas not done, to be measured: `rcupdate.rcu_expedited=1` with
+`rcupdate.rcu_normal_after_boot=1`. Drivers that load as modules on purpose (GPU drivers need their firmware, which an installed system
+without an initramfs can't give a built-in driver) stay modules. Not built or booted yet: needs a kernel build (about an hour) after the
+size round, one toolchain build at a time.
+
 Measured on 7 and 8 October 2026 with the 29 September desktop image in QEMU **without KVM** (software emulation on 4 vCPUs, so
 every CPU-bound step is several times slower than on real hardware; read the proportions, not the seconds). Seconds counted
 from the start of stage 1, one boot each except the old order, which ran twice:
@@ -643,6 +743,53 @@ Measured on the 29 September desktop image with `mksquashfs` (zstd, 512 KiB bloc
 Not rebuilt in a container: both recipes only `rm` files in `package()`, so the check was on the extracted image. A new ISO
 shows the real sizes.
 
+## Desktop ISO size (the owner, 9 and 12 October 2026)
+
+The 0.4 desktop ISO is 793.6 MB (rootfs.sqfs 749 MB of it). The first goal was 500 MB; the owner then made the rule: **it doesn't have to be
+exactly 500, make the ISO smaller without removing anything a general computer needs to run melon, i.e. only garbage that nothing uses.**
+Where the bytes were, measured on the published 0.4
+image (zstd as squashfs does it, MiB): firmware 259, shared libraries 258 (libLLVM 35, Mesa's Gallium and Vulkan 23), translations
+(145 languages) 54, binaries 40, kernel modules 24 plus the kernel 12 (and a second copy of the kernel in `/boot` of the ISO), wallpapers
+16 (Breeze 8.9 and the rewards), icons 13, fonts 12 (the colour emoji font is 9), `usr/share/melon` 12, the extras repository 11.6.
+
+Steps, in the order they ship. Each step is measured before it is called done, and the console ISO gains from the first two as well.
+
+1. **Done (pkgrel bumps in this PR, ISOs not rebuilt yet):** `linux-firmware` pkgrel 2 keeps one version of each Intel Wi-Fi firmware
+   (about 62 MB: for every device the kernel loads the highest API version it finds, and kernel 7.0's `cfg/*.c` accepts exactly the
+   one that stays: `MIN` = `MAX` 77 for the 22000 family, 89 for AX210, `-c101` core releases for BE200/Bz and Sc; the `-c` files stay
+   whole), and moves firmware for hardware that is not in PCs and laptops (SoCs, phone and router Wi-Fi, server network cards, ADSL
+   modems: about 56 MB) to `linux-firmware-extra`, which the ISOs leave out and `apk add linux-firmware-extra` brings back (the PC session's review, 12 October 2026,
+   changed two things: wired network cards people put in desktops (tigon, bnx2x, cxgb3/4, myri10ge, 3com), USB ADSL modems and pro-audio
+   cards stay in `other`, about 8 MiB; and `linux-firmware` still depends on everything including `-extra`, so `apk upgrade` never takes
+   firmware from an installed system, while the ISOs install the new meta package `linux-firmware-pc`, all but `-extra`). TI's
+   `tas2781` laptop amplifier firmware stays. `mkiso.sh` squashes with zstd 19 and 512 KiB blocks (about 20 MB less than level 15 with
+   128 KiB blocks; 1 MiB blocks would save 5 MB more) and, on the desktop ISO, carries only the `melon-vm-guest` package in the extras
+   repo, not a second copy of its dependencies (11 MB).
+2. **Done in the repository (ISOs not rebuilt yet; the owner: "All of them", then "just make sure we aren't losing os functionality as a
+   consequence of this", 12 October 2026): the cuts that lose nothing.**
+   - *The kernel is stored once on the ISO* (`melon/vmlinuz` next to the system image; `rootfs.sqfs` is built without `boot/vmlinuz-melon`).
+     GRUB's four menu entries load it from there, `toram` already copies the whole `melon/` directory, and the installers copy it into the
+     new system's `/boot` (`.cold` and `cal-finish`: `melon-base` pkgrel 37, `calamares-melon` pkgrel 9). About 12 MiB.
+   - *Breeze's default wallpaper as JPEG* (`scripts/png2jpg.py`, quality 95, no chroma subsampling; `breeze` pkgrel 2): Plasma reads
+     `5120x2880.jpg` as it read the PNG. About 14 MiB. Lossless codecs don't help these photos; the reward wallpapers are left alone.
+3. **Left alone because they are used** (the owner's rule): translations (every language: a computer set to that language uses them;
+   a split into `-lang-more` packages was tried in this PR and taken out again), text-to-speech (Plasma's "Speak Text"), ICU data, the
+   kernel's driver set, the emoji font, OpenCV in Spectacle, Mesa's `hasvk` (Haswell/Broadwell Vulkan), and `libKF6BreezeIcons` (KIconThemes
+   links it as the icon fallback, so it isn't a removable duplicate of the icon files). Checked and found nearly empty, so nothing to gain:
+   headers, pkg-config and CMake files, man pages, Python caches (static `.a` libraries are 4.4 MiB uncompressed). `boot/System.map-melon`
+   (8.6 MiB uncompressed, about 3 MB on the ISO) is unused at runtime, but dropping it means a kernel rebuild and a `linux-melon` pkgrel
+   bump (which `nvidia-open` pins): do it with the next kernel change. mksquashfs already stores identical files once.
+
+**To build and test all of this in one go:** `scripts/size-round.sh` (WSL, by absolute path, key plugged in; `packages`, `isos` and
+`tests` run one part; log `logs/size-round.log`). It builds the changed recipes, both ISOs and runs the QEMU tests.
+
+Measured on 12 October 2026 (a build of this PR on the WSL machine, with the translation split, which only breeze had): desktop ISO
+612 MB, console ISO 243 MB. **Never trade away Wi-Fi, graphics, audio or network drivers for a PC to save bytes**; whatever leaves the ISO
+must be hardware a PC doesn't have, and stays one `apk add` away.
+
+The 0.5 release build (17 October 2026, natively on melon, Plasma plus the welcome app): desktop ISO 626 MB, console ISO 248 MB.
+0.5 went back to a pre-release the same day (its packages had lost their setuid bits, rule 62) and 0.5.1 replaces it.
+
 ## Package repository (online)
 
 `scripts/publish-repo.sh` puts `repo/<arch>/` on the `packages` branch of github.com/melon-77/melon-os (one
@@ -659,7 +806,8 @@ Releases are named **melon <version> “<melon variety>”**, the varieties in a
 0.2 “Bailan”, then 0.3 “Cantaloupe”, 0.4 “Dudaim”, 0.5 “Esfahan”, 0.6 “Fukui”, 0.7 “Galia”, 0.8 “Honeydew”, … (the
 owner's choice, 29 September 2026). Tags are `v<version>` from 0.3 on (0.1 and 0.2 kept their date tags). A release
 is marked Latest, carries every ISO and `SHA256SUMS`,
-has notes written for users (what's new, which file to download, `doas apk upgrade` for installed systems), and the
+has notes written for users in the format in `docs/release-notes.md` (title, how to get it, what's new and coming next,
+where to report problems; no test or build details), and the
 release it replaces is retitled "(superseded)" with a link to the new one.
 
 The 32-bit edition has its own **pre-release**, not marked Latest, so the website's download button keeps pointing at
@@ -739,7 +887,7 @@ that is the only place Ubuntu is still needed.
   test waits 90 s before typing when there is no KVM: the greeter ignores keys for a while on an emulated CPU). When
   Ubuntu's source tool can't find an old version, its `orig` tarballs are still in `archive.ubuntu.com/ubuntu/pool/`
   (same sha256 as the manifest). Next: a test on the owner's U100 (`sudo melon-hwreport` for Wi-Fi and graphics).
-- **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (`melon-flathub`), Steam, Firefox, VLC and
+- **Stage 3 (gaming): in progress.** Done: Flatpak, the Flathub remote (preconfigured since 0.5.1, rule 63), Steam, Firefox, VLC and
   Prism Launcher offered from Flathub on first login, GameMode. Still to do: gamepad and controller udev rules,
   MangoHud (`docs/stage2-plan.md`).
 - **Init: runit stays melon's init (the owner's decision).** dinit may one day become an *optional variant* the owner

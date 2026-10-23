@@ -1,0 +1,6 @@
+#!/bin/sh
+# flatpak-system-helper runs revokefs-fuse as this account when it installs apps system-wide; without it every install
+# warned "Failed to get revokefs-fuse socket from system helper: User flatpak does not exist in password file entry"
+addgroup -S flatpak 2>/dev/null
+adduser -S -D -H -h /var/empty -s /sbin/nologin -G flatpak -g "Flatpak system helper" flatpak 2>/dev/null
+exit 0

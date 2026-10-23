@@ -1,0 +1,18 @@
+pkgname=tzdata
+pkgver=2026e
+pkgrel=0
+pkgdesc="Time zone data (IANA tz): lets the system and every app show local time; Plasma's Date & Time page needs it"
+license=Public-Domain
+url=https://www.iana.org/time-zones
+# upstream's release tarballs, both signed by Paul Eggert (7E3792A9D8ACF7D633BC1588ED97E90E62AA7E34); their sha512 matches Alpine's tzdata APKBUILD
+source=(tzdata2026e.tar.gz tzcode2026e.tar.gz)
+builddir=$srcdir
+options=('!strip')
+# zic runs on the build machine while installing, so tzcode is built with the build machine's compiler and only the data
+# (and the tzselect script) is packaged
+build(){ env -u CFLAGS -u LDFLAGS -u CPPFLAGS make CC=gcc cc=gcc CFLAGS=-O2 LDFLAGS= TZDIR=/usr/share/zoneinfo >/dev/null; }
+package(){
+  env -u CFLAGS -u LDFLAGS -u CPPFLAGS make CC=gcc cc=gcc CFLAGS=-O2 LDFLAGS= TZDIR=/usr/share/zoneinfo ZFLAGS='-b fat' DESTDIR=$pkgdir install >/dev/null
+  # /etc/localtime is the owner's choice (Plasma's Date & Time page links it); the post-install script only sets UTC when there is none
+  rm -rf $pkgdir/etc $pkgdir/usr/sbin $pkgdir/usr/bin/zdump $pkgdir/usr/lib $pkgdir/usr/share/man
+}

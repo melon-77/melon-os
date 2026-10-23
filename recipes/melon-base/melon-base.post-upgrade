@@ -5,4 +5,14 @@ r=/etc/apk/repositories
 if [ -f $r ] && grep -q 'raw.githubusercontent.com/xbfj/melon-os/' $r; then
   sed -i 's|raw.githubusercontent.com/xbfj/melon-os/|raw.githubusercontent.com/melon-77/melon-os/|' $r
 fi
+# the calm boot menu of October 2026 lives in melon-base (/usr/share/grub/themes/melon): a system still showing the old
+# picture menu gets the new one copied next to grub.cfg
+if [ -f /boot/grub/grub.cfg ] && [ -x /usr/bin/melon-update-grub ] && grep -qs '^desktop-image' /boot/grub/themes/melon/theme.txt; then
+  /usr/bin/melon-update-grub || true
+fi
+# desktop installs from the console installer with a Wi-Fi network got wpa_supplicant and dhcp-wifi next to NetworkManager
+# (two Wi-Fi stacks fighting over one card, before melon-base pkgrel 44): NetworkManager keeps the card, the other two go
+if [ -L /var/service/NetworkManager ]; then
+  for s in dhcp-wifi wpa_supplicant; do [ ! -L /var/service/$s ] || rm -f /var/service/$s; done
+fi
 exit 0

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Standard folders
+Comment=Creates Downloads, Documents, Pictures, ... in the home folder when they are missing (installs from before melon made them at install time)
+Exec=xdg-user-dirs-update
+NoDisplay=true
+X-KDE-autostart-phase=1

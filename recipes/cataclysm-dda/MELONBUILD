@@ -29,6 +29,8 @@ _ddamake(){
 }
 build(){ _ddamake -j$JOBS; }
 package(){
+  # the install target uses GNU cp and install options; melon's BusyBox has neither (melon as the build machine)
+  sed -i -e 's/cp -R --no-preserve=ownership/cp -R/' -e 's/install --mode=\([0-7]*\)/install -m \1/' Makefile
   _ddamake DESTDIR=$pkgdir install
   # zzip, upstream's save compression tool, is installed as /usr/bin/zzip, a name too generic for the system
   mv $pkgdir/usr/bin/zzip $pkgdir/usr/bin/cataclysm-zzip

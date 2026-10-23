@@ -82,6 +82,12 @@ Atom N270 with 2 GB of RAM (LXQt logs in through SDDM, printing works); the 32-b
 repository (`packages/x86`); the ISOs are on the pre-release `i686-20261007`; a test on a real U100 comes next. NetHack and
 the QEMU guest agent aren't in the 32-bit edition yet.
 
+## Website
+
+[melon-77.github.io/melon-os](https://melon-77.github.io/melon-os/) is built from the `gh-pages` branch. It also hosts
+the [distro finder](https://melon-77.github.io/melon-os/distro-finder/), a 200-question quiz that scores 110 Linux
+distros, melon included, against your answers.
+
 ## Developer tools
 
 Compilers and build tools come from the package repository (they're not on the ISOs), for example:

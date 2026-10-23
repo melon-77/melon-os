@@ -1,0 +1,13 @@
+pkgname=openssh
+pkgver=10.6_p1   # upstream 10.6p1; apk spells the portable suffix _p1
+pkgdesc="OpenSSH: ssh, scp, sftp and ssh-keygen (the client; sshd is included but not set up as a service)"
+license=custom
+url=https://www.openssh.com/portable.html
+source=(openssh-10.6p1.tar.gz)
+builddir=$srcdir/openssh-10.6p1
+makedepends=(openssl-dev zlib-dev)
+build(){ ./configure $conf_flags --sysconfdir=/etc/ssh --libexecdir=/usr/libexec/ssh --with-privsep-path=/var/empty \
+    --with-privsep-user=nobody --without-pam --without-kerberos5 --disable-strip --with-pid-dir=/run \
+    --with-default-path=/usr/local/bin:/usr/bin --with-mantype=man
+  make -j$JOBS; }
+package(){ make DESTDIR=$pkgdir install-nokeys; rm -rf $pkgdir/usr/share/man; }

@@ -110,6 +110,16 @@ services start (`melon.udev=sync` on the kernel command line brings the old, slo
 services that wait for each other check every 20 ms instead of every 0.42 s. `melon-boottime` shows where a boot's time went:
 the milestones of stage 1 and when the main daemons started, to 10 ms.
 
+## Smaller ISOs
+
+The desktop ISO is being slimmed from 794 MB by taking out only what nothing on a PC uses; what leaves the ISO stays one command away
+(details and measurements in AGENTS.md, "Desktop ISO size"). In the repository now:
+
+- Intel Wi-Fi firmware keeps the one version the kernel loads, and firmware for hardware that is not in PCs and laptops (SoC boards,
+  phone and router Wi-Fi chips, big server network cards) moves to `linux-firmware-extra`, and the ISOs install `linux-firmware-pc` (all
+  but that part): if you use such hardware, `sudo apk add linux-firmware-extra`. Installed systems that upgrade keep everything.
+- The kernel is stored once on the ISO, Breeze's default wallpaper is a high-quality JPEG, and the ISOs are squashed with zstd level 19.
+
 **NVIDIA graphics:** on a computer with an NVIDIA card (GTX 16/RTX 20 and newer), `melon-first-boot` offers the open
 driver (`sudo apk add linux-firmware-nvidia mesa-nvk`: nouveau with NVK, the desktop and games use the card) or NVIDIA's
 own kernel driver (`sudo apk add nvidia-open`: Flatpak games get NVIDIA's libraries from Flathub; the desktop can't use

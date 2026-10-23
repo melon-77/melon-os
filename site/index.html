@@ -79,6 +79,9 @@
       On first login it offers Firefox, VLC, Steam and Prism Launcher from Flathub, and asks before installing any of them.</dd></div>
     <div><dt>real hardware</dt><dd>Touchpads, Wi-Fi (Intel, Realtek, MediaTek, Qualcomm), Bluetooth, webcams, USB drives, printers.
       If something doesn&rsquo;t work, <code>sudo melon-hwreport</code> writes one file you can attach to an issue.</dd></div>
+    <div><dt>the goal</dt><dd>A fresh install should do the everyday things with no setup: USB drives mount, the lid suspends the laptop,
+      and sound, Bluetooth, Wi-Fi and the brightness and volume keys work. It is a written goal, and a checklist in the repository says
+      which parts are already tested.</dd></div>
     <div><dt>graphics</dt><dd>Mesa with LLVM: radeonsi and RADV for AMD, iris and ANV for Intel, nouveau and NVK for NVIDIA, llvmpipe when there is nothing else.
       NVIDIA&rsquo;s own driver is an option too.</dd></div>
     <div><dt>disks</dt><dd>XFS on GPT. One installer question gives you LUKS2 encryption. It also installs next to Windows without touching it

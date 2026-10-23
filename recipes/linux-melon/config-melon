@@ -406,3 +406,19 @@ CONFIG_AMD_SFH_HID=m
 CONFIG_AMD_PMF=m
 # USB4 / Thunderbolt docks
 CONFIG_USB4=m
+# ---- speed (the "superkernel" round, 12 October 2026; none of these takes a feature away) ----
+# Transparent huge pages only where a program asks (madvise): browsers, games and databases get fewer TLB misses, nothing else changes.
+CONFIG_TRANSPARENT_HUGEPAGE=y
+CONFIG_TRANSPARENT_HUGEPAGE_MADVISE=y
+# Multi-gen LRU: better page reclaim, so the desktop stays responsive under memory pressure.
+CONFIG_LRU_GEN=y
+CONFIG_LRU_GEN_ENABLED=y
+# Per-session CPU groups: a compile in a terminal doesn't starve the desktop.
+CONFIG_SCHED_AUTOGROUP=y
+# eBPF ran in the interpreter (BPF_SYSCALL was on, the JIT off): cgroup/socket filters and tracing tools are several times faster with it.
+CONFIG_BPF_JIT=y
+# BFQ as an extra I/O scheduler for spinning disks (the default stays mq-deadline/none); PSI for pressure-based tools.
+CONFIG_IOSCHED_BFQ=y
+CONFIG_PSI=y
+# zswap, when someone turns it on, compresses with zstd instead of lzo (smaller, as fast).
+CONFIG_ZSWAP_COMPRESSOR_DEFAULT_ZSTD=y
